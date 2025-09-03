@@ -1,0 +1,344 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap");
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Neon rotating border utilities */
+@keyframes neon-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.neon-rotate-border {
+  position: relative;
+  border-radius: 1rem; /* matches rounded-2xl */
+  padding: 2px; /* visible border width */
+  overflow: hidden;
+}
+
+.neon-rotate-border .neon-border-bg {
+  position: absolute;
+  inset: 0; /* fill exactly the padding area */
+  border-radius: inherit;
+  background: conic-gradient(from 0deg, #06b6d4, #7c3aed, #22c55e, #06b6d4);
+  animation: neon-rotate 8s linear infinite;
+  opacity: 0.7;
+  filter: blur(0px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Ensure content sits above neon layer */
+.neon-rotate-border > :not(.neon-border-bg) {
+  position: relative;
+  z-index: 1;
+  border-radius: inherit;
+}
+
+.neon-rotate-border:hover .neon-border-bg,
+.neon-rotate-border:focus-within .neon-border-bg,
+.group:hover .neon-border-bg {
+  opacity: 1;
+  animation-duration: 3s;
+}
+
+.dark .neon-rotate-border .neon-border-bg {
+  opacity: 0.9;
+}
+
+/* Office gallery glass tilt effect */
+.office-glass-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.office-glass {
+  position: relative;
+  background: linear-gradient(#ffffff22, transparent);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 25px 25px rgba(0, 0, 0, 0.25);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.5s ease, margin 0.5s ease;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  transform: rotate(calc(var(--r, 0deg) * 1deg));
+  overflow: hidden;
+}
+
+.office-glass-container:hover .office-glass {
+  transform: rotate(0deg);
+  margin: 0 10px;
+}
+
+/* Removed bottom label overlay on office images */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: "Inter", "Roboto", sans-serif;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary-500 hover:bg-primary-600 text-white font-medium py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary-500 hover:bg-secondary-600 text-white font-medium py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg;
+  }
+
+  .btn-outline {
+    @apply border-2 border-primary-500 text-primary-500 hover:bg-primary-500 hover:text-white font-medium py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105;
+  }
+
+  .card {
+    @apply bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2;
+  }
+
+  .section-padding {
+    @apply py-16 px-4 sm:px-6 lg:px-8;
+  }
+
+  .container-custom {
+    @apply max-w-7xl mx-auto;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary-500 to-secondary-500 bg-clip-text text-transparent;
+  }
+
+  .bg-gradient-primary {
+    @apply bg-gradient-to-r from-primary-500 to-primary-700;
+  }
+
+  .bg-gradient-secondary {
+    @apply bg-gradient-to-r from-secondary-500 to-secondary-700;
+  }
+
+  /* Custom scrollbar hiding */
+  .scrollbar-hide {
+    -ms-overflow-style: none; /* Internet Explorer 10+ */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
+  }
+
+  /* Enhanced perspective for 3D effects */
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+
+  @keyframes edgeGlow {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+  .animate-edgeGlow {
+    animation: edgeGlow 6s ease-in-out infinite;
+  }
+}
+
+/* Custom perspective for 3D effects */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+/* Edge glow animation for navbar */
+@keyframes edgeGlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Google Translate UI Improvements */
+#google_translate_element {
+  position: absolute !important;
+  top: 100% !important;
+  right: 0 !important;
+  z-index: 1000 !important;
+  min-width: 200px !important;
+  background: white !important;
+  border-radius: 8px !important;
+  padding: 8px !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+  border: 1px solid #e5e7eb !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  margin-top: 4px !important;
+}
+
+#google_translate_element .goog-te-gadget {
+  font-family: inherit !important;
+  font-size: 14px !important;
+  width: 100% !important;
+  display: block !important;
+}
+
+#google_translate_element .goog-te-gadget .goog-te-combo {
+  background: white !important;
+  border: 2px solid #3b82f6 !important;
+  border-radius: 8px !important;
+  padding: 10px 16px !important;
+  font-size: 14px !important;
+  color: #374151 !important;
+  outline: none !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+  width: 100% !important;
+  min-width: 200px !important;
+  cursor: pointer !important;
+  font-weight: 500 !important;
+  display: block !important;
+}
+
+#google_translate_element .goog-te-gadget .goog-te-combo:hover {
+  border-color: #2563eb !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+  transform: translateY(-1px) !important;
+}
+
+#google_translate_element .goog-te-gadget .goog-te-combo:focus {
+  border-color: #1d4ed8 !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+}
+
+/* Hide Google Translate branding and unnecessary elements */
+.goog-te-banner-frame {
+  display: none !important;
+}
+
+.goog-te-gadget {
+  color: transparent !important;
+}
+
+.goog-te-gadget .goog-te-combo {
+  margin: 0 !important;
+}
+
+/* Remove Google Translate logo and text */
+.goog-te-gadget img {
+  display: none !important;
+}
+
+.goog-te-gadget span {
+  display: none !important;
+}
+
+/* Hide duplicate select elements - show only the first one */
+#google_translate_element .goog-te-gadget .goog-te-combo:nth-child(n + 2) {
+  display: none !important;
+}
+
+/* Hide any additional language selectors */
+#google_translate_element .goog-te-gadget > div:not(:first-child) {
+  display: none !important;
+}
+
+/* Ensure only one dropdown is visible */
+#google_translate_element .goog-te-gadget {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+#google_translate_element .goog-te-gadget > * {
+  display: none !important;
+}
+
+#google_translate_element .goog-te-gadget > *:first-child {
+  display: block !important;
+}
+
+/* Force Google Translate to be visible and functional */
+.goog-te-combo {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Dark mode support for Google Translate */
+.dark #google_translate_element {
+  background: #1f2937 !important;
+  border-color: #374151 !important;
+}
+
+.dark #google_translate_element .goog-te-gadget .goog-te-combo {
+  background: #1f2937 !important;
+  border-color: #60a5fa !important;
+  color: #f9fafb !important;
+}
+
+.dark #google_translate_element .goog-te-gadget .goog-te-combo:hover {
+  border-color: #93c5fd !important;
+}
+
+.dark #google_translate_element .goog-te-gadget .goog-te-combo:focus {
+  border-color: #3b82f6 !important;
+}
+
+/* Office Gallery Auto-scroll Animation */
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.animate-scroll {
+  animation: scroll 30s linear infinite;
+}
+
+.animate-scroll:hover {
+  animation-play-state: paused;
+}
+
+/* Custom scrollbar for office gallery */
+.office-gallery-container::-webkit-scrollbar {
+  display: none;
+}
+
+.office-gallery-container {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Smooth scrolling for office gallery */
+.office-gallery-container {
+  scroll-behavior: smooth;
+}
+
+/* Touch-friendly scrolling */
+@media (max-width: 768px) {
+  .office-gallery-container {
+    scroll-snap-type: x mandatory;
+  }
+
+  .office-gallery-container > div {
+    scroll-snap-align: start;
+  }
+}
