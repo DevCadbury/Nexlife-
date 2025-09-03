@@ -34,6 +34,19 @@ import heroImage from "../assets/images/3721740.jpg";
 import heroImage2 from "../assets/images/3699248.jpg";
 import heroImage3 from "../assets/images/6226335.jpg";
 import logoImage from "../assets/images/02.png";
+import product1 from "../assets/images/products/1.png";
+import product2 from "../assets/images/products/2.png";
+import product3 from "../assets/images/products/3.png";
+import product4 from "../assets/images/products/4.png";
+import product5 from "../assets/images/products/5.png";
+import product6 from "../assets/images/products/6.png";
+import office1 from "../assets/images/office/Office_1.jpg";
+import office2 from "../assets/images/office/Office_2.jpg";
+import office3 from "../assets/images/office/Office_3.jpg";
+import office4 from "../assets/images/office/Office_4.jpg";
+import office5 from "../assets/images/office/Office_5.jpg";
+import office6 from "../assets/images/office/Office_6.jpg";
+import certificationImage from "../assets/images/image.png";
 import CountUp from "react-countup";
 
 const Home = () => {
@@ -941,7 +954,7 @@ const Home = () => {
 
               <div className="relative overflow-hidden">
                 <img
-                  src="/src/assets/images/products/1.png"
+                  src={product1}
                   alt="Premium Antibiotic Formula"
                   className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500 border-2 border-gray-300 dark:border-gray-600 rounded-lg"
                 />
@@ -975,7 +988,7 @@ const Home = () => {
 
               <div className="relative overflow-hidden">
                 <img
-                  src="/src/assets/images/products/2.png"
+                  src={product2}
                   alt="Cardiovascular Health Plus"
                   className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500 border-2 border-gray-300 dark:border-gray-600 rounded-lg"
                 />
@@ -1009,7 +1022,7 @@ const Home = () => {
 
               <div className="relative overflow-hidden">
                 <img
-                  src="/src/assets/images/products/3.png"
+                  src={product3}
                   alt="Diabetes Management Pro"
                   className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500 border-2 border-gray-300 dark:border-gray-600 rounded-lg"
                 />
@@ -1043,7 +1056,7 @@ const Home = () => {
 
               <div className="relative overflow-hidden">
                 <img
-                  src="/src/assets/images/products/4.png"
+                  src={product4}
                   alt="Pain Relief Advanced"
                   className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500 border-2 border-gray-300 dark:border-gray-600 rounded-lg"
                 />
@@ -1077,7 +1090,7 @@ const Home = () => {
 
               <div className="relative overflow-hidden">
                 <img
-                  src="/src/assets/images/products/5.png"
+                  src={product5}
                   alt="Immunity Booster Elite"
                   className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500 border-2 border-gray-300 dark:border-gray-600 rounded-lg"
                 />
@@ -1111,7 +1124,7 @@ const Home = () => {
 
               <div className="relative overflow-hidden">
                 <img
-                  src="/src/assets/images/products/6.png"
+                  src={product6}
                   alt="Digestive Health Formula"
                   className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500 border-2 border-gray-300 dark:border-gray-600 rounded-lg"
                 />
@@ -1460,7 +1473,7 @@ const Home = () => {
                     style={{ "--r": "-15deg" }}
                   >
                     <img
-                      src="/src/assets/images/office/Office_1.jpg"
+                      src={office1}
                       alt="Modern Office Space"
                       className="w-full h-full object-cover"
                     />
@@ -1474,7 +1487,7 @@ const Home = () => {
                     style={{ "--r": "5deg" }}
                   >
                     <img
-                      src="/src/assets/images/office/Office_2.jpg"
+                      src={office2}
                       alt="Executive Office"
                       className="w-full h-full object-cover"
                     />
@@ -1488,7 +1501,7 @@ const Home = () => {
                     style={{ "--r": "-8deg" }}
                   >
                     <img
-                      src="/src/assets/images/office/Office_3.jpg"
+                      src={office3}
                       alt="Meeting Room"
                       className="w-full h-full object-cover"
                     />
@@ -1502,7 +1515,7 @@ const Home = () => {
                     style={{ "--r": "6deg" }}
                   >
                     <img
-                      src="/src/assets/images/office/Office_4.jpg"
+                      src={office4}
                       alt="Reception Area"
                       className="w-full h-full object-cover"
                     />
@@ -1516,7 +1529,7 @@ const Home = () => {
                     style={{ "--r": "-10deg" }}
                   >
                     <img
-                      src="/src/assets/images/office/Office_5.jpg"
+                      src={office5}
                       alt="Workstation Area"
                       className="w-full h-full object-cover"
                     />
@@ -1530,7 +1543,7 @@ const Home = () => {
                     style={{ "--r": "12deg" }}
                   >
                     <img
-                      src="/src/assets/images/office/Office_6.jpg"
+                      src={office6}
                       alt="Conference Room"
                       className="w-full h-full object-cover"
                     />
@@ -2245,7 +2258,7 @@ const Home = () => {
             className="flex justify-center"
           >
             <img
-              src="/src/assets/images/image.png"
+              src={certificationImage}
               alt="Certifications and Standards"
               className="max-w-full h-auto max-h-96 object-contain"
             />
