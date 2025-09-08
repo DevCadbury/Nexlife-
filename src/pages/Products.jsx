@@ -11,6 +11,16 @@ import product6 from "../assets/images/products/6.png";
 import product7 from "../assets/images/products/7.png";
 import product8 from "../assets/images/products/8.png";
 import product9 from "../assets/images/products/9.png";
+
+// Surgical product images
+import adhesiveTapesImg from "../assets/images/Surgical/Adhesive Tapes & Plasters .png";
+import bandagesImg from "../assets/images/Surgical/Bandages & Dressings.png";
+import surgicalInstrumentsImg from "../assets/images/Surgical/Surgical Instruments.png";
+import infusionSetsImg from "../assets/images/Surgical/Infusion Sets.png";
+import cathetersImg from "../assets/images/Surgical/Catheters & Tubes.png";
+import ppeImg from "../assets/images/Surgical/Personal Protective Equipment.png";
+import diagnosticKitsImg from "../assets/images/Surgical/Diagnostic Kits.png";
+import patientCareImg from "../assets/images/Surgical/Patient Care Products.png";
 import {
   Pill,
   Syringe,
@@ -141,6 +151,7 @@ const Products = () => {
     "dry-syrups": {
       description:
         "Professional dry syrup formulations for pediatric and adult use with precise dosing and excellent stability",
+      subcategories: ["All Dry Syrups"],
       products: [
         {
           name: "Azithromycin Dry Syrup",
@@ -182,6 +193,7 @@ const Products = () => {
     ayurvedic: {
       description:
         "Traditional Ayurvedic formulations for natural healing and wellness",
+      subcategories: ["All Ayurvedic"],
       products: [
         {
           name: "MEDIMOVE Pain Relief Gel",
@@ -345,19 +357,19 @@ const Products = () => {
     "Steroidal Drugs": Sparkles,
   };
 
-  // Surgical category icons
-  const getSurgicalIcon = (category) => {
-    const surgicalIcons = {
-      "Adhesive Tapes & Plasters": Shield,
-      "Bandages & Dressings": Activity,
-      "Surgical Instruments": Scissors,
-      "Infusion Sets": Droplets,
-      "Catheters & Tubes": TestTube,
-      "Personal Protective Equipment": Shield,
-      "Diagnostic Kits": Microscope,
-      "Patient Care Products": Heart,
+  // Surgical category images
+  const getSurgicalImage = (category) => {
+    const surgicalImages = {
+      "Adhesive Tapes & Plasters": adhesiveTapesImg,
+      "Bandages & Dressings": bandagesImg,
+      "Surgical Instruments": surgicalInstrumentsImg,
+      "Infusion Sets": infusionSetsImg,
+      "Catheters & Tubes": cathetersImg,
+      "Personal Protective Equipment": ppeImg,
+      "Diagnostic Kits": diagnosticKitsImg,
+      "Patient Care Products": patientCareImg,
     };
-    return surgicalIcons[category] || Scissors;
+    return surgicalImages[category] || surgicalInstrumentsImg;
   };
 
   // Optimized smooth scroll function with proper offset
@@ -442,7 +454,7 @@ const Products = () => {
   }, []);
 
   return (
-    <div className="min-h-screen pt-32">
+    <div className="min-h-screen">
       {/* Hero Section */}
       <section className="relative py-20 overflow-hidden">
         {/* Background Image */}
@@ -630,7 +642,13 @@ const Products = () => {
                                       </div>
                                       <Link
                                         to={
+                                          categoryId === "capsules" &&
                                           subcategory === "Analgesic"
+                                            ? "/products/capsules/analgesic"
+                                            : categoryId === "capsules" &&
+                                              subcategory === "Anti-Convulsant"
+                                            ? "/products/capsules/anti-convulsant"
+                                            : subcategory === "Analgesic"
                                             ? "/products/analgesic"
                                             : subcategory === "Anthelmintic"
                                             ? "/products/anthelmintic"
@@ -638,8 +656,19 @@ const Products = () => {
                                             ? "/products/anti-allergic"
                                             : subcategory === "Anti Diabetic"
                                             ? "/products/anti-diabetic"
+                                            : categoryId === "capsules" &&
+                                              subcategory === "Anti-Malarial"
+                                            ? "/products/capsules/anti-malarial"
                                             : subcategory === "Anti Malarial"
                                             ? "/products/anti-malarial"
+                                            : categoryId === "capsules" &&
+                                              subcategory === "Anti Protozoal"
+                                            ? "/products/capsules/anti-protozoal"
+                                            : categoryId === "capsules" &&
+                                              subcategory === "Anti-Protozoal"
+                                            ? "/products/capsules/anti-protozoal"
+                                            : subcategory === "Anti-Protozoal"
+                                            ? "/products/anti-protozoal"
                                             : subcategory === "Anti Protozoal"
                                             ? "/products/anti-protozoal"
                                             : subcategory === "Anti Spasmodic"
@@ -651,12 +680,21 @@ const Products = () => {
                                             ? "/products/anti-convulsant"
                                             : subcategory === "Anti-Emetic"
                                             ? "/products/anti-emetic"
+                                            : categoryId === "capsules" &&
+                                              subcategory === "Anti-Fungal"
+                                            ? "/products/capsules/anti-fungal"
                                             : subcategory === "Anti-Fungal"
                                             ? "/products/anti-fungal"
+                                            : categoryId === "capsules" &&
+                                              subcategory === "Anti-Ulserative"
+                                            ? "/products/capsules/anti-ulcerative"
                                             : subcategory === "Anti-Ulserative"
                                             ? "/products/anti-ulcerative"
                                             : subcategory === "Anti-Viral"
                                             ? "/products/anti-viral"
+                                            : categoryId === "capsules" &&
+                                              subcategory === "Cardiovascular"
+                                            ? "/products/capsules/cardiovascular"
                                             : subcategory === "Cardiovascular"
                                             ? "/products/cardiovascular"
                                             : subcategory ===
@@ -669,6 +707,30 @@ const Products = () => {
                                             ? "/products/platelet-aggregation"
                                             : subcategory === "Steroidal Drugs"
                                             ? "/products/steroidal-drugs"
+                                            : categoryId === "capsules" &&
+                                              subcategory === "Anti-Depressant"
+                                            ? "/products/capsules/anti-depressant"
+                                            : categoryId === "capsules" &&
+                                              subcategory === "Anti-Epileptic"
+                                            ? "/products/capsules/anti-epileptic"
+                                            : categoryId === "capsules" &&
+                                              subcategory === "Anti-Migraine"
+                                            ? "/products/capsules/anti-migraine"
+                                            : categoryId === "capsules" &&
+                                              subcategory === "Anti-Tubercular"
+                                            ? "/products/capsules/anti-tubercular"
+                                            : categoryId === "capsules" &&
+                                              subcategory ===
+                                                "General Antibiotics"
+                                            ? "/products/capsules/general-antibiotics"
+                                            : subcategory ===
+                                              "General Antibiotics"
+                                            ? "/products/general-antibiotics-capsules"
+                                            : categoryId === "capsules" &&
+                                              subcategory === "Multi Vitamins"
+                                            ? "/products/capsules/multi-vitamins"
+                                            : subcategory === "Multi Vitamins"
+                                            ? "/products/multi-vitamins-capsules"
                                             : "/products"
                                         }
                                         className="inline-flex items-center space-x-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-all duration-300 group-hover:translate-x-1"
@@ -683,72 +745,51 @@ const Products = () => {
                             </div>
                           ) : categoryId === "dry-syrups" ||
                             categoryId === "ayurvedic" ? (
-                            // Product Cards
+                            // Subcategories grid to match Tablets/Capsules UX
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                              {categoryData.products.map((product, index) => (
-                                <motion.div
-                                  key={index}
-                                  variants={cardVariants}
-                                  whileHover="hover"
-                                  className="group bg-white dark:bg-gray-700 rounded-xl border-2 border-gray-800 dark:border-gray-500 hover:border-blue-600 dark:hover:border-blue-400 overflow-hidden hover:shadow-2xl transition-all duration-300 relative"
-                                >
-                                  {/* Elegant top border accent */}
-                                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
-
-                                  <div className="h-48 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/30 dark:to-blue-800/30 flex items-center justify-center overflow-hidden">
-                                    <div className="text-center">
-                                      <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                                        <Pill className="w-8 h-8 text-white" />
-                                      </div>
-                                      <p className="text-blue-600 font-medium text-sm">
-                                        Product Image
-                                      </p>
-                                    </div>
-                                  </div>
-                                  <div className="p-6">
-                                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
-                                      {product.name}
-                                    </h3>
-                                    <p className="text-gray-600 dark:text-gray-300 text-sm mb-3">
-                                      {product.generic}
-                                    </p>
-                                    {product.strength && (
-                                      <p className="text-gray-500 dark:text-gray-400 text-sm mb-3">
-                                        <span className="font-medium">
-                                          Strength:
-                                        </span>{" "}
-                                        {product.strength}
-                                      </p>
-                                    )}
-                                    <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
-                                      <span className="font-medium">
-                                        Packing:
-                                      </span>{" "}
-                                      {product.packing}
-                                    </p>
-                                    <Link
-                                      to={
-                                        categoryId === "dry-syrups"
-                                          ? "/products/dry-syrups"
-                                          : categoryId === "ayurvedic"
-                                          ? "/products/ayurvedic"
-                                          : "/products"
-                                      }
-                                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-3 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 hover:shadow-lg border border-blue-500/20 block text-center"
+                              {categoryData.subcategories.map(
+                                (subcategory, index) => {
+                                  const IconComponent = Pill;
+                                  return (
+                                    <motion.div
+                                      key={index}
+                                      variants={cardVariants}
+                                      whileHover="hover"
+                                      className="group bg-gradient-to-br from-gray-50 to-white dark:from-gray-700 dark:to-gray-800 p-6 rounded-xl border-2 border-gray-800 dark:border-gray-500 hover:border-blue-600 dark:hover:border-blue-400 hover:shadow-xl transition-all duration-300 relative overflow-hidden"
                                     >
-                                      Learn More
-                                    </Link>
-                                  </div>
-                                </motion.div>
-                              ))}
+                                      <div className="absolute top-0 right-0 w-0 h-0 border-l-[20px] border-l-transparent border-t-[20px] border-t-blue-800 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                                      <div className="flex items-center space-x-3 mb-4">
+                                        <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center border border-white/20 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                          <IconComponent className="w-6 h-6 text-white" />
+                                        </div>
+                                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
+                                          {subcategory}
+                                        </h3>
+                                      </div>
+                                      <Link
+                                        to={
+                                          categoryId === "dry-syrups"
+                                            ? "/products/dry-syrups"
+                                            : "/products/ayurvedic"
+                                        }
+                                        className="inline-flex items-center space-x-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-all duration-300 group-hover:translate-x-1"
+                                      >
+                                        <span>Check More</span>
+                                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                                      </Link>
+                                    </motion.div>
+                                  );
+                                }
+                              )}
                             </div>
                           ) : categoryId === "surgical" ? (
-                            // Surgical Categories
+                            // Surgical Categories with Product Images
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                               {categoryData.categories.map(
                                 (surgicalCategory, index) => {
-                                  const surgicalIcon =
-                                    getSurgicalIcon(surgicalCategory);
+                                  const surgicalImage =
+                                    getSurgicalImage(surgicalCategory);
                                   return (
                                     <motion.div
                                       key={index}
@@ -759,16 +800,26 @@ const Products = () => {
                                       {/* Elegant corner accent */}
                                       <div className="absolute top-0 right-0 w-0 h-0 border-l-[20px] border-l-transparent border-t-[20px] border-t-red-800 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
-                                      <div className="w-16 h-16 bg-gradient-to-r from-red-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-white/20 shadow-lg group-hover:scale-110 transition-transform duration-300">
-                                        <surgicalIcon className="w-8 h-8 text-white" />
+                                      {/* Product Image */}
+                                      <div className="w-full h-32 mb-4 rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-600 group-hover:border-red-300 dark:group-hover:border-red-500 transition-colors duration-300">
+                                        <img
+                                          src={surgicalImage}
+                                          alt={surgicalCategory}
+                                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                          loading="lazy"
+                                        />
                                       </div>
+
                                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors duration-300">
                                         {surgicalCategory}
                                       </h3>
-                                      <button className="inline-flex items-center space-x-2 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-medium transition-all duration-300 group-hover:translate-x-1">
+                                      <Link
+                                        to="/products/surgical"
+                                        className="inline-flex items-center space-x-2 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-medium transition-all duration-300 group-hover:translate-x-1"
+                                      >
                                         <span>View Products</span>
                                         <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-                                      </button>
+                                      </Link>
                                     </motion.div>
                                   );
                                 }

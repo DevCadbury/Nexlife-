@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Pill, Download, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
+import cetirizineImg from "../assets/images/anti-allergic/CETRIZINEANTI-ALLERGIC.png";
+import cetirizineImg2 from "../assets/images/anti-allergic/CETRIZINEANTI-ALLERGIC5.png";
 
 // Styled Components for Card Design
 const StyledCardWrapper = styled.div`
@@ -11,7 +13,7 @@ const StyledCardWrapper = styled.div`
     max-width: 400px;
     height: auto;
     min-height: 300px;
-    background-image: linear-gradient(163deg, #f59e0b 0%, #d97706 100%);
+    background-image: linear-gradient(163deg, #10b981 0%, #059669 100%);
     border-radius: 20px;
     transition: all 0.3s;
     padding: 3px;
@@ -21,14 +23,14 @@ const StyledCardWrapper = styled.div`
     width: 100%;
     height: 100%;
     min-height: 294px;
-    background-color: #1a1a1a;
+    background-color: transparent;
     border-radius: 17px;
     transition: all 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    padding: 20px;
+    padding: 0;
   }
 
   .card2:hover {
@@ -37,7 +39,7 @@ const StyledCardWrapper = styled.div`
   }
 
   .card:hover {
-    box-shadow: 0px 0px 30px 1px rgba(245, 158, 11, 0.3);
+    box-shadow: 0px 0px 30px 1px rgba(16, 185, 129, 0.3);
   }
 
   .card img {
@@ -57,33 +59,70 @@ const StyledCardWrapper = styled.div`
 const AntiAllergicProducts = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Anti Allergic products data - placeholder for now
+  // Anti Allergic products data
   const antiAllergicProducts = [
     {
       id: 1,
-      name: "Cetirizine Tablet",
+      name: "Cetirizine Dihydrochloride Tablet",
       description:
-        "Each Film Coated Tablet Contains: Cetirizine Hydrochloride BP 10mg",
-      type: "Film Coated Tablet",
+        "Each Film Coated Tablet Contains : Cetirizine Dihydrochloride BP___5mg/10mg Colour : Titanium Dioxide BP",
+      type: "Film coated Tablet",
       packaging: "Blister",
-      image: "/placeholder-image.png",
+      image: cetirizineImg,
     },
     {
       id: 2,
-      name: "Loratadine Tablet",
-      description: "Each Tablet Contains: Loratadine BP 10mg",
-      type: "Tablet",
+      name: "Cetirizine Hydrochloride, Paracetamol & Phenylpropanolamine Hydrochloride",
+      description:
+        "Each Uncoated Tablet Contains : Paracetamol BP___500mg Cetirizine Hydrochloride BP___5mg Phenylpropanolamine Hydrochloride BP___10mg",
+      type: "Uncoated Tablet",
       packaging: "Blister",
-      image: "/placeholder-image.png",
+      image: cetirizineImg2,
     },
     {
       id: 3,
+      name: "Chlorpheniramine Maleate Tablet",
+      description:
+        "Each Uncoated Tablet Contains: Chlorpheniramine Maleate BP___4mg",
+      type: "Uncoated Tablet",
+      packaging: "Blister",
+      image: cetirizineImg,
+    },
+    {
+      id: 4,
       name: "Fexofenadine Tablet",
       description:
-        "Each Film Coated Tablet Contains: Fexofenadine Hydrochloride BP 120mg",
-      type: "Film Coated Tablet",
+        "Each Film Coated Tablet Contains: Fexofenadine Hydrochloride___120mg Colour : Titanium Dioxide BP",
+      type: "Film coated Tablet",
       packaging: "Blister",
-      image: "/placeholder-image.png",
+      image: cetirizineImg2,
+    },
+    {
+      id: 5,
+      name: "Levocetirizine Tablet",
+      description:
+        "EachFilm Coated Tablet Contains : Levocetirizine Dihydrochloride__5mg Colour : Titanium Dioxide BP",
+      type: "Film coated Tablet",
+      packaging: "Blister",
+      image: cetirizineImg,
+    },
+    {
+      id: 6,
+      name: "Loratadine Tablet",
+      description:
+        "Each Uncoated Tablet Contains: Loratadine USP___10mg Colour : Erythrosine",
+      type: "Uncoated Tablet",
+      packaging: "Blister",
+      image: cetirizineImg2,
+    },
+    {
+      id: 7,
+      name: "Paracetamol, Chlorpheniramine Maleate, Phenylpropanolamine Hydrochloride & Caffeine Tablet",
+      description:
+        "Each Uncoated Tablet Contains : Paracetamol   BP___500mg Caffeine(Anhydrous)  BP___30mg Chlorpheniramine Maleate BP___2mg Phenylpropanolamine Hydrochloride BP___10mg",
+      type: "Uncoated Tablet",
+      packaging: "Blister",
+      image: cetirizineImg,
     },
   ];
 
@@ -137,9 +176,9 @@ const AntiAllergicProducts = () => {
   };
 
   return (
-    <div className="min-h-screen pt-32" style={{ minWidth: "768px" }}>
+    <div className="min-h-screen pt-2" style={{ minWidth: "768px" }}>
       {/* Hero Section */}
-      <section className="relative py-20 overflow-hidden">
+      <section className="relative py-8 overflow-hidden">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <img
@@ -331,6 +370,20 @@ const AntiAllergicProducts = () => {
             )}
           </AnimatePresence>
 
+          {/* Section Header: Our Products */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="mt-10"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white text-center">
+              Our Products
+            </h2>
+            <div className="mt-3 h-1 w-24 bg-gradient-to-r from-amber-500 to-orange-600 mx-auto rounded-full"></div>
+          </motion.div>
+
           {/* Product Images Gallery */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -340,7 +393,7 @@ const AntiAllergicProducts = () => {
             className="mt-12 mb-16"
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto justify-items-center">
-              {antiAllergicProducts.map((product) => (
+              {antiAllergicProducts.slice(0, 2).map((product) => (
                 <motion.div
                   key={product.id}
                   initial={{ opacity: 0, y: 20 }}
@@ -380,10 +433,15 @@ const AntiAllergicProducts = () => {
                 Get detailed information about all our anti-allergic products,
                 specifications, and pricing.
               </p>
-              <button className="inline-flex items-center space-x-3 bg-white text-amber-600 px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-all duration-200 shadow-lg hover:shadow-xl">
+              <a
+                href="https://drive.google.com/file/d/1Ct4xhTjZbbe-XoAjZZor7N74_YwWZPYC/view?usp=sharing"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center space-x-3 bg-white text-amber-600 px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
                 <Download className="w-5 h-5" />
                 <span>Download PDF Catalog</span>
-              </button>
+              </a>
             </div>
           </motion.div>
         </div>

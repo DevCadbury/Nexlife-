@@ -24,8 +24,22 @@ import ErectileDysfunctionProducts from "./pages/ErectileDysfunctionProducts";
 import LipidLoweringProducts from "./pages/LipidLoweringProducts";
 import PlateletAggregationProducts from "./pages/PlateletAggregationProducts";
 import SteroidalDrugsProducts from "./pages/SteroidalDrugsProducts";
-import DrySyrupsProducts from "./pages/DrySyrupsProducts";
-import AyurvedicProducts from "./pages/AyurvedicProducts";
+import AyurvedicProducts from "./pages/ayurvedic";
+import AnalgesicCapsules from "./pages/capules/analgesic";
+import AntiDepressantCapsules from "./pages/capules/anti-depressant";
+import AntiEpilepticCapsules from "./pages/capules/anti-epileptic";
+import AntiFungalCapsules from "./pages/capules/anti-fungal";
+import AntiMalarialCapsules from "./pages/capules/anti-malarial";
+import AntiMigraineCapsules from "./pages/capules/anti-migraine";
+import AntiProtozoalCapsules from "./pages/capules/anti-protozoal";
+import AntiTubercularCapsules from "./pages/capules/anti-tubercular";
+import AntiUlcerativeCapsules from "./pages/capules/anti-ulcerative";
+import CardiovascularCapsules from "./pages/capules/cardiovascular";
+import GeneralAntibioticsCapsules from "./pages/capules/general-antibiotics";
+import MultiVitaminsCapsules from "./pages/capules/multi-vitamins";
+import DrySyrups from "./pages/dry-syrups";
+import AntiConvulsantCapsules from "./pages/capules/anti-convulsant";
+import SurgicalProducts from "./pages/surgical";
 import Services from "./pages/Services";
 import GlobalPresence from "./pages/GlobalPresence";
 import Contact from "./pages/Contact";
@@ -68,10 +82,6 @@ function App() {
               <Route
                 path="/products/anti-diabetic"
                 element={<AntiDiabeticProducts />}
-              />
-              <Route
-                path="/products/dry-syrups"
-                element={<DrySyrupsProducts />}
               />
               <Route
                 path="/products/ayurvedic"
@@ -133,6 +143,61 @@ function App() {
                 path="/products/steroidal-drugs"
                 element={<SteroidalDrugsProducts />}
               />
+              <Route
+                path="/products/capsules/analgesic"
+                element={<AnalgesicCapsules />}
+              />
+              <Route
+                path="/products/capsules/anti-depressant"
+                element={<AntiDepressantCapsules />}
+              />
+              <Route
+                path="/products/capsules/anti-epileptic"
+                element={<AntiEpilepticCapsules />}
+              />
+              <Route
+                path="/products/capsules/anti-fungal"
+                element={<AntiFungalCapsules />}
+              />
+              <Route
+                path="/products/capsules/anti-malarial"
+                element={<AntiMalarialCapsules />}
+              />
+              <Route
+                path="/products/capsules/anti-migraine"
+                element={<AntiMigraineCapsules />}
+              />
+              <Route
+                path="/products/capsules/anti-protozoal"
+                element={<AntiProtozoalCapsules />}
+              />
+              <Route
+                path="/products/capsules/anti-tubercular"
+                element={<AntiTubercularCapsules />}
+              />
+              <Route
+                path="/products/capsules/anti-ulcerative"
+                element={<AntiUlcerativeCapsules />}
+              />
+              <Route
+                path="/products/capsules/cardiovascular"
+                element={<CardiovascularCapsules />}
+              />
+              <Route
+                path="/products/capsules/general-antibiotics"
+                element={<GeneralAntibioticsCapsules />}
+              />
+              <Route
+                path="/products/capsules/multi-vitamins"
+                element={<MultiVitaminsCapsules />}
+              />
+              <Route path="/products/dry-syrups" element={<DrySyrups />} />
+              <Route
+                path="/products/capsules/anti-convulsant"
+                element={<AntiConvulsantCapsules />}
+              />
+              <Route path="/products/surgical" element={<SurgicalProducts />} />
+
               <Route path="/services" element={<Services />} />
               <Route path="/global-presence" element={<GlobalPresence />} />
               <Route path="/contact" element={<Contact />} />

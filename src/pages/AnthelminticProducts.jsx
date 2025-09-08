@@ -23,14 +23,14 @@ const StyledCardWrapper = styled.div`
     width: 100%;
     height: 100%;
     min-height: 294px;
-    background-color: #1a1a1a;
+    background-color: transparent;
     border-radius: 17px;
     transition: all 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    padding: 20px;
+    padding: 0;
   }
 
   .card2:hover {
@@ -140,9 +140,9 @@ const AnthelminticProducts = () => {
   };
 
   return (
-    <div className="min-h-screen pt-32" style={{ minWidth: "768px" }}>
+    <div className="min-h-screen pt-2" style={{ minWidth: "768px" }}>
       {/* Hero Section */}
-      <section className="relative py-20 overflow-hidden">
+      <section className="relative py-8 overflow-hidden">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <img
@@ -334,6 +334,20 @@ const AnthelminticProducts = () => {
             )}
           </AnimatePresence>
 
+          {/* Section Header: Our Products */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="mt-10"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white text-center">
+              Our Products
+            </h2>
+            <div className="mt-3 h-1 w-24 bg-gradient-to-r from-green-500 to-emerald-600 mx-auto rounded-full"></div>
+          </motion.div>
+
           {/* Product Images Gallery */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -383,10 +397,15 @@ const AnthelminticProducts = () => {
                 Get detailed information about all our anthelmintic products,
                 specifications, and pricing.
               </p>
-              <button className="inline-flex items-center space-x-3 bg-white text-green-600 px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-all duration-200 shadow-lg hover:shadow-xl">
+              <a
+                href="https://drive.google.com/file/d/1Ct4xhTjZbbe-XoAjZZor7N74_YwWZPYC/view?usp=sharing"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center space-x-3 bg-white text-green-600 px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
                 <Download className="w-5 h-5" />
                 <span>Download PDF Catalog</span>
-              </button>
+              </a>
             </div>
           </motion.div>
         </div>

@@ -16,7 +16,7 @@ const StyledCardWrapper = styled.div`
     max-width: 400px;
     height: auto;
     min-height: 300px;
-    background-image: linear-gradient(163deg, #06b6d4 0%, #0891b2 100%);
+    background-image: linear-gradient(163deg, #10b981 0%, #059669 100%);
     border-radius: 20px;
     transition: all 0.3s;
     padding: 3px;
@@ -26,14 +26,14 @@ const StyledCardWrapper = styled.div`
     width: 100%;
     height: 100%;
     min-height: 294px;
-    background-color: #1a1a1a;
+    background-color: transparent;
     border-radius: 17px;
     transition: all 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    padding: 20px;
+    padding: 0;
   }
 
   .card2:hover {
@@ -42,7 +42,7 @@ const StyledCardWrapper = styled.div`
   }
 
   .card:hover {
-    box-shadow: 0px 0px 30px 1px rgba(6, 182, 212, 0.3);
+    box-shadow: 0px 0px 30px 1px rgba(16, 185, 129, 0.3);
   }
 
   .card img {
@@ -154,9 +154,9 @@ const DrySyrupsProducts = () => {
   };
 
   return (
-    <div className="min-h-screen pt-32" style={{ minWidth: "768px" }}>
+    <div className="min-h-screen pt-2" style={{ minWidth: "768px" }}>
       {/* Hero Section */}
-      <section className="relative py-20 overflow-hidden">
+      <section className="relative py-8 overflow-hidden">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <img
@@ -348,6 +348,20 @@ const DrySyrupsProducts = () => {
             )}
           </AnimatePresence>
 
+          {/* Section Header: Our Products */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="mt-10"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white text-center">
+              Our Products
+            </h2>
+            <div className="mt-3 h-1 w-24 bg-gradient-to-r from-cyan-500 to-blue-600 mx-auto rounded-full"></div>
+          </motion.div>
+
           {/* Product Images Gallery */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -397,10 +411,15 @@ const DrySyrupsProducts = () => {
                 Get detailed information about all our dry syrup products,
                 specifications, and pricing.
               </p>
-              <button className="inline-flex items-center space-x-3 bg-white text-cyan-600 px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-all duration-200 shadow-lg hover:shadow-xl">
+              <a
+                href="https://drive.google.com/file/d/1Ct4xhTjZbbe-XoAjZZor7N74_YwWZPYC/view?usp=sharing"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center space-x-3 bg-white text-cyan-600 px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
                 <Download className="w-5 h-5" />
                 <span>Download PDF Catalog</span>
-              </button>
+              </a>
             </div>
           </motion.div>
         </div>

@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Pill, Download, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
+import fluconazoleImg from "../assets/images/anti-fungal/FLUCONAZOLE-ANTI-FUNGLE-3.png";
+import griseofulvinImg from "../assets/images/anti-fungal/GRISEOFULVIN-ANTI-FUNGLE.png";
 
 // Styled Components for Card Design
 const StyledCardWrapper = styled.div`
@@ -11,7 +13,7 @@ const StyledCardWrapper = styled.div`
     max-width: 400px;
     height: auto;
     min-height: 300px;
-    background-image: linear-gradient(163deg, #f97316 0%, #ea580c 100%);
+    background-image: linear-gradient(163deg, #10b981 0%, #059669 100%);
     border-radius: 20px;
     transition: all 0.3s;
     padding: 3px;
@@ -21,14 +23,14 @@ const StyledCardWrapper = styled.div`
     width: 100%;
     height: 100%;
     min-height: 294px;
-    background-color: #1a1a1a;
+    background-color: transparent;
     border-radius: 17px;
     transition: all 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    padding: 20px;
+    padding: 0;
   }
 
   .card2:hover {
@@ -37,7 +39,7 @@ const StyledCardWrapper = styled.div`
   }
 
   .card:hover {
-    box-shadow: 0px 0px 30px 1px rgba(249, 115, 22, 0.3);
+    box-shadow: 0px 0px 30px 1px rgba(16, 185, 129, 0.3);
   }
 
   .card img {
@@ -57,31 +59,33 @@ const StyledCardWrapper = styled.div`
 const AntiFungalProducts = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Anti Fungal products data - placeholder for now
+  // Anti Fungal products data with images
   const antiFungalProducts = [
     {
       id: 1,
       name: "Fluconazole Tablet",
-      description: "Each Film Coated Tablet Contains: Fluconazole BP 150mg",
-      type: "Film Coated Tablet",
+      description:
+        "Each Uncoated Tablet Contains: Fluconazole 150mg/300mg Colour : Ponceau-4R",
+      type: "Uncoated Tablet",
       packaging: "Blister",
-      image: "/placeholder-image.png",
+      image: fluconazoleImg,
     },
     {
       id: 2,
-      name: "Itraconazole Capsule",
-      description: "Each Capsule Contains: Itraconazole BP 100mg",
-      type: "Capsule",
+      name: "Griseofulvin Tablet",
+      description: "Each Uncoated Tablet Contains: Griseofulvin BP____250mg",
+      type: "Uncoated Tablet",
       packaging: "Blister",
-      image: "/placeholder-image.png",
+      image: griseofulvinImg,
     },
     {
       id: 3,
-      name: "Ketoconazole Tablet",
-      description: "Each Tablet Contains: Ketoconazole BP 200mg",
-      type: "Tablet",
+      name: "Terbinafine Dispersible Tablet",
+      description:
+        "Each Uncoated Dispersible Tablet Contains: Terbinafine Hydrochloride Eq. to Terbinafine____125mg Colour : Sunset Yellow FCF",
+      type: "Uncoated Dispersible Tablet",
       packaging: "Blister",
-      image: "/placeholder-image.png",
+      image: fluconazoleImg,
     },
   ];
 
@@ -135,9 +139,9 @@ const AntiFungalProducts = () => {
   };
 
   return (
-    <div className="min-h-screen pt-32" style={{ minWidth: "768px" }}>
+    <div className="min-h-screen pt-2" style={{ minWidth: "768px" }}>
       {/* Hero Section */}
-      <section className="relative py-20 overflow-hidden">
+      <section className="relative py-8 overflow-hidden">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <img
@@ -171,8 +175,7 @@ const AntiFungalProducts = () => {
                 Anti Fungal Products
               </h1>
               <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed">
-                Discover our comprehensive range of anti-fungal medications for
-                effective treatment of fungal infections.
+                Explore our range of anti-fungal medications.
               </p>
             </div>
           </motion.div>
@@ -232,11 +235,11 @@ const AntiFungalProducts = () => {
                   className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border-2 border-gray-800 dark:border-gray-600 overflow-hidden"
                 >
                   {/* Table Header */}
-                  <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-6 text-white">
+                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-6 text-white">
                     <h2 className="text-2xl font-bold">
                       Anti Fungal Products Catalog
                     </h2>
-                    <p className="text-orange-100 mt-2">
+                    <p className="text-blue-100 mt-2">
                       Complete list of our anti-fungal medications
                     </p>
                   </div>
@@ -268,30 +271,30 @@ const AntiFungalProducts = () => {
                           <motion.tr
                             key={product.id}
                             variants={itemVariants}
-                            className="hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-300 border-b border-gray-300 dark:border-gray-600 last:border-b-0"
+                            className="hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-300 border-b border-gray-300 dark:border-gray-600 last:border-b-0"
                           >
-                            <td className="px-4 lg:px-6 py-3 lg:py-4 whitespace-nowrap border-r border-gray-300 dark:border-gray-600 last:border-r-0 hover:bg-orange-100 dark:hover:bg-orange-800/30 transition-colors duration-200">
+                            <td className="px-4 lg:px-6 py-3 lg:py-4 whitespace-nowrap border-r border-gray-300 dark:border-gray-600 last:border-r-0 hover:bg-blue-100 dark:hover:bg-blue-800/30 transition-colors duration-200">
                               <div className="text-sm font-bold text-gray-900 dark:text-white text-center">
                                 {product.id}
                               </div>
                             </td>
-                            <td className="px-4 lg:px-6 py-3 lg:py-4 whitespace-nowrap border-r border-gray-300 dark:border-gray-600 last:border-r-0 hover:bg-orange-100 dark:hover:bg-orange-800/30 transition-colors duration-200">
+                            <td className="px-4 lg:px-6 py-3 lg:py-4 whitespace-nowrap border-r border-gray-300 dark:border-gray-600 last:border-r-0 hover:bg-blue-100 dark:hover:bg-blue-800/30 transition-colors duration-200">
                               <div className="text-sm font-semibold text-gray-900 dark:text-white">
                                 {product.name}
                               </div>
                             </td>
-                            <td className="px-4 lg:px-6 py-3 lg:py-4 border-r border-gray-300 dark:border-gray-600 last:border-r-0 hover:bg-orange-100 dark:hover:bg-orange-800/30 transition-colors duration-200">
+                            <td className="px-4 lg:px-6 py-3 lg:py-4 border-r border-gray-300 dark:border-gray-600 last:border-r-0 hover:bg-blue-100 dark:hover:bg-blue-800/30 transition-colors duration-200">
                               <div className="text-sm text-gray-600 dark:text-gray-300 max-w-xs">
                                 {product.description}
                               </div>
                             </td>
-                            <td className="px-4 lg:px-6 py-3 lg:py-4 whitespace-nowrap border-r border-gray-300 dark:border-gray-600 last:border-r-0 hover:bg-orange-100 dark:hover:bg-orange-800/30 transition-colors duration-200">
-                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200">
+                            <td className="px-4 lg:px-6 py-3 lg:py-4 whitespace-nowrap border-r border-gray-300 dark:border-gray-600 last:border-r-0 hover:bg-blue-100 dark:hover:bg-blue-800/30 transition-colors duration-200">
+                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
                                 {product.type}
                               </span>
                             </td>
-                            <td className="px-4 lg:px-6 py-3 lg:py-4 whitespace-nowrap border-r border-gray-300 dark:border-gray-600 last:border-r-0 hover:bg-orange-100 dark:hover:bg-orange-800/30 transition-colors duration-200">
-                              <span className="text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200 px-2 py-1 rounded">
+                            <td className="px-4 lg:px-6 py-3 lg:py-4 whitespace-nowrap border-r border-gray-300 dark:border-gray-600 last:border-r-0 hover:bg-blue-100 dark:hover:bg-blue-800/30 transition-colors duration-200">
+                              <span className="text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 px-2 py-1 rounded">
                                 {product.packaging}
                               </span>
                             </td>
@@ -321,7 +324,7 @@ const AntiFungalProducts = () => {
                 </p>
                 <button
                   onClick={() => setSearchTerm("")}
-                  className="inline-flex items-center space-x-2 text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 font-medium transition-colors duration-200"
+                  className="inline-flex items-center space-x-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors duration-200"
                 >
                   <span>Clear Search</span>
                 </button>
@@ -338,7 +341,7 @@ const AntiFungalProducts = () => {
             className="mt-12 mb-16"
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto justify-items-center">
-              {antiFungalProducts.map((product) => (
+              {antiFungalProducts.slice(0, 2).map((product) => (
                 <motion.div
                   key={product.id}
                   initial={{ opacity: 0, y: 20 }}
@@ -370,18 +373,23 @@ const AntiFungalProducts = () => {
             transition={{ duration: 0.5, ease: "easeOut" }}
             className="text-center"
           >
-            <div className="bg-gradient-to-r from-orange-600 to-orange-700 rounded-2xl p-8 text-white">
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 text-white">
               <h3 className="text-2xl font-bold mb-4">
                 Download Complete Product Catalog
               </h3>
-              <p className="text-orange-100 mb-6">
+              <p className="text-blue-100 mb-6">
                 Get detailed information about all our anti-fungal products,
                 specifications, and pricing.
               </p>
-              <button className="inline-flex items-center space-x-3 bg-white text-orange-600 px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-all duration-200 shadow-lg hover:shadow-xl">
+              <a
+                href="https://drive.google.com/file/d/1Ct4xhTjZbbe-XoAjZZor7N74_YwWZPYC/view?usp=sharing"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center space-x-3 bg-white text-blue-600 px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
                 <Download className="w-5 h-5" />
                 <span>Download PDF Catalog</span>
-              </button>
+              </a>
             </div>
           </motion.div>
         </div>

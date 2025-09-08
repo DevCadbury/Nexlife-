@@ -3,6 +3,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Pill, Download, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
+import amlodipineImg from "../assets/images/cardiovascular/AMLOLIFE-2.png";
+import telmisartanImg from "../assets/images/cardiovascular/TELMINEX-ANTI-DIABETIC1.png";
+import atenololImg from "../assets/images/cardiovascular/ATNEX-2.png";
+import lisinoprilImg from "../assets/images/cardiovascular/ALIFE-2.png";
 
 // Styled Components for Card Design
 const StyledCardWrapper = styled.div`
@@ -11,7 +15,7 @@ const StyledCardWrapper = styled.div`
     max-width: 400px;
     height: auto;
     min-height: 300px;
-    background-image: linear-gradient(163deg, #dc2626 0%, #b91c1c 100%);
+    background-image: linear-gradient(163deg, #10b981 0%, #059669 100%);
     border-radius: 20px;
     transition: all 0.3s;
     padding: 3px;
@@ -21,14 +25,14 @@ const StyledCardWrapper = styled.div`
     width: 100%;
     height: 100%;
     min-height: 294px;
-    background-color: #1a1a1a;
+    background-color: transparent;
     border-radius: 17px;
     transition: all 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    padding: 20px;
+    padding: 0;
   }
 
   .card2:hover {
@@ -37,7 +41,7 @@ const StyledCardWrapper = styled.div`
   }
 
   .card:hover {
-    box-shadow: 0px 0px 30px 1px rgba(220, 38, 38, 0.3);
+    box-shadow: 0px 0px 30px 1px rgba(16, 185, 129, 0.3);
   }
 
   .card img {
@@ -57,33 +61,140 @@ const StyledCardWrapper = styled.div`
 const CardiovascularProducts = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Cardiovascular products data - placeholder for now
+  // Cardiovascular products data (placeholder images currently)
   const cardiovascularProducts = [
     {
       id: 1,
-      name: "Amlodipine Tablet",
+      name: "Amlodipine Besilate Tablet",
       description:
-        "Each Film Coated Tablet Contains: Amlodipine Besylate BP 5mg/10mg",
-      type: "Film Coated Tablet",
+        "Each Film Coated Tablet Contains: S(-) Amlodipine Besilate Eq. to S(-)Amlodipine____2.5mg/5mg/10mg Colour : Titanium Dioxide BP",
+      type: "Film coated Tablet",
       packaging: "Blister",
-      image: "/placeholder-image.png",
+      image: amlodipineImg,
     },
     {
       id: 2,
-      name: "Atenolol Tablet",
-      description: "Each Tablet Contains: Atenolol BP 50mg/100mg",
-      type: "Tablet",
+      name: "Amlodipine & Atenolol Tablet",
+      description:
+        "Each Uncoated Tablet Contains: Amlodipine Besilate BP Eq. to Amlodipine____2.5mg/5mg Atenolol BP____25mg/50mg Colour : Erythrosine",
+      type: "Uncoated Tablet",
       packaging: "Blister",
-      image: "/placeholder-image.png",
+      image: atenololImg,
     },
     {
       id: 3,
-      name: "Losartan Tablet",
+      name: "Amlodipine & Lisinopril Tablet",
       description:
-        "Each Film Coated Tablet Contains: Losartan Potassium BP 50mg",
-      type: "Film Coated Tablet",
+        "Each Uncoated Tablet Contains: Amlodipine Besilate BP Eq. to Amlodipine 5mg Lisinopril USP Eq. to Anhydrous Lisinopril____5mg Colour : Tartrazine",
+      type: "Uncoated Tablet",
       packaging: "Blister",
-      image: "/placeholder-image.png",
+      image: lisinoprilImg,
+    },
+    {
+      id: 4,
+      name: "Amlodipine, Losartan Potassium & Hydrochlorothiazide Tablet",
+      description:
+        "Each Film Coated Tablet Contains: Losartan Potassium USP____50mg Amlodipine Besilate BP Eq. to Amlodipine 5mg Hydrochlorothiazide BP____12.5mg Colour : Red Oxide of Iron & Titanium Dioxide BP",
+      type: "Film coated Tablet",
+      packaging: "Blister",
+      image: amlodipineImg,
+    },
+    {
+      id: 5,
+      name: "Enalapril Maleate Tablet",
+      description:
+        "Each Uncoated Tablet Contains: Enalapril Maleate BP____5mg Colour: Erythrosine Lake",
+      type: "Uncoated Tablet",
+      packaging: "Blister",
+      image: lisinoprilImg,
+    },
+    {
+      id: 6,
+      name: "Telmisartan Tablet",
+      description:
+        "Each Film Coated Tablet Contains: Telmisartan____40mg Colour : Ponceau 4R",
+      type: "Uncoated Tablet",
+      packaging: "Blister",
+      image: telmisartanImg,
+    },
+    {
+      id: 7,
+      name: "Atenolol Tablet",
+      description: "Each Uncoated Tablet Contains: Atenolol BP____25mg/50mg",
+      type: "Uncoated Tablet",
+      packaging: "Blister",
+      image: atenololImg,
+    },
+    {
+      id: 8,
+      name: "Lisinopril Tablet",
+      description:
+        "Each Uncoated Tablet Contains: Lisinopril USP Eq. to Anhydrous Lisinopril____2.5mg/5mg/10mg",
+      type: "Uncoated Tablet",
+      packaging: "Blister",
+      image: lisinoprilImg,
+    },
+    {
+      id: 9,
+      name: "Losartan Potassium Tablet",
+      description:
+        "Each Film Coated Tablet Contains: Losartan Potassium USP____25mg/50mg Colour : Quinoline Yellow WS, Brilliant Blue FCF & Titanium Dioxide",
+      type: "Film coated Tablet",
+      packaging: "Alu-Alu",
+      image: telmisartanImg,
+    },
+    {
+      id: 10,
+      name: "Losartan Potassium & Hydrochlorothiazide Tablet",
+      description:
+        "Each Film Coated Tablet Contains: Losartan Potassium USP____50mg Hydrochlorothiazide BP____12.5mg Colour : Quinoline Yellow WS, Brilliant Blue FCF & Titanium Dioxide",
+      type: "Film coated Tablet",
+      packaging: "Alu-Alu",
+      image: telmisartanImg,
+    },
+    {
+      id: 11,
+      name: "Ramipril Tablet",
+      description: "Each Uncoated Tablet Contains: Ramipril BP____2.5mg/5mg",
+      type: "Uncoated Tablet",
+      packaging: "Blister",
+      image: lisinoprilImg,
+    },
+    {
+      id: 12,
+      name: "Ramipril & Hydrochlorothiazide Tablet",
+      description:
+        "Each Uncoated Tablet Contains: Ramipril BP____2.5mg Hydrochlorothiazide BP____12.5mg Colour : Sunset Yellow FCF",
+      type: "Uncoated Tablet",
+      packaging: "Blister",
+      image: lisinoprilImg,
+    },
+    {
+      id: 13,
+      name: "Ramipril & Losartan Potassium Tablet",
+      description:
+        "Each Uncoated Tablet Contains: Ramipril BP____5mg Losartan Potassium USP____50mg Colour : Sunset Yellow FCF",
+      type: "Uncoated Tablet",
+      packaging: "Blister",
+      image: telmisartanImg,
+    },
+    {
+      id: 14,
+      name: "Spironolactone & Torsemide Tablets",
+      description:
+        "Each Film Coated Tablet Contains: Spironolactone BP____25mg/50mg/100mg Torsemide USP____5mg/ 10mg Colour : Yellow Oxide of Iron",
+      type: "Film coated Tablet",
+      packaging: "Blister",
+      image: amlodipineImg,
+    },
+    {
+      id: 15,
+      name: "Metoprolol Succinate Extended Release Tablet",
+      description:
+        "Each Extended Release Tablet Contains: Metoprolol Succinate USP Eq to Metoprolol____25mg/50mg Colour : Titanium Dioxide BP",
+      type: "Extended Release Tablet",
+      packaging: "Blister",
+      image: atenololImg,
     },
   ];
 
@@ -137,9 +248,9 @@ const CardiovascularProducts = () => {
   };
 
   return (
-    <div className="min-h-screen pt-32" style={{ minWidth: "768px" }}>
+    <div className="min-h-screen pt-2" style={{ minWidth: "768px" }}>
       {/* Hero Section */}
-      <section className="relative py-20 overflow-hidden">
+      <section className="relative py-8 overflow-hidden">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <img
@@ -173,8 +284,7 @@ const CardiovascularProducts = () => {
                 Cardiovascular Products
               </h1>
               <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed">
-                Discover our comprehensive range of cardiovascular medications
-                for heart health and blood pressure management.
+                Explore our cardiovascular medications.
               </p>
             </div>
           </motion.div>
@@ -234,11 +344,11 @@ const CardiovascularProducts = () => {
                   className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border-2 border-gray-800 dark:border-gray-600 overflow-hidden"
                 >
                   {/* Table Header */}
-                  <div className="bg-gradient-to-r from-red-600 to-red-700 p-6 text-white">
+                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-6 text-white">
                     <h2 className="text-2xl font-bold">
                       Cardiovascular Products Catalog
                     </h2>
-                    <p className="text-red-100 mt-2">
+                    <p className="text-blue-100 mt-2">
                       Complete list of our cardiovascular medications
                     </p>
                   </div>
@@ -270,30 +380,30 @@ const CardiovascularProducts = () => {
                           <motion.tr
                             key={product.id}
                             variants={itemVariants}
-                            className="hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-300 border-b border-gray-300 dark:border-gray-600 last:border-b-0"
+                            className="hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-300 border-b border-gray-300 dark:border-gray-600 last:border-b-0"
                           >
-                            <td className="px-4 lg:px-6 py-3 lg:py-4 whitespace-nowrap border-r border-gray-300 dark:border-gray-600 last:border-r-0 hover:bg-red-100 dark:hover:bg-red-800/30 transition-colors duration-200">
+                            <td className="px-4 lg:px-6 py-3 lg:py-4 whitespace-nowrap border-r border-gray-300 dark:border-gray-600 last:border-r-0 hover:bg-blue-100 dark:hover:bg-blue-800/30 transition-colors duration-200">
                               <div className="text-sm font-bold text-gray-900 dark:text-white text-center">
                                 {product.id}
                               </div>
                             </td>
-                            <td className="px-4 lg:px-6 py-3 lg:py-4 whitespace-nowrap border-r border-gray-300 dark:border-gray-600 last:border-r-0 hover:bg-red-100 dark:hover:bg-red-800/30 transition-colors duration-200">
+                            <td className="px-4 lg:px-6 py-3 lg:py-4 whitespace-nowrap border-r border-gray-300 dark:border-gray-600 last:border-r-0 hover:bg-blue-100 dark:hover:bg-blue-800/30 transition-colors duration-200">
                               <div className="text-sm font-semibold text-gray-900 dark:text-white">
                                 {product.name}
                               </div>
                             </td>
-                            <td className="px-4 lg:px-6 py-3 lg:py-4 border-r border-gray-300 dark:border-gray-600 last:border-r-0 hover:bg-red-100 dark:hover:bg-red-800/30 transition-colors duration-200">
+                            <td className="px-4 lg:px-6 py-3 lg:py-4 border-r border-gray-300 dark:border-gray-600 last:border-r-0 hover:bg-blue-100 dark:hover:bg-blue-800/30 transition-colors duration-200">
                               <div className="text-sm text-gray-600 dark:text-gray-300 max-w-xs">
                                 {product.description}
                               </div>
                             </td>
-                            <td className="px-4 lg:px-6 py-3 lg:py-4 whitespace-nowrap border-r border-gray-300 dark:border-gray-600 last:border-r-0 hover:bg-red-100 dark:hover:bg-red-800/30 transition-colors duration-200">
-                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                            <td className="px-4 lg:px-6 py-3 lg:py-4 whitespace-nowrap border-r border-gray-300 dark:border-gray-600 last:border-r-0 hover:bg-blue-100 dark:hover:bg-blue-800/30 transition-colors duration-200">
+                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
                                 {product.type}
                               </span>
                             </td>
-                            <td className="px-4 lg:px-6 py-3 lg:py-4 whitespace-nowrap border-r border-gray-300 dark:border-gray-600 last:border-r-0 hover:bg-red-100 dark:hover:bg-red-800/30 transition-colors duration-200">
-                              <span className="text-xs font-medium bg-rose-100 text-rose-800 dark:bg-rose-900 dark:text-rose-200 px-2 py-1 rounded">
+                            <td className="px-4 lg:px-6 py-3 lg:py-4 whitespace-nowrap border-r border-gray-300 dark:border-gray-600 last:border-r-0 hover:bg-blue-100 dark:hover:bg-blue-800/30 transition-colors duration-200">
+                              <span className="text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 px-2 py-1 rounded">
                                 {product.packaging}
                               </span>
                             </td>
@@ -323,7 +433,7 @@ const CardiovascularProducts = () => {
                 </p>
                 <button
                   onClick={() => setSearchTerm("")}
-                  className="inline-flex items-center space-x-2 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-medium transition-colors duration-200"
+                  className="inline-flex items-center space-x-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors duration-200"
                 >
                   <span>Clear Search</span>
                 </button>
@@ -340,7 +450,7 @@ const CardiovascularProducts = () => {
             className="mt-12 mb-16"
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto justify-items-center">
-              {cardiovascularProducts.map((product) => (
+              {displayProducts.slice(0, 6).map((product) => (
                 <motion.div
                   key={product.id}
                   initial={{ opacity: 0, y: 20 }}
@@ -372,18 +482,23 @@ const CardiovascularProducts = () => {
             transition={{ duration: 0.5, ease: "easeOut" }}
             className="text-center"
           >
-            <div className="bg-gradient-to-r from-red-600 to-red-700 rounded-2xl p-8 text-white">
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 text-white">
               <h3 className="text-2xl font-bold mb-4">
                 Download Complete Product Catalog
               </h3>
-              <p className="text-red-100 mb-6">
+              <p className="text-blue-100 mb-6">
                 Get detailed information about all our cardiovascular products,
                 specifications, and pricing.
               </p>
-              <button className="inline-flex items-center space-x-3 bg-white text-red-600 px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-all duration-200 shadow-lg hover:shadow-xl">
+              <a
+                href="https://drive.google.com/file/d/1Ct4xhTjZbbe-XoAjZZor7N74_YwWZPYC/view?usp=sharing"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center space-x-3 bg-white text-blue-600 px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
                 <Download className="w-5 h-5" />
                 <span>Download PDF Catalog</span>
-              </button>
+              </a>
             </div>
           </motion.div>
         </div>

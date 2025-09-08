@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Pill, Download, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
+import norfloxacinImg from "../assets/images/anti-protozoal/NORFLOXASINANTI-PROTOZOLE-1.png";
+import metronidazoleImg from "../assets/images/anti-protozoal/METRONIDAZOLEANTI-PROTOZOLE-2.png";
 
 // Styled Components for Card Design
 const StyledCardWrapper = styled.div`
@@ -11,7 +13,7 @@ const StyledCardWrapper = styled.div`
     max-width: 400px;
     height: auto;
     min-height: 300px;
-    background-image: linear-gradient(163deg, #06b6d4 0%, #0891b2 100%);
+    background-image: linear-gradient(163deg, #10b981 0%, #059669 100%);
     border-radius: 20px;
     transition: all 0.3s;
     padding: 3px;
@@ -21,14 +23,14 @@ const StyledCardWrapper = styled.div`
     width: 100%;
     height: 100%;
     min-height: 294px;
-    background-color: #1a1a1a;
+    background-color: transparent;
     border-radius: 17px;
     transition: all 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    padding: 20px;
+    padding: 0;
   }
 
   .card2:hover {
@@ -37,7 +39,7 @@ const StyledCardWrapper = styled.div`
   }
 
   .card:hover {
-    box-shadow: 0px 0px 30px 1px rgba(6, 182, 212, 0.3);
+    box-shadow: 0px 0px 30px 1px rgba(16, 185, 129, 0.3);
   }
 
   .card img {
@@ -57,31 +59,78 @@ const StyledCardWrapper = styled.div`
 const AntiProtozoalProducts = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Anti Protozoal products data - placeholder for now
+  // Anti Protozoal products data
   const antiProtozoalProducts = [
     {
       id: 1,
-      name: "Metronidazole Tablet",
-      description: "Each Film Coated Tablet Contains: Metronidazole BP 400mg",
-      type: "Film Coated Tablet",
+      name: "Ciprofloxacin & Tinidazole Tablet",
+      description:
+        "Each Film Coated Tablet Contains: Ciprofloxacin Hydrochloride BP____250mg/500mg Tinidazole BP____300mg/600gm Colour : Sunset Yellow FCF & Titanium Dioxide BP",
+      type: "Film coated Tablet",
       packaging: "Blister",
-      image: "/placeholder-image.png",
+      image: norfloxacinImg,
     },
     {
       id: 2,
-      name: "Tinidazole Tablet",
-      description: "Each Tablet Contains: Tinidazole BP 500mg",
-      type: "Tablet",
+      name: "Levofloxacin & Ornidazole Tablet",
+      description:
+        "Each Film Coated Tablet Contains: Levofloxacin Hemihydrate Eq. to Levofloxacin____250mg Ornidazole____500mg Colour : Tartrazine & Brilliant Blue FCF",
+      type: "Film coated Tablet",
       packaging: "Blister",
-      image: "/placeholder-image.png",
+      image: metronidazoleImg,
     },
     {
       id: 3,
-      name: "Secnidazole Tablet",
-      description: "Each Film Coated Tablet Contains: Secnidazole BP 1g",
-      type: "Film Coated Tablet",
+      name: "Loperamide",
+      description:
+        "Each Uncoated Tablet Contains: Loperamide Hydrochloride____2mg Colour : Brilliant Blue FCF & Quinoline Yellow WS",
+      type: "Uncoated Tablet",
       packaging: "Blister",
-      image: "/placeholder-image.png",
+      image: metronidazoleImg,
+    },
+    {
+      id: 4,
+      name: "Norfloxacin & Metronidazole Tablet",
+      description:
+        "Each Film Coated Tablet Contains: Norfloxacin BP____400mg Metronidazole BP____500mg Colour : Quinoline Yellow",
+      type: "Film coated Tablet",
+      packaging: "Blister",
+      image: metronidazoleImg,
+    },
+    {
+      id: 5,
+      name: "Mebendazole Tablet",
+      description: "Each Uncoated Tablet Contains: Mebendazole BP____100mg",
+      type: "Uncoated Tablet",
+      packaging: "Blister",
+      image: norfloxacinImg,
+    },
+    {
+      id: 6,
+      name: "Norfloxacin & Ornidazole Tablet",
+      description:
+        "Each Film Coated Tablet Contains: Norfloxacin BP____400mg Ornidazole____500mg Colour : Titanium Dioxide BP & Quinoline Yellow WS",
+      type: "Film coated Tablet",
+      packaging: "Blister",
+      image: norfloxacinImg,
+    },
+    {
+      id: 7,
+      name: "Norfloxacin & Tinidazole Tablet",
+      description:
+        "Each Film Coated Tablet Contains: Norfloxacin BP____400mg Tinidazole BP____600mg Colour : Quinoline Yellow WS & Titanium Dioxide BP or Tartrazine",
+      type: "Film coated Tablet",
+      packaging: "Blister",
+      image: norfloxacinImg,
+    },
+    {
+      id: 8,
+      name: "Ofloxacin & Ornidazole Tablet",
+      description:
+        "Each Film Coated Tablet Contains: Ofloxacin USP____100mg/200mg Ornidazole____250mg/500mg Colour : Sunset Yellow FCF",
+      type: "Film coated Tablet",
+      packaging: "Blister",
+      image: metronidazoleImg,
     },
   ];
 
@@ -135,9 +184,9 @@ const AntiProtozoalProducts = () => {
   };
 
   return (
-    <div className="min-h-screen pt-32" style={{ minWidth: "768px" }}>
+    <div className="min-h-screen pt-2" style={{ minWidth: "768px" }}>
       {/* Hero Section */}
-      <section className="relative py-20 overflow-hidden">
+      <section className="relative py-8 overflow-hidden">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <img
@@ -329,6 +378,20 @@ const AntiProtozoalProducts = () => {
             )}
           </AnimatePresence>
 
+          {/* Section Header: Our Products */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="mt-10"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white text-center">
+              Our Products
+            </h2>
+            <div className="mt-3 h-1 w-24 bg-gradient-to-r from-cyan-500 to-blue-600 mx-auto rounded-full"></div>
+          </motion.div>
+
           {/* Product Images Gallery */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -338,7 +401,7 @@ const AntiProtozoalProducts = () => {
             className="mt-12 mb-16"
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto justify-items-center">
-              {antiProtozoalProducts.map((product) => (
+              {antiProtozoalProducts.slice(0, 2).map((product) => (
                 <motion.div
                   key={product.id}
                   initial={{ opacity: 0, y: 20 }}
@@ -378,10 +441,15 @@ const AntiProtozoalProducts = () => {
                 Get detailed information about all our anti-protozoal products,
                 specifications, and pricing.
               </p>
-              <button className="inline-flex items-center space-x-3 bg-white text-cyan-600 px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-all duration-200 shadow-lg hover:shadow-xl">
+              <a
+                href="https://drive.google.com/file/d/1Ct4xhTjZbbe-XoAjZZor7N74_YwWZPYC/view?usp=sharing"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center space-x-3 bg-white text-cyan-600 px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
                 <Download className="w-5 h-5" />
                 <span>Download PDF Catalog</span>
-              </button>
+              </a>
             </div>
           </motion.div>
         </div>

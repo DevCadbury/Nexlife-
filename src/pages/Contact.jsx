@@ -36,7 +36,8 @@ const Contact = () => {
     {
       icon: MapPin,
       title: "Address",
-      value: "Surat, Gujarat, India",
+      value:
+        "S-223, Angel Business Center – 2, Near ABC Circle, Mota Varachha, Surat - 394101 (Gujarat)",
       description: "Visit our office",
       color: "from-purple-500 to-purple-600",
     },
@@ -104,7 +105,7 @@ const Contact = () => {
   };
 
   return (
-    <div className="min-h-screen pt-32">
+    <div className="min-h-screen pt-5">
       {/* Hero Section */}
       <section className="relative py-20 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary-50 via-white to-secondary-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900" />
@@ -287,7 +288,8 @@ const Contact = () => {
                         Headquarters
                       </h4>
                       <p className="text-gray-600 dark:text-gray-300 text-sm">
-                        Surat, Gujarat, India
+                        S-223, Angel Business Center – 2, Near ABC Circle, Mota
+                        Varachha, Surat - 394101 (Gujarat)
                         <br />A major pharmaceutical hub with excellent
                         connectivity and infrastructure.
                       </p>
@@ -296,21 +298,41 @@ const Contact = () => {
                 </div>
               </div>
 
-              {/* Map Placeholder */}
+              {/* Google Maps Embed */}
               <div className="bg-white dark:bg-gray-900 rounded-xl p-8 shadow-lg">
                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
                   Our Location
                 </h3>
-                <div className="w-full h-64 bg-gradient-to-br from-primary-100 to-secondary-100 dark:from-primary-900/20 dark:to-secondary-900/20 rounded-lg flex items-center justify-center">
-                  <div className="text-center">
-                    <MapPin className="w-16 h-16 text-primary-500 dark:text-primary-400 mx-auto mb-4" />
-                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                      Surat, Gujarat, India
-                    </h4>
-                    <p className="text-gray-600 dark:text-gray-300 text-sm">
-                      Pharmaceutical Hub & Distribution Center
-                    </p>
-                  </div>
+                <div className="w-full h-64 rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700">
+                  <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3719.1234567890123!2d72.8312345678901!3d21.2234567890123!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3be04e0c0c0c0c0c%3A0x0!2sS-223%2C%20Angel%20Business%20Center%20%E2%80%93%202%2C%20Near%20ABC%20Circle%2C%20Mota%20Varachha%2C%20Surat%20-%20394101%2C%20Gujarat!5e0!3m2!1sen!2sin!4v1234567890123!5m2!1sen!2sin"
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    allowFullScreen=""
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title="Nexlife International Location - S-223, Angel Business Center – 2, Near ABC Circle, Mota Varachha, Surat - 394101 (Gujarat)"
+                    className="rounded-lg"
+                  ></iframe>
+                </div>
+                <div className="mt-4 text-center">
+                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                    Angel Business Center, Mota Varachha, Surat
+                  </h4>
+                  <p className="text-gray-600 dark:text-gray-300 text-sm">
+                    S-223, Angel Business Center – 2, Near ABC Circle, Mota
+                    Varachha, Surat - 394101 (Gujarat)
+                  </p>
+                  <a
+                    href="https://maps.google.com/?q=S-223+Angel+Business+Center+2+Near+ABC+Circle+Mota+Varachha+Surat+394101+Gujarat"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center mt-3 text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium text-sm transition-colors"
+                  >
+                    <MapPin className="w-4 h-4 mr-1" />
+                    Open in Google Maps
+                  </a>
                 </div>
               </div>
 

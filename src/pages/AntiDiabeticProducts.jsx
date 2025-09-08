@@ -3,6 +3,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Pill, Download, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
+import glibenclamideImage from "../assets/images/anti-diabetic/GLIBNEX-6-Pacdora-1.png";
+import glimepirideImage from "../assets/images/anti-diabetic/GLIMNEX-6-1.png";
+import glipizideImage from "../assets/images/anti-diabetic/GLIPNEX-ANTIDIABETIC1.png";
+import metforminImage from "../assets/images/anti-diabetic/METFORMINANTI-DIABITIC-2.png";
 
 // Styled Components for Card Design
 const StyledCardWrapper = styled.div`
@@ -11,7 +15,7 @@ const StyledCardWrapper = styled.div`
     max-width: 400px;
     height: auto;
     min-height: 300px;
-    background-image: linear-gradient(163deg, #8b5cf6 0%, #7c3aed 100%);
+    background-image: linear-gradient(163deg, #10b981 0%, #059669 100%);
     border-radius: 20px;
     transition: all 0.3s;
     padding: 3px;
@@ -21,14 +25,14 @@ const StyledCardWrapper = styled.div`
     width: 100%;
     height: 100%;
     min-height: 294px;
-    background-color: #1a1a1a;
+    background-color: transparent;
     border-radius: 17px;
     transition: all 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    padding: 20px;
+    padding: 0;
   }
 
   .card2:hover {
@@ -37,7 +41,7 @@ const StyledCardWrapper = styled.div`
   }
 
   .card:hover {
-    box-shadow: 0px 0px 30px 1px rgba(139, 92, 246, 0.3);
+    box-shadow: 0px 0px 30px 1px rgba(16, 185, 129, 0.3);
   }
 
   .card img {
@@ -61,28 +65,64 @@ const AntiDiabeticProducts = () => {
   const antiDiabeticProducts = [
     {
       id: 1,
-      name: "Metformin Tablet",
-      description:
-        "Each Film Coated Tablet Contains: Metformin Hydrochloride BP 500mg",
-      type: "Film Coated Tablet",
+      name: "Glibenclamide Tablet",
+      description: "Each Uncoated Tablet Contains: Glibenclamide BP____5mg",
+      type: "Uncoated Tablet",
       packaging: "Blister",
-      image: "/placeholder-image.png",
+      image: glibenclamideImage,
     },
     {
       id: 2,
-      name: "Glibenclamide Tablet",
-      description: "Each Tablet Contains: Glibenclamide BP 5mg",
-      type: "Tablet",
+      name: "Glimepiride Tablet",
+      description:
+        "Each Uncoated Tablet Contains: Glimepiride USP____3mg/4mg Colour : Sunset Yellow FCF",
+      type: "Uncoated Tablet",
       packaging: "Blister",
-      image: "/placeholder-image.png",
+      image: glimepirideImage,
     },
     {
       id: 3,
-      name: "Gliclazide Tablet",
-      description: "Each Modified Release Tablet Contains: Gliclazide BP 30mg",
-      type: "Modified Release Tablet",
+      name: "Glipizide Tablet",
+      description: "Each Uncoated Tablet Contains: Glipizide BP____2.5mg/5mg",
+      type: "Uncoated Tablet",
       packaging: "Blister",
-      image: "/placeholder-image.png",
+      image: glipizideImage,
+    },
+    {
+      id: 4,
+      name: "Glipizide & Metformin Tablet",
+      description:
+        "Each Uncoated Tablet Contains: Glipizide BP____5mg Metformin Hydrochloride____500mg",
+      type: "Uncoated Tablet",
+      packaging: "Blister",
+      image: glipizideImage,
+    },
+    {
+      id: 5,
+      name: "Metformin Hydrochloride Tablet",
+      description:
+        "Each Uncoated Tablet Contains: Metformin Hydrochloride BP____500mg/850mg/1000mg",
+      type: "Uncoated Tablet",
+      packaging: "Blister",
+      image: metforminImage,
+    },
+    {
+      id: 6,
+      name: "Metformin & Glibenclamide Tablet",
+      description:
+        "Each Uncoated Tablet Contains: Glibenclamide BP____5mg Metformin Hydrochloride BP____500mg",
+      type: "Uncoated Tablet",
+      packaging: "Blister",
+      image: glibenclamideImage,
+    },
+    {
+      id: 7,
+      name: "Pioglitazone Hydrochloride Tablet",
+      description:
+        "Each Uncoated Tablet Contains: Pioglitazone Hydrochloride Eq. to Pioglitazone____15mg/30mg",
+      type: "Uncoated Tablet",
+      packaging: "Blister",
+      image: glimepirideImage,
     },
   ];
 
@@ -136,9 +176,9 @@ const AntiDiabeticProducts = () => {
   };
 
   return (
-    <div className="min-h-screen pt-32" style={{ minWidth: "768px" }}>
+    <div className="min-h-screen pt-2" style={{ minWidth: "768px" }}>
       {/* Hero Section */}
-      <section className="relative py-20 overflow-hidden">
+      <section className="relative py-8 overflow-hidden">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <img
@@ -330,6 +370,20 @@ const AntiDiabeticProducts = () => {
             )}
           </AnimatePresence>
 
+          {/* Section Header: Our Products */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="mt-10"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white text-center">
+              Our Products
+            </h2>
+            <div className="mt-3 h-1 w-24 bg-gradient-to-r from-purple-500 to-violet-600 mx-auto rounded-full"></div>
+          </motion.div>
+
           {/* Product Images Gallery */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -339,7 +393,7 @@ const AntiDiabeticProducts = () => {
             className="mt-12 mb-16"
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto justify-items-center">
-              {antiDiabeticProducts.map((product) => (
+              {antiDiabeticProducts.slice(0, 4).map((product) => (
                 <motion.div
                   key={product.id}
                   initial={{ opacity: 0, y: 20 }}
@@ -379,10 +433,15 @@ const AntiDiabeticProducts = () => {
                 Get detailed information about all our anti-diabetic products,
                 specifications, and pricing.
               </p>
-              <button className="inline-flex items-center space-x-3 bg-white text-purple-600 px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-all duration-200 shadow-lg hover:shadow-xl">
+              <a
+                href="https://drive.google.com/file/d/1Ct4xhTjZbbe-XoAjZZor7N74_YwWZPYC/view?usp=sharing"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center space-x-3 bg-white text-purple-600 px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
                 <Download className="w-5 h-5" />
                 <span>Download PDF Catalog</span>
-              </button>
+              </a>
             </div>
           </motion.div>
         </div>

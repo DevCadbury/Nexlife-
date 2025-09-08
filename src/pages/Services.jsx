@@ -11,6 +11,7 @@ import {
   Clock,
   Users,
 } from "lucide-react";
+import whyChooseUsImage from "../assets/images/why choose us.png";
 
 const Services = () => {
   const { t } = useTranslation();
@@ -127,7 +128,7 @@ const Services = () => {
   };
 
   return (
-    <div className="min-h-screen pt-32">
+    <div className="min-h-screen pt-5">
       {/* Hero Section */}
       <section className="relative py-20 bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <div className="container-custom">
@@ -315,8 +316,12 @@ const Services = () => {
               transition={{ duration: 0.8 }}
               className="relative"
             >
-              <div className="w-full h-80 bg-gradient-to-br from-primary-100 to-secondary-100 dark:from-primary-900/20 dark:to-secondary-900/20 rounded-2xl flex items-center justify-center">
-                <Globe className="w-32 h-32 text-primary-500 dark:text-primary-400" />
+              <div className="w-full h-80 bg-gradient-to-br from-primary-100 to-secondary-100 dark:from-primary-900/20 dark:to-secondary-900/20 rounded-2xl flex items-center justify-center p-6">
+                <img
+                  src={whyChooseUsImage}
+                  alt="Why Choose Our Services"
+                  className="w-full h-full object-contain rounded-xl border-4 border-white dark:border-gray-700 shadow-lg"
+                />
               </div>
             </motion.div>
           </div>

@@ -2,6 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { Globe, MapPin, Users, Building, Award } from "lucide-react";
+import globalReachImage from "../assets/images/global reach.png";
 
 const GlobalPresence = () => {
   const { t } = useTranslation();
@@ -92,7 +93,7 @@ const GlobalPresence = () => {
   };
 
   return (
-    <div className="min-h-screen pt-32">
+    <div className="min-h-screen pt-5">
       {/* Hero Section */}
       <section className="relative py-20 bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <div className="container-custom">
@@ -326,16 +327,12 @@ const GlobalPresence = () => {
               transition={{ duration: 0.8 }}
               className="relative"
             >
-              <div className="w-full h-80 bg-gradient-to-br from-primary-100 to-secondary-100 dark:from-primary-900/20 dark:to-secondary-900/20 rounded-2xl flex items-center justify-center">
-                <div className="text-center">
-                  <Globe className="w-32 h-32 text-primary-500 dark:text-primary-400 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                    Global Reach
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-300 text-sm">
-                    Connecting healthcare worldwide
-                  </p>
-                </div>
+              <div className="w-full h-96 rounded-2xl overflow-hidden border-2 border-gray-200 dark:border-gray-700 shadow-lg bg-white dark:bg-gray-800 p-4">
+                <img
+                  src={globalReachImage}
+                  alt="Global Operations & Infrastructure - Global Reach"
+                  className="w-full h-full object-contain rounded-xl"
+                />
               </div>
             </motion.div>
           </div>
