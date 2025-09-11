@@ -345,96 +345,43 @@ const Home = () => {
   // Office Gallery auto-scroll state and handlers
   const officeGalleryRef = useRef(null);
   const officeAutoRef = useRef(null);
+  const officeIndexRef = useRef(0);
   const [officeIndex, setOfficeIndex] = useState(0);
   const [officeDirection, setOfficeDirection] = useState(1); // 1: LTR, -1: RTL
 
   // Floating contact buttons state
   const [isFloatingOpen, setIsFloatingOpen] = useState(false);
 
-  const getOfficeStep = () => {
-    const container = officeGalleryRef.current;
-    if (!container) return 400;
-    const firstItem = container.querySelector(".office-card");
-    if (!firstItem) return 400;
-    const rect = firstItem.getBoundingClientRect();
-    const gap = parseFloat(getComputedStyle(container).gap || "0");
-    return rect.width + gap;
-  };
-
-  const getOfficeIdx = () => {
-    const container = officeGalleryRef.current;
-    if (!container) return 0;
-    const step = getOfficeStep();
-    if (!step) return 0;
-    const total = 6;
-    let idx = Math.round(container.scrollLeft / step);
-    if (idx >= total) idx = 0;
-    if (idx < 0) idx = total - 1;
-    return idx;
-  };
-
-  const officeNext = () => {
-    const container = officeGalleryRef.current;
-    if (!container) return;
-    const step = getOfficeStep();
-    const total = 6;
-    const current = getOfficeIdx();
-    const next = (current + 1) % total;
-    if (next === 0) {
-      // At end: smooth to end, then snap back to start and continue
-      container.scrollTo({ left: step * (total - 1), behavior: "smooth" });
-      setTimeout(() => {
-        container.scrollLeft = 0;
-        setOfficeIndex(0);
-      }, 450);
-    } else {
-      container.scrollTo({ left: step * next, behavior: "smooth" });
-      setOfficeIndex(next);
-    }
-  };
-
-  const officePrev = () => {
-    const container = officeGalleryRef.current;
-    if (!container) return;
-    const step = getOfficeStep();
-    const total = 6;
-    const current = getOfficeIdx();
-    if (current === 0) {
-      // Jump to duplicate position then scroll to last
-      container.scrollLeft = step * total;
-      requestAnimationFrame(() => {
-        container.scrollTo({ left: step * (total - 1), behavior: "smooth" });
-      });
-      setOfficeIndex(total - 1);
-    } else {
-      const prev = (current - 1 + total) % total;
-      container.scrollTo({ left: step * prev, behavior: "smooth" });
-      setOfficeIndex(prev);
-    }
-  };
-
   // Auto tick that continuously spins through all 6 images in a loop
   const officeAutoTick = () => {
     const container = officeGalleryRef.current;
-    if (!container) return;
-    const step = getOfficeStep();
-    const total = 6;
-    const current = getOfficeIdx();
+    if (!container) {
+      return;
+    }
 
-    // Calculate next index with wrap-around
+    const total = 6; // Original 6 images
+    const current = officeIndexRef.current;
     const nextIndex = (current + 1) % total;
 
-    // Smooth scroll to next image
-    container.scrollTo({ left: step * nextIndex, behavior: "smooth" });
-    setOfficeIndex(nextIndex);
-  };
+    // Calculate scroll position (320px width + 24px gap = 344px per image)
+    const scrollPosition = nextIndex * 344;
 
-  const officeGoTo = (idx) => {
-    const container = officeGalleryRef.current;
-    if (!container) return;
-    const step = getOfficeStep();
-    container.scrollTo({ left: step * idx, behavior: "smooth" });
-    setOfficeIndex(idx);
+    // Update the ref immediately
+    officeIndexRef.current = nextIndex;
+
+    // Smooth scroll to next image
+    container.scrollTo({ left: scrollPosition, behavior: "smooth" });
+    setOfficeIndex(nextIndex);
+
+    // If we just scrolled to the last original image (index 5), reset to start seamlessly
+    if (nextIndex === 5) {
+      // After the smooth scroll completes, instantly jump back to start for seamless loop
+      setTimeout(() => {
+        container.scrollTo({ left: 0, behavior: "auto" });
+        officeIndexRef.current = 0;
+        setOfficeIndex(0);
+      }, 1000); // Wait for smooth scroll to complete
+    }
   };
 
   useEffect(() => {
@@ -1417,36 +1364,8 @@ const Home = () => {
             transition={{ duration: 0.8, delay: 0.6 }}
             className="relative"
           >
-            {/* Navigation Buttons */}
-            <button
-              onClick={officePrev}
-              className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white dark:hover:bg-gray-700 transition-all duration-300 hover:scale-110 border border-gray-200 dark:border-gray-600"
-            >
-              <ChevronLeft className="w-6 h-6 text-gray-700 dark:text-gray-300" />
-            </button>
-
-            <button
-              onClick={officeNext}
-              className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white dark:hover:bg-gray-700 transition-all duration-300 hover:scale-110 border border-gray-200 dark:border-gray-600"
-            >
-              <ChevronRight className="w-6 h-6 text-gray-700 dark:text-gray-300" />
-            </button>
-
             {/* Auto-scrolling Gallery */}
-            <div
-              className="overflow-hidden"
-              onMouseEnter={() => {
-                if (officeAutoRef.current) {
-                  clearInterval(officeAutoRef.current);
-                  officeAutoRef.current = null;
-                }
-              }}
-              onMouseLeave={() => {
-                if (!officeAutoRef.current) {
-                  officeAutoRef.current = setInterval(officeAutoTick, 3000);
-                }
-              }}
-            >
+            <div className="overflow-hidden">
               <div
                 className="flex gap-6 office-gallery-container scroll-smooth overflow-x-auto w-full office-glass-container"
                 style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
@@ -1469,30 +1388,10 @@ const Home = () => {
                   const diff = touchStartX - touch.clientX;
                   container.scrollLeft = scrollLeft + diff;
                 }}
-                onScroll={(e) => {
-                  const container = e.currentTarget;
-                  const step = getOfficeStep();
-                  if (!step) return;
-                  const total = 6;
-                  const raw = container.scrollLeft / step;
-                  let idx = Math.round(raw);
-
-                  // Handle wrap-around for continuous loop
-                  if (idx >= total) idx = idx % total;
-                  if (idx < 0) idx = ((idx % total) + total) % total;
-
-                  // Only update if the index actually changed to prevent unnecessary re-renders
-                  if (idx !== officeIndex) {
-                    setOfficeIndex(idx);
-                  }
-                }}
               >
                 {/* Office Image 1 */}
                 <div className="flex-shrink-0 office-card">
-                  <div
-                    className="office-glass w-80 h-64 rounded-3xl overflow-hidden relative"
-                    style={{ "--r": "-15deg" }}
-                  >
+                  <div className="w-80 h-64 rounded-3xl overflow-hidden relative shadow-lg">
                     <img
                       src={office1}
                       alt="Modern Office Space"
@@ -1503,10 +1402,7 @@ const Home = () => {
 
                 {/* Office Image 2 */}
                 <div className="flex-shrink-0 office-card">
-                  <div
-                    className="office-glass w-80 h-64 rounded-3xl overflow-hidden relative"
-                    style={{ "--r": "5deg" }}
-                  >
+                  <div className="w-80 h-64 rounded-3xl overflow-hidden relative shadow-lg">
                     <img
                       src={office2}
                       alt="Executive Office"
@@ -1517,10 +1413,7 @@ const Home = () => {
 
                 {/* Office Image 3 */}
                 <div className="flex-shrink-0 office-card">
-                  <div
-                    className="office-glass w-80 h-64 rounded-3xl overflow-hidden relative"
-                    style={{ "--r": "-8deg" }}
-                  >
+                  <div className="w-80 h-64 rounded-3xl overflow-hidden relative shadow-lg">
                     <img
                       src={office3}
                       alt="Meeting Room"
@@ -1531,10 +1424,7 @@ const Home = () => {
 
                 {/* Office Image 4 */}
                 <div className="flex-shrink-0 office-card">
-                  <div
-                    className="office-glass w-80 h-64 rounded-3xl overflow-hidden relative"
-                    style={{ "--r": "6deg" }}
-                  >
+                  <div className="w-80 h-64 rounded-3xl overflow-hidden relative shadow-lg">
                     <img
                       src={office4}
                       alt="Reception Area"
@@ -1545,10 +1435,7 @@ const Home = () => {
 
                 {/* Office Image 5 */}
                 <div className="flex-shrink-0 office-card">
-                  <div
-                    className="office-glass w-80 h-64 rounded-3xl overflow-hidden relative"
-                    style={{ "--r": "-10deg" }}
-                  >
+                  <div className="w-80 h-64 rounded-3xl overflow-hidden relative shadow-lg">
                     <img
                       src={office5}
                       alt="Workstation Area"
@@ -1559,13 +1446,44 @@ const Home = () => {
 
                 {/* Office Image 6 */}
                 <div className="flex-shrink-0 office-card">
-                  <div
-                    className="office-glass w-80 h-64 rounded-3xl overflow-hidden relative"
-                    style={{ "--r": "12deg" }}
-                  >
+                  <div className="w-80 h-64 rounded-3xl overflow-hidden relative shadow-lg">
                     <img
                       src={office6}
                       alt="Conference Room"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+
+                {/* Duplicate images for seamless loop */}
+                {/* Office Image 1 - Duplicate */}
+                <div className="flex-shrink-0 office-card">
+                  <div className="w-80 h-64 rounded-3xl overflow-hidden relative shadow-lg">
+                    <img
+                      src={office1}
+                      alt="Modern Office Space"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+
+                {/* Office Image 2 - Duplicate */}
+                <div className="flex-shrink-0 office-card">
+                  <div className="w-80 h-64 rounded-3xl overflow-hidden relative shadow-lg">
+                    <img
+                      src={office2}
+                      alt="Executive Office"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+
+                {/* Office Image 3 - Duplicate */}
+                <div className="flex-shrink-0 office-card">
+                  <div className="w-80 h-64 rounded-3xl overflow-hidden relative shadow-lg">
+                    <img
+                      src={office3}
+                      alt="Meeting Room"
                       className="w-full h-full object-cover"
                     />
                   </div>
