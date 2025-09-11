@@ -15,7 +15,7 @@ const StyledCardWrapper = styled.div`
     max-width: 400px;
     height: auto;
     min-height: 300px;
-    background-image: linear-gradient(163deg, #10b981 0%, #059669 100%);
+    background-image: linear-gradient(163deg, #8b5cf6 0%, #7c3aed 100%);
     border-radius: 20px;
     transition: all 0.3s;
     padding: 3px;
@@ -219,7 +219,7 @@ const SteroidalDrugsProducts = () => {
                 {/* Table */}
                 <motion.div
                   variants={itemVariants}
-                  className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border-2 border-gray-800 dark:border-gray-600 overflow-hidden"
+                  className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border-2 border-purple-200 dark:border-purple-600 overflow-hidden"
                 >
                   <div className="bg-gradient-to-r from-purple-500 to-fuchsia-600 p-6 text-white">
                     <h2 className="text-2xl font-bold">

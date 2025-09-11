@@ -41,6 +41,7 @@ import DrySyrups from "./pages/dry-syrups";
 import AntiConvulsantCapsules from "./pages/capules/anti-convulsant";
 import SurgicalProducts from "./pages/surgical";
 import Services from "./pages/Services";
+import Gallery from "./pages/Gallery";
 import GlobalPresence from "./pages/GlobalPresence";
 import Contact from "./pages/Contact";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -199,6 +200,7 @@ function App() {
               <Route path="/products/surgical" element={<SurgicalProducts />} />
 
               <Route path="/services" element={<Services />} />
+              <Route path="/gallery" element={<Gallery />} />
               <Route path="/global-presence" element={<GlobalPresence />} />
               <Route path="/contact" element={<Contact />} />
             </Routes>

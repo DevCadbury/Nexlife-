@@ -15,7 +15,7 @@ const StyledCardWrapper = styled.div`
     max-width: 400px;
     height: auto;
     min-height: 300px;
-    background-image: linear-gradient(163deg, #10b981 0%, #059669 100%);
+    background-image: linear-gradient(163deg, #8b5cf6 0%, #7c3aed 100%);
     border-radius: 20px;
     transition: all 0.3s;
     padding: 3px;
@@ -61,7 +61,7 @@ const StyledCardWrapper = styled.div`
 const AntiDiabeticProducts = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Anti Diabetic products data - placeholder for now
+  // Anti Diabetic products data - using all 4 available images
   const antiDiabeticProducts = [
     {
       id: 1,
@@ -90,39 +90,12 @@ const AntiDiabeticProducts = () => {
     },
     {
       id: 4,
-      name: "Glipizide & Metformin Tablet",
-      description:
-        "Each Uncoated Tablet Contains: Glipizide BP____5mg Metformin Hydrochloride____500mg",
-      type: "Uncoated Tablet",
-      packaging: "Blister",
-      image: glipizideImage,
-    },
-    {
-      id: 5,
       name: "Metformin Hydrochloride Tablet",
       description:
         "Each Uncoated Tablet Contains: Metformin Hydrochloride BP____500mg/850mg/1000mg",
       type: "Uncoated Tablet",
       packaging: "Blister",
       image: metforminImage,
-    },
-    {
-      id: 6,
-      name: "Metformin & Glibenclamide Tablet",
-      description:
-        "Each Uncoated Tablet Contains: Glibenclamide BP____5mg Metformin Hydrochloride BP____500mg",
-      type: "Uncoated Tablet",
-      packaging: "Blister",
-      image: glibenclamideImage,
-    },
-    {
-      id: 7,
-      name: "Pioglitazone Hydrochloride Tablet",
-      description:
-        "Each Uncoated Tablet Contains: Pioglitazone Hydrochloride Eq. to Pioglitazone____15mg/30mg",
-      type: "Uncoated Tablet",
-      packaging: "Blister",
-      image: glimepirideImage,
     },
   ];
 
@@ -270,7 +243,7 @@ const AntiDiabeticProducts = () => {
                 {/* Products Table */}
                 <motion.div
                   variants={itemVariants}
-                  className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border-2 border-gray-800 dark:border-gray-600 overflow-hidden"
+                  className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border-2 border-purple-200 dark:border-purple-600 overflow-hidden"
                 >
                   {/* Table Header */}
                   <div className="bg-gradient-to-r from-purple-500 to-violet-600 p-6 text-white">
@@ -393,7 +366,7 @@ const AntiDiabeticProducts = () => {
             className="mt-12 mb-16"
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto justify-items-center">
-              {antiDiabeticProducts.slice(0, 4).map((product) => (
+              {antiDiabeticProducts.map((product) => (
                 <motion.div
                   key={product.id}
                   initial={{ opacity: 0, y: 20 }}

@@ -15,7 +15,7 @@ const StyledCardWrapper = styled.div`
     max-width: 400px;
     height: auto;
     min-height: 300px;
-    background-image: linear-gradient(163deg, #10b981 0%, #059669 100%);
+    background-image: linear-gradient(163deg, #3b82f6 0%, #1d4ed8 100%);
     border-radius: 20px;
     transition: all 0.3s;
     padding: 3px;
@@ -61,7 +61,7 @@ const StyledCardWrapper = styled.div`
 const CardiovascularProducts = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Cardiovascular products data (placeholder images currently)
+  // Cardiovascular products data - using only available images
   const cardiovascularProducts = [
     {
       id: 1,
@@ -74,51 +74,15 @@ const CardiovascularProducts = () => {
     },
     {
       id: 2,
-      name: "Amlodipine & Atenolol Tablet",
-      description:
-        "Each Uncoated Tablet Contains: Amlodipine Besilate BP Eq. to Amlodipine____2.5mg/5mg Atenolol BP____25mg/50mg Colour : Erythrosine",
-      type: "Uncoated Tablet",
-      packaging: "Blister",
-      image: atenololImg,
-    },
-    {
-      id: 3,
-      name: "Amlodipine & Lisinopril Tablet",
-      description:
-        "Each Uncoated Tablet Contains: Amlodipine Besilate BP Eq. to Amlodipine 5mg Lisinopril USP Eq. to Anhydrous Lisinopril____5mg Colour : Tartrazine",
-      type: "Uncoated Tablet",
-      packaging: "Blister",
-      image: lisinoprilImg,
-    },
-    {
-      id: 4,
-      name: "Amlodipine, Losartan Potassium & Hydrochlorothiazide Tablet",
-      description:
-        "Each Film Coated Tablet Contains: Losartan Potassium USP____50mg Amlodipine Besilate BP Eq. to Amlodipine 5mg Hydrochlorothiazide BP____12.5mg Colour : Red Oxide of Iron & Titanium Dioxide BP",
-      type: "Film coated Tablet",
-      packaging: "Blister",
-      image: amlodipineImg,
-    },
-    {
-      id: 5,
-      name: "Enalapril Maleate Tablet",
-      description:
-        "Each Uncoated Tablet Contains: Enalapril Maleate BP____5mg Colour: Erythrosine Lake",
-      type: "Uncoated Tablet",
-      packaging: "Blister",
-      image: lisinoprilImg,
-    },
-    {
-      id: 6,
       name: "Telmisartan Tablet",
       description:
         "Each Film Coated Tablet Contains: Telmisartan____40mg Colour : Ponceau 4R",
-      type: "Uncoated Tablet",
+      type: "Film Coated Tablet",
       packaging: "Blister",
       image: telmisartanImg,
     },
     {
-      id: 7,
+      id: 3,
       name: "Atenolol Tablet",
       description: "Each Uncoated Tablet Contains: Atenolol BP____25mg/50mg",
       type: "Uncoated Tablet",
@@ -126,75 +90,13 @@ const CardiovascularProducts = () => {
       image: atenololImg,
     },
     {
-      id: 8,
+      id: 4,
       name: "Lisinopril Tablet",
       description:
         "Each Uncoated Tablet Contains: Lisinopril USP Eq. to Anhydrous Lisinopril____2.5mg/5mg/10mg",
       type: "Uncoated Tablet",
       packaging: "Blister",
       image: lisinoprilImg,
-    },
-    {
-      id: 9,
-      name: "Losartan Potassium Tablet",
-      description:
-        "Each Film Coated Tablet Contains: Losartan Potassium USP____25mg/50mg Colour : Quinoline Yellow WS, Brilliant Blue FCF & Titanium Dioxide",
-      type: "Film coated Tablet",
-      packaging: "Alu-Alu",
-      image: telmisartanImg,
-    },
-    {
-      id: 10,
-      name: "Losartan Potassium & Hydrochlorothiazide Tablet",
-      description:
-        "Each Film Coated Tablet Contains: Losartan Potassium USP____50mg Hydrochlorothiazide BP____12.5mg Colour : Quinoline Yellow WS, Brilliant Blue FCF & Titanium Dioxide",
-      type: "Film coated Tablet",
-      packaging: "Alu-Alu",
-      image: telmisartanImg,
-    },
-    {
-      id: 11,
-      name: "Ramipril Tablet",
-      description: "Each Uncoated Tablet Contains: Ramipril BP____2.5mg/5mg",
-      type: "Uncoated Tablet",
-      packaging: "Blister",
-      image: lisinoprilImg,
-    },
-    {
-      id: 12,
-      name: "Ramipril & Hydrochlorothiazide Tablet",
-      description:
-        "Each Uncoated Tablet Contains: Ramipril BP____2.5mg Hydrochlorothiazide BP____12.5mg Colour : Sunset Yellow FCF",
-      type: "Uncoated Tablet",
-      packaging: "Blister",
-      image: lisinoprilImg,
-    },
-    {
-      id: 13,
-      name: "Ramipril & Losartan Potassium Tablet",
-      description:
-        "Each Uncoated Tablet Contains: Ramipril BP____5mg Losartan Potassium USP____50mg Colour : Sunset Yellow FCF",
-      type: "Uncoated Tablet",
-      packaging: "Blister",
-      image: telmisartanImg,
-    },
-    {
-      id: 14,
-      name: "Spironolactone & Torsemide Tablets",
-      description:
-        "Each Film Coated Tablet Contains: Spironolactone BP____25mg/50mg/100mg Torsemide USP____5mg/ 10mg Colour : Yellow Oxide of Iron",
-      type: "Film coated Tablet",
-      packaging: "Blister",
-      image: amlodipineImg,
-    },
-    {
-      id: 15,
-      name: "Metoprolol Succinate Extended Release Tablet",
-      description:
-        "Each Extended Release Tablet Contains: Metoprolol Succinate USP Eq to Metoprolol____25mg/50mg Colour : Titanium Dioxide BP",
-      type: "Extended Release Tablet",
-      packaging: "Blister",
-      image: atenololImg,
     },
   ];
 
@@ -341,7 +243,7 @@ const CardiovascularProducts = () => {
                 {/* Products Table */}
                 <motion.div
                   variants={itemVariants}
-                  className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border-2 border-gray-800 dark:border-gray-600 overflow-hidden"
+                  className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border-2 border-blue-200 dark:border-blue-600 overflow-hidden"
                 >
                   {/* Table Header */}
                   <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-6 text-white">
@@ -441,6 +343,20 @@ const CardiovascularProducts = () => {
             )}
           </AnimatePresence>
 
+          {/* Section Header: Our Products */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="mt-10"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white text-center">
+              Our Products
+            </h2>
+            <div className="mt-3 h-1 w-24 bg-gradient-to-r from-blue-500 to-purple-600 mx-auto rounded-full"></div>
+          </motion.div>
+
           {/* Product Images Gallery */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -450,7 +366,7 @@ const CardiovascularProducts = () => {
             className="mt-12 mb-16"
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto justify-items-center">
-              {displayProducts.slice(0, 6).map((product) => (
+              {cardiovascularProducts.map((product) => (
                 <motion.div
                   key={product.id}
                   initial={{ opacity: 0, y: 20 }}

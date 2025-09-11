@@ -159,15 +159,25 @@ const Contact = () => {
               </div>
               <div className="mt-6 flex flex-wrap items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                 <Phone className="w-4 h-4" />
-                <span>+91 96648 43790</span>
+                <a
+                  href="tel:+919664843790"
+                  className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                >
+                  +91 96648 43790
+                </a>
                 <span className="mx-2">•</span>
-                <span>Mobile: 88492 07934</span>
+                <a
+                  href="tel:+918401546910"
+                  className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                >
+                  Mobile: +91 84015 46910
+                </a>
               </div>
             </div>
           </motion.div>
 
           {/* Social row */}
-          <div className="mt-10 flex flex-wrap items-center justify-center md:justify-start gap-3">
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
             {socialLinks.map((s) => (
               <motion.a
                 key={s.label}
@@ -175,10 +185,10 @@ const Contact = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 whileHover={{ y: -3 }}
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/70 dark:bg-gray-900/60 backdrop-blur ring-1 ring-black/5 transition-colors ${s.color}`}
+                className={`inline-flex items-center gap-3 px-5 py-3 rounded-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-md ring-2 ring-black/10 dark:ring-white/10 shadow-lg hover:shadow-xl transition-all duration-300 ${s.color}`}
                 aria-label={s.label}
               >
-                <s.icon className="w-4 h-4" />
+                <s.icon className="w-5 h-5" />
                 <span className="text-sm font-medium">{s.label}</span>
               </motion.a>
             ))}
@@ -214,7 +224,23 @@ const Contact = () => {
                   {info.title}
                 </h3>
                 <div className="text-primary-500 font-medium mb-1">
-                  {info.value}
+                  {info.title === "Phone" ? (
+                    <a
+                      href="tel:+919664843790"
+                      className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                    >
+                      {info.value}
+                    </a>
+                  ) : info.title === "Email" ? (
+                    <a
+                      href="mailto:Info@nexlifeinternational.com"
+                      className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                    >
+                      {info.value}
+                    </a>
+                  ) : (
+                    info.value
+                  )}
                 </div>
                 <div className="text-gray-600 dark:text-gray-300 text-sm">
                   {info.description}
@@ -344,17 +370,30 @@ const Contact = () => {
                 <div className="space-y-4">
                   <div className="flex items-center space-x-3 text-gray-600 dark:text-gray-300">
                     <div className="w-2 h-2 bg-primary-500 rounded-full"></div>
-                    <span className="text-sm">
+                    <a
+                      href="mailto:Info@nexlifeinternational.com"
+                      className="text-sm hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                    >
                       Email: Info@nexlifeinternational.com
-                    </span>
+                    </a>
                   </div>
                   <div className="flex items-center space-x-3 text-gray-600 dark:text-gray-300">
                     <div className="w-2 h-2 bg-primary-500 rounded-full"></div>
-                    <span className="text-sm">Primary: +91 96648 43790</span>
+                    <a
+                      href="tel:+919664843790"
+                      className="text-sm hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                    >
+                      Primary: +91 96648 43790
+                    </a>
                   </div>
                   <div className="flex items-center space-x-3 text-gray-600 dark:text-gray-300">
                     <div className="w-2 h-2 bg-primary-500 rounded-full"></div>
-                    <span className="text-sm">Mobile: 88492 07934</span>
+                    <a
+                      href="tel:+918849207934"
+                      className="text-sm hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                    >
+                      Mobile: +91 88492 07934
+                    </a>
                   </div>
                   <div className="flex items-center space-x-3 text-gray-600 dark:text-gray-300">
                     <div className="w-2 h-2 bg-primary-500 rounded-full"></div>

@@ -278,10 +278,10 @@ const Products = () => {
       },
     },
     hover: {
-      y: -5,
-      scale: 1.02,
+      y: -8,
+      scale: 1.03,
       transition: {
-        duration: 0.2,
+        duration: 0.3,
         ease: "easeOut",
       },
     },
@@ -629,6 +629,37 @@ const Products = () => {
                                       whileHover="hover"
                                       className="group bg-gradient-to-br from-gray-50 to-white dark:from-gray-700 dark:to-gray-800 p-6 rounded-xl border-2 border-gray-800 dark:border-gray-500 hover:border-blue-600 dark:hover:border-blue-400 hover:shadow-xl transition-all duration-300 relative overflow-hidden"
                                     >
+                                      {/* Processing Bar Effect */}
+                                      <div className="absolute top-0 left-0 w-full h-2 bg-gray-200 dark:bg-gray-600 overflow-hidden">
+                                        <motion.div
+                                          className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500"
+                                          initial={{ width: "0%" }}
+                                          whileHover={{
+                                            width: "100%",
+                                            transition: {
+                                              duration: 1.5,
+                                              ease: "easeInOut",
+                                            },
+                                          }}
+                                        />
+                                      </div>
+
+                                      {/* Processing Indicator */}
+                                      <div className="absolute top-0 left-0 w-full h-2 bg-transparent overflow-hidden">
+                                        <motion.div
+                                          className="h-full bg-gradient-to-r from-blue-400 via-white to-blue-400 opacity-80"
+                                          initial={{ width: "0%", x: "0%" }}
+                                          whileHover={{
+                                            width: "100%",
+                                            x: "0%",
+                                            transition: {
+                                              duration: 1.5,
+                                              ease: "easeInOut",
+                                            },
+                                          }}
+                                        />
+                                      </div>
+
                                       {/* Elegant corner accent */}
                                       <div className="absolute top-0 right-0 w-0 h-0 border-l-[20px] border-l-transparent border-t-[20px] border-t-blue-800 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
@@ -757,6 +788,37 @@ const Products = () => {
                                       whileHover="hover"
                                       className="group bg-gradient-to-br from-gray-50 to-white dark:from-gray-700 dark:to-gray-800 p-6 rounded-xl border-2 border-gray-800 dark:border-gray-500 hover:border-blue-600 dark:hover:border-blue-400 hover:shadow-xl transition-all duration-300 relative overflow-hidden"
                                     >
+                                      {/* Processing Bar Effect */}
+                                      <div className="absolute top-0 left-0 w-full h-2 bg-gray-200 dark:bg-gray-600 overflow-hidden">
+                                        <motion.div
+                                          className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500"
+                                          initial={{ width: "0%" }}
+                                          whileHover={{
+                                            width: "100%",
+                                            transition: {
+                                              duration: 1.5,
+                                              ease: "easeInOut",
+                                            },
+                                          }}
+                                        />
+                                      </div>
+
+                                      {/* Processing Indicator */}
+                                      <div className="absolute top-0 left-0 w-full h-2 bg-transparent overflow-hidden">
+                                        <motion.div
+                                          className="h-full bg-gradient-to-r from-blue-400 via-white to-blue-400 opacity-80"
+                                          initial={{ width: "0%", x: "0%" }}
+                                          whileHover={{
+                                            width: "100%",
+                                            x: "0%",
+                                            transition: {
+                                              duration: 1.5,
+                                              ease: "easeInOut",
+                                            },
+                                          }}
+                                        />
+                                      </div>
+
                                       <div className="absolute top-0 right-0 w-0 h-0 border-l-[20px] border-l-transparent border-t-[20px] border-t-blue-800 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
                                       <div className="flex items-center space-x-3 mb-4">
@@ -797,6 +859,37 @@ const Products = () => {
                                       whileHover="hover"
                                       className="group bg-gradient-to-br from-gray-50 to-white dark:from-gray-700 dark:to-gray-800 p-6 rounded-xl border-2 border-gray-800 dark:border-gray-500 hover:border-red-600 dark:hover:border-red-400 hover:shadow-xl transition-all duration-300 text-center relative overflow-hidden"
                                     >
+                                      {/* Progress Bar Effect */}
+                                      <div className="absolute top-0 left-0 w-full h-1 bg-gray-200 dark:bg-gray-600 overflow-hidden rounded-t-xl">
+                                        <motion.div
+                                          className="h-full bg-gradient-to-r from-red-500 via-orange-500 to-red-500 rounded-t-xl"
+                                          initial={{ width: "0%" }}
+                                          whileHover={{
+                                            width: "100%",
+                                            transition: {
+                                              duration: 0.8,
+                                              ease: "easeInOut",
+                                            },
+                                          }}
+                                        />
+                                      </div>
+
+                                      {/* Processing Indicator */}
+                                      <div className="absolute top-0 left-0 w-full h-2 bg-transparent overflow-hidden">
+                                        <motion.div
+                                          className="h-full bg-gradient-to-r from-red-400 via-white to-red-400 opacity-80"
+                                          initial={{ width: "0%", x: "0%" }}
+                                          whileHover={{
+                                            width: "100%",
+                                            x: "0%",
+                                            transition: {
+                                              duration: 1.5,
+                                              ease: "easeInOut",
+                                            },
+                                          }}
+                                        />
+                                      </div>
+
                                       {/* Elegant corner accent */}
                                       <div className="absolute top-0 right-0 w-0 h-0 border-l-[20px] border-l-transparent border-t-[20px] border-t-red-800 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 

@@ -12,6 +12,7 @@ import {
   Users,
 } from "lucide-react";
 import whyChooseUsImage from "../assets/images/why choose us.png";
+import servicesHeaderImage from "../assets/images/our services.png";
 
 const Services = () => {
   const { t } = useTranslation();
@@ -130,22 +131,19 @@ const Services = () => {
   return (
     <div className="min-h-screen pt-5">
       {/* Hero Section */}
-      <section className="relative py-20 bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-        <div className="container-custom">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center max-w-4xl mx-auto"
-          >
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
-              {t("servicesTitle")}
-            </h1>
-            <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed">
-              {t("servicesSubtitle")}
-            </p>
-          </motion.div>
-        </div>
+      <section className="relative pt-0 pb-20 bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7 }}
+          className="w-full"
+        >
+          <img
+            src={servicesHeaderImage}
+            alt="Our Services"
+            className="w-full h-56 sm:h-64 md:h-80 lg:h-96 object-cover"
+          />
+        </motion.div>
       </section>
 
       {/* Services Grid */}
@@ -163,7 +161,7 @@ const Services = () => {
                 key={service.title}
                 variants={itemVariants}
                 whileHover={{ y: -10 }}
-                className="card p-8 group"
+                className="card p-8 group border-2 border-gray-200 dark:border-gray-700 rounded-2xl hover:border-primary-500 dark:hover:border-primary-400 transition-colors duration-300"
               >
                 <div
                   className={`w-16 h-16 mb-6 rounded-xl bg-gradient-to-r ${service.color} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
@@ -206,6 +204,7 @@ const Services = () => {
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
               Our Process
             </h2>
+            <div className="h-1 w-28 mx-auto mb-4 rounded-full bg-gradient-to-r from-black via-fuchsia-500 to-black" />
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
               We follow a systematic approach to ensure quality, compliance, and
               customer satisfaction at every step.

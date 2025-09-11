@@ -19,6 +19,7 @@ const Navbar = () => {
     { name: "About Us", link: "/about" },
     { name: "Products", link: "/products" },
     { name: "Services", link: "/services" },
+    { name: "Gallery", link: "/gallery" },
     { name: "Global Presence", link: "/global-presence" },
     { name: "Contact", link: "/contact" },
   ];
@@ -36,21 +37,7 @@ const Navbar = () => {
         <NavBody>
           <ANavbarLogo src={nexlifeLogo} alt="" />
           <NavItems items={navItems} />
-          <div className="flex items-center gap-6">
-            <div className="hidden xl:flex flex-col space-y-1">
-              <a
-                href="mailto:Info@nexlifeinternational.com"
-                className="text-sm text-gray-600 hover:text-blue-700 transition-colors duration-200"
-              >
-                Info@nexlifeinternational.com
-              </a>
-              <a
-                href="tel:+919664843790"
-                className="text-sm text-gray-600 hover:text-blue-700 transition-colors duration-200"
-              >
-                (+91) 96648 43790
-              </a>
-            </div>
+          <div className="flex items-center gap-4">
             <NavbarButton variant="secondary" onClick={handleCallUs}>
               Call Us
             </NavbarButton>

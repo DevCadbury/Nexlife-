@@ -150,7 +150,7 @@ const PlateletAggregationProducts = () => {
                 {/* Products Table */}
                 <motion.div
                   variants={itemVariants}
-                  className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border-2 border-gray-800 dark:border-gray-600 overflow-hidden"
+                  className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border-2 border-blue-200 dark:border-blue-600 overflow-hidden"
                 >
                   <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-6 text-white">
                     <h2 className="text-2xl font-bold">
@@ -247,7 +247,8 @@ const PlateletAggregationProducts = () => {
             )}
           </AnimatePresence>
 
-          {/* Product Images Gallery removed per request */}
+          {/* Spacing after table */}
+          <div className="mt-16"></div>
 
           {/* Download Catalog CTA */}
           <motion.div

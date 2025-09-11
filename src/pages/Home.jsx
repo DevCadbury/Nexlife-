@@ -25,6 +25,10 @@ import {
   Plus,
   ChevronLeft,
   ChevronRight,
+  MessageCircle,
+  Phone,
+  Mail,
+  X,
 } from "lucide-react";
 import DownloadButton from "../components/DownloadButton";
 import PharmaBackground from "../components/PharmaBackground";
@@ -343,6 +347,9 @@ const Home = () => {
   const officeAutoRef = useRef(null);
   const [officeIndex, setOfficeIndex] = useState(0);
   const [officeDirection, setOfficeDirection] = useState(1); // 1: LTR, -1: RTL
+
+  // Floating contact buttons state
+  const [isFloatingOpen, setIsFloatingOpen] = useState(false);
 
   const getOfficeStep = () => {
     const container = officeGalleryRef.current;
@@ -672,16 +679,16 @@ const Home = () => {
                   <Pill className="w-6 h-6 text-white" />
                 </div>
 
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
+                <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
                   Tablets & Capsules
                 </h3>
 
-                <p className="text-gray-600 dark:text-gray-300 text-xs leading-relaxed mb-3">
+                <p className="text-gray-600 dark:text-gray-300 text-sm md:text-base leading-relaxed mb-3">
                   Advanced formulation technology with enhanced bioavailability.
                 </p>
 
                 {/* 4 Feature Options */}
-                <div className="space-y-1.5 text-xs text-gray-500 dark:text-gray-400">
+                <div className="space-y-1.5 text-sm md:text-base text-gray-500 dark:text-gray-400">
                   <div className="flex items-center group/item">
                     <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2 group-hover/item:scale-110 transition-transform duration-200"></div>
                     <span className="group-hover/item:text-blue-600 dark:group-hover/item:text-blue-400 transition-colors duration-200">
@@ -732,17 +739,17 @@ const Home = () => {
                   <TestTube className="w-6 h-6 text-white" />
                 </div>
 
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors duration-300">
+                <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors duration-300">
                   Dry Syrup & Suspensions
                 </h3>
 
-                <p className="text-gray-600 dark:text-gray-300 text-xs leading-relaxed mb-3">
+                <p className="text-gray-600 dark:text-gray-300 text-sm md:text-base leading-relaxed mb-3">
                   Pediatric-friendly formulations with superior taste masking
                   and stability.
                 </p>
 
                 {/* 4 Feature Options */}
-                <div className="space-y-1.5 text-xs text-gray-500 dark:text-gray-400">
+                <div className="space-y-1.5 text-sm md:text-base text-gray-500 dark:text-gray-400">
                   <div className="flex items-center group/item">
                     <div className="w-1.5 h-1.5 bg-green-400 rounded-full mr-2 group-hover/item:scale-110 transition-transform duration-200"></div>
                     <span className="group-hover/item:text-green-600 dark:group-hover/item:text-green-400 transition-colors duration-200">
@@ -793,17 +800,17 @@ const Home = () => {
                   <Shield className="w-6 h-6 text-white" />
                 </div>
 
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-300">
+                <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-300">
                   Surgical & Medical Devices
                 </h3>
 
-                <p className="text-gray-600 dark:text-gray-300 text-xs leading-relaxed mb-3">
+                <p className="text-gray-600 dark:text-gray-300 text-sm md:text-base leading-relaxed mb-3">
                   Sterile, precision-engineered surgical instruments and medical
                   devices meeting international standards.
                 </p>
 
                 {/* 4 Feature Options */}
-                <div className="space-y-1.5 text-xs text-gray-500 dark:text-gray-400">
+                <div className="space-y-1.5 text-sm md:text-base text-gray-500 dark:text-gray-400">
                   <div className="flex items-center group/item">
                     <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mr-2 group-hover/item:scale-110 transition-transform duration-200"></div>
                     <span className="group-hover/item:text-purple-600 dark:group-hover/item:text-purple-400 transition-colors duration-200">
@@ -854,17 +861,17 @@ const Home = () => {
                   <TestTube className="w-6 h-6 text-white" />
                 </div>
 
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors duration-300">
+                <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors duration-300">
                   Injectables & Parenterals
                 </h3>
 
-                <p className="text-gray-600 dark:text-gray-300 text-xs leading-relaxed mb-3">
+                <p className="text-gray-600 dark:text-gray-300 text-sm md:text-base leading-relaxed mb-3">
                   Sterile injectable solutions for critical care and emergency
                   medicine.
                 </p>
 
                 {/* 4 Feature Options */}
-                <div className="space-y-1.5 text-xs text-gray-500 dark:text-gray-400">
+                <div className="space-y-1.5 text-sm md:text-base text-gray-500 dark:text-gray-400">
                   <div className="flex items-center group/item">
                     <div className="w-1.5 h-1.5 bg-orange-400 rounded-full mr-2 group-hover/item:scale-110 transition-transform duration-200"></div>
                     <span className="group-hover/item:text-orange-600 dark:group-hover/item:text-orange-400 transition-colors duration-200">
@@ -910,16 +917,18 @@ const Home = () => {
             transition={{ duration: 0.8 }}
             className="text-center mb-16"
           >
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4"
-            >
-              Our Products
-            </motion.h2>
-            <div className="h-1 w-28 mx-auto mb-4 rounded-full bg-gradient-to-r from-black via-fuchsia-500 to-black" />
+            <div className="inline-block mx-auto">
+              <motion.h2
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4 inline-block"
+              >
+                Our Products
+              </motion.h2>
+              <div className="h-1 w-11/12 mx-auto mb-4 rounded-full bg-gradient-to-r from-black via-fuchsia-500 to-black" />
+            </div>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -978,7 +987,7 @@ const Home = () => {
             {/* Product Card 2 */}
             <motion.div
               whileHover={{ y: -10, scale: 1.02 }}
-              className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-blue-300 dark:border-blue-500 hover:border-blue-400 dark:hover:border-blue-400 overflow-hidden group relative"
+              className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-red-300 dark:border-red-500 hover:border-red-400 dark:hover:border-red-400 overflow-hidden group relative"
               style={{
                 boxShadow: "0 0 20px rgba(236, 72, 153, 0.12)",
               }}
@@ -989,11 +998,79 @@ const Home = () => {
               <div className="relative overflow-hidden">
                 <img
                   src={product2}
+                  alt="Advanced Pain Relief Formula"
+                  className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500 border-2 border-gray-300 dark:border-gray-600 rounded-lg"
+                />
+
+                <div className="absolute top-4 left-4 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+                  Pain Reliever
+                </div>
+              </div>
+
+              <div className="p-6 relative z-10">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+                  Advanced Pain Relief Formula
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
+                  Fast-acting pain relief medication for acute and chronic pain
+                  management with proven efficacy and safety.
+                </p>
+              </div>
+            </motion.div>
+
+            {/* Product Card 3 */}
+            <motion.div
+              whileHover={{ y: -10, scale: 1.02 }}
+              className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-orange-300 dark:border-orange-500 hover:border-orange-400 dark:hover:border-orange-400 overflow-hidden group relative"
+              style={{
+                boxShadow: "0 0 20px rgba(236, 72, 153, 0.12)",
+              }}
+            >
+              {/* Border Edge Lighting Effect */}
+              <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-black/20 via-fuchsia-500/25 to-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+
+              <div className="relative overflow-hidden">
+                <img
+                  src={product3}
+                  alt="Pain Relief Advanced"
+                  className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500 border-2 border-gray-300 dark:border-gray-600 rounded-lg"
+                />
+
+                <div className="absolute top-4 left-4 bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+                  Pain Reliever
+                </div>
+              </div>
+
+              <div className="p-6 relative z-10">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+                  Pain Relief Advanced
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
+                  Advanced pain management solution with dual-action formula for
+                  effective relief from moderate to severe pain.
+                </p>
+              </div>
+            </motion.div>
+
+            {/* Product Card 4 */}
+            <motion.div
+              whileHover={{ y: -10, scale: 1.02 }}
+              className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-red-300 dark:border-red-500 hover:border-red-400 dark:hover:border-red-400 overflow-hidden group relative"
+              style={{
+                boxShadow: "0 0 20px rgba(236, 72, 153, 0.12)",
+              }}
+            >
+              {/* Border Edge Lighting Effect */}
+              <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-black/20 via-fuchsia-500/25 to-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+
+              <div className="relative overflow-hidden">
+                <img
+                  src={product4}
                   alt="Cardiovascular Health Plus"
                   className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500 border-2 border-gray-300 dark:border-gray-600 rounded-lg"
                 />
 
-                <div className="absolute top-4 left-4 bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+                <div className="absolute top-4 left-4 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-medium">
                   Cardiovascular
                 </div>
               </div>
@@ -1009,78 +1086,10 @@ const Home = () => {
               </div>
             </motion.div>
 
-            {/* Product Card 3 */}
-            <motion.div
-              whileHover={{ y: -10, scale: 1.02 }}
-              className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-blue-300 dark:border-blue-500 hover:border-blue-400 dark:hover:border-blue-400 overflow-hidden group relative"
-              style={{
-                boxShadow: "0 0 20px rgba(236, 72, 153, 0.12)",
-              }}
-            >
-              {/* Border Edge Lighting Effect */}
-              <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-black/20 via-fuchsia-500/25 to-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-
-              <div className="relative overflow-hidden">
-                <img
-                  src={product3}
-                  alt="Diabetes Management Pro"
-                  className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500 border-2 border-gray-300 dark:border-gray-600 rounded-lg"
-                />
-
-                <div className="absolute top-4 left-4 bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-medium">
-                  Diabetes
-                </div>
-              </div>
-
-              <div className="p-6 relative z-10">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
-                  Diabetes Management Pro
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
-                  Advanced diabetes control medication with extended release for
-                  consistent blood sugar management.
-                </p>
-              </div>
-            </motion.div>
-
-            {/* Product Card 4 */}
-            <motion.div
-              whileHover={{ y: -10, scale: 1.02 }}
-              className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-blue-300 dark:border-blue-500 hover:border-blue-400 dark:hover:border-blue-400 overflow-hidden group relative"
-              style={{
-                boxShadow: "0 0 20px rgba(236, 72, 153, 0.12)",
-              }}
-            >
-              {/* Border Edge Lighting Effect */}
-              <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-black/20 via-fuchsia-500/25 to-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-
-              <div className="relative overflow-hidden">
-                <img
-                  src={product4}
-                  alt="Pain Relief Advanced"
-                  className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500 border-2 border-gray-300 dark:border-gray-600 rounded-lg"
-                />
-
-                <div className="absolute top-4 left-4 bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-medium">
-                  Pain Management
-                </div>
-              </div>
-
-              <div className="p-6 relative z-10">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
-                  Pain Relief Advanced
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
-                  Fast-acting pain relief with anti-inflammatory properties for
-                  effective pain management.
-                </p>
-              </div>
-            </motion.div>
-
             {/* Product Card 5 */}
             <motion.div
               whileHover={{ y: -10, scale: 1.02 }}
-              className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-blue-300 dark:border-blue-500 hover:border-blue-400 dark:hover:border-blue-400 overflow-hidden group relative"
+              className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-green-300 dark:border-green-500 hover:border-green-400 dark:hover:border-green-400 overflow-hidden group relative"
               style={{
                 boxShadow: "0 0 20px rgba(236, 72, 153, 0.12)",
               }}
@@ -1091,22 +1100,22 @@ const Home = () => {
               <div className="relative overflow-hidden">
                 <img
                   src={product5}
-                  alt="Immunity Booster Elite"
+                  alt="Multivitamins Complete"
                   className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500 border-2 border-gray-300 dark:border-gray-600 rounded-lg"
                 />
 
-                <div className="absolute top-4 left-4 bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-medium">
-                  Immunity
+                <div className="absolute top-4 left-4 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+                  Multivitamins
                 </div>
               </div>
 
               <div className="p-6 relative z-10">
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
-                  Immunity Booster Elite
+                  Multivitamins Complete
                 </h3>
                 <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
-                  Premium immune system enhancement supplement for optimal
-                  health and wellness.
+                  Comprehensive multivitamin formula with essential nutrients
+                  for overall health and wellness support.
                 </p>
               </div>
             </motion.div>
@@ -1114,7 +1123,7 @@ const Home = () => {
             {/* Product Card 6 */}
             <motion.div
               whileHover={{ y: -10, scale: 1.02 }}
-              className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-blue-300 dark:border-blue-500 hover:border-blue-400 dark:hover:border-blue-400 overflow-hidden group relative"
+              className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-purple-300 dark:border-purple-500 hover:border-purple-400 dark:hover:border-purple-400 overflow-hidden group relative"
               style={{
                 boxShadow: "0 0 20px rgba(236, 72, 153, 0.12)",
               }}
@@ -1125,22 +1134,22 @@ const Home = () => {
               <div className="relative overflow-hidden">
                 <img
                   src={product6}
-                  alt="Digestive Health Formula"
+                  alt="Anti Allergic Formula"
                   className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500 border-2 border-gray-300 dark:border-gray-600 rounded-lg"
                 />
 
-                <div className="absolute top-4 left-4 bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-medium">
-                  Digestive
+                <div className="absolute top-4 left-4 bg-purple-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+                  Anti Allergic
                 </div>
               </div>
 
               <div className="p-6 relative z-10">
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
-                  Digestive Health Formula
+                  Anti Allergic Formula
                 </h3>
                 <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
-                  Natural digestive health support with probiotics for optimal
-                  gut health and digestion.
+                  Advanced anti-allergic medication for effective relief from
+                  seasonal allergies and allergic reactions.
                 </p>
               </div>
             </motion.div>
@@ -1161,12 +1170,15 @@ const Home = () => {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <motion.h2
-              variants={itemVariants}
-              className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4"
-            >
-              Why Choose Us?
-            </motion.h2>
+            <div className="inline-block mx-auto">
+              <motion.h2
+                variants={itemVariants}
+                className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4 inline-block"
+              >
+                Why Choose Us?
+              </motion.h2>
+              <div className="h-1 w-11/12 mx-auto mb-4 rounded-full bg-gradient-to-r from-black via-fuchsia-500 to-black" />
+            </div>
             <motion.p
               variants={itemVariants}
               className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto"
@@ -1225,12 +1237,15 @@ const Home = () => {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <motion.h2
-              variants={itemVariants}
-              className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4"
-            >
-              NEXLIFE INTERNATIONAL STANDS FOR
-            </motion.h2>
+            <div className="inline-block mx-auto">
+              <motion.h2
+                variants={itemVariants}
+                className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4 inline-block"
+              >
+                NEXLIFE INTERNATIONAL STANDS FOR
+              </motion.h2>
+              <div className="h-1 w-11/12 mx-auto mb-4 rounded-full bg-gradient-to-r from-black via-fuchsia-500 to-black" />
+            </div>
             <motion.p
               variants={itemVariants}
               className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto"
@@ -1293,12 +1308,15 @@ const Home = () => {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <motion.h2
-              variants={itemVariants}
-              className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4"
-            >
-              Our Core Values
-            </motion.h2>
+            <div className="inline-block mx-auto">
+              <motion.h2
+                variants={itemVariants}
+                className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4 inline-block"
+              >
+                Our Core Values
+              </motion.h2>
+              <div className="h-1 w-11/12 mx-auto mb-4 rounded-full bg-gradient-to-r from-black via-fuchsia-500 to-black" />
+            </div>
             <motion.p
               variants={itemVariants}
               className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto"
@@ -1367,15 +1385,18 @@ const Home = () => {
             transition={{ duration: 0.8 }}
             className="text-center mb-12"
           >
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4"
-            >
-              Our Office & Facilities
-            </motion.h2>
+            <div className="inline-block mx-auto">
+              <motion.h2
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4 inline-block"
+              >
+                Our Office & Facilities
+              </motion.h2>
+              <div className="h-1 w-11/12 mx-auto mb-4 rounded-full bg-gradient-to-r from-black via-fuchsia-500 to-black" />
+            </div>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -1570,15 +1591,18 @@ const Home = () => {
             transition={{ duration: 0.8 }}
             className="text-center mb-16"
           >
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4"
-            >
-              What Our Customers Say
-            </motion.h2>
+            <div className="inline-block mx-auto">
+              <motion.h2
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4 inline-block"
+              >
+                What Our Customers Say
+              </motion.h2>
+              <div className="h-1 w-11/12 mx-auto mb-4 rounded-full bg-gradient-to-r from-black via-fuchsia-500 to-black" />
+            </div>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -2228,15 +2252,18 @@ const Home = () => {
             transition={{ duration: 0.8 }}
             className="text-center mb-12"
           >
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4"
-            >
-              Our Certifications & Standards
-            </motion.h2>
+            <div className="inline-block mx-auto">
+              <motion.h2
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4 inline-block"
+              >
+                Our Certifications & Standards
+              </motion.h2>
+              <div className="h-1 w-full mb-4 rounded-full bg-gradient-to-r from-black via-fuchsia-500 to-black" />
+            </div>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -2268,6 +2295,85 @@ const Home = () => {
 
       {/* Debug Info - Only in Development */}
       <DebugInfo />
+
+      {/* Floating Contact Buttons */}
+      <div className="fixed right-6 bottom-6 z-50">
+        {/* Contact Options */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8, y: 20 }}
+          animate={{
+            opacity: isFloatingOpen ? 1 : 0,
+            scale: isFloatingOpen ? 1 : 0.8,
+            y: isFloatingOpen ? 0 : 20,
+          }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          className={`mb-4 space-y-3 ${isFloatingOpen ? "block" : "hidden"}`}
+        >
+          {/* WhatsApp Button */}
+          <motion.a
+            href="https://wa.link/qu1439"
+            target="_blank"
+            rel="noopener noreferrer"
+            whileHover={{ scale: 1.1, x: -5 }}
+            whileTap={{ scale: 0.95 }}
+            className="flex items-center gap-3 bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 group"
+          >
+            <MessageCircle className="w-5 h-5" />
+            <span className="text-sm font-medium">WhatsApp</span>
+            <div className="w-2 h-2 bg-green-300 rounded-full animate-pulse"></div>
+          </motion.a>
+
+          {/* Call Button */}
+          <motion.a
+            href="tel:+919664843790"
+            whileHover={{ scale: 1.1, x: -5 }}
+            whileTap={{ scale: 0.95 }}
+            className="flex items-center gap-3 bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 group"
+          >
+            <Phone className="w-5 h-5" />
+            <span className="text-sm font-medium">Call Now</span>
+            <div className="w-2 h-2 bg-blue-300 rounded-full animate-pulse"></div>
+          </motion.a>
+
+          {/* Email Button */}
+          <motion.a
+            href="mailto:info@nexlifeinternational.com"
+            whileHover={{ scale: 1.1, x: -5 }}
+            whileTap={{ scale: 0.95 }}
+            className="flex items-center gap-3 bg-purple-500 hover:bg-purple-600 text-white px-4 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 group"
+          >
+            <Mail className="w-5 h-5" />
+            <span className="text-sm font-medium">Email Us</span>
+            <div className="w-2 h-2 bg-purple-300 rounded-full animate-pulse"></div>
+          </motion.a>
+        </motion.div>
+
+        {/* Main Toggle Button */}
+        <motion.button
+          onClick={() => setIsFloatingOpen(!isFloatingOpen)}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          className="relative w-14 h-14 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center group"
+        >
+          <motion.div
+            animate={{ rotate: isFloatingOpen ? 45 : 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {isFloatingOpen ? (
+              <X className="w-6 h-6" />
+            ) : (
+              <MessageCircle className="w-6 h-6" />
+            )}
+          </motion.div>
+
+          {/* Pulse Animation */}
+          <motion.div
+            animate={{ scale: [1, 1.2, 1] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full opacity-30"
+          />
+        </motion.button>
+      </div>
     </div>
   );
 };

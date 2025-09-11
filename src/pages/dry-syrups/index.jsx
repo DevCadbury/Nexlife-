@@ -12,7 +12,7 @@ const StyledCardWrapper = styled.div`
     max-width: 400px;
     height: auto;
     min-height: 300px;
-    background-image: linear-gradient(163deg, #10b981 0%, #059669 100%);
+    background-image: linear-gradient(163deg, #3b82f6 0%, #7c3aed 100%);
     border-radius: 20px;
     transition: all 0.3s;
     padding: 3px;
@@ -249,7 +249,7 @@ const DrySyrups = () => {
                 {/* Products Table */}
                 <motion.div
                   variants={itemVariants}
-                  className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border-2 border-gray-800 dark:border-gray-600 overflow-hidden"
+                  className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border-2 border-blue-200 dark:border-blue-600 overflow-hidden"
                 >
                   {/* Table Header */}
                   <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-6 text-white">
@@ -346,49 +346,9 @@ const DrySyrups = () => {
               </motion.div>
             )}
           </AnimatePresence>
-          {/* Section Header: Our Products */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-            className="mt-10"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white text-center">
-              Our Products
-            </h2>
-            <div className="mt-3 h-1 w-24 bg-gradient-to-r from-blue-500 to-purple-600 mx-auto rounded-full"></div>
-          </motion.div>
 
-          {/* Product Images Gallery */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
-            className="mt-12 mb-16"
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto justify-items-center">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.3, delay: 0.1 }}
-              >
-                <StyledCardWrapper>
-                  <div className="card">
-                    <div className="card2">
-                      <img
-                        src={drySyrupImg}
-                        alt="Dry Syrup Product"
-                        loading="lazy"
-                      />
-                    </div>
-                  </div>
-                </StyledCardWrapper>
-              </motion.div>
-            </div>
-          </motion.div>
+          {/* Spacing after table */}
+          <div className="mt-16"></div>
 
           {/* Download Catalog CTA */}
           <motion.div

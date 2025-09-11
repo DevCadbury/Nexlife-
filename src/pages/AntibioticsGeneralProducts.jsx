@@ -13,7 +13,7 @@ const StyledCardWrapper = styled.div`
     max-width: 400px;
     height: auto;
     min-height: 300px;
-    background-image: linear-gradient(163deg, #10b981 0%, #059669 100%);
+    background-image: linear-gradient(163deg, #3b82f6 0%, #1d4ed8 100%);
     border-radius: 20px;
     transition: all 0.3s;
     padding: 3px;
@@ -59,7 +59,7 @@ const StyledCardWrapper = styled.div`
 const AntibioticsGeneralProducts = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Antibiotics (General) products data with images
+  // Antibiotics (General) products data - using only available images
   const antibioticsProducts = [
     {
       id: 1,
@@ -72,81 +72,9 @@ const AntibioticsGeneralProducts = () => {
     },
     {
       id: 2,
-      name: "Ciprofloxacin Tablet",
-      description:
-        "Each Film Coated Tablet Contains: Ciprofloxacin Hydrochloride BP Eq. to Ciprofloxacin____250mg/500mg Colour : Titanium Dioxide BP",
-      type: "Film Coated Tablet",
-      packaging: "Blister/Alu Alu",
-      image: azithromycinImage,
-    },
-    {
-      id: 3,
-      name: "Chloramphenicol BP Tablet",
-      description:
-        "Each Uncoated Tablet Contains: Chloramphenicol BP____500mg Excipient q.s.",
-      type: "Uncoated Tablet",
-      packaging: "Blister",
-      image: clarithromycinImage,
-    },
-    {
-      id: 4,
       name: "Clarithromycin Tablet",
       description:
         "Each Film Coated Tablet Contains: Clarithromycin USP____250mg Colour : Titanium Dioxide BP",
-      type: "Film Coated Tablet",
-      packaging: "Blister",
-      image: clarithromycinImage,
-    },
-    {
-      id: 5,
-      name: "Co-trimoxazole Tablet",
-      description:
-        "Each Uncoated Tablet Contains: Trimethoprim BP____160mg Sulfamethoxazole BP____800mg",
-      type: "Uncoated Tablet",
-      packaging: "Blister",
-      image: azithromycinImage,
-    },
-    {
-      id: 6,
-      name: "Doxycycline Hydrochloride & Lactic Acid Bacillus Tablet",
-      description:
-        "Each Film Coated Tablet Contains: Doxycycline Hydrochloride BP Eq. to Doxycycline____100mg Lactic Acid Bacillus 60 Million Spores Colour : Sunset Yellow FCF",
-      type: "Film Coated Tablet",
-      packaging: "Blister",
-      image: clarithromycinImage,
-    },
-    {
-      id: 7,
-      name: "Gatifloxacin Tablet",
-      description:
-        "Each Film Coated Tablet Contains: Gatifloxacin Sesquihydrate Eq. to Gatifloxacin____200mg/400mg Colour : Titanium Dioxide BP",
-      type: "Film Coated Tablet",
-      packaging: "Blister",
-      image: azithromycinImage,
-    },
-    {
-      id: 8,
-      name: "Levofloxacin Tablet",
-      description:
-        "Each Film Coated Tablet Contains: Levofloxacin Hemihydrate Eq. to Levofloxacin____250mg/500mg/750mg Colour : Red Oxide of Iron, Yellow Oxide of Iron & Titanium Dioxide BP",
-      type: "Film Coated Tablet",
-      packaging: "Blister/Alu Alu",
-      image: clarithromycinImage,
-    },
-    {
-      id: 9,
-      name: "Norfloxacin Tablet",
-      description:
-        "Each Film Coated Tablet Contains: Norfloxacin BP____400mg Colour : Sunset Yellow FCF",
-      type: "Film Coated Tablet",
-      packaging: "Blister",
-      image: azithromycinImage,
-    },
-    {
-      id: 10,
-      name: "Ofloxacin Tablet",
-      description:
-        "Each Film Coated Tablet Contains: Ofloxacin USP____100mg/200mg/400mg Colour : Titanium Dioxide BP",
       type: "Film Coated Tablet",
       packaging: "Blister",
       image: clarithromycinImage,
@@ -297,7 +225,7 @@ const AntibioticsGeneralProducts = () => {
                 {/* Products Table */}
                 <motion.div
                   variants={itemVariants}
-                  className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border-2 border-gray-800 dark:border-gray-600 overflow-hidden"
+                  className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border-2 border-blue-200 dark:border-blue-600 overflow-hidden"
                 >
                   {/* Table Header */}
                   <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-6 text-white">
@@ -397,6 +325,20 @@ const AntibioticsGeneralProducts = () => {
             )}
           </AnimatePresence>
 
+          {/* Section Header: Our Products */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="mt-10"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white text-center">
+              Our Products
+            </h2>
+            <div className="mt-3 h-1 w-24 bg-gradient-to-r from-blue-500 to-purple-600 mx-auto rounded-full"></div>
+          </motion.div>
+
           {/* Product Images Gallery */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -406,7 +348,7 @@ const AntibioticsGeneralProducts = () => {
             className="mt-12 mb-16"
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto justify-items-center">
-              {antibioticsProducts.slice(0, 2).map((product) => (
+              {antibioticsProducts.map((product) => (
                 <motion.div
                   key={product.id}
                   initial={{ opacity: 0, y: 20 }}

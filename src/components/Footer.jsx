@@ -178,7 +178,7 @@ const Footer = () => {
                   className={`group inline-flex items-center gap-2 px-4 h-10 rounded-full bg-gray-800/60 text-gray-200 ring-1 ring-white/10 transition-all duration-300 hover:shadow-lg hover:shadow-current/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 ${social.color}`}
                   aria-label={social.name}
                 >
-                  <social.icon className="w-4 h-4 transition-transform duration-300 group-hover:scale-110" />
+                  <social.icon className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" />
                   <span className="text-sm font-medium">{social.name}</span>
                 </motion.a>
               ))}

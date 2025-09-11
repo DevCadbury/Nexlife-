@@ -9,6 +9,7 @@ import {
   Twitter,
   Linkedin,
   Instagram,
+  MessageCircle,
   Languages,
 } from "lucide-react";
 import ThemeToggle from "../ThemeToggle";
@@ -50,18 +51,18 @@ export const Navbar = ({ children }) => {
             </div>
 
             {/* Right Side - Social Media Icons & Theme Toggle */}
-            <div className="hidden sm:flex items-center gap-2 sm:space-x-4 flex-wrap justify-center">
+            <div className="hidden sm:flex items-center gap-1 sm:space-x-2 flex-wrap justify-center">
               <motion.a
                 href="https://www.facebook.com/profile.php?id=61574990395658"
                 target="_blank"
                 rel="noopener noreferrer"
                 whileHover={{ y: -2, scale: 1.07 }}
                 whileTap={{ scale: 0.95, rotate: -3 }}
-                className="text-white hover:text-blue-200 transition-colors duration-200 p-1 hover:bg-white/10 rounded-md"
+                className="text-white hover:text-blue-200 transition-all duration-200 p-2 hover:bg-white/20 rounded-lg shadow-sm hover:shadow-md"
                 aria-label="Facebook"
                 title="Facebook"
               >
-                <Facebook className="w-3 h-3" />
+                <Facebook className="w-5 h-5" />
               </motion.a>
               <motion.a
                 href="https://x.com/Nexlife_?t=87n-aaHiSqDu8mEqj5SHMw&s=09"
@@ -69,11 +70,11 @@ export const Navbar = ({ children }) => {
                 rel="noopener noreferrer"
                 whileHover={{ y: -2, scale: 1.07 }}
                 whileTap={{ scale: 0.95, rotate: -3 }}
-                className="text-white hover:text-blue-200 transition-colors duration-200 p-1 hover:bg-white/10 rounded-md"
+                className="text-white hover:text-blue-200 transition-all duration-200 p-2 hover:bg-white/20 rounded-lg shadow-sm hover:shadow-md"
                 aria-label="X (Twitter)"
                 title="X (Twitter)"
               >
-                <Twitter className="w-3 h-3" />
+                <Twitter className="w-5 h-5" />
               </motion.a>
               <motion.a
                 href="https://www.linkedin.com/in/nexlife-international-02a04235a?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
@@ -81,11 +82,11 @@ export const Navbar = ({ children }) => {
                 rel="noopener noreferrer"
                 whileHover={{ y: -2, scale: 1.07 }}
                 whileTap={{ scale: 0.95, rotate: -3 }}
-                className="text-white hover:text-blue-200 transition-colors duration-200 p-1 hover:bg-white/10 rounded-md"
+                className="text-white hover:text-blue-200 transition-all duration-200 p-2 hover:bg-white/20 rounded-lg shadow-sm hover:shadow-md"
                 aria-label="LinkedIn"
                 title="LinkedIn"
               >
-                <Linkedin className="w-3 h-3" />
+                <Linkedin className="w-5 h-5" />
               </motion.a>
               <motion.a
                 href="https://www.instagram.com/nexlife_international?igsh=MWwwaWc0NXFtZDBleg=="
@@ -93,11 +94,23 @@ export const Navbar = ({ children }) => {
                 rel="noopener noreferrer"
                 whileHover={{ y: -2, scale: 1.07 }}
                 whileTap={{ scale: 0.95, rotate: -3 }}
-                className="text-white hover:text-blue-200 transition-colors duration-200 p-1 hover:bg-white/10 rounded-md"
+                className="text-white hover:text-blue-200 transition-all duration-200 p-2 hover:bg-white/20 rounded-lg shadow-sm hover:shadow-md"
                 aria-label="Instagram"
                 title="Instagram"
               >
-                <Instagram className="w-3 h-3" />
+                <Instagram className="w-5 h-5" />
+              </motion.a>
+              <motion.a
+                href="https://wa.link/qu1439"
+                target="_blank"
+                rel="noopener noreferrer"
+                whileHover={{ y: -2, scale: 1.07 }}
+                whileTap={{ scale: 0.95, rotate: -3 }}
+                className="text-white hover:text-green-300 transition-all duration-200 p-2 hover:bg-white/20 rounded-lg shadow-sm hover:shadow-md"
+                aria-label="WhatsApp"
+                title="WhatsApp"
+              >
+                <MessageCircle className="w-5 h-5" />
               </motion.a>
 
               {/* Divider */}

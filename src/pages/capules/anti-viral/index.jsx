@@ -12,7 +12,7 @@ const StyledCardWrapper = styled.div`
     max-width: 400px;
     height: auto;
     min-height: 300px;
-    background-image: linear-gradient(163deg, #10b981 0%, #059669 100%);
+    background-image: linear-gradient(163deg, #3b82f6 0%, #7c3aed 100%);
     border-radius: 20px;
     transition: all 0.3s;
     padding: 3px;

@@ -3,8 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Pill, Download, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
-import antiMalarialImg1 from "../assets/images/anti-diabetic/GLIBNEX-6-Pacdora-1.png";
-import antiMalarialImg2 from "../assets/images/anti-diabetic/GLIMNEX-6-1.png";
+import pyrinexImage from "../assets/images/anti-malarial/PYRINEX-2.png";
+import quinexImage from "../assets/images/anti-malarial/QUINEX-2.png";
 
 // Styled Components for Card Design
 const StyledCardWrapper = styled.div`
@@ -13,7 +13,7 @@ const StyledCardWrapper = styled.div`
     max-width: 400px;
     height: auto;
     min-height: 300px;
-    background-image: linear-gradient(163deg, #10b981 0%, #059669 100%);
+    background-image: linear-gradient(163deg, #ef4444 0%, #dc2626 100%);
     border-radius: 20px;
     transition: all 0.3s;
     padding: 3px;
@@ -62,21 +62,21 @@ const AntiMalarialProducts = () => {
   const antiMalarialProducts = [
     {
       id: 1,
-      name: "Chloroquine Phosphate Tablet",
+      name: "Pyrinex Tablet",
+      description:
+        "Each Film Coated Tablet Contains: Pyrimethamine BP____25mg Sulfamethoxypyridazine BP____500mg",
+      type: "Film Coated Tablet",
+      packaging: "Blister",
+      image: pyrinexImage,
+    },
+    {
+      id: 2,
+      name: "Quinex Tablet",
       description:
         "Each Film Coated Tablet Contains: Chloroquine Phosphate BP____250mg/500mg Colour : Titanium Dioxide BP",
       type: "Film Coated Tablet",
       packaging: "Blister",
-      image: antiMalarialImg1,
-    },
-    {
-      id: 2,
-      name: "Pyrimethamine & Sulfamethoxypyridazine Tablet",
-      description:
-        "Each Uncoated Tablet Contains: Pyrimethamine BP____25mg Sulfamethoxypyridazine BP____500mg",
-      type: "Uncoated Tablet",
-      packaging: "Blister",
-      image: antiMalarialImg2,
+      image: quinexImage,
     },
   ];
 
@@ -224,7 +224,7 @@ const AntiMalarialProducts = () => {
                 {/* Products Table */}
                 <motion.div
                   variants={itemVariants}
-                  className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border-2 border-gray-800 dark:border-gray-600 overflow-hidden"
+                  className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border-2 border-red-200 dark:border-red-600 overflow-hidden"
                 >
                   {/* Table Header */}
                   <div className="bg-gradient-to-r from-red-500 to-red-600 p-6 text-white">
@@ -347,7 +347,7 @@ const AntiMalarialProducts = () => {
             className="mt-12 mb-16"
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto justify-items-center">
-              {antiMalarialProducts.slice(0, 2).map((product) => (
+              {antiMalarialProducts.map((product) => (
                 <motion.div
                   key={product.id}
                   initial={{ opacity: 0, y: 20 }}

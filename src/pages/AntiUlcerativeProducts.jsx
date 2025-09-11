@@ -14,7 +14,7 @@ const StyledCardWrapper = styled.div`
     max-width: 400px;
     height: auto;
     min-height: 300px;
-    background-image: linear-gradient(163deg, #10b981 0%, #059669 100%);
+    background-image: linear-gradient(163deg, #3b82f6 0%, #1d4ed8 100%);
     border-radius: 20px;
     transition: all 0.3s;
     padding: 3px;
@@ -60,24 +60,25 @@ const StyledCardWrapper = styled.div`
 const AntiUlcerativeProducts = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Anti Ulcerative products data with images
+  // Anti Ulcerative products data - using only available images
   const antiUlcerativeProducts = [
     {
       id: 1,
-      name: "Misoprostol Tablet",
-      description: "Each Uncoated Tablet Contains: Mesoprostol____200mg",
-      type: "Uncoated Tablet",
-      packaging: "Blister",
-      image: rabeprazoleImg,
+      name: "Ranitidine Tablet",
+      description:
+        "Each Film Coated Tablet Contains: Ranitidine Hydrochloride BP Eq. to Ranitidine____150mg/300mg Colour: Sunset Yellow FCF & Titanium Dioxide BP",
+      type: "Film Coated Tablet",
+      packaging: "Alu-Alu",
+      image: ranitidineImg,
     },
     {
       id: 2,
-      name: "Omeprazole & Ondansetron Tablet",
+      name: "Rabeprazole Sodium Tablet",
       description:
-        "Each Film Coated Tablet Contains: Omeprazole Magnesium Eq. to Omeprazole____10mg Ondansetron Hydrochloride Dihydrate BP Eq. to Ondansetron____4mg Colour : Titanium Dioxide BP",
-      type: "Film Coated Tablet",
-      packaging: "Blister",
-      image: pantoprazoleImg,
+        "Each Enteric Coated Tablet Contains: Rabeprazole Sodium____20mg Colour: Yellow oxide of iron & Titanium dioxide",
+      type: "Enteric Coated Tablet",
+      packaging: "Alu-Alu",
+      image: rabeprazoleImg,
     },
     {
       id: 3,
@@ -87,42 +88,6 @@ const AntiUlcerativeProducts = () => {
       type: "Enteric Coated Tablet",
       packaging: "Alu-Alu",
       image: pantoprazoleImg,
-    },
-    {
-      id: 4,
-      name: "Pantoprazole & Domperidone Tablet",
-      description:
-        "Each Enteric Coated Tablet Contains: Pantoprazole Sodium Sesquihydrate Eq. to Pantoprazole____20mg/40mg Domperidone BP____10mg Colour : Quinoline Yellow WS",
-      type: "Enteric Coated Tablet",
-      packaging: "Alu-Alu",
-      image: pantoprazoleImg,
-    },
-    {
-      id: 5,
-      name: "Rabeprazole Sodium Tablet",
-      description:
-        "Each Enteric Coated Tablet Contains: Rabeprazole Sodium____20mg Colour: Yellow oxide of iron & Titanium dioxide",
-      type: "Enteric Coated Tablet",
-      packaging: "Alu-Alu",
-      image: rabeprazoleImg,
-    },
-    {
-      id: 6,
-      name: "Rabeprazole Sodium & Domperidone Tablet",
-      description:
-        "Each Enteric Coated Tablet Contains: Rabeprazole Sodium____20mg  Domperidone Maleate BP____10mg",
-      type: "Enteric Coated Tablet",
-      packaging: "Alu-Alu",
-      image: rabeprazoleImg,
-    },
-    {
-      id: 7,
-      name: "Ranitidine Tablet",
-      description:
-        "Each Film Coated Tablet Contains: Ranitidine Hydrochloride BP Eq. to Ranitidine____150mg/300mg Colour: Sunset Yellow FCF & Titanium Dioxide BP",
-      type: "Film Coated Tablet",
-      packaging: "Alu-Alu",
-      image: ranitidineImg,
     },
   ];
 
@@ -270,7 +235,7 @@ const AntiUlcerativeProducts = () => {
                 {/* Products Table */}
                 <motion.div
                   variants={itemVariants}
-                  className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border-2 border-gray-800 dark:border-gray-600 overflow-hidden"
+                  className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border-2 border-blue-200 dark:border-blue-600 overflow-hidden"
                 >
                   {/* Table Header */}
                   <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-6 text-white">
@@ -370,6 +335,20 @@ const AntiUlcerativeProducts = () => {
             )}
           </AnimatePresence>
 
+          {/* Section Header: Our Products */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="mt-10"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white text-center">
+              Our Products
+            </h2>
+            <div className="mt-3 h-1 w-24 bg-gradient-to-r from-blue-500 to-purple-600 mx-auto rounded-full"></div>
+          </motion.div>
+
           {/* Product Images Gallery */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -378,8 +357,8 @@ const AntiUlcerativeProducts = () => {
             transition={{ duration: 0.4, ease: "easeOut" }}
             className="mt-12 mb-16"
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto justify-items-center">
-              {antiUlcerativeProducts.slice(0, 3).map((product) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto justify-items-center">
+              {antiUlcerativeProducts.map((product) => (
                 <motion.div
                   key={product.id}
                   initial={{ opacity: 0, y: 20 }}
