@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "builds": [{ "src": "server.js", "use": "@vercel/node" }],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/server.js" },
+    { "src": "/(.*)", "dest": "/server.js" }
+  ],
+  "env": {
+    "SMTP_HOST": "",
+    "SMTP_PORT": "",
+    "SMTP_SECURE": "true",
+    "SMTP_USER": "",
+    "SMTP_PASS": "",
+    "CONTACT_TO": "",
+    "DASH_PASSWORD": ""
+  }
+}
