@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Send, CheckCircle, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import emailjs from "@emailjs/browser";
+import { submitContact } from "../lib/contact";
 
 const ContactForm = () => {
   const { t } = useTranslation();
@@ -30,22 +30,11 @@ const ContactForm = () => {
     setSubmitStatus(null);
 
     try {
-      // Replace with your actual EmailJS service ID, template ID, and public key
-      const result = await emailjs.sendForm(
-        "YOUR_SERVICE_ID", // Replace with your EmailJS service ID
-        "YOUR_TEMPLATE_ID", // Replace with your EmailJS template ID
-        formRef.current,
-        "YOUR_PUBLIC_KEY" // Replace with your EmailJS public key
-      );
-
-      if (result.status === 200) {
-        setSubmitStatus("success");
-        setFormData({ name: "", email: "", subject: "", message: "" });
-      } else {
-        setSubmitStatus("error");
-      }
+      await submitContact(formData);
+      setSubmitStatus("success");
+      setFormData({ name: "", email: "", subject: "", message: "" });
     } catch (error) {
-      console.error("EmailJS Error:", error);
+      console.error("Contact submit error:", error);
       setSubmitStatus("error");
     } finally {
       setIsSubmitting(false);

@@ -9,6 +9,7 @@ import {
   Heart,
   Share2,
 } from "lucide-react";
+import { fetchLikes, incrementLike } from "../lib/likes";
 
 // Import gallery images
 import galleryHeaderImage from "../assets/images/gallery.png";
@@ -46,6 +47,14 @@ const Gallery = () => {
     if (savedLikeCounts) {
       setLikeCounts(JSON.parse(savedLikeCounts));
     }
+
+    // Try to sync from backend
+    (async () => {
+      const server = await fetchLikes();
+      if (server && typeof server === "object") {
+        setLikeCounts(server);
+      }
+    })();
   }, []);
 
   // Gallery images from the gallery folder
@@ -53,94 +62,62 @@ const Gallery = () => {
     {
       id: 1,
       src: gallery1,
-      title: "Pharmaceutical Manufacturing",
-      description:
-        "State-of-the-art manufacturing facility with advanced equipment",
     },
     {
       id: 2,
       src: gallery2,
-      title: "Quality Control Laboratory",
-      description: "Rigorous quality testing and analysis in our modern lab",
     },
     {
       id: 3,
       src: gallery3,
-      title: "Research & Development",
-      description: "Innovation and development of new pharmaceutical solutions",
     },
     {
       id: 4,
       src: gallery4,
-      title: "Production Line",
-      description:
-        "Efficient production processes ensuring high-quality products",
     },
     {
       id: 5,
       src: gallery5,
-      title: "Packaging Facility",
-      description: "Advanced packaging technology for pharmaceutical products",
     },
     {
       id: 6,
       src: gallery6,
-      title: "Laboratory Equipment",
-      description: "Cutting-edge laboratory instruments for precise analysis",
     },
     {
       id: 7,
       src: gallery7,
-      title: "Clean Room Environment",
-      description: "Sterile environment maintaining highest quality standards",
     },
     {
       id: 8,
       src: gallery8,
-      title: "Quality Assurance",
-      description: "Comprehensive quality assurance processes and protocols",
     },
     {
       id: 9,
       src: gallery9,
-      title: "Manufacturing Process",
-      description: "Advanced manufacturing techniques and automation",
     },
     {
       id: 10,
       src: gallery10,
-      title: "Product Development",
-      description: "Innovative product development and formulation",
     },
     {
       id: 11,
       src: gallery11,
-      title: "Testing Laboratory",
-      description: "Comprehensive testing and validation procedures",
     },
     {
       id: 12,
       src: gallery12,
-      title: "Production Facility",
-      description: "Modern production facility with advanced technology",
     },
     {
       id: 13,
       src: gallery13,
-      title: "Quality Control",
-      description: "Stringent quality control measures and standards",
     },
     {
       id: 14,
       src: gallery14,
-      title: "Manufacturing Excellence",
-      description: "Excellence in pharmaceutical manufacturing processes",
     },
     {
       id: 15,
       src: gallery15,
-      title: "Innovation Center",
-      description: "Center of innovation for pharmaceutical research",
     },
   ];
 
@@ -167,20 +144,18 @@ const Gallery = () => {
     setSelectedImage(galleryImages[newIndex]);
   };
 
-  const addLike = (imageId) => {
-    // Add a new like to the user's likes
+  const addLike = async (imageId) => {
+    // Optimistic update
     setUserLikes((prev) => ({
       ...prev,
       [imageId]: (prev[imageId] || 0) + 1,
     }));
-
-    // Increase total like count
     setLikeCounts((prev) => ({
       ...prev,
       [imageId]: (prev[imageId] || 0) + 1,
     }));
 
-    // Save to localStorage for persistence
+    // Persist to localStorage immediately
     const updatedUserLikes = {
       ...userLikes,
       [imageId]: (userLikes[imageId] || 0) + 1,
@@ -189,18 +164,27 @@ const Gallery = () => {
       ...likeCounts,
       [imageId]: (likeCounts[imageId] || 0) + 1,
     };
-
     localStorage.setItem("galleryUserLikes", JSON.stringify(updatedUserLikes));
     localStorage.setItem(
       "galleryLikeCounts",
       JSON.stringify(updatedLikeCounts)
     );
+
+    // Try server sync
+    try {
+      const server = await incrementLike(imageId);
+      if (server && typeof server === "object") {
+        setLikeCounts(server);
+      }
+    } catch (e) {
+      // already handled by helper (localStorage fallback)
+    }
   };
 
   const shareImage = async (image) => {
     const shareData = {
-      title: image.title,
-      text: image.description,
+      title: "Gallery image",
+      text: "Check out this image from our gallery",
       url: `${window.location.origin}/gallery#image-${image.id}`,
     };
 
@@ -251,7 +235,7 @@ const Gallery = () => {
             <img
               src={galleryHeaderImage}
               alt="Global Pharmaceutical Network"
-              className="w-full h-full object-cover object-center object-[center_35%] scale-110 opacity-80"
+              className="w-full h-full object-cover object-[center_35%] scale-110 opacity-80"
             />
           </div>
 
@@ -323,25 +307,21 @@ const Gallery = () => {
                   stiffness: 100,
                 }}
                 whileHover={{
-                  scale: 1.05,
-                  y: -10,
-                  transition: { duration: 0.3 },
+                  scale: 1.02,
+                  transition: { duration: 0.2 },
                 }}
-                className="group relative overflow-hidden rounded-2xl sm:rounded-3xl bg-white dark:bg-gray-800 shadow-lg sm:shadow-xl hover:shadow-2xl transition-all duration-500 cursor-pointer border-2 border-transparent hover:border-blue-500/30 dark:hover:border-blue-400/30"
+                className="group relative overflow-hidden rounded-2xl bg-transparent shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer"
                 onClick={() => openLightbox(image, index)}
                 style={{
                   cursor: "pointer",
                 }}
               >
-                <div className="aspect-square overflow-hidden relative">
+                <div className="aspect-square overflow-hidden relative bg-transparent">
                   <img
                     src={image.src}
-                    alt={image.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+                    alt={"Gallery image"}
+                    className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
                   />
-
-                  {/* Gradient Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                   {/* Action Buttons */}
                   <div className="absolute top-2 sm:top-4 right-2 sm:right-4 flex gap-1 sm:gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
@@ -370,13 +350,6 @@ const Gallery = () => {
                     </motion.button>
                   </div>
 
-                  {/* Zoom Icon */}
-                  <div className="absolute top-2 sm:top-4 left-2 sm:left-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-                    <div className="p-1.5 sm:p-2 rounded-full bg-white/20 text-white backdrop-blur-sm">
-                      <ZoomIn className="w-3 h-3 sm:w-4 sm:h-4" />
-                    </div>
-                  </div>
-
                   {/* Like Count */}
                   {likeCounts[image.id] > 0 && (
                     <div className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
@@ -392,9 +365,6 @@ const Gallery = () => {
                     </div>
                   )}
                 </div>
-
-                {/* Border Animation */}
-                <div className="absolute inset-0 rounded-2xl sm:rounded-3xl border-2 border-transparent group-hover:border-blue-500/50 transition-all duration-500" />
               </motion.div>
             ))}
           </motion.div>
@@ -442,18 +412,12 @@ const Gallery = () => {
             {/* Image */}
             <img
               src={selectedImage.src}
-              alt={selectedImage.title}
-              className="w-full h-full object-contain rounded-lg"
+              alt={"Gallery image"}
+              className="max-h-[85vh] max-w-full w-auto h-auto object-contain rounded-lg bg-black mx-auto"
             />
 
-            {/* Image Info */}
+            {/* Image Actions */}
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3 sm:p-4 md:p-6 text-white">
-              <h3 className="text-lg sm:text-xl md:text-2xl font-bold mb-1 sm:mb-2">
-                {selectedImage.title}
-              </h3>
-              <p className="text-sm sm:text-base text-gray-200 mb-3 sm:mb-4">
-                {selectedImage.description}
-              </p>
               <div className="flex flex-wrap items-center gap-2 sm:gap-4">
                 <span className="px-2 sm:px-3 py-1 bg-blue-600 text-xs sm:text-sm font-medium rounded-full">
                   Gallery
