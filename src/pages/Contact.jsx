@@ -182,7 +182,7 @@ const Contact = () => {
                   <Mail className="w-5 h-5 mr-2" /> Email Us
                 </motion.a>
               </div>
-              <div className="mt-6 flex flex-wrap items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                 <Phone className="w-4 h-4" />
                 <a
                   href="tel:+919664843790"
