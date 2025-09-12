@@ -50,9 +50,22 @@ const Gallery = () => {
 
     // Try to sync from backend
     (async () => {
-      const server = await fetchLikes();
-      if (server && typeof server === "object") {
-        setLikeCounts(server);
+      try {
+        // Debug: show current backend URL from env
+        // eslint-disable-next-line no-console
+        console.log(
+          "[Gallery] VITE_BACKEND_URL=",
+          import.meta.env?.VITE_BACKEND_URL
+        );
+        const server = await fetchLikes();
+        // eslint-disable-next-line no-console
+        console.log("[Gallery] fetchLikes() result:", server);
+        if (server && typeof server === "object") {
+          setLikeCounts(server);
+        }
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error("[Gallery] fetchLikes() error:", err);
       }
     })();
   }, []);
@@ -172,11 +185,22 @@ const Gallery = () => {
 
     // Try server sync
     try {
+      // eslint-disable-next-line no-console
+      console.log(
+        "[Gallery] incrementLike() for id=",
+        imageId,
+        "VITE_BACKEND_URL=",
+        import.meta.env?.VITE_BACKEND_URL
+      );
       const server = await incrementLike(imageId);
+      // eslint-disable-next-line no-console
+      console.log("[Gallery] incrementLike() result:", server);
       if (server && typeof server === "object") {
         setLikeCounts(server);
       }
     } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error("[Gallery] incrementLike() error:", e);
       // already handled by helper (localStorage fallback)
     }
   };

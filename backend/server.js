@@ -1,15 +1,10 @@
 import express from "express";
 import cors from "cors";
-import fs from "fs";
-import path from "path";
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
-import { fileURLToPath } from "url";
+import { MongoClient } from "mongodb";
 
 dotenv.config();
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(cors());
@@ -34,29 +29,37 @@ function requireDashboardAuth(req, res, next) {
   res.redirect("/login");
 }
 
-// Simple in-file storage for likes
-const likesFile =
-  process.env.LIKES_FILE_PATH || path.join(__dirname, "likes.json");
+// ===== MongoDB setup =====
+const mongoUri = process.env.MONGODB_URI;
+const mongoClient = new MongoClient(mongoUri, { maxPoolSize: 5 });
+let likesCollection;
 
-function readLikes() {
-  try {
-    if (!fs.existsSync(likesFile)) {
-      fs.writeFileSync(likesFile, JSON.stringify({}), "utf-8");
-    }
-    const data = fs.readFileSync(likesFile, "utf-8");
-    return JSON.parse(data || "{}");
-  } catch (e) {
-    return {};
-  }
+async function initDb() {
+  if (!mongoUri) throw new Error("Missing MONGODB_URI env");
+  if (likesCollection) return likesCollection;
+  const client = await mongoClient.connect();
+  const db = client.db(process.env.MONGODB_DB || "nexlife");
+  likesCollection = db.collection("likes");
+  await likesCollection.createIndex({ id: 1 }, { unique: true });
+  return likesCollection;
 }
 
-function writeLikes(likes) {
-  try {
-    fs.writeFileSync(likesFile, JSON.stringify(likes, null, 2), "utf-8");
-    return true;
-  } catch (e) {
-    return false;
-  }
+async function getAllLikes() {
+  await initDb();
+  const docs = await likesCollection.find({}).toArray();
+  const map = {};
+  for (const d of docs) map[d.id] = d.count || 0;
+  return map;
+}
+
+async function incrementLikeDb(id) {
+  await initDb();
+  const result = await likesCollection.findOneAndUpdate(
+    { id: String(id) },
+    { $inc: { count: 1 } },
+    { upsert: true, returnDocument: "after" }
+  );
+  return result?.value?.count || 0;
 }
 
 app.get("/login", (req, res) => {
@@ -120,8 +123,8 @@ app.post("/logout", (req, res) => {
   res.redirect("/login");
 });
 
-app.get("/", requireDashboardAuth, (req, res) => {
-  const likes = readLikes();
+app.get("/", requireDashboardAuth, async (req, res) => {
+  const likes = await getAllLikes();
   const total = Object.values(likes).reduce((a, b) => a + Number(b || 0), 0);
   const rows = Object.entries(likes)
     .sort((a, b) => Number(a[0]) - Number(b[0]))
@@ -225,16 +228,15 @@ app.get("/", requireDashboardAuth, (req, res) => {
 </html>`);
 });
 
-app.get("/api/likes", (req, res) => {
-  const likes = readLikes();
+app.get("/api/likes", async (req, res) => {
+  const likes = await getAllLikes();
   res.json(likes);
 });
 
-app.post("/api/likes/:id", (req, res) => {
+app.post("/api/likes/:id", async (req, res) => {
   const id = String(req.params.id);
-  const likes = readLikes();
-  likes[id] = (likes[id] || 0) + 1;
-  writeLikes(likes);
+  await incrementLikeDb(id);
+  const likes = await getAllLikes();
   res.json(likes);
 });
 
