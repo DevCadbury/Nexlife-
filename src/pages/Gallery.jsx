@@ -51,22 +51,11 @@ const Gallery = () => {
     // Try to sync from backend
     (async () => {
       try {
-        // Debug: show current backend URL from env
-        // eslint-disable-next-line no-console
-        console.log(
-          "[Gallery] VITE_BACKEND_URL=",
-          import.meta.env?.VITE_BACKEND_URL
-        );
         const server = await fetchLikes();
-        // eslint-disable-next-line no-console
-        console.log("[Gallery] fetchLikes() result:", server);
         if (server && typeof server === "object") {
           setLikeCounts(server);
         }
-      } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error("[Gallery] fetchLikes() error:", err);
-      }
+      } catch {}
     })();
   }, []);
 
@@ -185,24 +174,11 @@ const Gallery = () => {
 
     // Try server sync
     try {
-      // eslint-disable-next-line no-console
-      console.log(
-        "[Gallery] incrementLike() for id=",
-        imageId,
-        "VITE_BACKEND_URL=",
-        import.meta.env?.VITE_BACKEND_URL
-      );
       const server = await incrementLike(imageId);
-      // eslint-disable-next-line no-console
-      console.log("[Gallery] incrementLike() result:", server);
       if (server && typeof server === "object") {
         setLikeCounts(server);
       }
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.error("[Gallery] incrementLike() error:", e);
-      // already handled by helper (localStorage fallback)
-    }
+    } catch {}
   };
 
   const shareImage = async (image) => {
@@ -237,13 +213,10 @@ const Gallery = () => {
         }, 2000);
       }
     } catch (error) {
-      console.error("Error sharing:", error);
-      // Fallback: Copy URL to clipboard
       try {
         await navigator.clipboard.writeText(shareData.url);
         alert("Gallery link copied to clipboard!");
-      } catch (clipboardError) {
-        console.error("Clipboard error:", clipboardError);
+      } catch {
         alert("Unable to share. Please copy the URL manually.");
       }
     }
