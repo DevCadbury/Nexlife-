@@ -1303,16 +1303,9 @@ const Home = () => {
                     <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
                       {info.title}
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed mb-6 flex-1">
+                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed flex-1">
                       {info.description}
                     </p>
-                    <motion.button
-                      whileHover={{ x: 5 }}
-                      className="text-primary-600 dark:text-primary-400 font-semibold hover:text-primary-700 dark:hover:text-primary-300 transition-colors duration-300 flex items-center group"
-                    >
-                      Read More
-                      <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
-                    </motion.button>
                   </div>
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 </motion.div>
