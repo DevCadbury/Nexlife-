@@ -101,7 +101,7 @@ export const Navbar = ({ children }) => {
                 <Instagram className="w-5 h-5" />
               </motion.a>
               <motion.a
-                href="https://wa.link/qu1439"
+                href="https://wa.me/919664843790"
                 target="_blank"
                 rel="noopener noreferrer"
                 whileHover={{ y: -2, scale: 1.07 }}

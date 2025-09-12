@@ -2229,7 +2229,7 @@ const Home = () => {
         >
           {/* WhatsApp Button */}
           <motion.a
-            href="https://wa.link/qu1439"
+            href="https://wa.me/919664843790"
             target="_blank"
             rel="noopener noreferrer"
             whileHover={{ scale: 1.1, x: -5 }}

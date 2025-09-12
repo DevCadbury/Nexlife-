@@ -53,7 +53,7 @@ const Footer = () => {
     },
     {
       name: "WhatsApp",
-      href: "https://wa.link/qu1439",
+      href: "https://wa.me/919664843790",
       icon: MessageCircle,
       color: "hover:bg-[#25D366]/10 text-[#25D366]",
     },
@@ -150,7 +150,7 @@ const Footer = () => {
               <div className="flex items-center space-x-3 text-gray-300 text-sm">
                 <MessageCircle className="w-4 h-4 text-primary-400" />
                 <a
-                  href="https://wa.link/qu1439"
+                  href="https://wa.me/919664843790"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="underline decoration-dotted hover:text-primary-300"
@@ -206,7 +206,7 @@ const Footer = () => {
                 Terms of Service
               </Link>
               <motion.a
-                href="https://wa.link/qu1439"
+                href="https://wa.me/919664843790"
                 target="_blank"
                 rel="noopener noreferrer"
                 whileHover={{ y: -2, scale: 1.03 }}

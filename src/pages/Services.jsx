@@ -130,19 +130,33 @@ const Services = () => {
 
   return (
     <div className="min-h-screen pt-5">
-      {/* Hero Section */}
+      {/* Hero Section with UI Tile Overlay */}
       <section className="relative pt-0 pb-20 bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
-          className="w-full"
+          transition={{ duration: 0.6 }}
+          className="relative w-full"
         >
           <img
             src={servicesHeaderImage}
             alt="Our Services"
-            className="w-full h-56 sm:h-64 md:h-80 lg:h-96 object-cover"
+            className="w-full h-[38vh] sm:h-[44vh] md:h-[52vh] lg:h-[60vh] object-cover"
           />
+          {/* Dark gradient overlay for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/20" />
+          {/* Text overlay with tile UI */}
+          <div className="absolute inset-0 flex items-center justify-center text-center px-4">
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20 shadow-2xl">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-3">
+                Our Services
+              </h1>
+              <p className="text-base sm:text-lg md:text-xl text-white/90 max-w-3xl mx-auto">
+                Comprehensive pharmaceutical solutions for global healthcare
+                needs
+              </p>
+            </div>
+          </div>
         </motion.div>
       </section>
 

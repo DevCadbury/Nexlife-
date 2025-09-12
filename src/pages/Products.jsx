@@ -971,14 +971,17 @@ const Products = () => {
               Get detailed information about all our products, specifications,
               and pricing in our comprehensive catalogue.
             </p>
-            <motion.button
+            <motion.a
+              href="https://drive.google.com/file/d/1Ct4xhTjZbbe-XoAjZZor7N74_YwWZPYC/view?usp=sharing"
+              target="_blank"
+              rel="noopener noreferrer"
               whileHover={{ scale: 1.02, y: -2 }}
               whileTap={{ scale: 0.98 }}
               className="inline-flex items-center space-x-3 bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold hover:bg-gray-100 transition-all duration-200 shadow-lg hover:shadow-xl"
             >
               <Download className="w-6 h-6" />
               <span>Download PDF Catalogue</span>
-            </motion.button>
+            </motion.a>
           </motion.div>
         </div>
       </section>

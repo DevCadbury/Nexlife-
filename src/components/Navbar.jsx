@@ -27,7 +27,7 @@ const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleCallUs = () => {
-    window.location.href = "tel:+919876543210";
+    window.location.href = "tel:+919664843790";
   };
 
   return (

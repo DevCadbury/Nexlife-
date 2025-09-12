@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Phone,
   Mail,
@@ -11,12 +11,37 @@ import {
   Instagram,
   Twitter,
   Facebook,
+  X,
 } from "lucide-react";
 import ContactForm from "../components/ContactForm";
 import logo from "../assets/images/nexlife-logo.png";
 
 const Contact = () => {
   const { t } = useTranslation();
+  const [isCallDialogOpen, setIsCallDialogOpen] = useState(false);
+  const [isBusinessHoursDialogOpen, setIsBusinessHoursDialogOpen] =
+    useState(false);
+
+  const phoneNumbers = [
+    {
+      label: "Primary",
+      number: "+91 96648 43790",
+      href: "tel:+919664843790",
+      description: "Main business line",
+    },
+    {
+      label: "Mobile",
+      number: "+91 84015 46910",
+      href: "tel:+918401546910",
+      description: "Mobile support",
+    },
+    {
+      label: "Secondary",
+      number: "+91 88492 07934",
+      href: "tel:+918849207934",
+      description: "Alternative contact",
+    },
+  ];
 
   const contactInfo = [
     {
@@ -76,7 +101,7 @@ const Contact = () => {
       color: "hover:bg-[#1877F2]/10 text-[#1877F2]",
     },
     {
-      href: "https://wa.link/qu1439",
+      href: "https://wa.me/919664843790",
       label: "WhatsApp",
       icon: MessageCircle,
       color: "hover:bg-[#25D366]/10 text-[#25D366]",
@@ -139,7 +164,7 @@ const Contact = () => {
               </p>
               <div className="flex flex-col sm:flex-row gap-3">
                 <motion.a
-                  href="https://wa.link/qu1439"
+                  href="https://wa.me/919664843790"
                   target="_blank"
                   rel="noopener noreferrer"
                   whileHover={{ y: -2, scale: 1.02 }}
@@ -238,12 +263,33 @@ const Contact = () => {
                     >
                       {info.value}
                     </a>
+                  ) : info.title === "Address" ? (
+                    <a
+                      href="https://maps.google.com/?q=S-223+Angel+Business+Center+2+Near+ABC+Circle+Mota+Varachha+Surat+394101+Gujarat"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors cursor-pointer"
+                    >
+                      {info.value}
+                    </a>
+                  ) : info.title === "Business Hours" ? (
+                    <div
+                      onClick={() => setIsBusinessHoursDialogOpen(true)}
+                      className="cursor-pointer hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                    >
+                      <div className="font-semibold">{info.value}</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                        {info.description}
+                      </div>
+                    </div>
                   ) : (
                     info.value
                   )}
                 </div>
                 <div className="text-gray-600 dark:text-gray-300 text-sm">
-                  {info.description}
+                  {info.title === "Business Hours"
+                    ? "Click to view timezone details"
+                    : info.description}
                 </div>
               </motion.div>
             ))}
@@ -398,7 +444,7 @@ const Contact = () => {
                   <div className="flex items-center space-x-3 text-gray-600 dark:text-gray-300">
                     <div className="w-2 h-2 bg-primary-500 rounded-full"></div>
                     <a
-                      href="https://wa.link/qu1439"
+                      href="https://wa.me/919664843790"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-sm underline decoration-dotted hover:text-primary-600"
@@ -496,14 +542,19 @@ const Contact = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <motion.button
+                onClick={() => {
+                  console.log("Button clicked, opening dialog");
+                  setIsCallDialogOpen(true);
+                }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="inline-flex items-center justify-center px-8 py-4 bg-white text-primary-600 rounded-lg font-semibold hover:bg-gray-100 transform transition-all duration-300"
               >
+                <Phone className="w-5 h-5 mr-2" />
                 Schedule a Call
               </motion.button>
               <motion.a
-                href="https://wa.link/qu1439"
+                href="https://wa.me/919664843790"
                 target="_blank"
                 rel="noopener noreferrer"
                 whileHover={{ scale: 1.05 }}
@@ -516,6 +567,258 @@ const Contact = () => {
           </motion.div>
         </div>
       </section>
+
+      {/* Call Dialog */}
+      <AnimatePresence>
+        {isCallDialogOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4"
+            onClick={() => {
+              console.log("Dialog background clicked, closing dialog");
+              setIsCallDialogOpen(false);
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="bg-white dark:bg-gray-900 rounded-2xl p-8 max-w-md w-full shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  Choose a Number to Call
+                </h3>
+                <div className="text-xs text-gray-500">
+                  Dialog State: {isCallDialogOpen ? "Open" : "Closed"}
+                </div>
+                <button
+                  onClick={() => {
+                    console.log("Close button clicked");
+                    setIsCallDialogOpen(false);
+                  }}
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                {phoneNumbers.map((phone, index) => (
+                  <motion.a
+                    key={index}
+                    href={phone.href}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="block p-4 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-primary-500 dark:hover:border-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/10 transition-all duration-300 group"
+                  >
+                    <div className="flex items-center space-x-4">
+                      <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                        <Phone className="w-6 h-6 text-primary-500" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2 mb-1">
+                          <span className="font-semibold text-gray-900 dark:text-white">
+                            {phone.label}
+                          </span>
+                          <span className="text-sm text-primary-500 font-medium">
+                            {phone.number}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">
+                          {phone.description}
+                        </p>
+                      </div>
+                    </div>
+                  </motion.a>
+                ))}
+              </div>
+
+              <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                <p className="text-sm text-gray-600 dark:text-gray-300 text-center">
+                  Click on any number above to start the call
+                </p>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Business Hours Dialog */}
+      <AnimatePresence>
+        {isBusinessHoursDialogOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4"
+            onClick={() => setIsBusinessHoursDialogOpen(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="bg-white dark:bg-gray-900 rounded-2xl p-8 max-w-md w-full shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  Business Hours
+                </h3>
+                <button
+                  onClick={() => setIsBusinessHoursDialogOpen(false)}
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+
+              <div className="space-y-6">
+                <div className="text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center">
+                    <Clock className="w-8 h-8 text-white" />
+                  </div>
+                  <h4 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                    Operating Hours
+                  </h4>
+                  <div className="text-2xl font-bold text-primary-500 mb-2">
+                    Mon - Sat: 9:00 AM - 6:00 PM
+                  </div>
+                  <div className="text-gray-600 dark:text-gray-300">
+                    IST (UTC +5:30)
+                  </div>
+                </div>
+
+                <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                  <h5 className="font-semibold text-gray-900 dark:text-white mb-3">
+                    Timezone Information
+                  </h5>
+                  <div className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                    <div className="flex justify-between">
+                      <span>Current Time (IST):</span>
+                      <span className="font-mono">
+                        {new Date().toLocaleString("en-IN", {
+                          timeZone: "Asia/Kolkata",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          second: "2-digit",
+                          hour12: true,
+                        })}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Day:</span>
+                      <span className="font-mono">
+                        {new Date().toLocaleDateString("en-IN", {
+                          timeZone: "Asia/Kolkata",
+                          weekday: "long",
+                        })}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Status:</span>
+                      <span
+                        className={`font-semibold ${(() => {
+                          const now = new Date();
+                          const istTime = new Date(
+                            now.toLocaleString("en-US", {
+                              timeZone: "Asia/Kolkata",
+                            })
+                          );
+                          const day = istTime.getDay();
+                          const hour = istTime.getHours();
+                          const isWeekday = day >= 1 && day <= 6;
+                          const isBusinessHours = hour >= 9 && hour < 18;
+                          return isWeekday && isBusinessHours
+                            ? "text-green-600"
+                            : "text-red-600";
+                        })()}`}
+                      >
+                        {(() => {
+                          const now = new Date();
+                          const istTime = new Date(
+                            now.toLocaleString("en-US", {
+                              timeZone: "Asia/Kolkata",
+                            })
+                          );
+                          const day = istTime.getDay();
+                          const hour = istTime.getHours();
+                          const isWeekday = day >= 1 && day <= 6;
+                          const isBusinessHours = hour >= 9 && hour < 18;
+                          return isWeekday && isBusinessHours
+                            ? "Open Now"
+                            : "Closed";
+                        })()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h5 className="font-semibold text-gray-900 dark:text-white">
+                    Contact Numbers
+                  </h5>
+                  <div className="space-y-3">
+                    {phoneNumbers.map((phone, index) => (
+                      <motion.a
+                        key={index}
+                        href={phone.href}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors group"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div className="w-8 h-8 bg-primary-100 dark:bg-primary-900/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                            <Phone className="w-4 h-4 text-primary-500" />
+                          </div>
+                          <div>
+                            <div className="font-medium text-gray-900 dark:text-white">
+                              {phone.label}
+                            </div>
+                            <div className="text-sm text-gray-600 dark:text-gray-300">
+                              {phone.description}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-primary-500 font-semibold group-hover:text-primary-600 transition-colors">
+                          {phone.number}
+                        </div>
+                      </motion.a>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <motion.a
+                    href="https://wa.me/919664843790"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="flex items-center justify-center space-x-3 w-full bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-300"
+                  >
+                    <MessageCircle className="w-5 h-5" />
+                    <span>Chat on WhatsApp</span>
+                  </motion.a>
+                </div>
+
+                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+                  <p className="text-sm text-blue-800 dark:text-blue-200">
+                    <strong>Note:</strong> We are closed on Sundays and public
+                    holidays. For urgent matters outside business hours, please
+                    contact us via WhatsApp.
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
