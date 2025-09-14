@@ -8,6 +8,7 @@ import {
   ZoomIn,
   Heart,
   Share2,
+  Settings,
 } from "lucide-react";
 import { fetchLikes, incrementLike } from "../lib/likes";
 
@@ -35,6 +36,7 @@ const Gallery = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [likeCounts, setLikeCounts] = useState({});
   const [userLikes, setUserLikes] = useState({});
+  const [showDashboard, setShowDashboard] = useState(false);
 
   // Load saved likes from localStorage on component mount
   useEffect(() => {
@@ -220,6 +222,15 @@ const Gallery = () => {
         alert("Unable to share. Please copy the URL manually.");
       }
     }
+  };
+
+  const openDashboard = () => {
+    // Open dashboard in new tab to avoid disrupting user experience
+    window.open(
+      "https://nexlife-api.vercel.app/login",
+      "_blank",
+      "noopener,noreferrer"
+    );
   };
 
   return (
@@ -460,6 +471,18 @@ const Gallery = () => {
           </motion.div>
         </motion.div>
       )}
+
+      {/* Floating Dashboard Button */}
+      <motion.button
+        initial={{ opacity: 0, scale: 0 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5, delay: 1.5 }}
+        onClick={openDashboard}
+        className="fixed bottom-6 right-6 z-50 p-4 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 group"
+        title="Open Dashboard"
+      >
+        <Settings className="w-6 h-6 group-hover:rotate-90 transition-transform duration-300" />
+      </motion.button>
     </div>
   );
 };

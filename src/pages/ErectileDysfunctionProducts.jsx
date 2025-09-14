@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { useDesktopOnly } from "../hooks/useDesktopOnly";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Download, Search } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -56,6 +57,9 @@ const StyledCardWrapper = styled.div`
 `;
 
 const ErectileDysfunctionProducts = () => {
+  // Force desktop view on all devices
+  useDesktopOnly();
+
   const [searchTerm, setSearchTerm] = useState("");
 
   // Erectile Dysfunction products data

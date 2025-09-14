@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { useDesktopOnly } from "../hooks/useDesktopOnly";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Search, Download } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -8,6 +9,9 @@ import { Link } from "react-router-dom";
 // No styled card wrapper needed since images are removed
 
 const PlateletAggregationProducts = () => {
+  // Force desktop view on all devices
+  useDesktopOnly();
+
   const [searchTerm, setSearchTerm] = useState("");
 
   // Platelet Aggregation products data

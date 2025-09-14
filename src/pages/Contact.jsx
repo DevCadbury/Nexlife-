@@ -132,17 +132,17 @@ const Contact = () => {
   return (
     <div className="min-h-screen pt-5">
       {/* Hero Section */}
-      <section className="relative py-20 overflow-hidden">
+      <section className="relative py-12 sm:py-16 md:py-20 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary-50 via-white to-secondary-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900" />
-        <div className="container-custom relative">
+        <div className="container-custom relative px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-[auto,1fr] items-center gap-8"
+            className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-[auto,1fr] items-center gap-6 md:gap-8"
           >
             <motion.div
-              className="mx-auto md:mx-0 bg-white/70 dark:bg-white backdrop-blur rounded-2xl p-4 shadow-xl ring-1 ring-black/5"
+              className="mx-auto md:mx-0 bg-white/70 dark:bg-white backdrop-blur rounded-2xl p-3 sm:p-4 shadow-xl ring-1 ring-black/5"
               whileHover={{ scale: 1.03 }}
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
             >
@@ -150,59 +150,64 @@ const Contact = () => {
                 <img
                   src={logo}
                   alt="Nexlife International"
-                  className="h-20 md:h-24 object-contain hover:opacity-90 transition-opacity"
+                  className="h-16 sm:h-20 md:h-24 object-contain hover:opacity-90 transition-opacity"
                   loading="eager"
                 />
               </a>
             </motion.div>
             <div className="text-center md:text-left">
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">
                 {t("contactTitle")}
               </h1>
-              <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 leading-relaxed mb-6">
+              <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 leading-relaxed mb-4 sm:mb-6">
                 {t("contactSubtitle")}
               </p>
-              <div className="flex flex-col sm:flex-row gap-3">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                 <motion.a
                   href="https://wa.me/919664843790"
                   target="_blank"
                   rel="noopener noreferrer"
                   whileHover={{ y: -2, scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30"
+                  className="inline-flex items-center justify-center px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 text-sm sm:text-base"
                 >
-                  <MessageCircle className="w-5 h-5 mr-2" /> Chat on WhatsApp
+                  <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" />
+                  <span className="hidden xs:inline">Chat on WhatsApp</span>
+                  <span className="xs:hidden">WhatsApp</span>
                 </motion.a>
                 <motion.a
                   href="mailto:Info@nexlifeinternational.com"
                   whileHover={{ y: -2, scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="inline-flex items-center justify-center px-6 py-3 rounded-lg border border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-100 font-semibold hover:bg-gray-50 dark:hover:bg-gray-800"
+                  className="inline-flex items-center justify-center px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg border border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-100 font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 text-sm sm:text-base"
                 >
-                  <Mail className="w-5 h-5 mr-2" /> Email Us
+                  <Mail className="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" />
+                  <span className="hidden xs:inline">Email Us</span>
+                  <span className="xs:hidden">Email</span>
                 </motion.a>
               </div>
-              <div className="mt-6 flex flex-wrap items-center justify-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                <Phone className="w-4 h-4" />
+              <div className="mt-4 sm:mt-6 flex flex-wrap items-center justify-center md:justify-start gap-1 sm:gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+                <Phone className="w-3 h-3 sm:w-4 sm:h-4" />
                 <a
                   href="tel:+919664843790"
                   className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
                 >
                   +91 96648 43790
                 </a>
-                <span className="mx-2">•</span>
+                <span className="mx-1 sm:mx-2">•</span>
                 <a
                   href="tel:+918401546910"
                   className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
                 >
-                  Mobile: +91 84015 46910
+                  <span className="hidden sm:inline">Mobile: </span>+91 84015
+                  46910
                 </a>
               </div>
             </div>
           </motion.div>
 
           {/* Social row */}
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
             {socialLinks.map((s) => (
               <motion.a
                 key={s.label}
@@ -210,11 +215,13 @@ const Contact = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 whileHover={{ y: -3 }}
-                className={`inline-flex items-center gap-3 px-5 py-3 rounded-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-md ring-2 ring-black/10 dark:ring-white/10 shadow-lg hover:shadow-xl transition-all duration-300 ${s.color}`}
+                className={`inline-flex items-center gap-2 sm:gap-3 px-3 sm:px-5 py-2 sm:py-3 rounded-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-md ring-2 ring-black/10 dark:ring-white/10 shadow-lg hover:shadow-xl transition-all duration-300 ${s.color} min-w-0 flex-shrink-0`}
                 aria-label={s.label}
               >
-                <s.icon className="w-5 h-5" />
-                <span className="text-sm font-medium">{s.label}</span>
+                <s.icon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                <span className="text-xs sm:text-sm font-medium truncate">
+                  {s.label}
+                </span>
               </motion.a>
             ))}
           </div>
@@ -225,13 +232,13 @@ const Contact = () => {
 
       {/* Contact Information */}
       <section className="section-padding bg-white dark:bg-gray-900">
-        <div className="container-custom">
+        <div className="container-custom px-4 sm:px-6 lg:px-8">
           <motion.div
             variants={containerVariants}
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-12 sm:mb-16"
           >
             {contactInfo.map((info) => (
               <motion.div
@@ -299,8 +306,8 @@ const Contact = () => {
 
       {/* Contact Form & Map Section */}
       <section className="section-padding bg-gray-50 dark:bg-gray-800">
-        <div className="container-custom">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div className="container-custom px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
             {/* Contact Form */}
             <motion.div
               initial={{ opacity: 0, x: -30 }}
@@ -461,18 +468,18 @@ const Contact = () => {
 
       {/* FAQ Section */}
       <section className="section-padding bg-white dark:bg-gray-900">
-        <div className="container-custom">
+        <div className="container-custom px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="text-center mb-16"
+            className="text-center mb-12 sm:mb-16"
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">
               Frequently Asked Questions
             </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+            <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
               Find answers to common questions about our services and processes.
             </p>
           </motion.div>
@@ -482,7 +489,7 @@ const Contact = () => {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto"
+            className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto"
           >
             {[
               {
@@ -526,21 +533,21 @@ const Contact = () => {
 
       {/* CTA Section */}
       <section className="section-padding bg-gradient-to-r from-primary-500 to-secondary-500">
-        <div className="container-custom text-center">
+        <div className="container-custom px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 sm:mb-6">
               Ready to Get Started?
             </h2>
-            <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
+            <p className="text-lg sm:text-xl text-white/90 mb-6 sm:mb-8 max-w-2xl mx-auto">
               Contact our team today to discuss your pharmaceutical needs and
               discover how we can help you succeed in the global market.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
               <motion.button
                 onClick={() => {
                   console.log("Button clicked, opening dialog");
@@ -548,10 +555,11 @@ const Contact = () => {
                 }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="inline-flex items-center justify-center px-8 py-4 bg-white text-primary-600 rounded-lg font-semibold hover:bg-gray-100 transform transition-all duration-300"
+                className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-white text-primary-600 rounded-lg font-semibold hover:bg-gray-100 transform transition-all duration-300 text-sm sm:text-base"
               >
-                <Phone className="w-5 h-5 mr-2" />
-                Schedule a Call
+                <Phone className="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" />
+                <span className="hidden xs:inline">Schedule a Call</span>
+                <span className="xs:hidden">Call Us</span>
               </motion.button>
               <motion.a
                 href="https://wa.me/919664843790"
@@ -559,9 +567,11 @@ const Contact = () => {
                 rel="noopener noreferrer"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="inline-flex items-center justify-center px-8 py-4 border-2 border-white text-white rounded-lg font-semibold hover:bg-white hover:text-primary-600 transform transition-all duration-300"
+                className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 border-2 border-white text-white rounded-lg font-semibold hover:bg-white hover:text-primary-600 transform transition-all duration-300 text-sm sm:text-base"
               >
-                <MessageCircle className="w-5 h-5 mr-2" /> Chat on WhatsApp
+                <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" />
+                <span className="hidden xs:inline">Chat on WhatsApp</span>
+                <span className="xs:hidden">WhatsApp</span>
               </motion.a>
             </div>
           </motion.div>

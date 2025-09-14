@@ -1,6 +1,8 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { useMobileViewport } from "./hooks/useMobileViewport";
+import SEOHead from "./components/SEOHead";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ScrollToTop from "./components/ScrollToTop";
@@ -45,20 +47,22 @@ import Services from "./pages/Services";
 import Gallery from "./pages/Gallery";
 import GlobalPresence from "./pages/GlobalPresence";
 import Contact from "./pages/Contact";
+import NotFound from "./pages/NotFound";
 import ErrorBoundary from "./components/ErrorBoundary";
 import "./i18n";
 
 function App() {
+  // Initialize mobile viewport optimization
+  useMobileViewport();
+
   return (
     <ThemeProvider>
       <Router>
+        <SEOHead />
         <ScrollToTop />
-        <div
-          className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300"
-          style={{ minWidth: "768px" }}
-        >
+        <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300 w-full max-w-full overflow-x-hidden">
           <Navbar />
-          <main className="pt-36">
+          <main className="pt-36 w-full max-w-full overflow-x-hidden">
             <Routes>
               <Route
                 path="/"
@@ -205,6 +209,8 @@ function App() {
               <Route path="/gallery" element={<Gallery />} />
               <Route path="/global-presence" element={<GlobalPresence />} />
               <Route path="/contact" element={<Contact />} />
+              {/* 404 Route - Must be last */}
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
           <Footer />

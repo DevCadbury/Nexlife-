@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import DottedMap from "dotted-map";
 
@@ -15,23 +15,34 @@ export default function WorldMap({
   lineColor = "#0ea5e9",
 }: MapProps) {
   const svgRef = useRef<SVGSVGElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
   const [hoveredPoint, setHoveredPoint] = useState<{
     x: number;
     y: number;
     label: string;
   } | null>(null);
-  const map = new DottedMap({ height: 100, grid: "diagonal" });
 
-  // Force light theme for the map
-  const isDark = false;
+  // Intersection Observer to only render when visible
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect(); // Stop observing once visible
+        }
+      },
+      { threshold: 0.1 }
+    );
 
-  const svgMap = map.getSVG({
-    radius: 0.22,
-    color: "#00000040",
-    shape: "circle",
-    backgroundColor: "white",
-  });
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
 
+    return () => observer.disconnect();
+  }, []);
+
+  // Define helper functions first
   const projectPoint = (lat: number, lng: number) => {
     const x = (lng + 180) * (800 / 360);
     const y = (90 - lat) * (400 / 180);
@@ -47,162 +58,144 @@ export default function WorldMap({
     return `M ${start.x} ${start.y} Q ${midX} ${midY} ${end.x} ${end.y}`;
   };
 
+  // Memoize map creation to prevent recreation on every render
+  const { svgMap, mapData } = useMemo(() => {
+    const map = new DottedMap({ height: 100, grid: "diagonal" });
+    const svgMap = map.getSVG({
+      radius: 0.22,
+      color: "#00000040",
+      shape: "circle",
+      backgroundColor: "white",
+    });
+
+    // Pre-calculate all points to avoid recalculation
+    const mapData = dots.map((dot) => ({
+      start: projectPoint(dot.start.lat, dot.start.lng),
+      end: projectPoint(dot.end.lat, dot.end.lng),
+      startLabel: dot.start.label || "Unknown",
+      endLabel: dot.end.label || "Unknown",
+    }));
+
+    return { svgMap, mapData };
+  }, [dots]);
+
   return (
-    <div className="w-full aspect-[2/1] dark:bg-black bg-white rounded-lg  relative font-sans">
-      <img
-        src={`data:image/svg+xml;utf8,${encodeURIComponent(svgMap)}`}
-        className="h-full w-full [mask-image:linear-gradient(to_bottom,transparent,white_10%,white_90%,transparent)] pointer-events-none select-none"
-        alt="world map"
-        height="495"
-        width="1056"
-        draggable={false}
-      />
-      <svg
-        ref={svgRef}
-        viewBox="0 0 800 400"
-        className="w-full h-full absolute inset-0 pointer-events-none select-none"
-      >
-        {dots.map((dot, i) => {
-          const startPoint = projectPoint(dot.start.lat, dot.start.lng);
-          const endPoint = projectPoint(dot.end.lat, dot.end.lng);
-          return (
-            <g key={`path-group-${i}`}>
-              <motion.path
-                d={createCurvedPath(startPoint, endPoint)}
-                fill="none"
-                stroke="url(#path-gradient)"
-                strokeWidth="1"
-                initial={{
-                  pathLength: 0,
-                }}
-                animate={{
-                  pathLength: 1,
-                }}
-                transition={{
-                  duration: 1,
-                  delay: 0.5 * i,
-                  ease: "easeOut",
-                }}
-                key={`start-upper-${i}`}
-              ></motion.path>
-            </g>
-          );
-        })}
-
-        <defs>
-          <linearGradient id="path-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="white" stopOpacity="0" />
-            <stop offset="5%" stopColor={lineColor} stopOpacity="1" />
-            <stop offset="95%" stopColor={lineColor} stopOpacity="1" />
-            <stop offset="100%" stopColor="white" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-
-        {dots.map((dot, i) => {
-          const startPoint = projectPoint(dot.start.lat, dot.start.lng);
-          const endPoint = projectPoint(dot.end.lat, dot.end.lng);
-
-          return (
-            <g key={`points-group-${i}`}>
-              <g key={`start-${i}`}>
-                <circle
-                  cx={startPoint.x}
-                  cy={startPoint.y}
-                  r="4"
-                  fill={lineColor}
-                  style={{ cursor: "pointer" }}
-                  onMouseEnter={() =>
-                    setHoveredPoint({
-                      x: startPoint.x,
-                      y: startPoint.y,
-                      label: dot.start.label || "Unknown",
-                    })
-                  }
-                  onMouseLeave={() => setHoveredPoint(null)}
-                />
-                <circle
-                  cx={startPoint.x}
-                  cy={startPoint.y}
-                  r="4"
-                  fill={lineColor}
-                  opacity="0.5"
-                >
-                  <animate
-                    attributeName="r"
-                    from="4"
-                    to="12"
-                    dur="1.5s"
-                    begin="0s"
-                    repeatCount="indefinite"
-                  />
-                  <animate
-                    attributeName="opacity"
-                    from="0.5"
-                    to="0"
-                    dur="1.5s"
-                    begin="0s"
-                    repeatCount="indefinite"
-                  />
-                </circle>
-              </g>
-              <g key={`end-${i}`}>
-                <circle
-                  cx={endPoint.x}
-                  cy={endPoint.y}
-                  r="4"
-                  fill={lineColor}
-                  style={{ cursor: "pointer" }}
-                  onMouseEnter={() =>
-                    setHoveredPoint({
-                      x: endPoint.x,
-                      y: endPoint.y,
-                      label: dot.end.label || "Unknown",
-                    })
-                  }
-                  onMouseLeave={() => setHoveredPoint(null)}
-                />
-                <circle
-                  cx={endPoint.x}
-                  cy={endPoint.y}
-                  r="4"
-                  fill={lineColor}
-                  opacity="0.5"
-                >
-                  <animate
-                    attributeName="r"
-                    from="4"
-                    to="12"
-                    dur="1.5s"
-                    begin="0s"
-                    repeatCount="indefinite"
-                  />
-                  <animate
-                    attributeName="opacity"
-                    from="0.5"
-                    to="0"
-                    dur="1.5s"
-                    begin="0s"
-                    repeatCount="indefinite"
-                  />
-                </circle>
-              </g>
-            </g>
-          );
-        })}
-      </svg>
-
-      {/* Tooltip for hovered points */}
-      {hoveredPoint && (
-        <div
-          className="absolute bg-white/95 text-gray-900 px-3 py-1 rounded-lg text-sm font-medium pointer-events-none z-20 border border-gray-200 shadow-lg"
-          style={{
-            left: `${(hoveredPoint.x / 800) * 100}%`,
-            top: `${(hoveredPoint.y / 400) * 100}%`,
-            transform: "translate(-50%, -120%)",
-          }}
-        >
-          {hoveredPoint.label}
+    <div
+      ref={containerRef}
+      className="w-full aspect-[2/1] dark:bg-black bg-white rounded-lg relative font-sans"
+    >
+      {!isVisible ? (
+        // Loading placeholder
+        <div className="w-full h-full flex items-center justify-center bg-gray-50 dark:bg-gray-800">
+          <div className="text-center">
+            <div className="inline-block animate-pulse rounded-full h-6 w-6 bg-blue-600 mb-2"></div>
+            <p className="text-gray-600 dark:text-gray-300 text-sm">
+              Preparing map...
+            </p>
+          </div>
         </div>
+      ) : (
+        <>
+          <img
+            src={`data:image/svg+xml;utf8,${encodeURIComponent(svgMap)}`}
+            className="h-full w-full [mask-image:linear-gradient(to_bottom,transparent,white_10%,white_90%,transparent)] pointer-events-none select-none"
+            alt="world map"
+            height="495"
+            width="1056"
+            draggable={false}
+          />
+          <svg
+            ref={svgRef}
+            viewBox="0 0 800 400"
+            className="w-full h-full absolute inset-0 pointer-events-none select-none"
+          >
+            <defs>
+              <linearGradient
+                id="path-gradient"
+                x1="0%"
+                y1="0%"
+                x2="100%"
+                y2="0%"
+              >
+                <stop offset="0%" stopColor="white" stopOpacity="0" />
+                <stop offset="5%" stopColor={lineColor} stopOpacity="1" />
+                <stop offset="95%" stopColor={lineColor} stopOpacity="1" />
+                <stop offset="100%" stopColor="white" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+
+            {/* Simplified paths without complex animations */}
+            {mapData.map((data, i) => (
+              <g key={`path-group-${i}`}>
+                <motion.path
+                  d={createCurvedPath(data.start, data.end)}
+                  fill="none"
+                  stroke="url(#path-gradient)"
+                  strokeWidth="1"
+                  initial={{ pathLength: 0 }}
+                  animate={{ pathLength: 1 }}
+                  transition={{
+                    duration: 0.6, // Further reduced duration
+                    delay: 0.1 * i, // Further reduced delay
+                    ease: "easeOut",
+                  }}
+                />
+              </g>
+            ))}
+
+            {/* Simplified points with reduced animations */}
+            {mapData.map((data, i) => (
+              <g key={`points-group-${i}`}>
+                {/* Start point */}
+                <circle
+                  cx={data.start.x}
+                  cy={data.start.y}
+                  r="3"
+                  fill={lineColor}
+                  style={{ cursor: "pointer" }}
+                  onMouseEnter={() =>
+                    setHoveredPoint({
+                      x: data.start.x,
+                      y: data.start.y,
+                      label: data.startLabel,
+                    })
+                  }
+                  onMouseLeave={() => setHoveredPoint(null)}
+                />
+                {/* End point */}
+                <circle
+                  cx={data.end.x}
+                  cy={data.end.y}
+                  r="3"
+                  fill={lineColor}
+                  style={{ cursor: "pointer" }}
+                  onMouseEnter={() =>
+                    setHoveredPoint({
+                      x: data.end.x,
+                      y: data.end.y,
+                      label: data.endLabel,
+                    })
+                  }
+                  onMouseLeave={() => setHoveredPoint(null)}
+                />
+              </g>
+            ))}
+          </svg>
+
+          {/* Tooltip for hovered points */}
+          {hoveredPoint && (
+            <div
+              className="absolute bg-white/95 text-gray-900 px-3 py-1 rounded-lg text-sm font-medium pointer-events-none z-20 border border-gray-200 shadow-lg"
+              style={{
+                left: `${(hoveredPoint.x / 800) * 100}%`,
+                top: `${(hoveredPoint.y / 400) * 100}%`,
+                transform: "translate(-50%, -120%)",
+              }}
+            >
+              {hoveredPoint.label}
+            </div>
+          )}
+        </>
       )}
     </div>
   );

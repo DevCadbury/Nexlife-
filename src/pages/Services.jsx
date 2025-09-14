@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Ship,
   Plane,
@@ -10,12 +10,36 @@ import {
   Globe,
   Clock,
   Users,
+  X,
+  Phone,
+  Mail,
+  MessageCircle,
 } from "lucide-react";
 import whyChooseUsImage from "../assets/images/why choose us.png";
 import servicesHeaderImage from "../assets/images/our services.png";
 
 const Services = () => {
   const { t } = useTranslation();
+  const [showConsultationDialog, setShowConsultationDialog] = useState(false);
+
+  // Contact handlers
+  const handleCall = () => {
+    window.location.href = "tel:+919664843790";
+  };
+
+  const handleEmail = () => {
+    window.location.href =
+      "mailto:Info@nexlifeinternational.com?subject=Free Consultation Request&body=Hello, I would like to schedule a free consultation to discuss my pharmaceutical needs.";
+  };
+
+  const handleWhatsApp = () => {
+    const message =
+      "Hello, I would like to schedule a free consultation to discuss my pharmaceutical needs.";
+    window.open(
+      `https://wa.me/919664843790?text=${encodeURIComponent(message)}`,
+      "_blank"
+    );
+  };
 
   const services = [
     {
@@ -360,6 +384,7 @@ const Services = () => {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              onClick={() => setShowConsultationDialog(true)}
               className="inline-flex items-center justify-center px-8 py-4 bg-white text-primary-600 rounded-lg font-semibold hover:bg-gray-100 transform transition-all duration-300"
             >
               Get a Free Consultation
@@ -367,6 +392,82 @@ const Services = () => {
           </motion.div>
         </div>
       </section>
+
+      {/* Consultation Dialog */}
+      <AnimatePresence>
+        {showConsultationDialog && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowConsultationDialog(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-md w-full shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  Free Consultation
+                </h3>
+                <button
+                  onClick={() => setShowConsultationDialog(false)}
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                >
+                  <X className="w-6 h-6 text-gray-500" />
+                </button>
+              </div>
+
+              <p className="text-gray-600 dark:text-gray-300 mb-8">
+                Ready to get started with your pharmaceutical needs? Schedule a
+                free consultation with our experts to discuss your requirements.
+              </p>
+
+              <div className="space-y-4">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleCall}
+                  className="w-full flex items-center justify-center space-x-3 bg-blue-600 text-white px-6 py-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                >
+                  <Phone className="w-5 h-5" />
+                  <span>Call Us</span>
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleEmail}
+                  className="w-full flex items-center justify-center space-x-3 bg-green-600 text-white px-6 py-4 rounded-lg font-semibold hover:bg-green-700 transition-colors"
+                >
+                  <Mail className="w-5 h-5" />
+                  <span>Send Email</span>
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleWhatsApp}
+                  className="w-full flex items-center justify-center space-x-3 bg-green-500 text-white px-6 py-4 rounded-lg font-semibold hover:bg-green-600 transition-colors"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  <span>WhatsApp</span>
+                </motion.button>
+              </div>
+
+              <div className="mt-6 text-center">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  +91 96648 43790 | Info@nexlifeinternational.com
+                </p>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

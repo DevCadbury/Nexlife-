@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { useDesktopOnly } from "../hooks/useDesktopOnly";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Pill, Download, Search } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -58,6 +59,9 @@ const StyledCardWrapper = styled.div`
 `;
 
 const AntiUlcerativeProducts = () => {
+  // Force desktop view on all devices
+  useDesktopOnly();
+
   const [searchTerm, setSearchTerm] = useState("");
 
   // Anti Ulcerative products data - using only available images

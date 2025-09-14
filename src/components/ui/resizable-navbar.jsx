@@ -195,7 +195,7 @@ export const Navbar = ({ children }) => {
 
 export const NavBody = ({ children }) => {
   return (
-    <div className="hidden md:flex items-center justify-between px-4 py-3">
+    <div className="hidden md:flex items-center justify-between px-3 py-2 gap-3">
       {children}
     </div>
   );
@@ -227,7 +227,7 @@ const GlowNavItem = ({ to, children }) => {
     >
       <Link
         to={to}
-        className="relative inline-flex h-10 items-center rounded-xl border border-blue-400/20 px-4 text-sm font-semibold text-gray-700 transition-all duration-200 bg-white/60 hover:bg-gradient-to-br hover:from-blue-50/70 hover:to-indigo-50/70 shadow-[inset_0_0_0_1px_rgba(59,130,246,0.15),0_6px_16px_rgba(59,130,246,0.12)] transform-gpu"
+        className="relative inline-flex h-9 items-center rounded-xl border border-blue-400/20 px-3 text-sm font-semibold text-gray-700 transition-all duration-200 bg-white/60 hover:bg-gradient-to-br hover:from-blue-50/70 hover:to-indigo-50/70 shadow-[inset_0_0_0_1px_rgba(59,130,246,0.15),0_6px_16px_rgba(59,130,246,0.12)] transform-gpu whitespace-nowrap"
       >
         {/* neon underline */}
         <span className="pointer-events-none absolute bottom-0 left-2 right-2 h-[2px] scale-x-0 origin-left bg-gradient-to-r from-blue-500 via-cyan-400 to-indigo-500 blur-[1px] transition-transform duration-300 group-hover:scale-x-100" />
@@ -241,7 +241,7 @@ const GlowNavItem = ({ to, children }) => {
 
 export const NavItems = ({ items = [] }) => {
   return (
-    <nav className="flex items-center gap-2 [perspective:1200px]">
+    <nav className="flex items-center gap-1 [perspective:1200px]">
       {items.map((item, idx) => (
         <GlowNavItem key={`nav-item-${idx}`} to={item.link}>
           {item.name}
@@ -258,7 +258,7 @@ export const NavbarButton = ({
   ...props
 }) => {
   const base =
-    "inline-flex items-center justify-center rounded-xl px-4 h-10 text-sm font-semibold transition-all transform-gpu";
+    "inline-flex items-center justify-center rounded-xl px-3 h-9 text-sm font-semibold transition-all transform-gpu whitespace-nowrap";
   const styles =
     variant === "primary"
       ? "bg-gradient-to-br from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-[0_8px_20px_rgba(59,130,246,0.25)]"

@@ -456,7 +456,7 @@ const Products = () => {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative py-20 overflow-hidden">
+      <section className="relative py-12 sm:py-16 lg:py-20 overflow-hidden">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <img
@@ -476,11 +476,11 @@ const Products = () => {
             className="text-center max-w-4xl mx-auto"
           >
             {/* Text UI Pane */}
-            <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-white/20 dark:border-gray-700/20">
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+            <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 shadow-xl border border-white/20 dark:border-gray-700/20">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">
                 Our Products
               </h1>
-              <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed">
+              <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 dark:text-gray-300 leading-relaxed">
                 Discover our comprehensive range of pharmaceutical products,
                 from tablets and capsules to surgical supplies and ayurvedic
                 formulations.
@@ -498,7 +498,7 @@ const Products = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.4, ease: "easeOut" }}
-            className="flex flex-wrap justify-center gap-4 mb-12"
+            className="flex flex-wrap justify-center gap-2 sm:gap-3 lg:gap-4 mb-8 sm:mb-10 lg:mb-12"
           >
             {categories.map((category) => (
               <motion.button
@@ -506,14 +506,15 @@ const Products = () => {
                 onClick={() => scrollToSection(category.id)}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className={`flex items-center space-x-2 px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
+                className={`flex items-center space-x-1 sm:space-x-2 px-3 sm:px-4 lg:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl font-medium transition-all duration-200 text-xs sm:text-sm lg:text-base ${
                   selectedCategory === category.id
                     ? `bg-gradient-to-r ${category.color} text-white shadow-lg`
                     : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
                 }`}
               >
-                <category.icon className="w-5 h-5" />
-                <span>{category.name}</span>
+                <category.icon className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="hidden sm:inline">{category.name}</span>
+                <span className="sm:hidden">{category.name.split(" ")[0]}</span>
               </motion.button>
             ))}
           </motion.div>
@@ -524,22 +525,22 @@ const Products = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
-            className="max-w-md mx-auto mb-12"
+            className="max-w-sm sm:max-w-md mx-auto mb-8 sm:mb-10 lg:mb-12"
           >
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
               <input
                 ref={searchInputRef}
                 type="text"
                 placeholder="Search products..."
                 value={searchTerm}
                 onChange={handleSearchChange}
-                className="w-full pl-10 pr-12 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white transition-all duration-200"
+                className="w-full pl-8 sm:pl-10 pr-10 sm:pr-12 py-2.5 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white transition-all duration-200 text-sm sm:text-base"
               />
               {searchTerm && (
                 <button
                   onClick={clearSearch}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200"
+                  className="absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200 text-lg sm:text-xl"
                 >
                   ×
                 </button>
@@ -580,31 +581,32 @@ const Products = () => {
                         className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border-2 border-gray-800 dark:border-gray-600 hover:border-blue-600 dark:hover:border-blue-400 overflow-hidden transition-all duration-300 hover:shadow-2xl"
                       >
                         {/* Category Header */}
-                        <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-8 text-white relative overflow-hidden">
+                        <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-4 sm:p-6 lg:p-8 text-white relative overflow-hidden">
                           {/* Elegant border pattern */}
-                          <div className="absolute inset-0 border-2 border-white/20 rounded-t-2xl"></div>
+                          <div className="absolute inset-0 border-2 border-white/20 rounded-t-xl sm:rounded-t-2xl"></div>
                           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
                           <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
 
                           <div className="flex items-center justify-between relative z-10">
-                            <div>
-                              <h2 className="text-3xl font-bold mb-2 capitalize">
+                            <div className="flex-1">
+                              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2 capitalize">
                                 {
                                   categories.find((c) => c.id === categoryId)
                                     ?.name
                                 }
                               </h2>
-                              <p className="text-blue-100 text-lg max-w-3xl">
+                              <p className="text-blue-100 text-sm sm:text-base lg:text-lg max-w-3xl">
                                 {categoryData.description}
                               </p>
                             </div>
-                            <div className="hidden md:block">
-                              <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center border-2 border-white/30 backdrop-blur-sm">
+                            <div className="hidden sm:block ml-4">
+                              <div className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 bg-white/20 rounded-full flex items-center justify-center border-2 border-white/30 backdrop-blur-sm">
                                 {React.createElement(
                                   categories.find((c) => c.id === categoryId)
                                     ?.icon || Pill,
                                   {
-                                    className: "w-10 h-10 text-white",
+                                    className:
+                                      "w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 text-white",
                                   }
                                 )}
                               </div>
@@ -613,11 +615,11 @@ const Products = () => {
                         </div>
 
                         {/* Category Content */}
-                        <div className="p-8">
+                        <div className="p-4 sm:p-6 lg:p-8">
                           {categoryId === "tablets" ||
                           categoryId === "capsules" ? (
                             // Subcategories Grid with Icons
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                               {categoryData.subcategories.map(
                                 (subcategory, index) => {
                                   const IconComponent =
@@ -627,7 +629,7 @@ const Products = () => {
                                       key={index}
                                       variants={cardVariants}
                                       whileHover="hover"
-                                      className="group bg-gradient-to-br from-gray-50 to-white dark:from-gray-700 dark:to-gray-800 p-6 rounded-xl border-2 border-gray-800 dark:border-gray-500 hover:border-blue-600 dark:hover:border-blue-400 hover:shadow-xl transition-all duration-300 relative overflow-hidden"
+                                      className="group bg-gradient-to-br from-gray-50 to-white dark:from-gray-700 dark:to-gray-800 p-4 sm:p-6 rounded-lg sm:rounded-xl border-2 border-gray-800 dark:border-gray-500 hover:border-blue-600 dark:hover:border-blue-400 hover:shadow-xl transition-all duration-300 relative overflow-hidden"
                                     >
                                       {/* Processing Bar Effect */}
                                       <div className="absolute top-0 left-0 w-full h-2 bg-gray-200 dark:bg-gray-600 overflow-hidden">
@@ -786,7 +788,7 @@ const Products = () => {
                                       key={index}
                                       variants={cardVariants}
                                       whileHover="hover"
-                                      className="group bg-gradient-to-br from-gray-50 to-white dark:from-gray-700 dark:to-gray-800 p-6 rounded-xl border-2 border-gray-800 dark:border-gray-500 hover:border-blue-600 dark:hover:border-blue-400 hover:shadow-xl transition-all duration-300 relative overflow-hidden"
+                                      className="group bg-gradient-to-br from-gray-50 to-white dark:from-gray-700 dark:to-gray-800 p-4 sm:p-6 rounded-lg sm:rounded-xl border-2 border-gray-800 dark:border-gray-500 hover:border-blue-600 dark:hover:border-blue-400 hover:shadow-xl transition-all duration-300 relative overflow-hidden"
                                     >
                                       {/* Processing Bar Effect */}
                                       <div className="absolute top-0 left-0 w-full h-2 bg-gray-200 dark:bg-gray-600 overflow-hidden">
@@ -847,7 +849,7 @@ const Products = () => {
                             </div>
                           ) : categoryId === "surgical" ? (
                             // Surgical Categories with Product Images
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                               {categoryData.categories.map(
                                 (surgicalCategory, index) => {
                                   const surgicalImage =
@@ -857,7 +859,7 @@ const Products = () => {
                                       key={index}
                                       variants={cardVariants}
                                       whileHover="hover"
-                                      className="group bg-gradient-to-br from-gray-50 to-white dark:from-gray-700 dark:to-gray-800 p-6 rounded-xl border-2 border-gray-800 dark:border-gray-500 hover:border-red-600 dark:hover:border-red-400 hover:shadow-xl transition-all duration-300 text-center relative overflow-hidden"
+                                      className="group bg-gradient-to-br from-gray-50 to-white dark:from-gray-700 dark:to-gray-800 p-4 sm:p-6 rounded-lg sm:rounded-xl border-2 border-gray-800 dark:border-gray-500 hover:border-red-600 dark:hover:border-red-400 hover:shadow-xl transition-all duration-300 text-center relative overflow-hidden"
                                     >
                                       {/* Progress Bar Effect */}
                                       <div className="absolute top-0 left-0 w-full h-1 bg-gray-200 dark:bg-gray-600 overflow-hidden rounded-t-xl">
@@ -894,7 +896,7 @@ const Products = () => {
                                       <div className="absolute top-0 right-0 w-0 h-0 border-l-[20px] border-l-transparent border-t-[20px] border-t-red-800 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
                                       {/* Product Image */}
-                                      <div className="w-full h-32 mb-4 rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-600 group-hover:border-red-300 dark:group-hover:border-red-500 transition-colors duration-300">
+                                      <div className="w-full h-24 sm:h-32 mb-3 sm:mb-4 rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-600 group-hover:border-red-300 dark:group-hover:border-red-500 transition-colors duration-300">
                                         <img
                                           src={surgicalImage}
                                           alt={surgicalCategory}
@@ -903,7 +905,7 @@ const Products = () => {
                                         />
                                       </div>
 
-                                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors duration-300">
+                                      <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 dark:text-white mb-2 sm:mb-3 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors duration-300">
                                         {surgicalCategory}
                                       </h3>
                                       <Link
@@ -964,10 +966,10 @@ const Products = () => {
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.5, ease: "easeOut" }}
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-4 sm:mb-6">
               Download Complete Product Catalogue
             </h2>
-            <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-blue-100 mb-6 sm:mb-8 max-w-2xl mx-auto">
               Get detailed information about all our products, specifications,
               and pricing in our comprehensive catalogue.
             </p>
@@ -977,9 +979,9 @@ const Products = () => {
               rel="noopener noreferrer"
               whileHover={{ scale: 1.02, y: -2 }}
               whileTap={{ scale: 0.98 }}
-              className="inline-flex items-center space-x-3 bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold hover:bg-gray-100 transition-all duration-200 shadow-lg hover:shadow-xl"
+              className="inline-flex items-center space-x-2 sm:space-x-3 bg-white text-blue-600 px-4 sm:px-6 lg:px-8 py-3 sm:py-4 rounded-lg sm:rounded-xl font-semibold hover:bg-gray-100 transition-all duration-200 shadow-lg hover:shadow-xl text-sm sm:text-base"
             >
-              <Download className="w-6 h-6" />
+              <Download className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
               <span>Download PDF Catalogue</span>
             </motion.a>
           </motion.div>
@@ -996,10 +998,10 @@ const Products = () => {
             whileHover={{ scale: 1.1, y: -2 }}
             whileTap={{ scale: 0.95 }}
             onClick={scrollToTop}
-            className="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-blue-600 to-purple-600 text-white p-3 md:p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border-2 border-white/20 hover:border-white/40"
+            className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 bg-gradient-to-r from-blue-600 to-purple-600 text-white p-2 sm:p-3 lg:p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border-2 border-white/20 hover:border-white/40"
             aria-label="Scroll to top"
           >
-            <ArrowUp className="w-4 h-4 md:w-5 md:h-5" />
+            <ArrowUp className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />
           </motion.button>
         )}
       </AnimatePresence>

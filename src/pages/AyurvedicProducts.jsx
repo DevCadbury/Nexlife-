@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { useDesktopOnly } from "../hooks/useDesktopOnly";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Pill, Download, Search } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -60,6 +61,9 @@ const StyledCardWrapper = styled.div`
 `;
 
 const AyurvedicProducts = () => {
+  // Force desktop view on all devices
+  useDesktopOnly();
+
   const [searchTerm, setSearchTerm] = useState("");
 
   // Ayurvedic products data

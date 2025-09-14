@@ -162,47 +162,78 @@ const About = () => {
               <div className="h-1 w-24 mx-auto mb-6 rounded-full bg-gradient-to-r from-black via-fuchsia-500 to-black" />
             </div>
 
-            <div className="prose prose-lg max-w-none text-gray-600 dark:text-gray-300 leading-relaxed space-y-6">
+            <div className="prose prose-lg max-w-none text-gray-600 dark:text-gray-300 leading-relaxed space-y-6 border border-gray-200 dark:border-gray-700 rounded-xl p-8 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
               <p className="text-xl font-semibold text-gray-900 dark:text-white">
-                NEXLIFE INTERNATIONAL, a distinguished name in the
-                Pharmaceutical & Healthcare Industry. Situated in Surat,
-                Gujarat, India.
+                NEXLIFE INTERNATIONAL – a trusted name in the global
+                Pharmaceutical & Healthcare industry – is headquartered in
+                Surat, Gujarat, India.
               </p>
 
               <p>
-                We are a global leader in pharmaceutical manufacturing and
-                exporting, known for our unwavering commitment to quality and
-                product effectiveness. Our state-of-the-art facilities hold
-                WHO-GMP, ISO 9001:2015, ISO 13485:2016, CE, FSSAI, Halal, and
-                HAACP certifications.
+                We are recognized worldwide for our commitment to quality,
+                innovation, and product effectiveness. Our world-class
+                facilities are certified with WHO-GMP, ISO 9001:2015, ISO
+                13485:2016, CE, FSSAI, Halal, and HACCP, ensuring adherence to
+                the highest international standards.
               </p>
 
               <p>
-                NEXLIFE INTERNATIONAL has over 500+ formulations registered
-                globally, supported by strong regulatory expertise.
+                With 500+ formulations registered globally and backed by strong
+                regulatory expertise, we deliver a diverse portfolio of
+                pharmaceutical solutions. Leveraging cutting-edge technology and
+                premium raw materials, we manufacture a wide range of dosage
+                forms including:
               </p>
 
-              <p>
-                We employ cutting-edge technology to produce a diverse range of
-                pharmaceutical formulations, including tablets, capsules,
-                injections, pre-filled syringes, inhalers, nasal sprays, creams,
-                ointments, eye/ear drops, syrups, suspensions, sachets, powders,
-                lozenges, jelly, and lotions. Made from premium raw materials,
-                our products meet international quality standards and are
-                managed by highly skilled professionals. We ensure competitive
-                pricing and timely delivery to meet our clients' needs
-                efficiently.
-              </p>
+              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-6 my-6">
+                <ul className="space-y-3 text-gray-700 dark:text-gray-300">
+                  <li className="flex items-start">
+                    <span className="text-blue-600 dark:text-blue-400 mr-3 mt-1">
+                      •
+                    </span>
+                    <span>Tablets, capsules, and injections</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-blue-600 dark:text-blue-400 mr-3 mt-1">
+                      •
+                    </span>
+                    <span>Pre-filled syringes, inhalers, and nasal sprays</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-blue-600 dark:text-blue-400 mr-3 mt-1">
+                      •
+                    </span>
+                    <span>
+                      Creams, ointments, eye/ear drops, syrups, and suspensions
+                    </span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-blue-600 dark:text-blue-400 mr-3 mt-1">
+                      •
+                    </span>
+                    <span>
+                      Sachets, powders, lozenges, jellies, and lotions
+                    </span>
+                  </li>
+                </ul>
+              </div>
 
               <p>
-                We excel in fulfilling both urgent and bulk client requirements,
-                exporting our products globally.
+                Every product is developed under the supervision of highly
+                skilled professionals to guarantee efficacy, safety, and
+                reliability. Along with competitive pricing and on-time
+                delivery, we are equipped to meet both urgent and bulk
+                requirements with efficiency.
               </p>
 
               <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 mt-8">
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-                  Our Global Reach
+                  Our Global Presence
                 </h3>
+                <p className="text-gray-600 dark:text-gray-300 mb-6">
+                  We proudly export to clients across Asia, Africa, Europe, and
+                  South America.
+                </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <h4 className="font-semibold text-gray-900 dark:text-white mb-2">
@@ -218,9 +249,9 @@ const About = () => {
                       Africa
                     </h4>
                     <p className="text-sm">
-                      Angola, Benin, Congo, Côte d'Ivoire, Ghana, Kenya, Malawi,
-                      Mali, Mauritius, Mozambique, Nigeria, Somalia, South
-                      Sudan, Tanzania, Togo, Uganda
+                      Angola, Benin, Ghana, Kenya, Malawi, Mali, Mauritius,
+                      Mozambique, Nigeria, Somalia, South Sudan, Tanzania, Togo,
+                      Uganda
                     </p>
                   </div>
                   <div>

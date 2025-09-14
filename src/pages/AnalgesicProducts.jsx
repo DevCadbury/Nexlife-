@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Pill, Download, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
+import { useDesktopOnly } from "../hooks/useDesktopOnly";
 import diclonexImage from "../assets/images/analgesic/DICLONEX-2.png";
 import sepnexImage from "../assets/images/analgesic/SEPNEX-2.png";
 import tramanexImage from "../assets/images/analgesic/TRAMANEX.png";
@@ -61,6 +62,9 @@ const StyledCardWrapper = styled.div`
 `;
 
 const AnalgesicProducts = () => {
+  // Force desktop view on all devices
+  useDesktopOnly();
+
   const [searchTerm, setSearchTerm] = useState("");
 
   // Analgesic products data with images
