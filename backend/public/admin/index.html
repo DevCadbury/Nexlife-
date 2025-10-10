@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Nexlife CRM • Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: Inter, ui-sans-serif, system-ui;
+      }
+    </style>
+  </head>
+  <body class="bg-slate-950 text-slate-100">
+    <div class="min-h-screen grid grid-cols-[260px_1fr]">
+      <aside
+        class="border-r border-slate-800 bg-slate-900/60 sticky top-0 h-screen overflow-y-auto"
+      >
+        <div class="p-4 flex items-center gap-3 border-b border-slate-800">
+          <div
+            class="h-9 w-9 rounded-lg bg-gradient-to-tr from-cyan-400 to-indigo-500"
+          ></div>
+          <div>
+            <div class="font-extrabold leading-tight">Nexlife CRM</div>
+            <div class="text-[11px] text-slate-400">Admin Dashboard</div>
+            <button
+              data-tab="analytics"
+              class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-800"
+            >
+              📊 Analytics
+            </button>
+          </div>
+        </div>
+        <nav class="p-3 space-y-4" id="sidebar">
+          <div>
+            <div
+              class="px-3 text-[11px] uppercase tracking-wide text-slate-500 mb-1"
+            >
+              Overview
+            </div>
+            <button
+              data-tab="dashboard"
+              class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-800"
+            >
+              🏠 Dashboard
+            </button>
+          </div>
+          <div>
+            <div
+              class="px-3 text-[11px] uppercase tracking-wide text-slate-500 mb-1"
+            >
+              CRM
+            </div>
+            <button
+              data-tab="inquiries"
+              class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-800"
+            >
+              📨 Inquiries
+              <span
+                id="tabBadge-new"
+                class="ml-2 text-[10px] rounded bg-amber-500/20 text-amber-300 px-1.5 py-0.5 hidden"
+                >0</span
+              >
+            </button>
+            <button
+              data-tab="subscribers"
+              class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-800"
+            >
+              👥 Subscribers
+            </button>
+            <button
+              data-tab="campaigns"
+              class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-800"
+            >
+              ✉️ Campaigns
+            </button>
+          </div>
+          <div>
+            <div
+              class="px-3 text-[11px] uppercase tracking-wide text-slate-500 mb-1"
+            >
+              Content
+            </div>
+            <button
+              data-tab="gallery"
+              class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-800"
+            >
+              🖼️ Gallery
+            </button>
+          </div>
+          <div>
+            <div
+              class="px-3 text-[11px] uppercase tracking-wide text-slate-500 mb-1"
+            >
+              Administration
+            </div>
+            <button
+              data-tab="staff"
+              class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-800"
+            >
+              🛡️ Staff
+            </button>
+            <button
+              data-tab="logs"
+              class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-800"
+            >
+              📒 Logs
+            </button>
+            <button
+              data-tab="export"
+              class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-800"
+            >
+              ⬇️ Export
+            </button>
+          </div>
+          <div class="px-3 text-[11px] text-slate-500">
+            v1 • ${new Date().getFullYear()}
+          </div>
+        </nav>
+      </aside>
+      <main class="min-h-screen">
+        <header class="border-b border-slate-800 bg-slate-900/60">
+          <div class="px-6 py-3 flex items-center justify-between">
+            <div class="font-extrabold" id="tabTitle">Dashboard</div>
+            <div class="flex items-center gap-3">
+              <div id="userInfo" class="text-sm text-slate-300"></div>
+              <button
+                id="bell"
+                class="relative rounded-lg border border-slate-800 px-3 py-1.5 hover:border-indigo-500"
+              >
+                <span class="text-sm">Notifications</span>
+                <span
+                  id="badge"
+                  class="hidden absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                ></span>
+              </button>
+              <form method="post" action="/logout">
+                <button
+                  class="rounded-lg bg-indigo-600 hover:bg-indigo-500 px-4 py-2 text-sm font-semibold"
+                >
+                  Logout
+                </button>
+              </form>
+            </div>
+          </div>
+        </header>
+        <nav
+          id="topnav"
+          class="px-6 py-2 border-b border-slate-800 bg-slate-900/40 flex flex-wrap gap-2"
+        >
+          <button
+            data-tab="dashboard"
+            class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-sm"
+          >
+            Dashboard
+          </button>
+          <button
+            data-tab="analytics"
+            class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-sm"
+          >
+            Analytics
+          </button>
+          <button
+            data-tab="inquiries"
+            class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-sm"
+          >
+            Inquiries
+          </button>
+          <button
+            data-tab="subscribers"
+            class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-sm"
+          >
+            Subscribers
+          </button>
+          <button
+            data-tab="campaigns"
+            class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-sm"
+          >
+            Campaigns
+          </button>
+          <button
+            data-tab="gallery"
+            class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-sm"
+          >
+            Gallery
+          </button>
+          <button
+            data-tab="staff"
+            class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-sm"
+          >
+            Staff
+          </button>
+          <button
+            data-tab="logs"
+            class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-sm"
+          >
+            Logs
+          </button>
+          <button
+            data-tab="export"
+            class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-sm"
+          >
+            Export
+          </button>
+        </nav>
+        <section id="content" class="p-6"></section>
+      </main>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

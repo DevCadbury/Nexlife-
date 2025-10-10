@@ -1,7 +1,7 @@
 const API_BASE = import.meta.env.VITE_BACKEND_URL || "";
 
 export async function submitContact(payload) {
-  const res = await fetch(`${API_BASE}/api/contact`, {
+  const res = await fetch(`${API_BASE}/api/inquiries`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),

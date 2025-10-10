@@ -12,7 +12,9 @@ const ContactForm = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    phone: "",
     subject: "",
+    productName: "",
     message: "",
   });
 
@@ -32,7 +34,7 @@ const ContactForm = () => {
     try {
       await submitContact(formData);
       setSubmitStatus("success");
-      setFormData({ name: "", email: "", subject: "", message: "" });
+      setFormData({ name: "", email: "", phone: "", subject: "", productName: "", message: "" });
     } catch (error) {
       console.error("Contact submit error:", error);
       setSubmitStatus("error");
@@ -42,7 +44,7 @@ const ContactForm = () => {
   };
 
   const isFormValid =
-    formData.name && formData.email && formData.subject && formData.message;
+    formData.name && formData.email && formData.phone && formData.message;
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -94,13 +96,33 @@ const ContactForm = () => {
           />
         </div>
 
+        {/* Phone Field */}
+        <div>
+          <label
+            htmlFor="phone"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+          >
+            Phone Number *
+          </label>
+          <input
+            type="tel"
+            id="phone"
+            name="phone"
+            value={formData.phone}
+            onChange={handleInputChange}
+            required
+            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white transition-colors"
+            placeholder="Enter your phone number"
+          />
+        </div>
+
         {/* Subject Field */}
         <div>
           <label
             htmlFor="subject"
             className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
           >
-            {t("subject")} *
+            {t("subject")}
           </label>
           <input
             type="text"
@@ -108,9 +130,27 @@ const ContactForm = () => {
             name="subject"
             value={formData.subject}
             onChange={handleInputChange}
-            required
             className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white transition-colors"
-            placeholder="Enter subject"
+            placeholder="Enter subject (optional)"
+          />
+        </div>
+
+        {/* Product Name Field */}
+        <div>
+          <label
+            htmlFor="productName"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+          >
+            Product/Service of Interest
+          </label>
+          <input
+            type="text"
+            id="productName"
+            name="productName"
+            value={formData.productName}
+            onChange={handleInputChange}
+            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white transition-colors"
+            placeholder="e.g., Analgesic Products, Antibiotics, etc."
           />
         </div>
 
@@ -179,7 +219,7 @@ const ContactForm = () => {
               )}
               <span className="text-sm font-medium">
                 {submitStatus === "success"
-                  ? "Message sent successfully! We'll get back to you soon."
+                  ? "Message sent successfully! We've received your inquiry and sent you a confirmation email with our product catalogue. We'll get back to you within 24 hours."
                   : "Failed to send message. Please try again or contact us directly."}
               </span>
             </motion.div>

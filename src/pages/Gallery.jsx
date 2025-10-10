@@ -9,121 +9,74 @@ import {
   Heart,
   Share2,
   Settings,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
-import { fetchLikes, incrementLike } from "../lib/likes";
 
-// Import gallery images
+// Import gallery header image
 import galleryHeaderImage from "../assets/images/gallery.png";
-import gallery1 from "../assets/images/gallery/1.jpg";
-import gallery2 from "../assets/images/gallery/2.jpg";
-import gallery3 from "../assets/images/gallery/3.jpg";
-import gallery4 from "../assets/images/gallery/4.jpg";
-import gallery5 from "../assets/images/gallery/5.jpg";
-import gallery6 from "../assets/images/gallery/6.jpg";
-import gallery7 from "../assets/images/gallery/7.jpg";
-import gallery8 from "../assets/images/gallery/8.jpg";
-import gallery9 from "../assets/images/gallery/9.jpg";
-import gallery10 from "../assets/images/gallery/10.jpg";
-import gallery11 from "../assets/images/gallery/11.jpg";
-import gallery12 from "../assets/images/gallery/12.jpg";
-import gallery13 from "../assets/images/gallery/13.jpg";
-import gallery14 from "../assets/images/gallery/14.jpg";
-import gallery15 from "../assets/images/gallery/15.jpg";
 
 const Gallery = () => {
   const { t } = useTranslation();
   const [selectedImage, setSelectedImage] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [galleryImages, setGalleryImages] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [likeCounts, setLikeCounts] = useState({});
   const [userLikes, setUserLikes] = useState({});
   const [showDashboard, setShowDashboard] = useState(false);
 
-  // Load saved likes from localStorage on component mount
+  // API base URL - use environment variable or fallback to localhost
+  const API_BASE = import.meta.env.VITE_BACKEND_URL
+    ? `${import.meta.env.VITE_BACKEND_URL}/api`
+    : "http://localhost:4000/api";
+
+  // Fetch gallery images from API
+  useEffect(() => {
+    const fetchGalleryImages = async () => {
+      try {
+        setLoading(true);
+        console.log("Fetching gallery images from:", `${API_BASE}/gallery`);
+        const response = await fetch(`${API_BASE}/gallery`);
+        console.log("Response status:", response.status);
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Response error:", errorText);
+          throw new Error(
+            `Failed to fetch gallery images: ${response.status} ${response.statusText}`
+          );
+        }
+
+        const data = await response.json();
+        console.log("Gallery data received:", data);
+        setGalleryImages(data.items || []);
+
+        // Initialize like counts from API data
+        const initialLikeCounts = {};
+        data.items?.forEach((image) => {
+          initialLikeCounts[image._id] = image.likes || 0;
+        });
+        setLikeCounts(initialLikeCounts);
+      } catch (err) {
+        console.error("Error fetching gallery images:", err);
+        setError(`Failed to load gallery images: ${err.message}`);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchGalleryImages();
+  }, []);
+
+  // Load saved user likes from localStorage
   useEffect(() => {
     const savedUserLikes = localStorage.getItem("galleryUserLikes");
-    const savedLikeCounts = localStorage.getItem("galleryLikeCounts");
-
     if (savedUserLikes) {
       setUserLikes(JSON.parse(savedUserLikes));
     }
-    if (savedLikeCounts) {
-      setLikeCounts(JSON.parse(savedLikeCounts));
-    }
-
-    // Try to sync from backend
-    (async () => {
-      try {
-        const server = await fetchLikes();
-        if (server && typeof server === "object") {
-          setLikeCounts(server);
-        }
-      } catch {}
-    })();
   }, []);
-
-  // Gallery images from the gallery folder
-  const galleryImages = [
-    {
-      id: 1,
-      src: gallery1,
-    },
-    {
-      id: 2,
-      src: gallery2,
-    },
-    {
-      id: 3,
-      src: gallery3,
-    },
-    {
-      id: 4,
-      src: gallery4,
-    },
-    {
-      id: 5,
-      src: gallery5,
-    },
-    {
-      id: 6,
-      src: gallery6,
-    },
-    {
-      id: 7,
-      src: gallery7,
-    },
-    {
-      id: 8,
-      src: gallery8,
-    },
-    {
-      id: 9,
-      src: gallery9,
-    },
-    {
-      id: 10,
-      src: gallery10,
-    },
-    {
-      id: 11,
-      src: gallery11,
-    },
-    {
-      id: 12,
-      src: gallery12,
-    },
-    {
-      id: 13,
-      src: gallery13,
-    },
-    {
-      id: 14,
-      src: gallery14,
-    },
-    {
-      id: 15,
-      src: gallery15,
-    },
-  ];
 
   const openLightbox = (image, index) => {
     setSelectedImage(image);
@@ -164,30 +117,45 @@ const Gallery = () => {
       ...userLikes,
       [imageId]: (userLikes[imageId] || 0) + 1,
     };
-    const updatedLikeCounts = {
-      ...likeCounts,
-      [imageId]: (likeCounts[imageId] || 0) + 1,
-    };
     localStorage.setItem("galleryUserLikes", JSON.stringify(updatedUserLikes));
-    localStorage.setItem(
-      "galleryLikeCounts",
-      JSON.stringify(updatedLikeCounts)
-    );
 
-    // Try server sync
+    // Sync with server
     try {
-      const server = await incrementLike(imageId);
-      if (server && typeof server === "object") {
-        setLikeCounts(server);
+      console.log(
+        "Liking image:",
+        imageId,
+        "at",
+        `${API_BASE}/gallery/${imageId}/like`
+      );
+      const response = await fetch(`${API_BASE}/gallery/${imageId}/like`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      console.log("Like response status:", response.status);
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Like response data:", data);
+        setLikeCounts((prev) => ({
+          ...prev,
+          [imageId]: data.likes,
+        }));
+      } else {
+        const errorText = await response.text();
+        console.error("Like error response:", errorText);
       }
-    } catch {}
+    } catch (error) {
+      console.error("Error liking image:", error);
+    }
   };
 
   const shareImage = async (image) => {
     const shareData = {
       title: "Gallery image",
       text: "Check out this image from our gallery",
-      url: `${window.location.origin}/gallery#image-${image.id}`,
+      url: `${window.location.origin}/gallery#image-${image._id}`,
     };
 
     try {
@@ -227,7 +195,7 @@ const Gallery = () => {
   const openDashboard = () => {
     // Open dashboard in new tab to avoid disrupting user experience
     window.open(
-      "https://nexlife-api.vercel.app/login",
+      "https://nexlife-admin.vercel.app/login",
       "_blank",
       "noopener,noreferrer"
     );
@@ -296,86 +264,129 @@ const Gallery = () => {
       {/* Gallery Section */}
       <section className="py-12 sm:py-16 md:py-20 lg:py-24">
         <div className="container-custom px-4 sm:px-6 lg:px-8">
+          {/* Loading State */}
+          {loading && (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <Loader2 className="w-12 h-12 animate-spin text-indigo-400 mx-auto mb-4" />
+                <p className="text-slate-400">Loading gallery images...</p>
+              </div>
+            </div>
+          )}
+
+          {/* Error State */}
+          {error && (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
+                <p className="text-red-400 mb-4">{error}</p>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                >
+                  Try Again
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Gallery Grid */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ duration: 0.8 }}
-            className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 sm:gap-5 md:gap-6"
-          >
-            {galleryImages.map((image, index) => (
-              <motion.div
-                key={image.id}
-                initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{
-                  duration: 0.6,
-                  delay: index * 0.1,
-                  type: "spring",
-                  stiffness: 100,
-                }}
-                whileHover={{
-                  scale: 1.02,
-                  transition: { duration: 0.2 },
-                }}
-                className="group relative overflow-hidden rounded-2xl bg-transparent shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer"
-                onClick={() => openLightbox(image, index)}
-                style={{
-                  cursor: "pointer",
-                }}
-              >
-                <div className="aspect-square overflow-hidden relative bg-transparent">
-                  <img
-                    src={image.src}
-                    alt={"Gallery image"}
-                    className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-                  />
+          {!loading && !error && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ duration: 0.8 }}
+              className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 sm:gap-5 md:gap-6"
+            >
+              {galleryImages.map((image, index) => (
+                <motion.div
+                  key={image._id}
+                  initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                  whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                  transition={{
+                    duration: 0.6,
+                    delay: index * 0.1,
+                    type: "spring",
+                    stiffness: 100,
+                  }}
+                  whileHover={{
+                    scale: 1.02,
+                    transition: { duration: 0.2 },
+                  }}
+                  className="group relative overflow-hidden rounded-2xl bg-transparent shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer"
+                  onClick={() => openLightbox(image, index)}
+                  style={{
+                    cursor: "pointer",
+                  }}
+                >
+                  <div className="aspect-square overflow-hidden relative bg-transparent">
+                    <img
+                      src={image.url}
+                      alt={image.alt || "Gallery image"}
+                      className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                    />
 
-                  {/* Action Buttons */}
-                  <div className="absolute top-2 sm:top-4 right-2 sm:right-4 flex gap-1 sm:gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-                    <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        addLike(image.id);
-                      }}
-                      className="p-1.5 sm:p-2 rounded-full bg-red-500 text-white shadow-lg hover:bg-red-600 backdrop-blur-sm transition-all duration-300"
-                    >
-                      <Heart className="w-3 h-3 sm:w-4 sm:h-4 fill-current" />
-                    </motion.button>
+                    {/* Action Buttons */}
+                    <div className="absolute top-2 sm:top-4 right-2 sm:right-4 flex gap-1 sm:gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          addLike(image._id);
+                        }}
+                        className="p-1.5 sm:p-2 rounded-full bg-red-500 text-white shadow-lg hover:bg-red-600 backdrop-blur-sm transition-all duration-300"
+                      >
+                        <Heart className="w-3 h-3 sm:w-4 sm:h-4 fill-current" />
+                      </motion.button>
 
-                    <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        shareImage(image);
-                      }}
-                      className="p-1.5 sm:p-2 rounded-full bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm transition-all duration-300"
-                    >
-                      <Share2 className="w-3 h-3 sm:w-4 sm:h-4" />
-                    </motion.button>
-                  </div>
-
-                  {/* Like Count */}
-                  {likeCounts[image.id] > 0 && (
-                    <div className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-                      <div className="flex items-center gap-1 px-2 sm:px-3 py-1 bg-black/50 text-white text-xs sm:text-sm font-medium rounded-full backdrop-blur-sm">
-                        <Heart className="w-3 h-3 sm:w-4 sm:h-4 fill-current text-red-400" />
-                        <span>{likeCounts[image.id]}</span>
-                        {userLikes[image.id] > 0 && (
-                          <span className="text-red-300">
-                            ({userLikes[image.id]})
-                          </span>
-                        )}
-                      </div>
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          shareImage(image);
+                        }}
+                        className="p-1.5 sm:p-2 rounded-full bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm transition-all duration-300"
+                      >
+                        <Share2 className="w-3 h-3 sm:w-4 sm:h-4" />
+                      </motion.button>
                     </div>
-                  )}
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
+
+                    {/* Like Count */}
+                    {likeCounts[image._id] > 0 && (
+                      <div className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+                        <div className="flex items-center gap-1 px-2 sm:px-3 py-1 bg-black/50 text-white text-xs sm:text-sm font-medium rounded-full backdrop-blur-sm">
+                          <Heart className="w-3 h-3 sm:w-4 sm:h-4 fill-current text-red-400" />
+                          <span>{likeCounts[image._id]}</span>
+                          {userLikes[image._id] > 0 && (
+                            <span className="text-red-300">
+                              ({userLikes[image._id]})
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+
+          {/* Empty State */}
+          {!loading && !error && galleryImages.length === 0 && (
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Heart className="w-8 h-8 text-slate-400" />
+              </div>
+              <h3 className="text-lg font-medium text-slate-400 mb-2">
+                No images yet
+              </h3>
+              <p className="text-slate-500">
+                Check back later for new gallery images
+              </p>
+            </div>
+          )}
         </div>
       </section>
 
@@ -419,8 +430,8 @@ const Gallery = () => {
 
             {/* Image */}
             <img
-              src={selectedImage.src}
-              alt={"Gallery image"}
+              src={selectedImage.url}
+              alt={selectedImage.alt || "Gallery image"}
               className="max-h-[85vh] max-w-full w-auto h-auto object-contain rounded-lg bg-black mx-auto"
             />
 
@@ -434,18 +445,18 @@ const Gallery = () => {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => addLike(selectedImage.id)}
+                  onClick={() => addLike(selectedImage._id)}
                   className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1 sm:py-2 rounded-lg transition-all duration-300 text-xs sm:text-sm bg-red-500 text-white hover:bg-red-600"
                 >
                   <Heart className="w-3 h-3 sm:w-4 sm:h-4 fill-current" />
                   <span className="hidden sm:inline">Like</span>
-                  {likeCounts[selectedImage.id] > 0 && (
+                  {likeCounts[selectedImage._id] > 0 && (
                     <span className="ml-1 text-xs">
-                      {likeCounts[selectedImage.id]}
-                      {userLikes[selectedImage.id] > 0 && (
+                      {likeCounts[selectedImage._id]}
+                      {userLikes[selectedImage._id] > 0 && (
                         <span className="text-red-200">
                           {" "}
-                          ({userLikes[selectedImage.id]})
+                          ({userLikes[selectedImage._id]})
                         </span>
                       )}
                     </span>

@@ -37,31 +37,15 @@ export const ThemeProvider = ({ children }) => {
     // Add the current theme class
     root.classList.add(currentTheme);
 
-    // For dark mode, also add the 'dark' class for Tailwind
+    // For Tailwind dark mode
     if (currentTheme === "dark") {
       root.classList.add("dark");
+    } else {
+      root.classList.remove("dark");
     }
 
     // Save to localStorage
     localStorage.setItem("theme", currentTheme);
-
-    // Debug log
-    console.log(
-      "Theme changed to:",
-      currentTheme,
-      "Classes:",
-      root.classList.toString()
-    );
-
-    // Force a re-render of the entire app to ensure dark mode is applied
-    if (currentTheme === "dark") {
-      // Trigger a re-render by updating the body class
-      document.body.classList.add("dark");
-      document.body.classList.remove("light");
-    } else {
-      document.body.classList.add("light");
-      document.body.classList.remove("dark");
-    }
   }, [currentTheme]);
 
   const changeTheme = (themeName) => {
@@ -71,7 +55,10 @@ export const ThemeProvider = ({ children }) => {
   };
 
   const toggleTheme = () => {
-    setCurrentTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
+    const themes = ["light", "dark", "brand"];
+    const currentIndex = themes.indexOf(currentTheme);
+    const nextIndex = (currentIndex + 1) % themes.length;
+    setCurrentTheme(themes[nextIndex]);
   };
 
   const value = {

@@ -1,6 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { ThemeProvider } from "./contexts/ThemeContext";
+import { ThemeProvider, useTheme } from "./contexts/ThemeContext";
 import { useMobileViewport } from "./hooks/useMobileViewport";
 import SEOHead from "./components/SEOHead";
 import Navbar from "./components/Navbar";
@@ -51,171 +51,178 @@ import NotFound from "./pages/NotFound";
 import ErrorBoundary from "./components/ErrorBoundary";
 import "./i18n";
 
-function App() {
+function AppContent() {
   // Initialize mobile viewport optimization
   useMobileViewport();
+  const { theme } = useTheme();
 
   return (
-    <ThemeProvider>
-      <Router>
-        <SEOHead />
-        <ScrollToTop />
-        <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300 w-full max-w-full overflow-x-hidden">
-          <Navbar />
-          <main className="pt-36 w-full max-w-full overflow-x-hidden">
-            <Routes>
-              <Route
-                path="/"
-                element={
-                  <ErrorBoundary>
-                    <Home />
-                  </ErrorBoundary>
-                }
-              />
-              <Route path="/about" element={<About />} />
-              <Route path="/products" element={<Products />} />
-              <Route
-                path="/products/analgesic"
-                element={<AnalgesicProducts />}
-              />
-              <Route
-                path="/products/anthelmintic"
-                element={<AnthelminticProducts />}
-              />
-              <Route
-                path="/products/anti-allergic"
-                element={<AntiAllergicProducts />}
-              />
-              <Route
-                path="/products/anti-diabetic"
-                element={<AntiDiabeticProducts />}
-              />
-              <Route
-                path="/products/ayurvedic"
-                element={<AyurvedicProducts />}
-              />
-              <Route
-                path="/products/anti-malarial"
-                element={<AntiMalarialProducts />}
-              />
-              <Route
-                path="/products/anti-protozoal"
-                element={<AntiProtozoalProducts />}
-              />
-              <Route
-                path="/products/cardiovascular"
-                element={<CardiovascularProducts />}
-              />
-              <Route
-                path="/products/anti-fungal"
-                element={<AntiFungalProducts />}
-              />
-              <Route
-                path="/products/anti-spasmodic"
-                element={<AntiSpasmodicProducts />}
-              />
-              <Route
-                path="/products/antibiotics-general"
-                element={<AntibioticsGeneralProducts />}
-              />
-              <Route
-                path="/products/anti-convulsant"
-                element={<AntiConvulsantProducts />}
-              />
-              <Route
-                path="/products/anti-emetic"
-                element={<AntiEmeticProducts />}
-              />
-              <Route
-                path="/products/anti-ulcerative"
-                element={<AntiUlcerativeProducts />}
-              />
-              <Route
-                path="/products/anti-viral"
-                element={<AntiViralProducts />}
-              />
-              <Route
-                path="/products/erectile-dysfunction"
-                element={<ErectileDysfunctionProducts />}
-              />
-              <Route
-                path="/products/lipid-lowering"
-                element={<LipidLoweringProducts />}
-              />
-              <Route
-                path="/products/platelet-aggregation"
-                element={<PlateletAggregationProducts />}
-              />
-              <Route
-                path="/products/steroidal-drugs"
-                element={<SteroidalDrugsProducts />}
-              />
-              <Route
-                path="/products/capsules/analgesic"
-                element={<AnalgesicCapsules />}
-              />
-              <Route
-                path="/products/capsules/anti-depressant"
-                element={<AntiDepressantCapsules />}
-              />
-              <Route
-                path="/products/capsules/anti-epileptic"
-                element={<AntiEpilepticCapsules />}
-              />
-              <Route
-                path="/products/capsules/anti-fungal"
-                element={<AntiFungalCapsules />}
-              />
-              <Route
-                path="/products/capsules/anti-malarial"
-                element={<AntiMalarialCapsules />}
-              />
-              <Route
-                path="/products/capsules/anti-migraine"
-                element={<AntiMigraineCapsules />}
-              />
-              <Route
-                path="/products/capsules/anti-protozoal"
-                element={<AntiProtozoalCapsules />}
-              />
-              <Route
-                path="/products/capsules/anti-tubercular"
-                element={<AntiTubercularCapsules />}
-              />
-              <Route
-                path="/products/capsules/anti-ulcerative"
-                element={<AntiUlcerativeCapsules />}
-              />
-              <Route
-                path="/products/capsules/cardiovascular"
-                element={<CardiovascularCapsules />}
-              />
-              <Route
-                path="/products/capsules/general-antibiotics"
-                element={<GeneralAntibioticsCapsules />}
-              />
-              <Route
-                path="/products/capsules/multi-vitamins"
-                element={<MultiVitaminsCapsules />}
-              />
-              <Route path="/products/dry-syrups" element={<DrySyrups />} />
-              <Route
-                path="/products/capsules/anti-convulsant"
-                element={<AntiConvulsantCapsules />}
-              />
-              <Route path="/products/surgical" element={<SurgicalProducts />} />
+    <Router>
+      <SEOHead />
+      <ScrollToTop />
+      <div className={`min-h-screen transition-colors duration-300 w-full max-w-full overflow-x-hidden ${theme.background} ${theme.text}`}>
+        <Navbar />
+        <main className="pt-36 w-full max-w-full overflow-x-hidden">
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <ErrorBoundary>
+                  <Home />
+                </ErrorBoundary>
+              }
+            />
+            <Route path="/about" element={<About />} />
+            <Route path="/products" element={<Products />} />
+            <Route
+              path="/products/analgesic"
+              element={<AnalgesicProducts />}
+            />
+            <Route
+              path="/products/anthelmintic"
+              element={<AnthelminticProducts />}
+            />
+            <Route
+              path="/products/anti-allergic"
+              element={<AntiAllergicProducts />}
+            />
+            <Route
+              path="/products/anti-diabetic"
+              element={<AntiDiabeticProducts />}
+            />
+            <Route
+              path="/products/ayurvedic"
+              element={<AyurvedicProducts />}
+            />
+            <Route
+              path="/products/anti-malarial"
+              element={<AntiMalarialProducts />}
+            />
+            <Route
+              path="/products/anti-protozoal"
+              element={<AntiProtozoalProducts />}
+            />
+            <Route
+              path="/products/cardiovascular"
+              element={<CardiovascularProducts />}
+            />
+            <Route
+              path="/products/anti-fungal"
+              element={<AntiFungalProducts />}
+            />
+            <Route
+              path="/products/anti-spasmodic"
+              element={<AntiSpasmodicProducts />}
+            />
+            <Route
+              path="/products/antibiotics-general"
+              element={<AntibioticsGeneralProducts />}
+            />
+            <Route
+              path="/products/anti-convulsant"
+              element={<AntiConvulsantProducts />}
+            />
+            <Route
+              path="/products/anti-emetic"
+              element={<AntiEmeticProducts />}
+            />
+            <Route
+              path="/products/anti-ulcerative"
+              element={<AntiUlcerativeProducts />}
+            />
+            <Route
+              path="/products/anti-viral"
+              element={<AntiViralProducts />}
+            />
+            <Route
+              path="/products/erectile-dysfunction"
+              element={<ErectileDysfunctionProducts />}
+            />
+            <Route
+              path="/products/lipid-lowering"
+              element={<LipidLoweringProducts />}
+            />
+            <Route
+              path="/products/platelet-aggregation"
+              element={<PlateletAggregationProducts />}
+            />
+            <Route
+              path="/products/steroidal-drugs"
+              element={<SteroidalDrugsProducts />}
+            />
+            <Route
+              path="/products/capsules/analgesic"
+              element={<AnalgesicCapsules />}
+            />
+            <Route
+              path="/products/capsules/anti-depressant"
+              element={<AntiDepressantCapsules />}
+            />
+            <Route
+              path="/products/capsules/anti-epileptic"
+              element={<AntiEpilepticCapsules />}
+            />
+            <Route
+              path="/products/capsules/anti-fungal"
+              element={<AntiFungalCapsules />}
+            />
+            <Route
+              path="/products/capsules/anti-malarial"
+              element={<AntiMalarialCapsules />}
+            />
+            <Route
+              path="/products/capsules/anti-migraine"
+              element={<AntiMigraineCapsules />}
+            />
+            <Route
+              path="/products/capsules/anti-protozoal"
+              element={<AntiProtozoalCapsules />}
+            />
+            <Route
+              path="/products/capsules/anti-tubercular"
+              element={<AntiTubercularCapsules />}
+            />
+            <Route
+              path="/products/capsules/anti-ulcerative"
+              element={<AntiUlcerativeCapsules />}
+            />
+            <Route
+              path="/products/capsules/cardiovascular"
+              element={<CardiovascularCapsules />}
+            />
+            <Route
+              path="/products/capsules/general-antibiotics"
+              element={<GeneralAntibioticsCapsules />}
+            />
+            <Route
+              path="/products/capsules/multi-vitamins"
+              element={<MultiVitaminsCapsules />}
+            />
+            <Route path="/products/dry-syrups" element={<DrySyrups />} />
+            <Route
+              path="/products/capsules/anti-convulsant"
+              element={<AntiConvulsantCapsules />}
+            />
+            <Route path="/products/surgical" element={<SurgicalProducts />} />
 
-              <Route path="/services" element={<Services />} />
-              <Route path="/gallery" element={<Gallery />} />
-              <Route path="/global-presence" element={<GlobalPresence />} />
-              <Route path="/contact" element={<Contact />} />
-              {/* 404 Route - Must be last */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </main>
-          <Footer />
-        </div>
-      </Router>
+            <Route path="/services" element={<Services />} />
+            <Route path="/gallery" element={<Gallery />} />
+            <Route path="/global-presence" element={<GlobalPresence />} />
+            <Route path="/contact" element={<Contact />} />
+            {/* 404 Route - Must be last */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </main>
+        <Footer />
+      </div>
+    </Router>
+  );
+}
+
+function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
     </ThemeProvider>
   );
 }

@@ -6,8 +6,7 @@ import Switch from "./Switch";
 import TranslationMessage from "./TranslationMessage";
 
 const ThemeToggle = () => {
-  const { currentTheme, changeTheme } = useContext(ThemeContext);
-  const [isDark, setIsDark] = useState(currentTheme === "dark");
+  const { currentTheme, toggleTheme } = useContext(ThemeContext);
   const [showMessage, setShowMessage] = useState(false);
 
   const handleTranslateClick = () => {
@@ -15,15 +14,8 @@ const ThemeToggle = () => {
   };
 
   const handleThemeToggle = () => {
-    const newTheme = isDark ? "light" : "dark";
-    setIsDark(!isDark);
-    changeTheme(newTheme);
+    toggleTheme();
   };
-
-  // Update state when theme changes externally
-  useEffect(() => {
-    setIsDark(currentTheme === "dark");
-  }, [currentTheme]);
 
   return (
     <>
@@ -55,7 +47,7 @@ const ThemeToggle = () => {
 
         {/* New Animated Theme Toggle Switch - Mobile Optimized */}
         <div className="scale-75 sm:scale-100">
-          <Switch isDark={isDark} onToggle={handleThemeToggle} />
+          <Switch isDark={currentTheme !== "light"} onToggle={handleThemeToggle} />
         </div>
       </div>
 

@@ -14,12 +14,13 @@ export const seoConfig = {
     type: "website",
     author: "Nexlife International",
     publisher: "Nexlife International",
-    robots: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
+    robots:
+      "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
     canonical: "https://www.nexlifeinternational.com",
     alternate: {
       "x-default": "https://www.nexlifeinternational.com",
-      "en": "https://www.nexlifeinternational.com",
-      "hi": "https://www.nexlifeinternational.com/hi",
+      en: "https://www.nexlifeinternational.com",
+      hi: "https://www.nexlifeinternational.com/hi",
     },
   },
 

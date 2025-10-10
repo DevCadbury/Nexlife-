@@ -1,0 +1,278 @@
+import express from "express";
+import multer from "multer";
+import { v2 as cloudinary } from "cloudinary";
+import { getCollections } from "../db.js";
+import { requireAuth } from "./auth.js";
+import { logCommunication, ActivityLevel } from "../config/logger.js";
+
+// Cloudinary configuration is handled in server.js
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 8 * 1024 * 1024 },
+});
+const router = express.Router();
+
+// Public: list gallery (only visible items, hide admin notes)
+router.get("/", async (req, res) => {
+  const { gallery } = await getCollections();
+  const items = await gallery
+    .find({ visible: { $ne: false } })
+    .project({ adminNote: 0 })
+    .sort({ createdAt: -1 })
+    .toArray();
+  res.json({ total: items.length, items });
+});
+
+// Admin: list all (includes invisible and admin notes)
+router.get(
+  "/admin",
+  requireAuth(["superadmin", "admin", "staff"]),
+  async (req, res) => {
+    const { gallery } = await getCollections();
+    const items = await gallery
+      .find({})
+      .project({})
+      .sort({ createdAt: -1 })
+      .toArray();
+    res.json({ total: items.length, items });
+  }
+);
+
+// Admin: upload image
+router.post(
+  "/upload",
+  requireAuth(["superadmin", "admin"]),
+  upload.single("file"),
+  async (req, res) => {
+    if (!req.file) return res.status(400).json({ error: "File required" });
+    try {
+      const result = await cloudinary.uploader.upload_stream(
+        {
+          folder: "nexlife-gallery",
+          resource_type: "image",
+          transformation: [
+            { width: 1200, height: 1200, crop: "limit" },
+            { quality: "auto" },
+            { fetch_format: "auto" },
+          ],
+        },
+        async (error, uploaded) => {
+          if (error) return res.status(500).json({ error: error.message });
+          const { gallery } = await getCollections();
+          const doc = {
+            url: uploaded.secure_url,
+            publicId: uploaded.public_id,
+            alt: req.body.alt || "Gallery image",
+            format: uploaded.format,
+            bytes: uploaded.bytes,
+            width: uploaded.width,
+            height: uploaded.height,
+            likes: 0,
+            views: 0,
+            visible: true,
+            adminNote: "",
+            uploadedBy: {
+              id: req.user?.id,
+              name: req.user?.name || "Admin",
+              email: req.user?.email || "admin@nexlifeinternational.com",
+            },
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          };
+          const r = await gallery.insertOne(doc);
+          await logCommunication(req, {
+            level: ActivityLevel.SUCCESS,
+            type: "gallery.upload",
+            message: `Uploaded gallery image ${doc.publicId}`,
+            refId: r.insertedId,
+            actorId: req.user?.id,
+            actorName: req.user?.name,
+            meta: { publicId: doc.publicId },
+          });
+          res.json({ success: true, item: { _id: r.insertedId, ...doc } });
+        }
+      );
+      result.end(req.file.buffer);
+    } catch (e) {
+      res.status(500).json({ error: e.message });
+    }
+  }
+);
+
+// Admin: delete image
+router.delete(
+  "/:id",
+  requireAuth(["superadmin", "admin"]),
+  async (req, res) => {
+    const { gallery } = await getCollections();
+    const item = await gallery.findOne({
+      _id: new (await import("mongodb")).ObjectId(req.params.id),
+    });
+    if (!item) return res.status(404).json({ error: "Not found" });
+    try {
+      if (item.publicId) await cloudinary.uploader.destroy(item.publicId);
+    } catch (_) {}
+    await gallery.deleteOne({ _id: item._id });
+    await logCommunication(req, {
+      level: ActivityLevel.WARN,
+      type: "gallery.delete",
+      message: `Deleted gallery image ${item.publicId || String(item._id)}`,
+      refId: item._id,
+      actorId: req.user?.id,
+      actorName: req.user?.name,
+      meta: { publicId: item.publicId || null },
+    });
+    res.json({ success: true });
+  }
+);
+
+// Public: like an image
+router.post("/:id/like", async (req, res) => {
+  const { gallery } = await getCollections();
+  const _id = new (await import("mongodb")).ObjectId(req.params.id);
+  await gallery.updateOne({ _id }, { $inc: { likes: 1 } });
+  const item = await gallery.findOne({ _id });
+  res.json({ likes: item?.likes || 0 });
+});
+
+// Public: get single image and increment view count (hide admin notes)
+router.get("/:id", async (req, res) => {
+  try {
+    const { gallery } = await getCollections();
+    const _id = new (await import("mongodb")).ObjectId(req.params.id);
+
+    const item = await gallery.findOne(
+      { _id },
+      { projection: { adminNote: 0 } }
+    );
+    if (!item) {
+      return res.status(404).json({ error: "Image not found" });
+    }
+
+    // Increment view count
+    await gallery.updateOne({ _id }, { $inc: { views: 1 } });
+
+    res.json({
+      item: {
+        ...item,
+        views: (item.views || 0) + 1,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching image:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Admin: set visibility
+router.patch(
+  "/:id/visibility",
+  requireAuth(["superadmin", "admin"]),
+  async (req, res) => {
+    try {
+      const { visible } = req.body || {};
+      if (typeof visible !== "boolean") {
+        return res.status(400).json({ error: "visible boolean required" });
+      }
+      const { gallery } = await getCollections();
+      const _id = new (await import("mongodb")).ObjectId(req.params.id);
+      await gallery.updateOne(
+        { _id },
+        { $set: { visible, updatedAt: new Date() } }
+      );
+      await logCommunication(req, {
+        level: ActivityLevel.INFO,
+        type: "gallery.visibility",
+        message: `Set gallery visibility to ${visible}`,
+        refId: _id,
+        actorId: req.user?.id,
+        actorName: req.user?.name,
+        meta: { visible },
+      });
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Set visibility error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  }
+);
+
+// Admin: set admin note (private)
+router.patch(
+  "/:id/note",
+  requireAuth(["superadmin", "admin"]),
+  async (req, res) => {
+    try {
+      const note = String((req.body?.note || "").slice(0, 2000));
+      const { gallery } = await getCollections();
+      const _id = new (await import("mongodb")).ObjectId(req.params.id);
+      await gallery.updateOne(
+        { _id },
+        { $set: { adminNote: note, updatedAt: new Date() } }
+      );
+      await logCommunication(req, {
+        level: ActivityLevel.INFO,
+        type: "gallery.note",
+        message: `Updated admin note`,
+        refId: _id,
+        actorId: req.user?.id,
+        actorName: req.user?.name,
+      });
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Set note error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  }
+);
+
+// Admin: migrate existing gallery images to include uploader info
+router.post(
+  "/migrate-uploaders",
+  requireAuth(["superadmin"]),
+  async (req, res) => {
+    try {
+      const { gallery } = await getCollections();
+
+      // Find all images without uploadedBy field
+      const imagesWithoutUploader = await gallery
+        .find({
+          uploadedBy: { $exists: false },
+        })
+        .toArray();
+
+      console.log(
+        `Found ${imagesWithoutUploader.length} images without uploader info`
+      );
+
+      // Update each image with default uploader info
+      const updatePromises = imagesWithoutUploader.map((image) =>
+        gallery.updateOne(
+          { _id: image._id },
+          {
+            $set: {
+              uploadedBy: {
+                id: "unknown",
+                name: "System",
+                email: "system@nexlifeinternational.com",
+              },
+            },
+          }
+        )
+      );
+
+      await Promise.all(updatePromises);
+
+      res.json({
+        success: true,
+        message: `Updated ${imagesWithoutUploader.length} images with default uploader info`,
+      });
+    } catch (error) {
+      console.error("Error migrating uploaders:", error);
+      res.status(500).json({ error: "Migration failed" });
+    }
+  }
+);
+
+export default router;

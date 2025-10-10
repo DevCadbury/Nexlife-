@@ -1,17 +1,37 @@
 {
   "version": 2,
+  "name": "nexlife-api",
   "builds": [{ "src": "server.js", "use": "@vercel/node" }],
   "routes": [
     { "src": "/api/(.*)", "dest": "/server.js" },
     { "src": "/(.*)", "dest": "/server.js" }
   ],
   "env": {
-    "SMTP_HOST": "",
-    "SMTP_PORT": "",
-    "SMTP_SECURE": "true",
-    "SMTP_USER": "",
-    "SMTP_PASS": "",
-    "CONTACT_TO": "",
-    "DASH_PASSWORD": ""
+    "NODE_ENV": "production",
+    "SMTP_HOST": "@smtp_host",
+    "SMTP_PORT": "@smtp_port",
+    "SMTP_SECURE": "@smtp_secure",
+    "SMTP_USER": "@smtp_user",
+    "SMTP_PASS": "@smtp_pass",
+    "CONTACT_TO": "@contact_to",
+    "DASH_PASSWORD": "@dash_password",
+    "MONGODB_URI": "@mongodb_uri",
+    "MONGODB_DB": "@mongodb_db",
+    "JWT_SECRET": "@jwt_secret",
+    "SUPERADMIN_EMAIL": "@superadmin_email",
+    "SUPERADMIN_PASSWORD": "@superadmin_password",
+    "CLOUDINARY_CLOUD_NAME": "@cloudinary_cloud_name",
+    "CLOUDINARY_API_KEY": "@cloudinary_api_key",
+    "CLOUDINARY_API_SECRET": "@cloudinary_api_secret",
+    "IMAP_HOST": "@imap_host",
+    "IMAP_PORT": "@imap_port",
+    "IMAP_SECURE": "@imap_secure",
+    "IMAP_USER": "@imap_user",
+    "IMAP_PASS": "@imap_pass"
+  },
+  "functions": {
+    "server.js": {
+      "maxDuration": 30
+    }
   }
 }

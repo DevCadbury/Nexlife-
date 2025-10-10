@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create Enquiry - Nexlife International</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      .gradient-bg {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
+      .glass-effect {
+        backdrop-filter: blur(10px);
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+      .form-input {
+        transition: all 0.3s ease;
+      }
+      .form-input:focus {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      }
+      .submit-btn {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        transition: all 0.3s ease;
+      }
+      .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+      }
+      .floating-label {
+        transition: all 0.3s ease;
+      }
+      .form-input:focus + .floating-label,
+      .form-input:not(:placeholder-shown) + .floating-label {
+        transform: translateY(-25px) scale(0.9);
+        color: #667eea;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen gradient-bg">
+    <!-- Header -->
+    <header class="bg-white/10 backdrop-blur-md border-b border-white/20">
+      <div class="container mx-auto px-6 py-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <div
+              class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center"
+            >
+              <i class="fas fa-pills text-white text-xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-white">Nexlife International</h1>
+          </div>
+          <nav class="hidden md:flex space-x-6">
+            <a href="#" class="text-white/80 hover:text-white transition-colors"
+              >Home</a
+            >
+            <a href="#" class="text-white/80 hover:text-white transition-colors"
+              >Products</a
+            >
+            <a href="#" class="text-white/80 hover:text-white transition-colors"
+              >About</a
+            >
+            <a href="#" class="text-white/80 hover:text-white transition-colors"
+              >Contact</a
+            >
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-12">
+      <div class="max-w-4xl mx-auto">
+        <!-- Page Header -->
+        <div class="text-center mb-12">
+          <h2 class="text-4xl font-bold text-white mb-4">Create New Enquiry</h2>
+          <p class="text-white/80 text-lg">
+            Fill out the form below to submit your enquiry. We'll get back to
+            you within 24 hours.
+          </p>
+        </div>
+
+        <!-- Enquiry Form -->
+        <div class="glass-effect rounded-2xl p-8 shadow-2xl">
+          <!-- Loading Overlay (Hidden by default) -->
+          <div
+            id="loadingOverlay"
+            class="hidden absolute inset-0 bg-black/50 backdrop-blur-sm rounded-2xl flex items-center justify-center z-10"
+          >
+            <div class="text-center">
+              <div
+                class="w-16 h-16 border-4 border-white/20 border-t-white rounded-full animate-spin mx-auto mb-4"
+              ></div>
+              <p class="text-white text-lg font-semibold">
+                Submitting your enquiry...
+              </p>
+            </div>
+          </div>
+
+          <form id="enquiryForm" class="space-y-8 relative">
+            <!-- Personal Information Section -->
+            <div class="bg-white/5 rounded-xl p-6">
+              <h3
+                class="text-xl font-semibold text-white mb-6 flex items-center"
+              >
+                <i class="fas fa-user mr-3 text-blue-400"></i>
+                Personal Information
+              </h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="relative">
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    placeholder=" "
+                    required
+                    class="form-input w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-transparent focus:outline-none focus:border-blue-400 focus:bg-white/20"
+                  />
+                  <label
+                    for="name"
+                    class="floating-label absolute left-4 top-3 text-white/70 pointer-events-none"
+                  >
+                    Full Name *
+                  </label>
+                </div>
+                <div class="relative">
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder=" "
+                    required
+                    class="form-input w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-transparent focus:outline-none focus:border-blue-400 focus:bg-white/20"
+                  />
+                  <label
+                    for="email"
+                    class="floating-label absolute left-4 top-3 text-white/70 pointer-events-none"
+                  >
+                    Email Address *
+                  </label>
+                </div>
+                <div class="relative">
+                  <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    placeholder=" "
+                    class="form-input w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-transparent focus:outline-none focus:border-blue-400 focus:bg-white/20"
+                  />
+                  <label
+                    for="phone"
+                    class="floating-label absolute left-4 top-3 text-white/70 pointer-events-none"
+                  >
+                    Phone Number
+                  </label>
+                </div>
+                <div class="relative">
+                  <input
+                    type="text"
+                    id="company"
+                    name="company"
+                    placeholder=" "
+                    class="form-input w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-transparent focus:outline-none focus:border-blue-400 focus:bg-white/20"
+                  />
+                  <label
+                    for="company"
+                    class="floating-label absolute left-4 top-3 text-white/70 pointer-events-none"
+                  >
+                    Company/Organization
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Enquiry Details Section -->
+            <div class="bg-white/5 rounded-xl p-6">
+              <h3
+                class="text-xl font-semibold text-white mb-6 flex items-center"
+              >
+                <i class="fas fa-clipboard-list mr-3 text-green-400"></i>
+                Enquiry Details
+              </h3>
+              <div class="space-y-6">
+                <div class="relative">
+                  <input
+                    type="text"
+                    id="subject"
+                    name="subject"
+                    placeholder=" "
+                    required
+                    class="form-input w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-transparent focus:outline-none focus:border-blue-400 focus:bg-white/20"
+                  />
+                  <label
+                    for="subject"
+                    class="floating-label absolute left-4 top-3 text-white/70 pointer-events-none"
+                  >
+                    Subject *
+                  </label>
+                </div>
+                <div class="relative">
+                  <select
+                    id="category"
+                    name="category"
+                    required
+                    class="form-input w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-blue-400 focus:bg-white/20"
+                  >
+                    <option value="" class="bg-gray-800 text-white">
+                      Select Category
+                    </option>
+                    <option
+                      value="product_inquiry"
+                      class="bg-gray-800 text-white"
+                    >
+                      Product Inquiry
+                    </option>
+                    <option value="pricing" class="bg-gray-800 text-white">
+                      Pricing Information
+                    </option>
+                    <option value="partnership" class="bg-gray-800 text-white">
+                      Partnership Opportunity
+                    </option>
+                    <option value="support" class="bg-gray-800 text-white">
+                      Technical Support
+                    </option>
+                    <option value="other" class="bg-gray-800 text-white">
+                      Other
+                    </option>
+                  </select>
+                </div>
+                <div class="relative">
+                  <textarea
+                    id="message"
+                    name="message"
+                    placeholder=" "
+                    rows="6"
+                    required
+                    class="form-input w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-transparent focus:outline-none focus:border-blue-400 focus:bg-white/20 resize-none"
+                  ></textarea>
+                  <label
+                    for="message"
+                    class="floating-label absolute left-4 top-3 text-white/70 pointer-events-none"
+                  >
+                    Message *
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Product Interest Section -->
+            <div class="bg-white/5 rounded-xl p-6">
+              <h3
+                class="text-xl font-semibold text-white mb-6 flex items-center"
+              >
+                <i class="fas fa-pills mr-3 text-purple-400"></i>
+                Product Interest
+              </h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-3">
+                  <label class="text-white/80 text-sm font-medium"
+                    >Products of Interest</label
+                  >
+                  <div class="space-y-2">
+                    <label class="flex items-center space-x-3 text-white/80">
+                      <input
+                        type="checkbox"
+                        name="products"
+                        value="analgesic"
+                        class="w-4 h-4 text-blue-600 bg-white/10 border-white/20 rounded focus:ring-blue-500"
+                      />
+                      <span>Analgesic Products</span>
+                    </label>
+                    <label class="flex items-center space-x-3 text-white/80">
+                      <input
+                        type="checkbox"
+                        name="products"
+                        value="antibiotic"
+                        class="w-4 h-4 text-blue-600 bg-white/10 border-white/20 rounded focus:ring-blue-500"
+                      />
+                      <span>Antibiotic Products</span>
+                    </label>
+                    <label class="flex items-center space-x-3 text-white/80">
+                      <input
+                        type="checkbox"
+                        name="products"
+                        value="antifungal"
+                        class="w-4 h-4 text-blue-600 bg-white/10 border-white/20 rounded focus:ring-blue-500"
+                      />
+                      <span>Antifungal Products</span>
+                    </label>
+                    <label class="flex items-center space-x-3 text-white/80">
+                      <input
+                        type="checkbox"
+                        name="products"
+                        value="cardiovascular"
+                        class="w-4 h-4 text-blue-600 bg-white/10 border-white/20 rounded focus:ring-blue-500"
+                      />
+                      <span>Cardiovascular Products</span>
+                    </label>
+                  </div>
+                </div>
+                <div class="space-y-3">
+                  <label class="text-white/80 text-sm font-medium"
+                    >Quantity Required</label
+                  >
+                  <div class="space-y-2">
+                    <label class="flex items-center space-x-3 text-white/80">
+                      <input
+                        type="radio"
+                        name="quantity"
+                        value="small"
+                        class="w-4 h-4 text-blue-600 bg-white/10 border-white/20 focus:ring-blue-500"
+                      />
+                      <span>Small (1-100 units)</span>
+                    </label>
+                    <label class="flex items-center space-x-3 text-white/80">
+                      <input
+                        type="radio"
+                        name="quantity"
+                        value="medium"
+                        class="w-4 h-4 text-blue-600 bg-white/10 border-white/20 focus:ring-blue-500"
+                      />
+                      <span>Medium (100-1000 units)</span>
+                    </label>
+                    <label class="flex items-center space-x-3 text-white/80">
+                      <input
+                        type="radio"
+                        name="quantity"
+                        value="large"
+                        class="w-4 h-4 text-blue-600 bg-white/10 border-white/20 focus:ring-blue-500"
+                      />
+                      <span>Large (1000+ units)</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Additional Information Section -->
+            <div class="bg-white/5 rounded-xl p-6">
+              <h3
+                class="text-xl font-semibold text-white mb-6 flex items-center"
+              >
+                <i class="fas fa-info-circle mr-3 text-yellow-400"></i>
+                Additional Information
+              </h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="relative">
+                  <input
+                    type="text"
+                    id="country"
+                    name="country"
+                    placeholder=" "
+                    class="form-input w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-transparent focus:outline-none focus:border-blue-400 focus:bg-white/20"
+                  />
+                  <label
+                    for="country"
+                    class="floating-label absolute left-4 top-3 text-white/70 pointer-events-none"
+                  >
+                    Country
+                  </label>
+                </div>
+                <div class="relative">
+                  <input
+                    type="text"
+                    id="city"
+                    name="city"
+                    placeholder=" "
+                    class="form-input w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-transparent focus:outline-none focus:border-blue-400 focus:bg-white/20"
+                  />
+                  <label
+                    for="city"
+                    class="floating-label absolute left-4 top-3 text-white/70 pointer-events-none"
+                  >
+                    City
+                  </label>
+                </div>
+                <div class="relative">
+                  <input
+                    type="date"
+                    id="preferred_date"
+                    name="preferred_date"
+                    class="form-input w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-blue-400 focus:bg-white/20"
+                  />
+                  <label
+                    for="preferred_date"
+                    class="absolute left-4 top-3 text-white/70 pointer-events-none"
+                  >
+                    Preferred Response Date
+                  </label>
+                </div>
+                <div class="relative">
+                  <select
+                    id="urgency"
+                    name="urgency"
+                    class="form-input w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-blue-400 focus:bg-white/20"
+                  >
+                    <option value="" class="bg-gray-800 text-white">
+                      Select Urgency
+                    </option>
+                    <option value="low" class="bg-gray-800 text-white">
+                      Low
+                    </option>
+                    <option value="medium" class="bg-gray-800 text-white">
+                      Medium
+                    </option>
+                    <option value="high" class="bg-gray-800 text-white">
+                      High
+                    </option>
+                    <option value="urgent" class="bg-gray-800 text-white">
+                      Urgent
+                    </option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Terms and Submit -->
+            <div class="bg-white/5 rounded-xl p-6">
+              <div class="space-y-6">
+                <label class="flex items-start space-x-3 text-white/80">
+                  <input
+                    type="checkbox"
+                    name="terms"
+                    required
+                    class="w-4 h-4 text-blue-600 bg-white/10 border-white/20 rounded focus:ring-blue-500 mt-1"
+                  />
+                  <span class="text-sm"
+                    >I agree to the
+                    <a
+                      href="#"
+                      class="text-blue-400 hover:text-blue-300 underline"
+                      >Terms and Conditions</a
+                    >
+                    and
+                    <a
+                      href="#"
+                      class="text-blue-400 hover:text-blue-300 underline"
+                      >Privacy Policy</a
+                    ></span
+                  >
+                </label>
+                <label class="flex items-start space-x-3 text-white/80">
+                  <input
+                    type="checkbox"
+                    name="newsletter"
+                    class="w-4 h-4 text-blue-600 bg-white/10 border-white/20 rounded focus:ring-blue-500 mt-1"
+                  />
+                  <span class="text-sm"
+                    >Subscribe to our newsletter for updates and product
+                    information</span
+                  >
+                </label>
+                <div class="flex flex-col sm:flex-row gap-4">
+                  <button
+                    type="submit"
+                    class="submit-btn flex-1 px-8 py-4 text-white font-semibold rounded-lg flex items-center justify-center space-x-2"
+                  >
+                    <i class="fas fa-paper-plane"></i>
+                    <span>Submit Enquiry</span>
+                  </button>
+                  <button
+                    type="button"
+                    onclick="resetForm()"
+                    class="flex-1 px-8 py-4 bg-white/10 border border-white/20 text-white font-semibold rounded-lg hover:bg-white/20 transition-all duration-300 flex items-center justify-center space-x-2"
+                  >
+                    <i class="fas fa-undo"></i>
+                    <span>Reset Form</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- Success Message (Hidden by default) -->
+        <div
+          id="successMessage"
+          class="hidden glass-effect rounded-2xl p-8 shadow-2xl mt-8"
+        >
+          <div class="text-center">
+            <div
+              class="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4"
+            >
+              <i class="fas fa-check text-green-400 text-2xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-white mb-2">
+              Enquiry Submitted Successfully!
+            </h3>
+            <p class="text-white/80">
+              Thank you for your enquiry. We'll get back to you within 24 hours.
+            </p>
+          </div>
+        </div>
+
+        <!-- Error Message (Hidden by default) -->
+        <div
+          id="errorMessage"
+          class="hidden glass-effect rounded-2xl p-8 shadow-2xl mt-8 border border-red-500/20"
+        >
+          <div class="text-center">
+            <div
+              class="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4"
+            >
+              <i class="fas fa-exclamation-triangle text-red-400 text-2xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-white mb-2">
+              Submission Failed
+            </h3>
+            <p class="text-white/80 mb-4" id="errorText">
+              There was an error submitting your enquiry. Please try again.
+            </p>
+            <button
+              onclick="hideError()"
+              class="px-6 py-2 bg-red-500/20 border border-red-500/30 text-red-300 rounded-lg hover:bg-red-500/30 transition-all duration-300"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white/10 backdrop-blur-md border-t border-white/20 mt-16">
+      <div class="container mx-auto px-6 py-8">
+        <div class="text-center text-white/80">
+          <p>&copy; 2024 Nexlife International. All rights reserved.</p>
+          <p class="mt-2">
+            Contact: info@nexlifeinternational.com | +1 (555) 123-4567
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      // API Configuration
+      const API_BASE_URL =
+        window.location.hostname === "localhost" ||
+        window.location.hostname === "127.0.0.1"
+          ? "http://localhost:4000/api"
+          : "http://localhost:4000/api";
+
+      // Development mode indicator
+      console.log("Development Mode:", window.location.hostname);
+      console.log("API Base URL:", API_BASE_URL);
+
+      // Test backend connection
+      async function testBackendConnection() {
+        try {
+          const response = await fetch(`${API_BASE_URL}/health`, {
+            method: "GET",
+            mode: "cors",
+          });
+          console.log(
+            "Backend connection test:",
+            response.ok ? "SUCCESS" : "FAILED"
+          );
+        } catch (error) {
+          console.log("Backend connection test: FAILED -", error.message);
+        }
+      }
+
+      // Test connection on page load
+      testBackendConnection();
+
+      // Form handling
+      document
+        .getElementById("enquiryForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          // Show loading state
+          const submitBtn = this.querySelector('button[type="submit"]');
+          const originalText = submitBtn.innerHTML;
+          submitBtn.innerHTML =
+            '<i class="fas fa-spinner fa-spin"></i> <span>Submitting...</span>';
+          submitBtn.disabled = true;
+
+          // Show loading overlay
+          document.getElementById("loadingOverlay").classList.remove("hidden");
+
+          try {
+            // Get form data
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+
+            // Process form data for API
+            const enquiryData = {
+              name: data.name,
+              email: data.email,
+              phone: data.phone || "",
+              company: data.company || "",
+              subject: data.subject,
+              message: data.message,
+              category: data.category,
+              products: Array.from(
+                document.querySelectorAll('input[name="products"]:checked')
+              ).map((cb) => cb.value),
+              quantity: data.quantity || "",
+              country: data.country || "",
+              city: data.city || "",
+              preferred_date: data.preferred_date || "",
+              urgency: data.urgency || "medium",
+              newsletter: data.newsletter === "on",
+            };
+
+            console.log("Submitting enquiry data:", enquiryData);
+            console.log("Using API URL:", API_BASE_URL);
+
+            // Submit to backend API
+            const response = await fetch(`${API_BASE_URL}/inquiries`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(enquiryData),
+            });
+
+            if (!response.ok) {
+              const errorText = await response.text();
+              let errorMessage = `HTTP error! status: ${response.status}`;
+
+              try {
+                const errorData = JSON.parse(errorText);
+                errorMessage =
+                  errorData.message || errorData.error || errorMessage;
+              } catch (e) {
+                errorMessage = errorText || errorMessage;
+              }
+
+              throw new Error(errorMessage);
+            }
+
+            const result = await response.json();
+            console.log("Enquiry submitted successfully:", result);
+
+            // Hide loading overlay
+            document.getElementById("loadingOverlay").classList.add("hidden");
+
+            // Show success message
+            document.getElementById("enquiryForm").style.display = "none";
+            document
+              .getElementById("successMessage")
+              .classList.remove("hidden");
+
+            // Scroll to success message
+            document
+              .getElementById("successMessage")
+              .scrollIntoView({ behavior: "smooth" });
+          } catch (error) {
+            console.error("Error submitting enquiry:", error);
+
+            // Hide loading overlay
+            document.getElementById("loadingOverlay").classList.add("hidden");
+
+            // Check if it's a CORS or network error and suggest localhost
+            let errorMessage =
+              error.message ||
+              "Failed to submit enquiry. Please try again or contact us directly.";
+
+            if (
+              error.message.includes("CORS") ||
+              error.message.includes("Failed to fetch") ||
+              error.message.includes("ERR_FAILED")
+            ) {
+              errorMessage =
+                "Connection failed. Please ensure the backend server is running on localhost:4000 or try again later.";
+            }
+
+            // Show error message
+            document.getElementById("errorText").textContent = errorMessage;
+            document.getElementById("errorMessage").classList.remove("hidden");
+
+            // Scroll to error message
+            document
+              .getElementById("errorMessage")
+              .scrollIntoView({ behavior: "smooth" });
+
+            // Reset button state
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+          }
+        });
+
+      // Reset form function
+      function resetForm() {
+        document.getElementById("enquiryForm").reset();
+        document.getElementById("enquiryForm").style.display = "block";
+        document.getElementById("successMessage").classList.add("hidden");
+        document.getElementById("errorMessage").classList.add("hidden");
+        document.getElementById("loadingOverlay").classList.add("hidden");
+      }
+
+      // Hide error function
+      function hideError() {
+        document.getElementById("errorMessage").classList.add("hidden");
+        document.getElementById("enquiryForm").style.display = "block";
+        document.getElementById("loadingOverlay").classList.add("hidden");
+      }
+
+      // Add floating label functionality
+      document.querySelectorAll(".form-input").forEach((input) => {
+        input.addEventListener("focus", function () {
+          this.parentElement
+            .querySelector(".floating-label")
+            .classList.add("floating-label-active");
+        });
+
+        input.addEventListener("blur", function () {
+          if (!this.value) {
+            this.parentElement
+              .querySelector(".floating-label")
+              .classList.remove("floating-label-active");
+          }
+        });
+      });
+
+      // Add smooth scrolling for anchor links
+      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+        anchor.addEventListener("click", function (e) {
+          e.preventDefault();
+          document.querySelector(this.getAttribute("href")).scrollIntoView({
+            behavior: "smooth",
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
