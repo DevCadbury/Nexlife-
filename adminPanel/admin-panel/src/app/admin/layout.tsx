@@ -51,6 +51,7 @@ export default function AdminLayout({
   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
   const [isHoveringCard, setIsHoveringCard] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [isAuthChecking, setIsAuthChecking] = useState(true);
   const [notificationTab, setNotificationTab] = useState<
     "inquiries" | "replies"
   >("inquiries");
@@ -91,6 +92,57 @@ export default function AdminLayout({
       }
     },
   });
+
+  // Immediate client-side authentication check
+  useEffect(() => {
+    const checkAuth = () => {
+      setIsAuthChecking(true);
+
+      // Check if token exists in localStorage or cookies
+      let token = localStorage.getItem("token");
+      if (!token) {
+        const cookies = document.cookie
+          .split(";")
+          .reduce((acc: Record<string, string>, cookie) => {
+            const [key, value] = cookie.split("=");
+            if (key && value) acc[key.trim()] = decodeURIComponent(value);
+            return acc;
+          }, {});
+        token = cookies["nxl_jwt"];
+      }
+
+      if (!token) {
+        // No token found, redirect immediately
+        router.push("/login");
+        return;
+      }
+
+      // Validate token format and expiration
+      try {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        const currentTime = Math.floor(Date.now() / 1000);
+
+        if (payload.exp && payload.exp < currentTime) {
+          // Token expired, redirect to login
+          localStorage.removeItem("token");
+          document.cookie = "nxl_jwt=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0";
+          router.push("/login");
+          return;
+        }
+      } catch (error) {
+        // Invalid token format, redirect to login
+        localStorage.removeItem("token");
+        document.cookie = "nxl_jwt=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0";
+        router.push("/login");
+        return;
+      }
+
+      // Token is valid, allow access
+      setIsAuthChecking(false);
+    };
+
+    checkAuth();
+  }, [router]);
 
   const items = latest?.items || [];
   const replyItems = latestReplies?.items || [];
@@ -236,6 +288,30 @@ export default function AdminLayout({
       }
     };
   }, [open, profileOpen, hoverTimeout]);
+
+  if (isAuthChecking) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/20 to-indigo-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900 flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center"
+        >
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"
+          />
+          <h2 className="text-xl font-semibold text-slate-700 dark:text-slate-300 mb-2">
+            Verifying Access
+          </h2>
+          <p className="text-slate-500 dark:text-slate-400">
+            Please wait while we check your authentication...
+          </p>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div suppressHydrationWarning={true} className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/20 to-indigo-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
