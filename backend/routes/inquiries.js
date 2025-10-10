@@ -282,7 +282,7 @@ router.post("/", async (req, res) => {
 });
 
 // GET /api/inquiries - list for dashboard
-router.get("/", async (req, res) => {
+router.get("/", requireAuth(), async (req, res) => {
   try {
     const { status, email, q, limit = 50, offset = 0 } = req.query || {};
     const { inquiries } = await getCollections();
@@ -433,7 +433,7 @@ router.patch(
 );
 
 // PATCH /api/inquiries/:id/meta - update CRM metadata (priority, tags, notes, assignees, reminderAt)
-router.patch("/:id([0-9a-fA-F]{24})/meta", async (req, res) => {
+router.patch("/:id([0-9a-fA-F]{24})/meta", requireAuth(), async (req, res) => {
   const id = req.params.id;
   const { priority, tags, notes, assignees, reminderAt } = req.body || {};
   if (!id) return res.status(400).json({ error: "Bad request" });
@@ -468,7 +468,7 @@ router.patch("/:id([0-9a-fA-F]{24})/meta", async (req, res) => {
 });
 
 // POST /api/inquiries/:id/reply - admin reply (sends email)
-router.post("/:id([0-9a-fA-F]{24})/reply", async (req, res) => {
+router.post("/:id([0-9a-fA-F]{24})/reply", requireAuth(), async (req, res) => {
   const id = req.params.id;
   const { subject, message, fromName, attachments = [], note } = req.body || {};
   if (!id || !subject || !message) {
@@ -717,7 +717,7 @@ export default router;
 // ===== Thread helpers and endpoints =====
 
 // GET /api/inquiries/threads?email=foo@example.com
-router.get("/threads", async (req, res) => {
+router.get("/threads", requireAuth(), async (req, res) => {
   try {
     const email = String(req.query.email || "")
       .toLowerCase()
@@ -775,7 +775,7 @@ router.get("/threads", async (req, res) => {
 });
 
 // Lightweight count of new inquiries for notifications
-router.get("/new/count", async (req, res) => {
+router.get("/new/count", requireAuth(), async (req, res) => {
   try {
     const { inquiries } = await getCollections();
     const count = await inquiries.countDocuments({ status: "new" });
@@ -787,7 +787,7 @@ router.get("/new/count", async (req, res) => {
 });
 
 // PATCH /api/inquiries/:id/mark-seen - mark inquiry as seen by agent
-router.patch("/:id([0-9a-fA-F]{24})/mark-seen", async (req, res) => {
+router.patch("/:id([0-9a-fA-F]{24})/mark-seen", requireAuth(), async (req, res) => {
   const id = req.params.id;
   const { agentName } = req.body || {};
   if (!id || !agentName) return res.status(400).json({ error: "Bad request" });
@@ -828,7 +828,7 @@ router.patch("/:id([0-9a-fA-F]{24})/mark-seen", async (req, res) => {
 });
 
 // PATCH /api/inquiries/threads/mark-seen - mark thread as seen by agent
-router.patch("/threads/mark-seen", async (req, res) => {
+router.patch("/threads/mark-seen", requireAuth(), async (req, res) => {
   const { email, agentName } = req.body || {};
   if (!email || !agentName) return res.status(400).json({ error: "Bad request" });
   try {
@@ -869,7 +869,7 @@ router.patch("/threads/mark-seen", async (req, res) => {
 });
 
 // POST /api/inquiries/threads/reply { email, subject, message, fromName, inquiryId }
-router.post("/threads/reply", async (req, res) => {
+router.post("/threads/reply", requireAuth(), async (req, res) => {
   const {
     email,
     subject,
@@ -1011,7 +1011,7 @@ router.post("/threads/reply", async (req, res) => {
 });
 
 // PATCH /api/inquiries/threads/mark-read-all { email }
-router.patch("/threads/mark-read-all", async (req, res) => {
+router.patch("/threads/mark-read-all", requireAuth(), async (req, res) => {
   const { email } = req.body || {};
   if (!email) return res.status(400).json({ error: "email is required" });
   try {

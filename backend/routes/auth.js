@@ -106,12 +106,26 @@ router.get("/me", async (req, res) => {
   const token = header.startsWith("Bearer ")
     ? header.slice(7)
     : cookies["nxl_jwt"];
-  if (!token) return res.status(401).json({ error: "Unauthorized" });
+
+  if (!token) {
+    return res.status(401).json({ error: "Unauthorized - No token provided" });
+  }
+
   try {
-    const payload = jwt.verify(
-      token,
-      process.env.JWT_SECRET || "dev-secret-change"
-    );
+    const secret = process.env.JWT_SECRET || "dev-secret-change";
+    const payload = jwt.verify(token, secret);
+
+    // Check if token is expired
+    const currentTime = Math.floor(Date.now() / 1000);
+    if (payload.exp && payload.exp < currentTime) {
+      return res.status(401).json({ error: "Unauthorized - Token expired" });
+    }
+
+    // Validate required payload fields
+    if (!payload.id || !payload.email) {
+      return res.status(401).json({ error: "Unauthorized - Invalid token payload" });
+    }
+
     const { staff } = await getCollections();
     const user = await staff.findOne(
       {
@@ -123,7 +137,11 @@ router.get("/me", async (req, res) => {
       },
       { projection: { passwordHash: 0, resetCode: 0, resetExpiresAt: 0 } }
     );
-    if (!user) return res.status(404).json({ error: "User not found" });
+
+    if (!user) {
+      return res.status(401).json({ error: "Unauthorized - User not found" });
+    }
+
     res.json({
       user: {
         id: user._id,
@@ -133,7 +151,8 @@ router.get("/me", async (req, res) => {
       },
     });
   } catch (e) {
-    return res.status(401).json({ error: "Invalid token" });
+    console.error("Token verification failed:", e.message);
+    return res.status(401).json({ error: "Unauthorized - Invalid token" });
   }
 });
 
@@ -148,22 +167,39 @@ router.post("/me", async (req, res) => {
   const token = header.startsWith("Bearer ")
     ? header.slice(7)
     : cookies["nxl_jwt"];
-  if (!token) return res.status(401).json({ error: "Unauthorized" });
+
+  if (!token) {
+    return res.status(401).json({ error: "Unauthorized - No token provided" });
+  }
+
   try {
-    const payload = jwt.verify(
-      token,
-      process.env.JWT_SECRET || "dev-secret-change"
-    );
+    const secret = process.env.JWT_SECRET || "dev-secret-change";
+    const payload = jwt.verify(token, secret);
+
+    // Check if token is expired
+    const currentTime = Math.floor(Date.now() / 1000);
+    if (payload.exp && payload.exp < currentTime) {
+      return res.status(401).json({ error: "Unauthorized - Token expired" });
+    }
+
+    // Validate required payload fields
+    if (!payload.id || !payload.email) {
+      return res.status(401).json({ error: "Unauthorized - Invalid token payload" });
+    }
+
     const { staff } = await getCollections();
     const name = String((req.body?.name || "").trim());
     if (!name) return res.status(400).json({ error: "Name is required" });
+
     await staff.updateOne(
       { _id: new (await import("mongodb")).ObjectId(payload.id) },
       { $set: { name } }
     );
+
     return res.json({ success: true });
   } catch (e) {
-    return res.status(401).json({ error: "Invalid token" });
+    console.error("Token verification failed:", e.message);
+    return res.status(401).json({ error: "Unauthorized - Invalid token" });
   }
 });
 
@@ -174,11 +210,15 @@ router.post("/change-password", async (req, res) => {
     !req.headers.authorization &&
     !(req.headers.cookie || "").includes("nxl_jwt=")
   ) {
-    return res.status(401).json({ error: "Unauthorized" });
+    return res.status(401).json({ error: "Unauthorized - No token provided" });
   }
-  if (!newPassword || newPassword.length < 6)
+
+  if (!newPassword || newPassword.length < 6) {
     return res.status(400).json({ error: "New password too short" });
+  }
+
   const secret = process.env.JWT_SECRET || "dev-secret-change";
+
   try {
     const token = (req.headers.authorization || "").startsWith("Bearer ")
       ? req.headers.authorization.slice(7)
@@ -188,7 +228,24 @@ router.post("/change-password", async (req, res) => {
             .map((p) => p.trim())
             .find((p) => p.startsWith("nxl_jwt=")) || ""
         ).split("=")[1];
+
+    if (!token) {
+      return res.status(401).json({ error: "Unauthorized - No token provided" });
+    }
+
     const payload = jwt.verify(token, secret);
+
+    // Check if token is expired
+    const currentTime = Math.floor(Date.now() / 1000);
+    if (payload.exp && payload.exp < currentTime) {
+      return res.status(401).json({ error: "Unauthorized - Token expired" });
+    }
+
+    // Validate required payload fields
+    if (!payload.id || !payload.email) {
+      return res.status(401).json({ error: "Unauthorized - Invalid token payload" });
+    }
+
     const { staff } = await getCollections();
     const user = await staff.findOne({
       _id: payload.id
@@ -197,16 +254,23 @@ router.post("/change-password", async (req, res) => {
           ).ObjectId(payload.id)
         : null,
     });
-    if (!user) return res.status(404).json({ error: "User not found" });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
     if (
       oldPassword &&
       !bcrypt.compareSync(String(oldPassword), user.passwordHash || "")
-    )
+    ) {
       return res.status(400).json({ error: "Old password incorrect" });
+    }
+
     await staff.updateOne(
       { _id: user._id },
       { $set: { passwordHash: hashPassword(newPassword) } }
     );
+
     try {
       await logSystem(req, {
         level: ActivityLevel.SUCCESS,
@@ -217,9 +281,11 @@ router.post("/change-password", async (req, res) => {
         status: "success",
       });
     } catch {}
+
     return res.json({ success: true });
   } catch (e) {
-    return res.status(401).json({ error: "Invalid token" });
+    console.error("Token verification failed:", e.message);
+    return res.status(401).json({ error: "Unauthorized - Invalid token" });
   }
 });
 
@@ -326,17 +392,36 @@ function getTokenFromReq(req) {
 export function requireAuth(roles = []) {
   return (req, res, next) => {
     const token = getTokenFromReq(req);
-    if (!token) return res.status(401).json({ error: "Unauthorized" });
+    if (!token) {
+      return res.status(401).json({ error: "Unauthorized - No token provided" });
+    }
+
     try {
       const secret = process.env.JWT_SECRET || "dev-secret-change";
       const payload = jwt.verify(token, secret);
-      req.user = payload;
-      if (roles.length && !roles.includes(payload.role)) {
-        return res.status(403).json({ error: "Forbidden" });
+
+      // Check if token is expired
+      const currentTime = Math.floor(Date.now() / 1000);
+      if (payload.exp && payload.exp < currentTime) {
+        return res.status(401).json({ error: "Unauthorized - Token expired" });
       }
+
+      // Validate required payload fields
+      if (!payload.id || !payload.email) {
+        return res.status(401).json({ error: "Unauthorized - Invalid token payload" });
+      }
+
+      req.user = payload;
+
+      // Check role-based access if roles are specified
+      if (roles.length && !roles.includes(payload.role)) {
+        return res.status(403).json({ error: "Forbidden - Insufficient permissions" });
+      }
+
       next();
     } catch (e) {
-      return res.status(401).json({ error: "Invalid token" });
+      console.error("Token verification failed:", e.message);
+      return res.status(401).json({ error: "Unauthorized - Invalid token" });
     }
   };
 }

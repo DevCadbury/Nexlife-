@@ -1,5 +1,6 @@
 import express from "express";
 import { getCollections } from "../db.js";
+import { requireAuth } from "./auth.js";
 
 const router = express.Router();
 
@@ -19,7 +20,7 @@ function toCsv(rows) {
 }
 
 // GET /api/export/contacts.csv
-router.get("/contacts.csv", async (req, res) => {
+router.get("/contacts.csv", requireAuth(), async (req, res) => {
   const { subscribers } = await getCollections();
   const items = await subscribers
     .find({})
@@ -33,7 +34,7 @@ router.get("/contacts.csv", async (req, res) => {
 });
 
 // GET /api/export/logs.csv
-router.get("/logs.csv", async (req, res) => {
+router.get("/logs.csv", requireAuth(), async (req, res) => {
   const { logs } = await getCollections();
   const items = await logs
     .find({})

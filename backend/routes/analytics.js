@@ -1,5 +1,6 @@
 import express from "express";
 import { getCollections } from "../db.js";
+import { requireAuth } from "./auth.js";
 
 const router = express.Router();
 
@@ -16,7 +17,7 @@ function addDays(d, n) {
 }
 
 // GET /api/analytics/overview
-router.get("/overview", async (req, res) => {
+router.get("/overview", requireAuth(), async (req, res) => {
   const { inquiries, logs, campaigns, gallery } = await getCollections();
   const [submissions, replies, totalCampaigns, totalImages] = await Promise.all(
     [
@@ -36,7 +37,7 @@ router.get("/overview", async (req, res) => {
 });
 
 // GET /api/analytics/submissions?range=7
-router.get("/submissions", async (req, res) => {
+router.get("/submissions", requireAuth(), async (req, res) => {
   const range = req.query.range === 'all' ? null : Math.min(Number(req.query.range) || 30, 365);
   const { inquiries } = await getCollections();
 
@@ -80,7 +81,7 @@ router.get("/submissions", async (req, res) => {
 });
 
 // GET /api/analytics/replies
-router.get("/replies", async (req, res) => {
+router.get("/replies", requireAuth(), async (req, res) => {
   const { inquiries } = await getCollections();
   const avg = await inquiries
     .aggregate([
@@ -97,7 +98,7 @@ router.get("/replies", async (req, res) => {
 });
 
 // GET /api/analytics/status?range=30 - distribution of inquiry statuses with optional date filter
-router.get("/status", async (req, res) => {
+router.get("/status", requireAuth(), async (req, res) => {
   const range = req.query.range === 'all' ? null : (req.query.range ? Math.min(Number(req.query.range), 365) : null);
   const { inquiries } = await getCollections();
 
@@ -124,7 +125,7 @@ router.get("/status", async (req, res) => {
 });
 
 // GET /api/analytics/unique-customers?days=30 - distinct emails in recent window
-router.get("/unique-customers", async (req, res) => {
+router.get("/unique-customers", requireAuth(), async (req, res) => {
   const days = Math.min(Math.max(Number(req.query.days) || 30, 1), 365);
   const { inquiries } = await getCollections();
   const since = addDays(startOfDay(), -days + 1);
@@ -150,7 +151,7 @@ router.get("/unique-customers", async (req, res) => {
 });
 
 // GET /api/analytics/customers?limit=10 - latest inquiries simplified
-router.get("/customers", async (req, res) => {
+router.get("/customers", requireAuth(), async (req, res) => {
   const limit = Math.min(Math.max(Number(req.query.limit) || 10, 1), 100);
   const { inquiries } = await getCollections();
   const items = await inquiries
@@ -170,7 +171,7 @@ router.get("/customers", async (req, res) => {
 });
 
 // GET /api/analytics/visitors/countries?range=30
-router.get("/visitors/countries", async (req, res) => {
+router.get("/visitors/countries", requireAuth(), async (req, res) => {
   try {
     const range = Math.min(Number(req.query.range) || 30, 365);
     const { visitors } = await getCollections();
@@ -198,7 +199,7 @@ router.get("/visitors/countries", async (req, res) => {
 });
 
 // POST /api/analytics/visitors/track - track a page visit
-router.post("/visitors/track", async (req, res) => {
+router.post("/visitors/track", requireAuth(), async (req, res) => {
   try {
     const { visitors } = await getCollections();
     const { page, country, ip, userAgent, referrer } = req.body;
@@ -226,7 +227,7 @@ router.post("/visitors/track", async (req, res) => {
 });
 
 // GET /api/analytics/visitors/pages?range=30 - page visit statistics
-router.get("/visitors/pages", async (req, res) => {
+router.get("/visitors/pages", requireAuth(), async (req, res) => {
   try {
     const range = Math.min(Number(req.query.range) || 30, 365);
     const { visitors } = await getCollections();
@@ -262,7 +263,7 @@ router.get("/visitors/pages", async (req, res) => {
 });
 
 // GET /api/analytics/visitors/overview?range=30 - visitor overview stats
-router.get("/visitors/overview", async (req, res) => {
+router.get("/visitors/overview", requireAuth(), async (req, res) => {
   try {
     const range = Math.min(Number(req.query.range) || 30, 365);
     const { visitors } = await getCollections();

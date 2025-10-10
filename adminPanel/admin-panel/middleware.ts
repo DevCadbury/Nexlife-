@@ -12,7 +12,11 @@ async function validateToken(token: string): Promise<boolean> {
       return false;
     }
 
-    // Additional validation can be added here
+    // Validate required payload fields
+    if (!payload.id || !payload.email) {
+      return false;
+    }
+
     return true;
   } catch (error) {
     console.error("Token validation error:", error);

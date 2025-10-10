@@ -1,11 +1,12 @@
 import express from "express";
 import { getCollections, addLog } from "../db.js";
 import { sendEmail, sendBulkEmail, validateEmail } from "../config/email.js";
+import { requireAuth } from "./auth.js";
 
 const router = express.Router();
 
 // GET /api/subscribers
-router.get("/", async (req, res) => {
+router.get("/", requireAuth(), async (req, res) => {
   try {
     const { subscribers } = await getCollections();
     const items = await subscribers
@@ -21,7 +22,7 @@ router.get("/", async (req, res) => {
 });
 
 // POST /api/subscribers - add subscriber
-router.post("/", async (req, res) => {
+router.post("/", requireAuth(), async (req, res) => {
   try {
     const { email } = req.body || {};
     if (!email || !validateEmail(email)) {
@@ -47,7 +48,7 @@ router.post("/", async (req, res) => {
 });
 
 // DELETE /api/subscribers/:email
-router.delete("/:email", async (req, res) => {
+router.delete("/:email", requireAuth(), async (req, res) => {
   try {
     const email = decodeURIComponent(req.params.email || "");
     const { subscribers } = await getCollections();
@@ -65,7 +66,7 @@ router.delete("/:email", async (req, res) => {
 });
 
 // POST /api/subscribers/campaign - basic campaign send
-router.post("/campaign", async (req, res) => {
+router.post("/campaign", requireAuth(), async (req, res) => {
   try {
     const { subject, message, recipients } = req.body || {};
     if (!subject || !message)
