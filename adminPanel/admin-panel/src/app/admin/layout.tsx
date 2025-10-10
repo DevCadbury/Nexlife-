@@ -447,7 +447,7 @@ export default function AdminLayout({
 
               {/* Logout Button - Highlighted and at the end */}
               <motion.form
-                action="/logout"
+                action="/api/logout"
                 method="post"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -515,7 +515,7 @@ export default function AdminLayout({
                         <SettingsIcon className="w-4 h-4" />
                         Settings
                       </Link>
-                      <form action="/logout" method="post" className="w-full">
+                      <form action="/api/logout" method="post" className="w-full">
                         <button
                           type="submit"
                           className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-400 hover:bg-red-900/30 rounded-lg transition-colors duration-200"
