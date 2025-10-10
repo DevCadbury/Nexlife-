@@ -61,7 +61,7 @@ router.post("/", requireAuth(["superadmin"]), async (req, res) => {
       email: email,
       password: finalPassword,
       role: role,
-      loginUrl: 'https://nexlife-international.vercel.app/admin/login'
+      loginUrl: 'https://nexlife-admin.vercel.app/login'
     });
   } catch (emailError) {
     console.error('Failed to send welcome email:', emailError);
