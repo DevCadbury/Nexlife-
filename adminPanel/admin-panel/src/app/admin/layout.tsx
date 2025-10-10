@@ -531,6 +531,16 @@ export default function AdminLayout({
               >
                 <button
                   type="submit"
+                  onClick={() => {
+                    // Clear all tokens from localStorage and sessionStorage
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    // Clear any cached authentication data
+                    if (typeof window !== 'undefined') {
+                      // Clear any cached profile data
+                      window.location.href = '/login';
+                    }
+                  }}
                   className="flex items-center gap-2 text-red-700 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 transition-colors font-medium"
                   title="Logout"
                 >
@@ -594,6 +604,16 @@ export default function AdminLayout({
                       <form action="/api/logout" method="post" className="w-full">
                         <button
                           type="submit"
+                          onClick={() => {
+                            // Clear all tokens from localStorage and sessionStorage
+                            localStorage.clear();
+                            sessionStorage.clear();
+                            // Clear any cached authentication data
+                            if (typeof window !== 'undefined') {
+                              // Clear any cached profile data
+                              window.location.href = '/login';
+                            }
+                          }}
                           className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-400 hover:bg-red-900/30 rounded-lg transition-colors duration-200"
                         >
                           <LogOut className="w-4 h-4" />

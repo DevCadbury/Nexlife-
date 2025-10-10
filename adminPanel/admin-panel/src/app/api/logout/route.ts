@@ -22,6 +22,9 @@ export async function POST(request: NextRequest) {
       responseHeaders.set('set-cookie', setCookie);
     }
 
+    // Clear localStorage token (this will be handled by client-side script)
+    responseHeaders.set('Set-Cookie', 'nxl_jwt=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0');
+
     // Redirect to login page after logout
     responseHeaders.set('location', '/login');
 
