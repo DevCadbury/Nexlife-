@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -82,6 +82,33 @@ type Inquiry = {
 };
 
 export default function Inquiries() {
+  return (
+    <Suspense fallback={
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 backdrop-blur-xl"
+      >
+        <div className="text-center space-y-4">
+          <div className="w-24 h-24 mx-auto rounded-3xl bg-gradient-to-br from-blue-500 via-purple-500 to-indigo-600 flex items-center justify-center shadow-2xl border-4 border-white/20 dark:border-white/10">
+            <MessageSquare className="w-12 h-12 text-white drop-shadow-lg" />
+          </div>
+          <h3 className="text-3xl font-bold bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 dark:from-white dark:via-blue-100 dark:to-white bg-clip-text text-transparent">
+            Loading Enquiries
+          </h3>
+          <p className="text-slate-600 dark:text-slate-300 text-lg font-medium">
+            Preparing your dashboard...
+          </p>
+        </div>
+      </motion.div>
+    }>
+      <InquiriesContent />
+    </Suspense>
+  );
+}
+
+function InquiriesContent() {
   const searchParams = useSearchParams();
   const [items, setItems] = useState<Inquiry[]>([]);
   const [q, setQ] = useState("");
@@ -3983,4 +4010,5 @@ export default function Inquiries() {
       </Dialog>
     </motion.div>
   );
+}
 }
