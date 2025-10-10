@@ -4011,4 +4011,3 @@ function InquiriesContent() {
     </motion.div>
   );
 }
-}
