@@ -1,6 +1,8 @@
 {
   "version": 2,
   "name": "nexlife-admin",
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/$1" },
     { "src": "/(.*)", "dest": "/$1" }
