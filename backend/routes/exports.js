@@ -21,32 +21,92 @@ function toCsv(rows) {
 
 // GET /api/export/contacts.csv
 router.get("/contacts.csv", requireAuth(), async (req, res) => {
-  const { subscribers } = await getCollections();
-  const items = await subscribers
-    .find({})
-    .project({ _id: 0, email: 1, createdAt: 1, lastSeenAt: 1 })
-    .sort({ createdAt: -1 })
-    .toArray();
-  const csv = toCsv(items);
-  res.setHeader("Content-Type", "text/csv");
-  res.setHeader("Content-Disposition", "attachment; filename=contacts.csv");
-  res.send(csv);
+  try {
+    const { subscribers, staff } = await getCollections();
+    const { role, id: userId } = req.user;
+    
+    let query = {};
+    
+    if (role === "superadmin") {
+      // Superadmin gets all subscribers (not deleted by super)
+      query = { deleted_by_super: { $ne: true } };
+    } else if (role === "admin") {
+      // Admin gets only their own subscribers added within 24 hours and not deleted
+      const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      query = {
+        added_by: userId,
+        added_at: { $gte: twentyFourHoursAgo },
+        is_locked: { $ne: true },
+        deleted_by_admin: { $ne: true },
+        deleted_by_super: { $ne: true }
+      };
+    } else {
+      return res.status(403).json({ error: "Insufficient permissions" });
+    }
+    
+    // Get subscribers with added_by user info
+    const items = await subscribers.aggregate([
+      { $match: query },
+      {
+        $lookup: {
+          from: "staff",
+          let: { addedBy: { $toObjectId: "$added_by" } },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$_id", "$$addedBy"] } } },
+            { $project: { name: 1, email: 1 } }
+          ],
+          as: "addedByUser"
+        }
+      },
+      {
+        $addFields: {
+          added_by_name: { $arrayElemAt: ["$addedByUser.name", 0] },
+          added_by_email: { $arrayElemAt: ["$addedByUser.email", 0] }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          email: 1,
+          createdAt: 1,
+          added_at: 1,
+          added_by_name: 1,
+          added_by_email: 1,
+          is_locked: 1
+        }
+      },
+      { $sort: { createdAt: -1 } }
+    ]).toArray();
+    
+    const csv = toCsv(items);
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader("Content-Disposition", "attachment; filename=contacts.csv");
+    res.send(csv);
+  } catch (error) {
+    console.error("Export contacts failed:", error);
+    res.status(500).json({ error: "Export failed" });
+  }
 });
 
-// GET /api/export/logs.csv
-router.get("/logs.csv", requireAuth(), async (req, res) => {
-  const { logs } = await getCollections();
-  const items = await logs
-    .find({})
-    .project({ _id: 0 })
-    .sort({ createdAt: -1 })
-    .limit(5000)
-    .toArray();
-  const withTimestamp = items.map((i) => ({ timestamp: i.createdAt, ...i }));
-  const csv = toCsv(withTimestamp);
-  res.setHeader("Content-Type", "text/csv");
-  res.setHeader("Content-Disposition", "attachment; filename=logs.csv");
-  res.send(csv);
+// GET /api/export/logs.csv - Superadmin only
+router.get("/logs.csv", requireAuth(["superadmin"]), async (req, res) => {
+  try {
+    const { logs } = await getCollections();
+    const items = await logs
+      .find({})
+      .project({ _id: 0 })
+      .sort({ createdAt: -1 })
+      .limit(5000)
+      .toArray();
+    const withTimestamp = items.map((i) => ({ timestamp: i.createdAt, ...i }));
+    const csv = toCsv(withTimestamp);
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader("Content-Disposition", "attachment; filename=logs.csv");
+    res.send(csv);
+  } catch (error) {
+    console.error("Export logs failed:", error);
+    res.status(500).json({ error: "Export failed" });
+  }
 });
 
 export default router;

@@ -2,8 +2,32 @@ import express from "express";
 import { getCollections, addLog } from "../db.js";
 import { sendEmail, sendBulkEmail, validateEmail } from "../config/email.js";
 import { requireAuth } from "./auth.js";
+import multer from "multer";
+import csv from "csv-parser";
+import xlsx from "xlsx";
+import { Readable } from "stream";
 
 const router = express.Router();
+
+// Configure multer for file uploads
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedMimes = [
+      'text/csv',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    ];
+    if (allowedMimes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Only CSV and Excel files are allowed.'));
+    }
+  }
+});
 
 // GET /api/subscribers/stats
 router.get("/stats", requireAuth(), async (req, res) => {
@@ -58,14 +82,14 @@ router.get("/", requireAuth(), async (req, res) => {
     const { subscribers } = await getCollections();
     const { role, id: userId } = req.user;
     
-    let query = { deleted_by_super: { $ne: true } };
+    let matchQuery = { deleted_by_super: { $ne: true } };
     
     if (role === "superadmin") {
       // Superadmin sees all subscribers except those deleted by superadmin
-      query = { deleted_by_super: { $ne: true } };
+      matchQuery = { deleted_by_super: { $ne: true } };
     } else if (role === "admin") {
       // Admin sees only their own unlocked subscribers
-      query = {
+      matchQuery = {
         added_by: userId,
         is_locked: { $ne: true },
         deleted_by_admin: { $ne: true },
@@ -73,11 +97,42 @@ router.get("/", requireAuth(), async (req, res) => {
       };
     }
     
-    const items = await subscribers
-      .find(query)
-      .project({ _id: 0 })
-      .sort({ createdAt: -1 })
-      .toArray();
+    // Use aggregation to include staff info
+    const items = await subscribers.aggregate([
+      { $match: matchQuery },
+      {
+        $lookup: {
+          from: "staff",
+          let: { addedBy: { $toObjectId: "$added_by" } },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$_id", "$$addedBy"] } } },
+            { $project: { name: 1, email: 1 } }
+          ],
+          as: "addedByUser"
+        }
+      },
+      {
+        $addFields: {
+          added_by_name: { $arrayElemAt: ["$addedByUser.name", 0] },
+          added_by_email: { $arrayElemAt: ["$addedByUser.email", 0] }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          email: 1,
+          createdAt: 1,
+          added_at: 1,
+          added_by: 1,
+          added_by_name: 1,
+          added_by_email: 1,
+          is_locked: 1,
+          deleted_by_admin: 1,
+          deleted_by_super: 1
+        }
+      },
+      { $sort: { createdAt: -1 } }
+    ]).toArray();
       
     res.json({ total: items.length, items });
   } catch (err) {
@@ -102,22 +157,23 @@ router.post("/", requireAuth(), async (req, res) => {
     const existing = await subscribers.findOne({ email: normalizedEmail });
     
     if (existing) {
-      // If subscriber exists but was deleted by admin, allow re-adding by the same admin
-      if (existing.deleted_by_admin && existing.added_by === userId) {
+      // If subscriber was deleted or locked, allow re-adding
+      if (existing.deleted_by_admin || existing.deleted_by_super || existing.is_locked) {
         await subscribers.updateOne(
           { email: normalizedEmail },
           {
             $set: {
               deleted_by_admin: false,
+              deleted_by_super: false,
+              added_by: userId,
               added_at: new Date(),
               is_locked: false
             }
           }
         );
-      } else if (existing.deleted_by_super) {
-        return res.status(400).json({ error: "Subscriber was permanently removed" });
       } else {
-        return res.status(400).json({ error: "Email already exists" });
+        // Subscriber is active
+        return res.status(400).json({ error: "Email already exists and is active" });
       }
     } else {
       // Create new subscriber
@@ -142,6 +198,242 @@ router.post("/", requireAuth(), async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     console.error("Add subscriber failed", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// POST /api/subscribers/bulk - Add multiple subscribers (comma-separated)
+router.post("/bulk", requireAuth(), async (req, res) => {
+  try {
+    const { emails } = req.body || {};
+    
+    if (!emails || typeof emails !== 'string') {
+      return res.status(400).json({ error: "Comma-separated emails string required" });
+    }
+    
+    const { subscribers } = await getCollections();
+    const { id: userId, name } = req.user;
+    
+    // Parse comma-separated emails
+    const emailList = emails
+      .split(',')
+      .map(email => email.trim().toLowerCase())
+      .filter(email => email && validateEmail(email));
+    
+    // Remove duplicates
+    const uniqueEmails = [...new Set(emailList)];
+    
+    let added = 0;
+    let skipped = 0;
+    const results = [];
+    
+    for (const email of uniqueEmails) {
+      try {
+        const existing = await subscribers.findOne({ email });
+        
+        if (existing && !existing.deleted_by_admin && !existing.deleted_by_super && !existing.is_locked) {
+          skipped++;
+          results.push({ email, status: 'skipped', reason: 'already_exists' });
+          continue;
+        }
+        
+        if (existing) {
+          // Re-add previously deleted/locked subscriber
+          await subscribers.updateOne(
+            { email },
+            {
+              $set: {
+                deleted_by_admin: false,
+                deleted_by_super: false,
+                added_by: userId,
+                added_at: new Date(),
+                is_locked: false
+              }
+            }
+          );
+        } else {
+          // Create new subscriber
+          await subscribers.insertOne({
+            email,
+            added_by: userId,
+            added_at: new Date(),
+            createdAt: new Date(),
+            is_locked: false,
+            deleted_by_admin: false,
+            deleted_by_super: false
+          });
+        }
+        
+        added++;
+        results.push({ email, status: 'added' });
+      } catch (error) {
+        skipped++;
+        results.push({ email, status: 'error', reason: error.message });
+      }
+    }
+    
+    await addLog({
+      type: "subscriber.bulk_added",
+      actorId: userId,
+      actorName: name,
+      meta: { 
+        total: uniqueEmails.length,
+        added,
+        skipped,
+        method: 'comma_separated'
+      }
+    });
+    
+    res.json({ 
+      success: true, 
+      total: uniqueEmails.length,
+      added, 
+      skipped,
+      results 
+    });
+  } catch (err) {
+    console.error("Bulk add subscribers failed", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// POST /api/subscribers/import - Import from CSV/Excel file
+router.post("/import", requireAuth(), upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "File is required" });
+    }
+    
+    const { subscribers } = await getCollections();
+    const { id: userId, name } = req.user;
+    
+    let emails = [];
+    
+    // Parse file based on type
+    if (req.file.mimetype === 'text/csv') {
+      // Parse CSV
+      const results = [];
+      const stream = Readable.from(req.file.buffer.toString());
+      
+      await new Promise((resolve, reject) => {
+        stream
+          .pipe(csv())
+          .on('data', (data) => results.push(data))
+          .on('end', resolve)
+          .on('error', reject);
+      });
+      
+      // Extract emails from CSV (look for common column names)
+      emails = results.map(row => {
+        const email = row.email || row.Email || row.EMAIL || 
+                     row['Email Address'] || row['email address'] ||
+                     Object.values(row).find(value => 
+                       typeof value === 'string' && validateEmail(value.trim())
+                     );
+        return email ? email.trim().toLowerCase() : null;
+      }).filter(Boolean);
+      
+    } else {
+      // Parse Excel
+      const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const data = xlsx.utils.sheet_to_json(worksheet);
+      
+      // Extract emails from Excel
+      emails = data.map(row => {
+        const email = row.email || row.Email || row.EMAIL || 
+                     row['Email Address'] || row['email address'] ||
+                     Object.values(row).find(value => 
+                       typeof value === 'string' && validateEmail(value.trim())
+                     );
+        return email ? email.trim().toLowerCase() : null;
+      }).filter(Boolean);
+    }
+    
+    // Remove duplicates
+    const uniqueEmails = [...new Set(emails)];
+    
+    let added = 0;
+    let skipped = 0;
+    let invalid = 0;
+    const results = [];
+    
+    for (const email of uniqueEmails) {
+      try {
+        if (!validateEmail(email)) {
+          invalid++;
+          results.push({ email, status: 'invalid', reason: 'invalid_format' });
+          continue;
+        }
+        
+        const existing = await subscribers.findOne({ email });
+        
+        if (existing && !existing.deleted_by_admin && !existing.deleted_by_super && !existing.is_locked) {
+          skipped++;
+          results.push({ email, status: 'skipped', reason: 'already_exists' });
+          continue;
+        }
+        
+        if (existing) {
+          // Re-add previously deleted/locked subscriber
+          await subscribers.updateOne(
+            { email },
+            {
+              $set: {
+                deleted_by_admin: false,
+                deleted_by_super: false,
+                added_by: userId,
+                added_at: new Date(),
+                is_locked: false
+              }
+            }
+          );
+        } else {
+          // Create new subscriber
+          await subscribers.insertOne({
+            email,
+            added_by: userId,
+            added_at: new Date(),
+            createdAt: new Date(),
+            is_locked: false,
+            deleted_by_admin: false,
+            deleted_by_super: false
+          });
+        }
+        
+        added++;
+        results.push({ email, status: 'added' });
+      } catch (error) {
+        skipped++;
+        results.push({ email, status: 'error', reason: error.message });
+      }
+    }
+    
+    await addLog({
+      type: "subscriber.file_imported",
+      actorId: userId,
+      actorName: name,
+      meta: { 
+        filename: req.file.originalname,
+        fileType: req.file.mimetype,
+        total: uniqueEmails.length,
+        added,
+        skipped,
+        invalid
+      }
+    });
+    
+    res.json({ 
+      success: true, 
+      total: uniqueEmails.length,
+      added, 
+      skipped,
+      invalid,
+      results: results.slice(0, 100) // Limit results to first 100 for performance
+    });
+  } catch (err) {
+    console.error("Import subscribers failed", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });

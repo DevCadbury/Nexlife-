@@ -15,7 +15,15 @@ import {
   CheckSquare,
   Square,
   AlertCircle,
+  Upload,
+  FileText,
+  Archive,
+  UserPlus,
 } from "lucide-react";
+import { useToast } from "@/components/ui/toast";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { FileUpload } from "@/components/ui/file-upload";
+import { BulkEmailInput } from "@/components/ui/bulk-email-input";
 
 export default function Subscribers() {
   const { data, mutate } = useSWR("/subscribers", fetcher);
@@ -25,7 +33,22 @@ export default function Subscribers() {
   const [loading, setLoading] = useState(false);
   const [selectedEmails, setSelectedEmails] = useState<string[]>([]);
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [activeTab, setActiveTab] = useState<"single" | "bulk" | "import">("single");
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    variant?: 'danger' | 'warning' | 'info';
+    loading?: boolean;
+  }>({
+    open: false,
+    title: "",
+    message: "",
+    onConfirm: () => {},
+  });
   
+  const { toast } = useToast();
   const userRole = profile?.user?.role;
 
   async function add() {
@@ -36,9 +59,18 @@ export default function Subscribers() {
       setEmail("");
       mutate();
       mutateStats();
+      toast({
+        variant: "success",
+        title: "Subscriber added",
+        description: `${email} has been added to the newsletter`,
+      });
     } catch (error: any) {
       console.error("Failed to add subscriber:", error);
-      alert(error.response?.data?.error || "Failed to add subscriber");
+      toast({
+        variant: "error",
+        title: "Failed to add subscriber",
+        description: error.response?.data?.error || "An error occurred while adding the subscriber",
+      });
     } finally {
       setLoading(false);
     }
@@ -49,48 +81,87 @@ export default function Subscribers() {
     if (!subscriber) return;
     
     // Check if admin can delete (within 24 hours)
+    let title = "Remove Subscriber";
+    let message = `Are you sure you want to remove ${emailToRemove} from the newsletter?`;
+    let variant: 'danger' | 'warning' | 'info' = 'danger';
+    
     if (userRole === "admin") {
       const addedAt = new Date(subscriber.added_at || subscriber.createdAt);
       const now = new Date();
       const hoursDiff = (now.getTime() - addedAt.getTime()) / (1000 * 60 * 60);
       
       if (hoursDiff > 24) {
-        if (!confirm("This subscriber is older than 24 hours and will be locked from your view. Continue?")) {
-          return;
-        }
-      } else if (!confirm("Remove this subscriber?")) {
-        return;
+        title = "Lock Subscriber";
+        message = `This subscriber is older than 24 hours and will be locked from your view (not permanently deleted). Continue?`;
+        variant = 'warning';
       }
-    } else if (!confirm("Remove this subscriber?")) {
-      return;
     }
     
-    try {
-      await api.delete(`/subscribers/${encodeURIComponent(emailToRemove)}`);
-      mutate();
-      mutateStats();
-    } catch (error: any) {
-      console.error("Failed to remove subscriber:", error);
-      alert(error.response?.data?.error || "Failed to remove subscriber");
-    }
+    setConfirmDialog({
+      open: true,
+      title,
+      message,
+      variant,
+      onConfirm: async () => {
+        setConfirmDialog(prev => ({ ...prev, loading: true }));
+        try {
+          await api.delete(`/subscribers/${encodeURIComponent(emailToRemove)}`);
+          mutate();
+          mutateStats();
+          toast({
+            variant: "success",
+            title: "Subscriber removed",
+            description: `${emailToRemove} has been removed from the newsletter`,
+          });
+          setConfirmDialog(prev => ({ ...prev, open: false }));
+        } catch (error: any) {
+          console.error("Failed to remove subscriber:", error);
+          toast({
+            variant: "error",
+            title: "Failed to remove subscriber",
+            description: error.response?.data?.error || "An error occurred while removing the subscriber",
+          });
+          setConfirmDialog(prev => ({ ...prev, loading: false }));
+        }
+      }
+    });
   }
 
   async function bulkDelete() {
     if (selectedEmails.length === 0) return;
-    if (!confirm(`Delete ${selectedEmails.length} selected subscribers?`)) return;
     
-    setBulkDeleting(true);
-    try {
-      await api.delete("/subscribers/bulk", { data: { emails: selectedEmails } });
-      setSelectedEmails([]);
-      mutate();
-      mutateStats();
-    } catch (error: any) {
-      console.error("Failed to bulk delete subscribers:", error);
-      alert(error.response?.data?.error || "Failed to delete subscribers");
-    } finally {
-      setBulkDeleting(false);
-    }
+    setConfirmDialog({
+      open: true,
+      title: "Bulk Delete Subscribers",
+      message: `Are you sure you want to delete ${selectedEmails.length} selected subscribers? This action cannot be undone.`,
+      variant: 'danger',
+      onConfirm: async () => {
+        setConfirmDialog(prev => ({ ...prev, loading: true }));
+        setBulkDeleting(true);
+        try {
+          await api.delete("/subscribers/bulk", { data: { emails: selectedEmails } });
+          setSelectedEmails([]);
+          mutate();
+          mutateStats();
+          toast({
+            variant: "success",
+            title: "Subscribers deleted",
+            description: `Successfully deleted ${selectedEmails.length} subscribers`,
+          });
+          setConfirmDialog(prev => ({ ...prev, open: false }));
+        } catch (error: any) {
+          console.error("Failed to bulk delete subscribers:", error);
+          toast({
+            variant: "error",
+            title: "Failed to delete subscribers",
+            description: error.response?.data?.error || "An error occurred during bulk deletion",
+          });
+          setConfirmDialog(prev => ({ ...prev, loading: false }));
+        } finally {
+          setBulkDeleting(false);
+        }
+      }
+    });
   }
 
   function toggleSelectAll() {
@@ -133,6 +204,47 @@ export default function Subscribers() {
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     
     return `${hours}h ${minutes}m`;
+  }
+
+  // Bulk email functions
+  async function handleBulkEmails(emails: string[]) {
+    try {
+      const response = await api.post("/subscribers/bulk-emails", { emails });
+      mutate();
+      mutateStats();
+      toast({
+        variant: "success",
+        title: "Bulk import completed",
+        description: `Added ${response.data.added} subscribers, updated ${response.data.updated} existing ones`,
+      });
+    } catch (error: any) {
+      console.error("Failed to import emails:", error);
+      throw new Error(error.response?.data?.error || "Failed to import emails");
+    }
+  }
+
+  // File upload function
+  async function handleFileUpload(file: File) {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    try {
+      const response = await api.post("/subscribers/import", formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      mutate();
+      mutateStats();
+      toast({
+        variant: "success",
+        title: "File import completed",
+        description: `Added ${response.data.added} subscribers, updated ${response.data.updated} existing ones`,
+      });
+    } catch (error: any) {
+      console.error("Failed to import file:", error);
+      throw new Error(error.response?.data?.error || "Failed to import file");
+    }
   }
 
   return (
@@ -208,41 +320,111 @@ export default function Subscribers() {
           </div>
         </motion.div>
 
-        {/* Add Subscriber Form */}
+        {/* Add Subscribers Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
           className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700 mb-8"
         >
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-            <Plus className="w-5 h-5" />
-            Add New Subscriber
-          </h2>
-          <div className="flex items-center gap-4">
-            <div className="flex-1">
-              <input
-                type="email"
-                className="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg px-4 py-3 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                placeholder="Enter email address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && add()}
-              />
-            </div>
-            <button
-              onClick={add}
-              disabled={loading || !email.trim()}
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-medium transition-colors"
-            >
-              {loading ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
+          <div className="mb-6">
+            <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+              <UserPlus className="w-5 h-5" />
+              Add Subscribers
+            </h2>
+            
+            {/* Tab Navigation */}
+            <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-700 p-1 rounded-lg">
+              <button
+                onClick={() => setActiveTab("single")}
+                className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium transition-all duration-200 ${
+                  activeTab === "single"
+                    ? "bg-white dark:bg-slate-600 text-blue-600 shadow-sm"
+                    : "text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+                }`}
+              >
                 <Plus className="w-4 h-4" />
-              )}
-              {loading ? "Adding..." : "Add Subscriber"}
-            </button>
+                Single
+              </button>
+              <button
+                onClick={() => setActiveTab("bulk")}
+                className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium transition-all duration-200 ${
+                  activeTab === "bulk"
+                    ? "bg-white dark:bg-slate-600 text-blue-600 shadow-sm"
+                    : "text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+                }`}
+              >
+                <Mail className="w-4 h-4" />
+                Bulk Emails
+              </button>
+              <button
+                onClick={() => setActiveTab("import")}
+                className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium transition-all duration-200 ${
+                  activeTab === "import"
+                    ? "bg-white dark:bg-slate-600 text-blue-600 shadow-sm"
+                    : "text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+                }`}
+              >
+                <Upload className="w-4 h-4" />
+                Import File
+              </button>
+            </div>
           </div>
+
+          {/* Tab Content */}
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {activeTab === "single" && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium text-slate-900 dark:text-white">Add Single Subscriber</h3>
+                <div className="flex items-center gap-4">
+                  <div className="flex-1">
+                    <input
+                      type="email"
+                      className="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg px-4 py-3 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                      placeholder="Enter email address"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      onKeyPress={(e) => e.key === "Enter" && add()}
+                    />
+                  </div>
+                  <button
+                    onClick={add}
+                    disabled={loading || !email.trim()}
+                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-medium transition-colors"
+                  >
+                    {loading ? (
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <Plus className="w-4 h-4" />
+                    )}
+                    {loading ? "Adding..." : "Add Subscriber"}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {activeTab === "bulk" && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium text-slate-900 dark:text-white">Bulk Add from Email List</h3>
+                <BulkEmailInput onSubmit={handleBulkEmails} loading={loading} />
+              </div>
+            )}
+
+            {activeTab === "import" && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium text-slate-900 dark:text-white">Import from CSV/Excel File</h3>
+                <p className="text-sm text-slate-600 dark:text-slate-400">
+                  Upload a CSV or Excel file with email addresses. The file should have an "email" column.
+                </p>
+                <FileUpload onUpload={handleFileUpload} loading={loading} />
+              </div>
+            )}
+          </motion.div>
         </motion.div>
 
         {/* Subscribers List */}
@@ -358,7 +540,7 @@ export default function Subscribers() {
                               </div>
                               {userRole === "superadmin" && subscriber.added_by && (
                                 <div className="text-xs text-slate-500 dark:text-slate-400">
-                                  Added by: {subscriber.added_by}
+                                  Added by: {subscriber.staff_name || subscriber.added_by}
                                 </div>
                               )}
                             </div>
@@ -430,6 +612,17 @@ export default function Subscribers() {
           )}
         </motion.div>
       </div>
+
+      {/* Confirm Dialog */}
+      <ConfirmDialog
+        isOpen={confirmDialog.open}
+        onClose={() => setConfirmDialog(prev => ({ ...prev, open: false }))}
+        onConfirm={confirmDialog.onConfirm}
+        title={confirmDialog.title}
+        message={confirmDialog.message}
+        variant={confirmDialog.variant}
+        loading={confirmDialog.loading}
+      />
     </div>
   );
 }

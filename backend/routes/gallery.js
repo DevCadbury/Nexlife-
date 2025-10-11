@@ -19,7 +19,7 @@ router.get("/", async (req, res) => {
   const items = await gallery
     .find({ visible: { $ne: false } })
     .project({ adminNote: 0 })
-    .sort({ createdAt: -1 })
+    .sort({ sequence: 1, createdAt: -1 })
     .toArray();
   res.json({ total: items.length, items });
 });
@@ -33,7 +33,7 @@ router.get(
     const items = await gallery
       .find({})
       .project({})
-      .sort({ createdAt: -1 })
+      .sort({ sequence: 1, createdAt: -1 })
       .toArray();
     res.json({ total: items.length, items });
   }
@@ -60,6 +60,10 @@ router.post(
         async (error, uploaded) => {
           if (error) return res.status(500).json({ error: error.message });
           const { gallery } = await getCollections();
+          // Get current max sequence to add new image at the end
+          const maxSequenceItem = await gallery.findOne({}, { sort: { sequence: -1 } });
+          const nextSequence = (maxSequenceItem?.sequence || 0) + 1;
+
           const doc = {
             url: uploaded.secure_url,
             publicId: uploaded.public_id,
@@ -72,6 +76,7 @@ router.post(
             views: 0,
             visible: true,
             adminNote: "",
+            sequence: nextSequence,
             uploadedBy: {
               id: req.user?.id,
               name: req.user?.name || "Admin",
@@ -100,7 +105,7 @@ router.post(
   }
 );
 
-// Admin: delete image
+// Admin: delete image (with permission checking)
 router.delete(
   "/:id",
   requireAuth(["superadmin", "admin"]),
@@ -110,6 +115,21 @@ router.delete(
       _id: new (await import("mongodb")).ObjectId(req.params.id),
     });
     if (!item) return res.status(404).json({ error: "Not found" });
+
+    // Check deletion permissions for admins
+    if (req.user?.role === "admin") {
+      const uploadedAt = new Date(item.createdAt);
+      const now = new Date();
+      const hoursDiff = (now.getTime() - uploadedAt.getTime()) / (1000 * 60 * 60);
+      
+      // Allow deletion within 24 hours or if user uploaded it themselves
+      if (hoursDiff > 24 && item.uploadedBy?.id !== req.user?.id) {
+        return res.status(403).json({ 
+          error: "You can only delete images uploaded within 24 hours or images you uploaded yourself" 
+        });
+      }
+    }
+
     try {
       if (item.publicId) await cloudinary.uploader.destroy(item.publicId);
     } catch (_) {}
@@ -227,7 +247,118 @@ router.patch(
   }
 );
 
-// Admin: migrate existing gallery images to include uploader info
+// Admin: move image in sequence
+router.patch(
+  "/:id/sequence",
+  requireAuth(["superadmin", "admin"]),
+  async (req, res) => {
+    try {
+      const { direction } = req.body;
+      if (!['up', 'down'].includes(direction)) {
+        return res.status(400).json({ error: "Direction must be 'up' or 'down'" });
+      }
+
+      const { gallery } = await getCollections();
+      const _id = new (await import("mongodb")).ObjectId(req.params.id);
+      
+      // Get current image
+      const currentImage = await gallery.findOne({ _id });
+      if (!currentImage) {
+        return res.status(404).json({ error: "Image not found" });
+      }
+
+      // Get all images sorted by sequence
+      const allImages = await gallery.find({}).sort({ sequence: 1 }).toArray();
+      const currentIndex = allImages.findIndex(img => img._id.toString() === _id.toString());
+      
+      if (currentIndex === -1) {
+        return res.status(404).json({ error: "Image not found in sequence" });
+      }
+
+      let targetIndex;
+      if (direction === 'up' && currentIndex > 0) {
+        targetIndex = currentIndex - 1;
+      } else if (direction === 'down' && currentIndex < allImages.length - 1) {
+        targetIndex = currentIndex + 1;
+      } else {
+        return res.status(400).json({ error: "Cannot move in that direction" });
+      }
+
+      // Swap sequences
+      const targetImage = allImages[targetIndex];
+      const currentSequence = currentImage.sequence || currentIndex;
+      const targetSequence = targetImage.sequence || targetIndex;
+
+      await gallery.updateOne(
+        { _id: currentImage._id },
+        { $set: { sequence: targetSequence } }
+      );
+      
+      await gallery.updateOne(
+        { _id: targetImage._id },
+        { $set: { sequence: currentSequence } }
+      );
+
+      await logCommunication(req, {
+        level: ActivityLevel.INFO,
+        type: "gallery.sequence",
+        message: `Moved image ${direction} in sequence`,
+        refId: _id,
+        actorId: req.user?.id,
+        actorName: req.user?.name,
+        meta: { direction, from: currentSequence, to: targetSequence },
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating sequence:", error);
+      res.status(500).json({ error: "Failed to update sequence" });
+    }
+  }
+);
+
+// Admin: bulk reorder images
+router.patch(
+  "/reorder",
+  requireAuth(["superadmin", "admin"]),
+  async (req, res) => {
+    try {
+      const { sequences } = req.body;
+      if (!Array.isArray(sequences)) {
+        return res.status(400).json({ error: "Sequences must be an array" });
+      }
+
+      const { gallery } = await getCollections();
+      const ObjectId = (await import("mongodb")).ObjectId;
+      
+      // Update all sequences
+      const updatePromises = sequences.map(({ id, sequence }) =>
+        gallery.updateOne(
+          { _id: new ObjectId(id) },
+          { $set: { sequence: sequence } }
+        )
+      );
+
+      await Promise.all(updatePromises);
+
+      await logCommunication(req, {
+        level: ActivityLevel.INFO,
+        type: "gallery.reorder",
+        message: `Bulk reordered ${sequences.length} images`,
+        actorId: req.user?.id,
+        actorName: req.user?.name,
+        meta: { count: sequences.length },
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error reordering images:", error);
+      res.status(500).json({ error: "Failed to reorder images" });
+    }
+  }
+);
+
+// Admin: migrate existing gallery images to include uploader info and sequences
 router.post(
   "/migrate-uploaders",
   requireAuth(["superadmin"]),
@@ -264,9 +395,28 @@ router.post(
 
       await Promise.all(updatePromises);
 
+      // Add sequence numbers to images that don't have them
+      const imagesWithoutSequence = await gallery
+        .find({ sequence: { $exists: false } })
+        .sort({ createdAt: 1 })
+        .toArray();
+
+      console.log(
+        `Found ${imagesWithoutSequence.length} images without sequence numbers`
+      );
+
+      const sequencePromises = imagesWithoutSequence.map((image, index) =>
+        gallery.updateOne(
+          { _id: image._id },
+          { $set: { sequence: index + 1 } }
+        )
+      );
+
+      await Promise.all(sequencePromises);
+
       res.json({
         success: true,
-        message: `Updated ${imagesWithoutUploader.length} images with default uploader info`,
+        message: `Updated ${imagesWithoutUploader.length} images with uploader info and ${imagesWithoutSequence.length} images with sequence numbers`,
       });
     } catch (error) {
       console.error("Error migrating uploaders:", error);
