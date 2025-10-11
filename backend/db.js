@@ -65,7 +65,12 @@ async function ensureIndexes(db) {
     ]);
   await db
     .collection("subscribers")
-    .createIndexes([{ key: { email: 1 }, unique: true }]);
+    .createIndexes([
+      { key: { email: 1 }, unique: true },
+      { key: { added_by: 1, is_locked: 1 } },
+      { key: { deleted_by_admin: 1, deleted_by_super: 1 } },
+      { key: { added_at: -1 } },
+    ]);
   await db
     .collection("staff")
     .createIndexes([{ key: { email: 1 }, unique: true }, { key: { role: 1 } }]);
