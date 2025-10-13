@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import useSWR from "swr";
-import { fetcher } from "@/lib/api";
+import { fetcher, api } from "@/lib/api";
 import { motion } from "framer-motion";
 import {
   Download,
@@ -1009,28 +1009,28 @@ export default function Logs() {
           <table className="w-full">
             <thead className="bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-700 backdrop-blur-sm">
               <tr>
-                <th className="px-6 py-5 text-left text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+                <th className="px-3 py-3 text-left text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
                   Activity
                 </th>
-                <th className="px-6 py-5 text-left text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+                <th className="px-3 py-3 text-left text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
                   Type
                 </th>
-                <th className="px-6 py-5 text-left text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+                <th className="px-3 py-3 text-left text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
                   Message
                 </th>
-                <th className="px-6 py-5 text-left text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+                <th className="px-3 py-3 text-left text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
                   User
                 </th>
-                <th className="px-6 py-5 text-left text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+                <th className="px-3 py-3 text-left text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
                   IP Address
                 </th>
-                <th className="px-6 py-5 text-left text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+                <th className="px-3 py-3 text-left text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
                   Timestamp
                 </th>
-                <th className="px-6 py-5 text-left text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+                <th className="px-3 py-3 text-left text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
                   Level
                 </th>
-                <th className="px-6 py-5 text-left text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+                <th className="px-3 py-3 text-left text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -1038,14 +1038,14 @@ export default function Logs() {
             <tbody className="divide-y divide-slate-200/50 dark:divide-slate-700/50">
               {logsLoading ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-16 text-center">
+                  <td colSpan={8} className="px-3 py-8 text-center">
                     <motion.div
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      className="flex flex-col items-center gap-4"
+                      className="flex flex-col items-center gap-3"
                     >
-                      <Loader2 className="w-12 h-12 animate-spin text-indigo-500" />
-                      <div className="text-slate-600 dark:text-slate-400 font-medium">
+                      <Loader2 className="w-10 h-10 animate-spin text-indigo-500" />
+                      <div className="text-slate-600 dark:text-slate-400 font-medium text-sm">
                         Loading system logs...
                       </div>
                     </motion.div>
@@ -1053,20 +1053,20 @@ export default function Logs() {
                 </tr>
               ) : filteredLogs.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-16 text-center">
+                  <td colSpan={8} className="px-3 py-8 text-center">
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="flex flex-col items-center gap-6"
+                      className="flex flex-col items-center gap-4"
                     >
-                      <div className="p-6 bg-slate-100 dark:bg-slate-700/50 rounded-full">
-                        <Activity className="w-16 h-16 text-slate-400" />
+                      <div className="p-4 bg-slate-100 dark:bg-slate-700/50 rounded-full">
+                        <Activity className="w-12 h-12 text-slate-400" />
                       </div>
                       <div>
-                        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">
                           No logs found
                         </h3>
-                        <p className="text-slate-600 dark:text-slate-400 mb-4 max-w-md">
+                        <p className="text-sm text-slate-600 dark:text-slate-400 mb-3 max-w-md">
                           Try adjusting your filters or search terms to see more results
                         </p>
                         <button
@@ -1078,7 +1078,7 @@ export default function Logs() {
                             setFromDate("");
                             setToDate("");
                           }}
-                          className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-colors font-medium"
+                          className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors font-medium text-sm"
                         >
                           Clear Filters
                         </button>
@@ -1104,32 +1104,32 @@ export default function Logs() {
                     }}
                   >
                     {/* Activity Column */}
-                    <td className="px-6 py-5">
-                      <div className="flex items-center gap-4">
+                    <td className="px-3 py-3">
+                      <div className="flex items-center gap-2">
                         <motion.div
-                          whileHover={{ scale: 1.1, rotate: 5 }}
-                          className={`p-3 rounded-2xl ${getActivityColor(
+                          whileHover={{ scale: 1.05, rotate: 5 }}
+                          className={`p-2 rounded-lg ${getActivityColor(
                             log.type
-                          )} text-white shadow-lg backdrop-blur-sm`}
+                          )} text-white shadow-sm backdrop-blur-sm`}
                         >
                           {getActivityIcon(log.type)}
                         </motion.div>
                         <div>
-                          <div className="text-sm font-bold text-slate-900 dark:text-white">
+                          <div className="text-xs font-bold text-slate-900 dark:text-white">
                             {log.type || "Unknown Activity"}
                           </div>
                           <div className="text-xs text-slate-500 dark:text-slate-400">
-                            {log.actorName ? "User Action" : "System Event"}
+                            {log.actorName ? "User" : "System"}
                           </div>
                         </div>
                       </div>
                     </td>
 
                     {/* Type Column */}
-                    <td className="px-6 py-5">
-                      <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
+                    <td className="px-3 py-3">
+                      <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-bold bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
                         <div
-                          className={`w-2 h-2 rounded-full ${getActivityColor(
+                          className={`w-1.5 h-1.5 rounded-full ${getActivityColor(
                             log.type
                           )}`}
                         />
@@ -1138,7 +1138,7 @@ export default function Logs() {
                     </td>
 
                     {/* Message Column */}
-                    <td className="px-6 py-5 max-w-xs">
+                    <td className="px-3 py-3 max-w-xs">
                       <div
                         className="text-sm text-slate-700 dark:text-slate-300 font-medium truncate group-hover:text-slate-900 dark:group-hover:text-white transition-colors"
                         title={log.message || ""}
@@ -1146,30 +1146,30 @@ export default function Logs() {
                         {log.message || "No description available"}
                       </div>
                       {(log as any).customerName && (
-                        <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">
+                        <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
                           Customer: {(log as any).customerName}
                         </div>
                       )}
                     </td>
 
                     {/* User Column */}
-                    <td className="px-6 py-5">
-                      <div className="flex items-center gap-3">
+                    <td className="px-3 py-3">
+                      <div className="flex items-center gap-2">
                         {log.actorName ? (
                           <>
-                            <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
-                              <User className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                            <div className="p-1.5 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
+                              <User className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
                             </div>
-                            <span className="text-sm font-semibold text-slate-900 dark:text-white">
+                            <span className="text-xs font-semibold text-slate-900 dark:text-white">
                               {log.actorName}
                             </span>
                           </>
                         ) : (
                           <>
-                            <div className="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg">
-                              <Database className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                            <div className="p-1.5 bg-slate-100 dark:bg-slate-700 rounded-lg">
+                              <Database className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400" />
                             </div>
-                            <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                            <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
                               System
                             </span>
                           </>
@@ -1178,14 +1178,14 @@ export default function Logs() {
                     </td>
 
                     {/* IP Address Column */}
-                    <td className="px-6 py-5">
-                      <div className="text-sm font-mono text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-700/50 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600">
+                    <td className="px-3 py-3">
+                      <div className="text-xs font-mono text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-700/50 px-2 py-1 rounded-md border border-slate-200 dark:border-slate-600">
                         {log.ip || "N/A"}
                       </div>
                     </td>
 
                     {/* Timestamp Column */}
-                    <td className="px-6 py-5">
+                    <td className="px-3 py-3">
                       <div className="flex flex-col gap-1">
                         <div className="text-sm font-semibold text-slate-900 dark:text-white">
                           {new Date(log.timestamp).toLocaleDateString('en-US', {
@@ -1206,9 +1206,9 @@ export default function Logs() {
                     </td>
 
                     {/* Level Column */}
-                    <td className="px-6 py-5">
+                    <td className="px-3 py-3">
                       <div
-                        className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold border backdrop-blur-sm ${getLevelColor(
+                        className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-bold border backdrop-blur-sm ${getLevelColor(
                           log.level
                         )}`}
                       >
@@ -1220,55 +1220,55 @@ export default function Logs() {
                     </td>
 
                     {/* Actions Column */}
-                    <td className="px-6 py-5">
-                      <div className="flex items-center gap-2">
+                    <td className="px-3 py-3">
+                      <div className="flex items-center gap-1.5 flex-wrap">
                         {(log as any).category && (
-                          <span className="px-2 py-1 text-xs rounded-lg border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-700/50 font-medium">
+                          <span className="px-2 py-0.5 text-xs rounded-md border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-700/50 font-medium">
                             {(log as any).category}
                           </span>
                         )}
                         <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
                           onClick={(e) => {
                             e.stopPropagation();
                             setSelectedLog(log);
                             setShowDetails(true);
                           }}
-                          className="p-2 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl transition-all duration-200"
+                          className="p-1.5 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-all duration-200"
                           title="View Details"
                         >
-                          <Eye className="w-5 h-5" />
+                          <Eye className="w-4 h-4" />
                         </motion.button>
                         {getThreadUrl(log) && (
                           <motion.a
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
                             href={getThreadUrl(log) as string}
-                            className="p-2 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-xl transition-all duration-200"
+                            className="p-1.5 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all duration-200"
                             title="Open Thread"
                           >
-                            <ArrowRight className="w-5 h-5" />
+                            <ArrowRight className="w-4 h-4" />
                           </motion.a>
                         )}
-                        {getUserRoleFromToken().role === "superadmin" && (
+                        {(getUserRoleFromToken().role === "superadmin" || getUserRoleFromToken().role === "dev") && (
                           <motion.button
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
                             onClick={(e) => {
                               e.stopPropagation();
                               setLogToDelete(log);
                               setShowDeleteDialog(true);
                             }}
-                            className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-all duration-200 shadow-sm"
-                            title="Delete Log (Superadmin Only)"
+                            className="p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-all duration-200 shadow-sm"
+                            title="Delete Log"
                           >
-                            <Trash2 className="w-5 h-5" />
+                            <Trash2 className="w-3.5 h-3.5" />
                           </motion.button>
                         )}
                         {log.meta && Object.keys(log.meta).length > 0 && (
                           <div
-                            className="w-3 h-3 rounded-full bg-indigo-400 shadow-lg"
+                            className="w-2 h-2 rounded-full bg-indigo-400 shadow-lg"
                             title="Has metadata"
                           />
                         )}
@@ -1888,27 +1888,22 @@ export default function Logs() {
 
                   setIsDeleting(true);
                   try {
-                    const response = await fetch(`/api/logs/${logToDelete._id}`, {
-                      method: 'DELETE',
-                      credentials: 'include',
-                    });
-                    const result = await response.json();
+                    const response = await api.delete(`/logs/${logToDelete._id}`);
 
-                    if (result.success) {
+                    if (response.data.success) {
                       mutate(); // Refresh the logs after deletion
                       setShowDeleteDialog(false);
                       setLogToDelete(null);
                       showToast('Log entry deleted successfully', 'success');
                     } else {
-                      // Show error in a better way - maybe add a toast or error state
-                      console.error('Failed to delete log entry:', result.error);
-                      showToast('Failed to delete log entry', 'error');
-                      // For now, we'll just close the dialog and log the error
+                      console.error('Failed to delete log entry:', response.data.error);
+                      showToast(response.data.error || 'Failed to delete log entry', 'error');
                       setShowDeleteDialog(false);
                       setLogToDelete(null);
                     }
-                  } catch (error) {
+                  } catch (error: any) {
                     console.error('Error deleting log:', error);
+                    showToast(error.response?.data?.error || 'Error deleting log', 'error');
                     setShowDeleteDialog(false);
                     setLogToDelete(null);
                   } finally {
@@ -2058,22 +2053,18 @@ export default function Logs() {
                 onClick={async () => {
                   setIsDeletingAll(true);
                   try {
-                    const response = await fetch('/api/logs/all', {
-                      method: 'DELETE',
-                      credentials: 'include',
-                    });
-                    const result = await response.json();
+                    const response = await api.delete('/logs/all');
 
-                    if (result.success) {
+                    if (response.data.success) {
                       mutate(); // Refresh the logs after deletion
                       setShowDeleteAllDialog(false);
-                      showToast(`Successfully deleted ${result.deletedCount || 'all'} log entries`, 'success');
+                      showToast(`Successfully deleted ${response.data.deletedCount || 'all'} log entries`, 'success');
                     } else {
-                      showToast(result.error || 'Failed to delete logs', 'error');
+                      showToast(response.data.error || 'Failed to delete logs', 'error');
                     }
-                  } catch (error) {
+                  } catch (error: any) {
                     console.error('Error deleting all logs:', error);
-                    showToast('Failed to delete logs', 'error');
+                    showToast(error.response?.data?.error || 'Failed to delete logs', 'error');
                   } finally {
                     setIsDeletingAll(false);
                   }
