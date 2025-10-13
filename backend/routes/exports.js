@@ -25,21 +25,25 @@ router.get("/contacts.csv", requireAuth(), async (req, res) => {
     const { subscribers, staff } = await getCollections();
     const { role, id: userId } = req.user;
     
+    console.log('[EXPORT] User role:', role, 'User ID:', userId);
+    
     let query = {};
     
-    if (role === "superadmin") {
-      // Superadmin gets all subscribers (not deleted by super)
+    if (role === "superadmin" || role === "dev") {
+      // Superadmin and dev get all subscribers (not deleted by super)
       query = { deleted_by_super: { $ne: true } };
+      console.log('[EXPORT] Superadmin/dev query:', query);
     } else if (role === "admin") {
       // Admin gets only their own subscribers added within 24 hours and not deleted
       const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
       query = {
-        added_by: userId,
+        added_by: String(userId),
         added_at: { $gte: twentyFourHoursAgo },
         is_locked: { $ne: true },
         deleted_by_admin: { $ne: true },
         deleted_by_super: { $ne: true }
       };
+      console.log('[EXPORT] Admin query:', query);
     } else {
       return res.status(403).json({ error: "Insufficient permissions" });
     }
@@ -88,8 +92,8 @@ router.get("/contacts.csv", requireAuth(), async (req, res) => {
   }
 });
 
-// GET /api/export/logs.csv - Superadmin only
-router.get("/logs.csv", requireAuth(["superadmin"]), async (req, res) => {
+// GET /api/export/logs.csv - Superadmin and dev only
+router.get("/logs.csv", requireAuth(["superadmin", "dev"]), async (req, res) => {
   try {
     const { logs } = await getCollections();
     const items = await logs

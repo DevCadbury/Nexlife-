@@ -77,6 +77,10 @@ export default function Logs() {
     visible: false
   });
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(50);
+  const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false);
+  const [isDeletingAll, setIsDeletingAll] = useState(false);
 
   console.log("Logs component mounted/rendered");
 
@@ -95,8 +99,9 @@ export default function Logs() {
     const checkAuthorization = () => {
       console.log("Running checkAuthorization function");
       const { role } = getUserRoleFromToken();
-      console.log("Authorization check result:", { role, isAuthorized: role === "superadmin" });
-      setIsAuthorized(role === "superadmin");
+      const authorized = role === "superadmin" || role === "dev";
+      console.log("Authorization check result:", { role, isAuthorized: authorized });
+      setIsAuthorized(authorized);
       setIsLoading(false);
     };
 
@@ -216,6 +221,17 @@ export default function Logs() {
       matchesDate
     );
   });
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredLogs.length / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const paginatedLogs = filteredLogs.slice(startIndex, endIndex);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, levelFilter, typeFilter, categoryFilter, fromDate, toDate, pageSize]);
 
   const getLevelIcon = (level: string) => {
     if (!level) return <Activity className="w-4 h-4 text-gray-400" />;
@@ -471,7 +487,7 @@ export default function Logs() {
             Access Denied
           </h2>
           <p className="text-slate-400">
-            This page is only accessible to super administrators.
+            This page is only accessible to superadmin and dev roles.
           </p>
         </div>
       </div>
@@ -593,6 +609,25 @@ export default function Logs() {
                     <span className="font-semibold text-sm">Export CSV</span>
                   </div>
                 </motion.button>
+                {getUserRoleFromToken().role === "dev" && (
+                  <motion.button
+                    whileHover={{ scale: 1.02, y: -1 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setShowDeleteAllDialog(true)}
+                    className="group relative overflow-hidden flex items-center gap-3 px-5 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl border border-white/20 backdrop-blur-sm"
+                  >
+                    <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <motion.div
+                      whileHover={{ scale: 1.1 }}
+                      className="relative z-10"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </motion.div>
+                    <div className="relative z-10">
+                      <span className="font-semibold text-sm">Delete All</span>
+                    </div>
+                  </motion.button>
+                )}
               </motion.div>
             </div>
           </div>
@@ -862,33 +897,102 @@ export default function Logs() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.3 }}
-            className="mt-2 flex items-center justify-between p-2 bg-slate-50/50 dark:bg-slate-700/30 rounded-lg border border-slate-200/50 dark:border-slate-600/50"
+            className="mt-2 space-y-2"
           >
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1">
-                <TrendingUp className="w-3 h-3 text-indigo-600" />
-                <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                  Showing {filteredLogs.length} of {logs.length} logs
-                </span>
+            <div className="flex items-center justify-between p-2 bg-slate-50/50 dark:bg-slate-700/30 rounded-lg border border-slate-200/50 dark:border-slate-600/50">
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
+                  <TrendingUp className="w-3 h-3 text-indigo-600" />
+                  <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                    Showing {startIndex + 1}-{Math.min(endIndex, filteredLogs.length)} of {filteredLogs.length} logs
+                    {filteredLogs.length !== logs.length && ` (filtered from ${logs.length})`}
+                  </span>
+                </div>
+                {(searchTerm || levelFilter !== "all" || categoryFilter !== "all" || typeFilter !== "all" || fromDate || toDate) && (
+                  <button
+                    onClick={() => {
+                      setSearchTerm("");
+                      setLevelFilter("all");
+                      setCategoryFilter("all");
+                      setTypeFilter("all");
+                      setFromDate("");
+                      setToDate("");
+                    }}
+                    className="text-xs text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium transition-colors"
+                  >
+                    Clear all
+                  </button>
+                )}
               </div>
-              {(searchTerm || levelFilter !== "all" || categoryFilter !== "all" || typeFilter !== "all" || fromDate || toDate) && (
-                <button
-                  onClick={() => {
-                    setSearchTerm("");
-                    setLevelFilter("all");
-                    setCategoryFilter("all");
-                    setTypeFilter("all");
-                    setFromDate("");
-                    setToDate("");
-                  }}
-                  className="text-xs text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium transition-colors"
-                >
-                  Clear all
-                </button>
-              )}
+              <div className="text-xs text-slate-500 dark:text-slate-400">
+                {logsLoading ? "Updating..." : "Live data"}
+              </div>
             </div>
-            <div className="text-xs text-slate-500 dark:text-slate-400">
-              {logsLoading ? "Updating..." : "Live data"}
+
+            {/* Pagination Controls */}
+            <div className="flex items-center justify-between p-3 bg-slate-50/50 dark:bg-slate-700/30 rounded-lg border border-slate-200/50 dark:border-slate-600/50">
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                  Rows per page:
+                </span>
+                <select
+                  value={pageSize}
+                  onChange={(e) => setPageSize(Number(e.target.value))}
+                  className="px-3 py-1.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-300 text-xs font-medium"
+                >
+                  <option value={10}>10</option>
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                  <option value={200}>200</option>
+                </select>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                  Page {currentPage} of {totalPages || 1}
+                </span>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setCurrentPage(1)}
+                    disabled={currentPage === 1}
+                    className="p-1.5 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
+                    title="First page"
+                  >
+                    <div className="flex items-center gap-0.5">
+                      <ChevronDown className="w-3 h-3 rotate-90" />
+                      <ChevronDown className="w-3 h-3 rotate-90 -ml-1" />
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="p-1.5 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
+                    title="Previous page"
+                  >
+                    <ChevronDown className="w-4 h-4 rotate-90" />
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages || totalPages === 0}
+                    className="p-1.5 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
+                    title="Next page"
+                  >
+                    <ChevronDown className="w-4 h-4 -rotate-90" />
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage(totalPages)}
+                    disabled={currentPage === totalPages || totalPages === 0}
+                    className="p-1.5 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
+                    title="Last page"
+                  >
+                    <div className="flex items-center gap-0.5">
+                      <ChevronDown className="w-3 h-3 -rotate-90" />
+                      <ChevronDown className="w-3 h-3 -rotate-90 -ml-1" />
+                    </div>
+                  </button>
+                </div>
+              </div>
             </div>
           </motion.div>
         </motion.div>
@@ -982,7 +1086,7 @@ export default function Logs() {
                   </td>
                 </tr>
               ) : (
-                filteredLogs.map((log, index) => (
+                paginatedLogs.map((log, index) => (
                   <motion.tr
                     key={log._id}
                     initial={{ opacity: 0, y: 10 }}
@@ -1822,6 +1926,169 @@ export default function Logs() {
                   <>
                     <Trash2 className="w-4 h-4" />
                     Delete
+                  </>
+                )}
+              </motion.button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Delete All Logs Confirmation Dialog */}
+      {showDeleteAllDialog && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8, y: 50 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 50 }}
+            transition={{
+              type: "spring",
+              stiffness: 300,
+              damping: 30,
+              duration: 0.4,
+            }}
+            className="bg-gradient-to-br from-white via-slate-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 border border-white/20 dark:border-slate-700/50 rounded-2xl max-w-md w-full shadow-2xl"
+          >
+            {/* Header */}
+            <div className="relative p-6 border-b border-slate-200/50 dark:border-slate-700/50 bg-gradient-to-r from-red-600/5 via-red-600/5 to-red-600/5 backdrop-blur-sm">
+              <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 via-red-500/10 to-red-500/10 rounded-t-2xl"></div>
+              <div className="absolute -top-10 -right-10 w-20 h-20 bg-red-500/10 rounded-full blur-2xl"></div>
+              <div className="relative flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <motion.div
+                    initial={{ scale: 0, rotate: -180 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                    className="p-3 bg-red-500 text-white rounded-xl shadow-xl backdrop-blur-sm"
+                  >
+                    <Trash2 className="w-6 h-6" />
+                  </motion.div>
+                  <div>
+                    <motion.h3
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.3 }}
+                      className="text-xl font-bold text-slate-900 dark:text-white"
+                    >
+                      Delete All Logs
+                    </motion.h3>
+                    <motion.p
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.4 }}
+                      className="text-slate-600 dark:text-slate-400 text-sm mt-0.5"
+                    >
+                      This action cannot be undone
+                    </motion.p>
+                  </div>
+                </div>
+                <motion.button
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.5 }}
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => {
+                    setShowDeleteAllDialog(false);
+                  }}
+                  className="p-2 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-xl transition-all duration-300 backdrop-blur-sm border border-white/10"
+                >
+                  <X className="w-5 h-5" />
+                </motion.button>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 space-y-4">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="space-y-3"
+              >
+                <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-xl border-2 border-red-200 dark:border-red-800">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                    <div className="space-y-2">
+                      <p className="text-red-900 dark:text-red-200 font-bold text-sm">
+                        ⚠️ CRITICAL ACTION - DEV ONLY
+                      </p>
+                      <p className="text-red-800 dark:text-red-300 text-sm leading-relaxed">
+                        You are about to permanently delete <strong>ALL {logs.length.toLocaleString()} log entries</strong> from the system. This will:
+                      </p>
+                      <ul className="text-red-800 dark:text-red-300 text-sm space-y-1 ml-4 list-disc">
+                        <li>Remove all activity history</li>
+                        <li>Clear all audit trails</li>
+                        <li>Delete all system event records</li>
+                        <li>Cannot be recovered or undone</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+                  This action is restricted to DEV role only and should be used with extreme caution. All log data will be permanently erased.
+                </p>
+              </motion.div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center justify-end gap-3 p-6 border-t border-slate-200/50 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50 rounded-b-2xl">
+              <motion.button
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.6 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => {
+                  setShowDeleteAllDialog(false);
+                }}
+                disabled={isDeletingAll}
+                className="px-4 py-2 text-slate-600 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 font-medium rounded-xl transition-all duration-200 disabled:opacity-50"
+              >
+                Cancel
+              </motion.button>
+              <motion.button
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.7 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={async () => {
+                  setIsDeletingAll(true);
+                  try {
+                    const response = await fetch('/api/logs/all', {
+                      method: 'DELETE',
+                      credentials: 'include',
+                    });
+                    const result = await response.json();
+
+                    if (result.success) {
+                      mutate(); // Refresh the logs after deletion
+                      setShowDeleteAllDialog(false);
+                      showToast(`Successfully deleted ${result.deletedCount || 'all'} log entries`, 'success');
+                    } else {
+                      showToast(result.error || 'Failed to delete logs', 'error');
+                    }
+                  } catch (error) {
+                    console.error('Error deleting all logs:', error);
+                    showToast('Failed to delete logs', 'error');
+                  } finally {
+                    setIsDeletingAll(false);
+                  }
+                }}
+                disabled={isDeletingAll}
+                className="px-6 py-2 bg-red-500 hover:bg-red-600 text-white font-medium rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {isDeletingAll ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Deleting All...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4" />
+                    Delete All {logs.length.toLocaleString()} Logs
                   </>
                 )}
               </motion.button>

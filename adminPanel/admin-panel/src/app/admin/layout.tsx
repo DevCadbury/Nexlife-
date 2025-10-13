@@ -360,9 +360,14 @@ export default function AdminLayout({
         <nav className="p-4 space-y-2">
           {tabs
             .filter((t) => {
-              // Hide logs and staff from non-superadmins
+              const userRole = profile?.user?.role;
+              // Hide logs and staff from non-superadmin/dev users
               if (t.href === "/admin/logs" || t.href === "/admin/staff") {
-                return profile?.user?.role === "superadmin";
+                return userRole === "superadmin" || userRole === "dev";
+              }
+              // Hide gallery from non-superadmin/dev users
+              if (t.href === "/admin/gallery") {
+                return userRole === "superadmin" || userRole === "dev";
               }
               return true;
             })

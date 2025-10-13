@@ -6,6 +6,7 @@ import readline from "readline";
 dotenv.config();
 
 const MONGODB_URI = process.env.MONGODB_URI;
+const MONGODB_DB = process.env.MONGODB_DB || "nexlife";
 
 if (!MONGODB_URI) {
   console.error("❌ Error: MONGODB_URI not found in environment variables");
@@ -71,9 +72,9 @@ async function createDevAccount() {
     console.log("\n🔄 Connecting to database...");
     const client = new MongoClient(MONGODB_URI);
     await client.connect();
-    console.log("✅ Connected to database");
+    const db = client.db(MONGODB_DB);
+    console.log(`✅ Connected to database: ${MONGODB_DB}`);
 
-    const db = client.db();
     const staffCollection = db.collection("staff");
 
     // Check if email already exists

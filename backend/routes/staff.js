@@ -180,6 +180,63 @@ router.patch("/:id/notifications", requireAuth(["superadmin", "dev"]), async (re
   res.json({ success: true });
 });
 
+// Send password reset link - SUPERADMIN & DEV (superadmins can only send to staff/admin, dev can send to anyone)
+router.post("/:id/send-reset-link", requireAuth(["superadmin", "dev"]), async (req, res) => {
+  try {
+    const _id = new ObjectId(req.params.id);
+    const { staff } = await getCollections();
+    
+    // Get target user
+    const targetUser = await staff.findOne({ _id });
+    if (!targetUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    
+    // Check permissions: superadmins can only reset for staff/admin
+    if (req.user?.role === "superadmin" && (targetUser.role === "superadmin" || targetUser.role === "dev")) {
+      return res.status(403).json({ error: "Cannot send reset link to superadmin or DEV accounts" });
+    }
+    
+    // Generate reset code and expiration
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+    
+    // Update user with reset code
+    await staff.updateOne(
+      { _id },
+      { $set: { resetCode: code, resetExpiresAt: expiresAt } }
+    );
+    
+    // Send reset email
+    try {
+      await sendEmail(targetUser.email, 'otp', { code });
+      
+      await addLog({
+        type: "staff.reset_link_sent",
+        refId: _id,
+        actorId: req.user?.id,
+        meta: { 
+          targetEmail: targetUser.email,
+          targetName: targetUser.name,
+          sentBy: req.user?.name || req.user?.email
+        },
+      });
+      
+      res.json({ 
+        success: true, 
+        message: `Password reset link sent to ${targetUser.email}`,
+        expiresAt 
+      });
+    } catch (emailError) {
+      console.error('Failed to send reset email:', emailError);
+      return res.status(500).json({ error: "Failed to send reset email" });
+    }
+  } catch (error) {
+    console.error('Error sending reset link:', error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // Delete staff - SUPERADMIN & DEV ONLY (superadmins can't delete other superadmins, only DEV can delete superadmins)
 router.delete("/:id", requireAuth(["superadmin", "dev"]), async (req, res) => {
   const _id = new ObjectId(req.params.id);

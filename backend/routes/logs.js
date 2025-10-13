@@ -5,8 +5,8 @@ import { logActivity } from "../config/logger.js";
 
 const router = express.Router();
 
-// GET /api/logs - Get all logs (superadmin only)
-router.get("/", requireAuth(["superadmin"]), async (req, res) => {
+// GET /api/logs - Get all logs (superadmin and dev only)
+router.get("/", requireAuth(["superadmin", "dev"]), async (req, res) => {
   try {
     const { logs } = await getCollections();
 
@@ -81,8 +81,8 @@ router.get("/", requireAuth(["superadmin"]), async (req, res) => {
   }
 });
 
-// GET /api/logs/stats - Get log statistics (superadmin only)
-router.get("/stats", requireAuth(["superadmin"]), async (req, res) => {
+// GET /api/logs/stats - Get log statistics (superadmin and dev only)
+router.get("/stats", requireAuth(["superadmin", "dev"]), async (req, res) => {
   try {
     const { logs } = await getCollections();
 
@@ -150,8 +150,8 @@ router.get("/stats", requireAuth(["superadmin"]), async (req, res) => {
   }
 });
 
-// POST /api/logs - Create a new log entry (superadmin; can be extended to service auth)
-router.post("/", requireAuth(["superadmin"]), async (req, res) => {
+// POST /api/logs - Create a new log entry (superadmin and dev only)
+router.post("/", requireAuth(["superadmin", "dev"]), async (req, res) => {
   try {
     const body = req.body || {};
     const saved = await logActivity({ req, ...body });
@@ -162,8 +162,34 @@ router.post("/", requireAuth(["superadmin"]), async (req, res) => {
   }
 });
 
-// DELETE /api/logs - Clear all logs (superadmin only)
-router.delete("/", requireAuth(["superadmin"]), async (req, res) => {
+// DELETE /api/logs/all - Clear all logs (dev only)
+router.delete("/all", requireAuth(["dev"]), async (req, res) => {
+  try {
+    const { logs } = await getCollections();
+    const result = await logs.deleteMany({});
+    
+    // Log this critical action
+    await logActivity({
+      req,
+      level: "warn",
+      type: "logs.delete_all",
+      message: `DEV user ${req.user?.name || req.user?.email} deleted all ${result.deletedCount} log entries`,
+      category: "system",
+    });
+
+    res.json({
+      success: true,
+      deletedCount: result.deletedCount,
+      message: `Successfully deleted ${result.deletedCount} log entries`,
+    });
+  } catch (error) {
+    console.error("Error deleting all logs:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// DELETE /api/logs - Clear logs with options (superadmin and dev only)
+router.delete("/", requireAuth(["superadmin", "dev"]), async (req, res) => {
   try {
     const { logs } = await getCollections();
 
@@ -200,8 +226,8 @@ router.delete("/", requireAuth(["superadmin"]), async (req, res) => {
   }
 });
 
-// DELETE /api/logs/:id - Delete a specific log entry (superadmin only)
-router.delete("/:id", requireAuth(["superadmin"]), async (req, res) => {
+// DELETE /api/logs/:id - Delete a specific log entry (superadmin and dev only)
+router.delete("/:id", requireAuth(["superadmin", "dev"]), async (req, res) => {
   try {
     const { logs } = await getCollections();
     const { ObjectId } = await import('mongodb');
