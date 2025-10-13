@@ -21,22 +21,32 @@ function generatePassword(length = 12) {
   return password;
 }
 
-// List staff
-router.get("/", requireAuth(["superadmin"]), async (req, res) => {
+// List staff - SUPERADMIN & DEV ONLY (DEV users are hidden from superadmins)
+router.get("/", requireAuth(["superadmin", "dev"]), async (req, res) => {
   const { staff } = await getCollections();
+  
+  // If user is superadmin, hide DEV role users
+  const query = req.user?.role === "superadmin" ? { role: { $ne: "dev" } } : {};
+  
   const items = await staff
-    .find({})
+    .find(query)
     .project({ passwordHash: 0 })
     .sort({ createdAt: -1 })
     .toArray();
   res.json({ total: items.length, items });
 });
 
-// Create staff
-router.post("/", requireAuth(["superadmin"]), async (req, res) => {
+// Create staff - SUPERADMIN & DEV ONLY (only DEV can create DEV role)
+router.post("/", requireAuth(["superadmin", "dev"]), async (req, res) => {
   const { email, name, role = "admin", password } = req.body || {};
   if (!email || !name)
     return res.status(400).json({ error: "Missing fields" });
+  
+  // Only DEV can create DEV role users
+  if (role === "dev" && req.user?.role !== "dev") {
+    return res.status(403).json({ error: "Insufficient permissions to create DEV role" });
+  }
+  
   const { staff } = await getCollections();
   const exists = await staff.findOne({ email: String(email).toLowerCase() });
   if (exists) return res.status(409).json({ error: "Email already exists" });
@@ -77,11 +87,26 @@ router.post("/", requireAuth(["superadmin"]), async (req, res) => {
   res.json({ success: true, id: r.insertedId, generatedPassword: !password ? finalPassword : undefined });
 });
 
-// Update staff role/name
-router.patch("/:id", requireAuth(["superadmin"]), async (req, res) => {
+// Update staff role/name - SUPERADMIN & DEV ONLY (superadmins can't edit other superadmins or DEV)
+router.patch("/:id", requireAuth(["superadmin", "dev"]), async (req, res) => {
   const { name, role } = req.body || {};
   const _id = new ObjectId(req.params.id);
   const { staff } = await getCollections();
+  
+  // Check target user's role
+  const targetUser = await staff.findOne({ _id });
+  if (!targetUser) return res.status(404).json({ error: "User not found" });
+  
+  // Superadmins cannot edit other superadmins or DEV users
+  if (req.user?.role === "superadmin" && (targetUser.role === "superadmin" || targetUser.role === "dev")) {
+    return res.status(403).json({ error: "Cannot modify other superadmin or DEV accounts" });
+  }
+  
+  // Only DEV can update to DEV role
+  if (role === "dev" && req.user?.role !== "dev") {
+    return res.status(403).json({ error: "Insufficient permissions to assign DEV role" });
+  }
+  
   await staff.updateOne(
     { _id },
     { $set: { ...(name && { name }), ...(role && { role }) } }
@@ -95,15 +120,25 @@ router.patch("/:id", requireAuth(["superadmin"]), async (req, res) => {
   res.json({ success: true });
 });
 
-// Reset password
+// Reset password - SUPERADMIN & DEV ONLY (superadmins can't reset other superadmins or DEV)
 router.post(
   "/:id/reset-password",
-  requireAuth(["superadmin"]),
+  requireAuth(["superadmin", "dev"]),
   async (req, res) => {
     const { password } = req.body || {};
     if (!password) return res.status(400).json({ error: "Password required" });
     const _id = new ObjectId(req.params.id);
     const { staff } = await getCollections();
+    
+    // Check target user's role
+    const targetUser = await staff.findOne({ _id });
+    if (!targetUser) return res.status(404).json({ error: "User not found" });
+    
+    // Superadmins cannot reset password for other superadmins or DEV users
+    if (req.user?.role === "superadmin" && (targetUser.role === "superadmin" || targetUser.role === "dev")) {
+      return res.status(403).json({ error: "Cannot reset password for other superadmin or DEV accounts" });
+    }
+    
     await staff.updateOne(
       { _id },
       { $set: { passwordHash: hashPassword(password) } }
@@ -117,11 +152,21 @@ router.post(
   }
 );
 
-// Toggle notifications
-router.patch("/:id/notifications", requireAuth(["superadmin"]), async (req, res) => {
+// Toggle notifications - SUPERADMIN & DEV ONLY (superadmins can't modify other superadmins or DEV)
+router.patch("/:id/notifications", requireAuth(["superadmin", "dev"]), async (req, res) => {
   const { enabled } = req.body || {};
   const _id = new ObjectId(req.params.id);
   const { staff } = await getCollections();
+  
+  // Check target user's role
+  const targetUser = await staff.findOne({ _id });
+  if (!targetUser) return res.status(404).json({ error: "User not found" });
+  
+  // Superadmins cannot modify other superadmins or DEV users
+  if (req.user?.role === "superadmin" && (targetUser.role === "superadmin" || targetUser.role === "dev")) {
+    return res.status(403).json({ error: "Cannot modify other superadmin or DEV accounts" });
+  }
+  
   await staff.updateOne(
     { _id },
     { $set: { notifications: Boolean(enabled) } }
@@ -135,10 +180,25 @@ router.patch("/:id/notifications", requireAuth(["superadmin"]), async (req, res)
   res.json({ success: true });
 });
 
-// Delete staff
-router.delete("/:id", requireAuth(["superadmin"]), async (req, res) => {
+// Delete staff - SUPERADMIN & DEV ONLY (superadmins can't delete other superadmins, only DEV can delete superadmins)
+router.delete("/:id", requireAuth(["superadmin", "dev"]), async (req, res) => {
   const _id = new ObjectId(req.params.id);
   const { staff } = await getCollections();
+  
+  // Check target user's role
+  const targetUser = await staff.findOne({ _id });
+  if (!targetUser) return res.status(404).json({ error: "User not found" });
+  
+  // Superadmins cannot delete other superadmins or DEV users
+  if (req.user?.role === "superadmin" && (targetUser.role === "superadmin" || targetUser.role === "dev")) {
+    return res.status(403).json({ error: "Cannot delete other superadmin or DEV accounts" });
+  }
+  
+  // DEV users cannot delete other DEV users (protection)
+  if (req.user?.role === "dev" && targetUser.role === "dev" && req.user?.id !== targetUser._id.toString()) {
+    return res.status(403).json({ error: "Cannot delete other DEV accounts" });
+  }
+  
   await staff.deleteOne({ _id });
   await addLog({ type: "staff.deleted", refId: _id, actorId: req.user?.id });
   res.json({ success: true });

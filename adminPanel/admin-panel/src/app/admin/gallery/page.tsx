@@ -56,6 +56,13 @@ export default function Gallery() {
   const { toast } = useToast();
   const userRole = profile?.user?.role;
 
+  // Check if user has permission to access gallery
+  React.useEffect(() => {
+    if (profile && userRole !== "superadmin" && userRole !== "dev") {
+      window.location.href = "/admin";
+    }
+  }, [profile, userRole]);
+
   // Update images when data changes
   React.useEffect(() => {
     if (data?.items) {
@@ -174,24 +181,8 @@ export default function Gallery() {
 
   // Check delete permissions based on role and upload time
   function checkDeletePermissions(image: any): { allowed: boolean; reason?: string; isOld?: boolean } {
-    if (userRole === "superadmin") {
+    if (userRole === "superadmin" || userRole === "dev") {
       return { allowed: true };
-    }
-    
-    if (userRole === "admin") {
-      const uploadedAt = new Date(image.createdAt);
-      const now = new Date();
-      const hoursDiff = (now.getTime() - uploadedAt.getTime()) / (1000 * 60 * 60);
-      
-      // Allow deletion within 24 hours, or if user uploaded it
-      if (hoursDiff <= 24 || image.uploadedBy?.id === profile?.user?.id) {
-        return { allowed: true, isOld: hoursDiff > 24 };
-      }
-      
-      return { 
-        allowed: false, 
-        reason: "You can only delete images uploaded within 24 hours or images you uploaded yourself" 
-      };
     }
     
     return { 

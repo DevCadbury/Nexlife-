@@ -24,10 +24,10 @@ router.get("/", async (req, res) => {
   res.json({ total: items.length, items });
 });
 
-// Admin: list all (includes invisible and admin notes)
+// Admin: list all (includes invisible and admin notes) - SUPERADMIN & DEV ONLY
 router.get(
   "/admin",
-  requireAuth(["superadmin", "admin", "staff"]),
+  requireAuth(["superadmin", "dev"]),
   async (req, res) => {
     const { gallery } = await getCollections();
     const items = await gallery
@@ -39,10 +39,10 @@ router.get(
   }
 );
 
-// Admin: upload image
+// Admin: upload image - SUPERADMIN & DEV ONLY
 router.post(
   "/upload",
-  requireAuth(["superadmin", "admin"]),
+  requireAuth(["superadmin", "dev"]),
   upload.single("file"),
   async (req, res) => {
     if (!req.file) return res.status(400).json({ error: "File required" });
@@ -105,30 +105,16 @@ router.post(
   }
 );
 
-// Admin: delete image (with permission checking)
+// Admin: delete image - SUPERADMIN & DEV ONLY
 router.delete(
   "/:id",
-  requireAuth(["superadmin", "admin"]),
+  requireAuth(["superadmin", "dev"]),
   async (req, res) => {
     const { gallery } = await getCollections();
     const item = await gallery.findOne({
       _id: new (await import("mongodb")).ObjectId(req.params.id),
     });
     if (!item) return res.status(404).json({ error: "Not found" });
-
-    // Check deletion permissions for admins
-    if (req.user?.role === "admin") {
-      const uploadedAt = new Date(item.createdAt);
-      const now = new Date();
-      const hoursDiff = (now.getTime() - uploadedAt.getTime()) / (1000 * 60 * 60);
-      
-      // Allow deletion within 24 hours or if user uploaded it themselves
-      if (hoursDiff > 24 && item.uploadedBy?.id !== req.user?.id) {
-        return res.status(403).json({ 
-          error: "You can only delete images uploaded within 24 hours or images you uploaded yourself" 
-        });
-      }
-    }
 
     try {
       if (item.publicId) await cloudinary.uploader.destroy(item.publicId);
@@ -185,10 +171,10 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// Admin: set visibility
+// Admin: set visibility - SUPERADMIN & DEV ONLY
 router.patch(
   "/:id/visibility",
-  requireAuth(["superadmin", "admin"]),
+  requireAuth(["superadmin", "dev"]),
   async (req, res) => {
     try {
       const { visible } = req.body || {};
@@ -218,10 +204,10 @@ router.patch(
   }
 );
 
-// Admin: set admin note (private)
+// Admin: set admin note (private) - SUPERADMIN & DEV ONLY
 router.patch(
   "/:id/note",
-  requireAuth(["superadmin", "admin"]),
+  requireAuth(["superadmin", "dev"]),
   async (req, res) => {
     try {
       const note = String((req.body?.note || "").slice(0, 2000));
@@ -247,10 +233,10 @@ router.patch(
   }
 );
 
-// Admin: move image in sequence
+// Admin: move image in sequence - SUPERADMIN & DEV ONLY
 router.patch(
   "/:id/sequence",
-  requireAuth(["superadmin", "admin"]),
+  requireAuth(["superadmin", "dev"]),
   async (req, res) => {
     try {
       const { direction } = req.body;
@@ -317,10 +303,10 @@ router.patch(
   }
 );
 
-// Admin: bulk reorder images
+// Admin: bulk reorder images - SUPERADMIN & DEV ONLY
 router.patch(
   "/reorder",
-  requireAuth(["superadmin", "admin"]),
+  requireAuth(["superadmin", "dev"]),
   async (req, res) => {
     try {
       const { sequences } = req.body;
@@ -358,10 +344,10 @@ router.patch(
   }
 );
 
-// Admin: migrate existing gallery images to include uploader info and sequences
+// Admin: migrate existing gallery images to include uploader info and sequences - SUPERADMIN & DEV ONLY
 router.post(
   "/migrate-uploaders",
-  requireAuth(["superadmin"]),
+  requireAuth(["superadmin", "dev"]),
   async (req, res) => {
     try {
       const { gallery } = await getCollections();
