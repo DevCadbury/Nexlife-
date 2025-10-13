@@ -1,5 +1,6 @@
 import express from "express";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 import { ObjectId } from "mongodb";
 import { getCollections, addLog } from "../db.js";
 import { requireAuth } from "./auth.js";
@@ -197,19 +198,43 @@ router.post("/:id/send-reset-link", requireAuth(["superadmin", "dev"]), async (r
       return res.status(403).json({ error: "Cannot send reset link to superadmin or DEV accounts" });
     }
     
-    // Generate reset code and expiration
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+    // Generate JWT token valid for 24 hours
+    const resetToken = jwt.sign(
+      {
+        userId: _id.toString(),
+        email: targetUser.email,
+        type: 'password-reset',
+        iat: Math.floor(Date.now() / 1000)
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
     
-    // Update user with reset code
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+    
+    // Store reset token in database with used flag
     await staff.updateOne(
       { _id },
-      { $set: { resetCode: code, resetExpiresAt: expiresAt } }
+      { 
+        $set: { 
+          resetToken: resetToken,
+          resetTokenExpires: expiresAt,
+          resetTokenUsed: false,
+          resetTokenCreatedAt: new Date()
+        } 
+      }
     );
+    
+    // Generate reset URL
+    const resetUrl = `${process.env.ADMIN_URL || 'https://nexlife-admin.vercel.app'}/reset-password?token=${resetToken}`;
     
     // Send reset email
     try {
-      await sendEmail(targetUser.email, 'otp', { code });
+      await sendEmail(targetUser.email, 'passwordReset', { 
+        name: targetUser.name,
+        resetUrl: resetUrl,
+        expiresIn: '24 hours'
+      });
       
       await addLog({
         type: "staff.reset_link_sent",
@@ -218,7 +243,8 @@ router.post("/:id/send-reset-link", requireAuth(["superadmin", "dev"]), async (r
         meta: { 
           targetEmail: targetUser.email,
           targetName: targetUser.name,
-          sentBy: req.user?.name || req.user?.email
+          sentBy: req.user?.name || req.user?.email,
+          expiresAt: expiresAt
         },
       });
       
@@ -233,6 +259,149 @@ router.post("/:id/send-reset-link", requireAuth(["superadmin", "dev"]), async (r
     }
   } catch (error) {
     console.error('Error sending reset link:', error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Verify reset token - Public endpoint
+router.get("/reset-token/:token", async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { staff } = await getCollections();
+    
+    // Verify JWT token
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (jwtError) {
+      if (jwtError.name === 'TokenExpiredError') {
+        return res.status(400).json({ error: "Reset link has expired" });
+      }
+      return res.status(400).json({ error: "Invalid reset link" });
+    }
+    
+    // Check if token is for password reset
+    if (decoded.type !== 'password-reset') {
+      return res.status(400).json({ error: "Invalid reset link" });
+    }
+    
+    // Find user and check token status
+    const user = await staff.findOne({ 
+      _id: new ObjectId(decoded.userId),
+      resetToken: token 
+    });
+    
+    if (!user) {
+      return res.status(404).json({ error: "User not found or token mismatch" });
+    }
+    
+    // Check if token has been used
+    if (user.resetTokenUsed) {
+      return res.status(400).json({ error: "This reset link has already been used" });
+    }
+    
+    // Check if token has expired (double check)
+    if (user.resetTokenExpires && new Date() > user.resetTokenExpires) {
+      return res.status(400).json({ error: "Reset link has expired" });
+    }
+    
+    res.json({ 
+      success: true, 
+      user: {
+        name: user.name,
+        email: user.email
+      },
+      expiresAt: user.resetTokenExpires
+    });
+  } catch (error) {
+    console.error('Error verifying reset token:', error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Reset password with token - Public endpoint
+router.post("/reset-password-with-token", async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+    
+    if (!token || !newPassword) {
+      return res.status(400).json({ error: "Token and new password are required" });
+    }
+    
+    if (newPassword.length < 8) {
+      return res.status(400).json({ error: "Password must be at least 8 characters" });
+    }
+    
+    const { staff } = await getCollections();
+    
+    // Verify JWT token
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (jwtError) {
+      if (jwtError.name === 'TokenExpiredError') {
+        return res.status(400).json({ error: "Reset link has expired" });
+      }
+      return res.status(400).json({ error: "Invalid reset link" });
+    }
+    
+    // Check if token is for password reset
+    if (decoded.type !== 'password-reset') {
+      return res.status(400).json({ error: "Invalid reset link" });
+    }
+    
+    // Find user and check token status
+    const user = await staff.findOne({ 
+      _id: new ObjectId(decoded.userId),
+      resetToken: token 
+    });
+    
+    if (!user) {
+      return res.status(404).json({ error: "User not found or token mismatch" });
+    }
+    
+    // Check if token has been used
+    if (user.resetTokenUsed) {
+      return res.status(400).json({ error: "This reset link has already been used" });
+    }
+    
+    // Check if token has expired
+    if (user.resetTokenExpires && new Date() > user.resetTokenExpires) {
+      return res.status(400).json({ error: "Reset link has expired" });
+    }
+    
+    // Update password and mark token as used
+    await staff.updateOne(
+      { _id: user._id },
+      { 
+        $set: { 
+          passwordHash: hashPassword(newPassword),
+          resetTokenUsed: true,
+          resetTokenUsedAt: new Date()
+        },
+        $unset: {
+          resetToken: "",
+          resetTokenExpires: ""
+        }
+      }
+    );
+    
+    await addLog({
+      type: "staff.password_reset_completed",
+      refId: user._id,
+      meta: { 
+        email: user.email,
+        name: user.name,
+        resetMethod: 'token'
+      },
+    });
+    
+    res.json({ 
+      success: true, 
+      message: "Password has been reset successfully. You can now login with your new password." 
+    });
+  } catch (error) {
+    console.error('Error resetting password:', error);
     res.status(500).json({ error: "Internal server error" });
   }
 });

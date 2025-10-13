@@ -10,13 +10,58 @@ import {
   Clock,
   Shield,
 } from "lucide-react";
+import { api } from "@/lib/api";
 
 export default function ExportPage() {
+  // Get the base URL for downloads
+  const getDownloadUrl = (path: string) => {
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+    if (backendUrl) {
+      return `${backendUrl}${path}`;
+    }
+    return path; // Fallback to relative path
+  };
+
+  const handleDownload = async (exportType: string, fileName: string) => {
+    try {
+      // Get JWT token from localStorage
+      const token = localStorage.getItem("token");
+      
+      // Use fetch with authorization header
+      const response = await fetch(getDownloadUrl(`/api/export/${exportType}.csv`), {
+        method: "GET",
+        headers: {
+          "Authorization": token ? `Bearer ${token}` : "",
+        },
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error(`Export failed: ${response.statusText}`);
+      }
+
+      // Create blob and download
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error("Export error:", error);
+      alert("Failed to export data. Please try again.");
+    }
+  };
+
   const exportOptions = [
     {
       title: "Contacts CSV",
       description: "Export all subscriber email addresses",
-      href: "/api/export/contacts.csv",
+      type: "contacts",
+      fileName: "nexlife-contacts.csv",
       icon: Users,
       color: "bg-blue-600 hover:bg-blue-700",
       count: "All subscribers",
@@ -24,7 +69,8 @@ export default function ExportPage() {
     {
       title: "Logs CSV",
       description: "Export system activity logs",
-      href: "/api/export/logs.csv",
+      type: "logs",
+      fileName: "nexlife-logs.csv",
       icon: Activity,
       color: "bg-green-600 hover:bg-green-700",
       count: "Recent activities",
@@ -74,13 +120,13 @@ export default function ExportPage() {
                     <span className="text-xs text-slate-500 dark:text-slate-500 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded">
                       {option.count}
                     </span>
-                    <a
-                      href={option.href}
+                    <button
+                      onClick={() => handleDownload(option.type, option.fileName)}
                       className={`flex items-center gap-2 px-4 py-2 rounded-lg text-white text-sm font-medium transition-colors ${option.color} shadow-lg`}
                     >
                       <Download className="w-4 h-4" />
                       Download
-                    </a>
+                    </button>
                   </div>
                 </div>
               </div>

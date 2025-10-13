@@ -40,6 +40,7 @@ import {
   Target,
   Zap,
   X,
+  ChevronDown,
 } from "lucide-react";
 
 interface LogEntry {

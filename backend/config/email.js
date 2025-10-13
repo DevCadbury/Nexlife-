@@ -285,6 +285,145 @@ This email was sent automatically when your account was created.
 If you have any questions, please contact your administrator.
     `,
   }),
+
+  passwordReset: (data) => ({
+    subject: `[Nexlife Security] Password Reset Request`,
+    html: `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Password Reset</title>
+      </head>
+      <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f8fafc;">
+        <div style="max-width: 600px; margin: 40px auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+          
+          <!-- Header with Gradient -->
+          <div style="background: linear-gradient(135deg, #22d3ee 0%, #6366f1 50%, #a855f7 100%); padding: 40px 20px; text-align: center; position: relative;">
+            <div style="background: rgba(255, 255, 255, 0.2); width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
+              <div style="background: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+              </div>
+            </div>
+            <h1 style="margin: 0; font-size: 28px; font-weight: 700; color: white; letter-spacing: -0.5px;">Password Reset Request</h1>
+            <p style="margin: 10px 0 0 0; color: rgba(255, 255, 255, 0.9); font-size: 16px;">Nexlife International Admin Panel</p>
+          </div>
+
+          <!-- Content -->
+          <div style="padding: 40px 30px;">
+            <h2 style="color: #1e293b; margin: 0 0 16px 0; font-size: 20px; font-weight: 600;">Hello ${data.name || 'User'}!</h2>
+            
+            <p style="color: #475569; font-size: 16px; line-height: 1.6; margin: 0 0 24px 0;">
+              We received a request to reset the password for your Nexlife Admin account. Click the button below to create a new password:
+            </p>
+
+            <!-- CTA Button -->
+            <div style="text-align: center; margin: 32px 0;">
+              <a href="${data.resetUrl}" style="background: linear-gradient(135deg, #22d3ee, #6366f1); color: white; padding: 16px 32px; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 16px; display: inline-block; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); transition: transform 0.2s;">
+                🔐 Reset Your Password
+              </a>
+            </div>
+
+            <!-- Info Box -->
+            <div style="background: linear-gradient(135deg, #f0f9ff 0%, #f5f3ff 100%); border-left: 4px solid #6366f1; border-radius: 8px; padding: 20px; margin: 24px 0;">
+              <p style="margin: 0 0 12px 0; color: #1e293b; font-weight: 600; font-size: 14px;">⏰ Important Information:</p>
+              <ul style="margin: 0; padding-left: 20px; color: #475569; font-size: 14px; line-height: 1.8;">
+                <li>This link will expire in <strong style="color: #6366f1;">${data.expiresIn || '24 hours'}</strong></li>
+                <li>This link can only be used <strong style="color: #6366f1;">once</strong></li>
+                <li>If you didn't request this, please ignore this email</li>
+                <li>Your password won't change until you create a new one</li>
+              </ul>
+            </div>
+
+            <!-- Security Notice -->
+            <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 16px; margin: 24px 0;">
+              <p style="margin: 0 0 8px 0; color: #92400e; font-weight: 600; font-size: 14px;">🛡️ Security Tips:</p>
+              <p style="margin: 0; color: #92400e; font-size: 13px; line-height: 1.6;">
+                Never share this link with anyone. Nexlife staff will never ask for your password or reset link via email, phone, or chat.
+              </p>
+            </div>
+
+            <!-- Alternative Link -->
+            <div style="background: #f8fafc; border-radius: 8px; padding: 16px; margin: 24px 0;">
+              <p style="margin: 0 0 8px 0; color: #64748b; font-size: 13px;">If the button doesn't work, copy and paste this link into your browser:</p>
+              <p style="margin: 0; word-break: break-all; color: #6366f1; font-size: 12px; font-family: monospace; background: white; padding: 8px; border-radius: 4px; border: 1px solid #e2e8f0;">
+                ${data.resetUrl}
+              </p>
+            </div>
+
+            <!-- Help Section -->
+            <div style="border-top: 1px solid #e2e8f0; padding-top: 24px; margin-top: 32px;">
+              <p style="color: #64748b; font-size: 14px; margin: 0 0 12px 0;">Need help? Contact us:</p>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 6px 0; color: #94a3b8; font-size: 13px; width: 80px;">📧 Email:</td>
+                  <td style="padding: 6px 0;">
+                    <a href="mailto:Info@nexlifeinternational.com" style="color: #6366f1; text-decoration: none; font-size: 13px;">Info@nexlifeinternational.com</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #94a3b8; font-size: 13px;">📞 Phone:</td>
+                  <td style="padding: 6px 0; color: #475569; font-size: 13px;">+91 96648 43790 | +91 84015 46910</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #94a3b8; font-size: 13px;">💬 WhatsApp:</td>
+                  <td style="padding: 6px 0;">
+                    <a href="https://wa.me/919664843790" style="color: #6366f1; text-decoration: none; font-size: 13px;">+91 96648 43790</a>
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div style="background: #1e293b; padding: 24px 30px; text-align: center;">
+            <p style="margin: 0 0 8px 0; color: #94a3b8; font-size: 13px;">
+              This is an automated security email from Nexlife International
+            </p>
+            <p style="margin: 0; color: #64748b; font-size: 12px;">
+              © ${new Date().getFullYear()} Nexlife International. All rights reserved.
+            </p>
+            <p style="margin: 12px 0 0 0; color: #64748b; font-size: 11px;">
+              This email was sent to a verified Nexlife admin account
+            </p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+    text: `
+Password Reset Request - Nexlife International
+
+Hello ${data.name || 'User'}!
+
+We received a request to reset the password for your Nexlife Admin account.
+
+Reset your password by visiting this link:
+${data.resetUrl}
+
+⏰ Important Information:
+• This link will expire in ${data.expiresIn || '24 hours'}
+• This link can only be used once
+• If you didn't request this, please ignore this email
+• Your password won't change until you create a new one
+
+🛡️ Security Tips:
+Never share this link with anyone. Nexlife staff will never ask for your password or reset link via email, phone, or chat.
+
+Need help? Contact us:
+📧 Email: Info@nexlifeinternational.com
+📞 Phone: +91 96648 43790 | +91 84015 46910
+💬 WhatsApp: +91 96648 43790
+
+---
+This is an automated security email from Nexlife International
+© ${new Date().getFullYear()} Nexlife International. All rights reserved.
+    `,
+  }),
 };
 
 // Convert markdown images to HTML images

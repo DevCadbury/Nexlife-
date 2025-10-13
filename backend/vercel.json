@@ -25,6 +25,7 @@
     "JWT_SECRET": "9cb50b98caa56aaef6c1a0408510f7539be5a1e2d33989ae52f2b14646551a65",
     "SUPERADMIN_EMAIL": "Info@nexlifeinternational.com",
     "SUPERADMIN_PASSWORD": "Nexlife@2025",
+    "ADMIN_URL": "https://nexlife-admin.vercel.app",
     "CLOUDINARY_CLOUD_NAME": "dqnhpmoej",
     "CLOUDINARY_API_KEY": "159867665417568",
     "CLOUDINARY_API_SECRET": "UjVH-Wj-XwiiKyYdeewjRxnDIzA",

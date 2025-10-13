@@ -415,80 +415,84 @@ export default function Staff() {
                   </span>
                 </div>
 
-                <div className="flex gap-2">
+                {/* Action Buttons - Two Rows for Better Visibility */}
+                <div className="space-y-2">
+                  {/* Row 1: Edit, Role, Notifications */}
+                  <div className="flex gap-2">
+                    {canModifyUser(user) && (
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => openModal(user)}
+                        className="flex-1 flex items-center justify-center gap-2 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                        title="Edit staff member"
+                      >
+                        <Edit className="w-4 h-4" />
+                        Edit
+                      </motion.button>
+                    )}
+                    {canModifyUser(user) && (
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => changeRole(user)}
+                        className="flex-1 flex items-center justify-center gap-2 bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/20 dark:hover:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                        title="Change user role"
+                      >
+                        <Shield className="w-4 h-4" />
+                        Role
+                      </motion.button>
+                    )}
+                    {canModifyUser(user) && (
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => toggleNotifications(user)}
+                        className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          user.notifications !== false
+                            ? 'bg-green-50 hover:bg-green-100 dark:bg-green-900/20 dark:hover:bg-green-900/30 text-green-700 dark:text-green-300'
+                            : 'bg-gray-50 hover:bg-gray-100 dark:bg-gray-900/20 dark:hover:bg-gray-900/30 text-gray-700 dark:text-gray-300'
+                        }`}
+                        title="Toggle notifications"
+                      >
+                        {user.notifications !== false ? <Bell className="w-4 h-4" /> : <BellOff className="w-4 h-4" />}
+                      </motion.button>
+                    )}
+                  </div>
+                  
+                  {/* Row 2: Send Link, Reset Password, Delete */}
                   {canModifyUser(user) && (
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => openModal(user)}
-                      className="flex-1 flex items-center justify-center gap-2 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-                      title="Edit staff member"
-                    >
-                      <Edit className="w-4 h-4" />
-                      Edit
-                    </motion.button>
-                  )}
-                  {canModifyUser(user) && (
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => changeRole(user)}
-                      className="flex items-center justify-center gap-2 bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/20 dark:hover:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-                      title="Change user role"
-                    >
-                      <Shield className="w-4 h-4" />
-                      Role
-                    </motion.button>
-                  )}
-                  {canModifyUser(user) && (
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => toggleNotifications(user)}
-                      className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        user.notifications !== false
-                          ? 'bg-green-50 hover:bg-green-100 dark:bg-green-900/20 dark:hover:bg-green-900/30 text-green-700 dark:text-green-300'
-                          : 'bg-gray-50 hover:bg-gray-100 dark:bg-gray-900/20 dark:hover:bg-gray-900/30 text-gray-700 dark:text-gray-300'
-                      }`}
-                      title="Toggle notifications"
-                    >
-                      {user.notifications !== false ? <Bell className="w-4 h-4" /> : <BellOff className="w-4 h-4" />}
-                    </motion.button>
-                  )}
-                  {canModifyUser(user) && (
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => sendResetLink(user)}
-                      className="flex-1 flex items-center justify-center gap-2 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-                      title="Send password reset link"
-                    >
-                      <Mail className="w-4 h-4" />
-                      Send Link
-                    </motion.button>
-                  )}
-                  {canModifyUser(user) && (
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => resetPassword(user)}
-                      className="flex-1 flex items-center justify-center gap-2 bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/20 dark:hover:bg-amber-900/30 text-amber-700 dark:text-amber-300 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-                      title="Reset password directly"
-                    >
-                      <Key className="w-4 h-4" />
-                      Reset
-                    </motion.button>
-                  )}
-                  {canModifyUser(user) && (
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => deleteUser(user)}
-                      className="flex items-center justify-center gap-2 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30 text-red-700 dark:text-red-300 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-                      title="Delete staff member"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </motion.button>
+                    <div className="flex gap-2">
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => sendResetLink(user)}
+                        className="flex-1 flex items-center justify-center gap-2 bg-cyan-50 hover:bg-cyan-100 dark:bg-cyan-900/20 dark:hover:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                        title="Send password reset link via email"
+                      >
+                        <Mail className="w-4 h-4" />
+                        Send Link
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => resetPassword(user)}
+                        className="flex-1 flex items-center justify-center gap-2 bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/20 dark:hover:bg-amber-900/30 text-amber-700 dark:text-amber-300 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                        title="Reset password directly"
+                      >
+                        <Key className="w-4 h-4" />
+                        Reset
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => deleteUser(user)}
+                        className="flex items-center justify-center gap-2 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30 text-red-700 dark:text-red-300 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                        title="Delete staff member"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </motion.button>
+                    </div>
                   )}
                 </div>
               </motion.div>
