@@ -12,23 +12,29 @@ export const useTheme = () => {
 };
 
 export const ThemeProvider = ({ children }) => {
-  const [currentTheme, setCurrentTheme] = useState("light");
-
-  useEffect(() => {
+  const [currentTheme, setCurrentTheme] = useState(() => {
+    // Initialize from localStorage or system preference
     const savedTheme = localStorage.getItem("theme");
     if (savedTheme && themes[savedTheme]) {
-      setCurrentTheme(savedTheme);
-    } else {
-      // Check system preference
-      const prefersDark = window.matchMedia(
-        "(prefers-color-scheme: dark)"
-      ).matches;
-      const defaultTheme = prefersDark ? "dark" : "light";
-      setCurrentTheme(defaultTheme);
+      return savedTheme;
     }
+    // Check system preference
+    const prefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    ).matches;
+    return prefersDark ? "dark" : "light";
+  });
+
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  useEffect(() => {
+    // Mark as initialized after first mount
+    setIsInitialized(true);
   }, []);
 
   useEffect(() => {
+    if (!isInitialized) return;
+
     const root = document.documentElement;
 
     // Remove all theme classes
@@ -38,7 +44,7 @@ export const ThemeProvider = ({ children }) => {
     root.classList.add(currentTheme);
 
     // For Tailwind dark mode
-    if (currentTheme === "dark") {
+    if (currentTheme === "dark" || currentTheme === "brand") {
       root.classList.add("dark");
     } else {
       root.classList.remove("dark");
@@ -46,7 +52,7 @@ export const ThemeProvider = ({ children }) => {
 
     // Save to localStorage
     localStorage.setItem("theme", currentTheme);
-  }, [currentTheme]);
+  }, [currentTheme, isInitialized]);
 
   const changeTheme = (themeName) => {
     if (themes[themeName]) {
@@ -55,10 +61,8 @@ export const ThemeProvider = ({ children }) => {
   };
 
   const toggleTheme = () => {
-    const themes = ["light", "dark", "brand"];
-    const currentIndex = themes.indexOf(currentTheme);
-    const nextIndex = (currentIndex + 1) % themes.length;
-    setCurrentTheme(themes[nextIndex]);
+    // Simple toggle between light and dark only
+    setCurrentTheme(prevTheme => prevTheme === "light" ? "dark" : "light");
   };
 
   const value = {

@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useState } from "react";
 import { motion } from "framer-motion";
 import { Languages } from "lucide-react";
 import { ThemeContext } from "../contexts/ThemeContext";
@@ -13,7 +13,9 @@ const ThemeToggle = () => {
     setShowMessage(true);
   };
 
-  const handleThemeToggle = () => {
+  const handleThemeToggle = (e) => {
+    // Prevent event bubbling
+    e?.stopPropagation();
     toggleTheme();
   };
 
@@ -47,7 +49,10 @@ const ThemeToggle = () => {
 
         {/* New Animated Theme Toggle Switch - Mobile Optimized */}
         <div className="scale-75 sm:scale-100">
-          <Switch isDark={currentTheme !== "light"} onToggle={handleThemeToggle} />
+          <Switch 
+            isDark={currentTheme === "dark"} 
+            onToggle={handleThemeToggle} 
+          />
         </div>
       </div>
 

@@ -2,6 +2,13 @@ import React from "react";
 import styled from "styled-components";
 
 const Switch = ({ isDark, onToggle }) => {
+  const handleChange = (e) => {
+    e.stopPropagation();
+    if (onToggle) {
+      onToggle(e);
+    }
+  };
+
   return (
     <StyledWrapper>
       <label className="switch">
@@ -9,7 +16,8 @@ const Switch = ({ isDark, onToggle }) => {
           type="checkbox"
           id="toggle"
           checked={isDark}
-          onChange={onToggle}
+          onChange={handleChange}
+          aria-label="Toggle theme"
         />
         <span className="slider">
           <div className="moons-hole">
@@ -78,9 +86,10 @@ const StyledWrapper = styled.div`
     bottom: 0;
     background-color: black;
     border-radius: 20px;
-    transition: 0.4s;
+    transition: background-color 0.4s ease;
     overflow: hidden;
     z-index: 2;
+    cursor: pointer;
   }
 
   .slider:before {
@@ -91,16 +100,18 @@ const StyledWrapper = styled.div`
     left: 4px;
     bottom: 5px;
     background-color: white;
-    transition: 1s;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.6s ease;
     border-radius: 50%;
     overflow: hidden;
+    will-change: transform;
   }
 
   .moons-hole {
     content: "";
     position: absolute;
     opacity: 1;
-    transition: 1s;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s ease;
+    will-change: transform, opacity;
   }
 
   .moon-hole {
@@ -137,6 +148,10 @@ const StyledWrapper = styled.div`
     background-color: #62cff0;
   }
 
+  input:focus + .slider {
+    outline: none;
+  }
+
   input:checked + .slider:before {
     transform: translateX(52px);
     background-color: orange;
@@ -151,8 +166,9 @@ const StyledWrapper = styled.div`
     right: 6px;
     top: 0;
     bottom: 0;
-    transition: 1s;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s ease;
     transform: translateY(0px);
+    will-change: transform, opacity;
   }
 
   .star {
@@ -226,8 +242,9 @@ const StyledWrapper = styled.div`
     top: 0;
     bottom: 0;
     width: 20px;
-    transition: 1s;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s ease;
     transform: translateX(-55px);
+    will-change: transform, opacity;
   }
 
   .black-clouds {
@@ -236,10 +253,11 @@ const StyledWrapper = styled.div`
     top: 0;
     bottom: 0;
     width: 20px;
-    transition: 1s;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s ease;
     transform: translateX(-55px);
     opacity: 0;
     z-index: 0;
+    will-change: transform, opacity;
   }
 
   .black-cloud {
