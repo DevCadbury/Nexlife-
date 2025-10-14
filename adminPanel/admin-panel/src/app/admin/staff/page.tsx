@@ -250,9 +250,17 @@ export default function Staff() {
 
   // Function to check if user can be modified by current user
   const canModifyUser = (targetUser: StaffMember) => {
-    const { role: currentUserRole } = getUserRoleFromToken();
+    const { role: currentUserRole, name: currentUserName } = getUserRoleFromToken();
     
-    // Dev can modify anyone
+    // Check if trying to modify self
+    const isSelf = targetUser.name === currentUserName || targetUser.email === localStorage.getItem("userEmail");
+    
+    // Dev cannot modify their own account
+    if (currentUserRole === "dev" && isSelf && targetUser.role === "dev") {
+      return false;
+    }
+    
+    // Dev can modify anyone else
     if (currentUserRole === "dev") return true;
     
     // Superadmin cannot modify other superadmins or dev users

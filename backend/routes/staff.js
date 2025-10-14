@@ -98,6 +98,11 @@ router.patch("/:id", requireAuth(["superadmin", "dev"]), async (req, res) => {
   const targetUser = await staff.findOne({ _id });
   if (!targetUser) return res.status(404).json({ error: "User not found" });
   
+  // DEV users cannot modify their own role
+  if (req.user?.role === "dev" && targetUser.role === "dev" && req.user?.id === targetUser._id.toString() && role) {
+    return res.status(403).json({ error: "DEV users cannot change their own role" });
+  }
+  
   // Superadmins cannot edit other superadmins or DEV users
   if (req.user?.role === "superadmin" && (targetUser.role === "superadmin" || targetUser.role === "dev")) {
     return res.status(403).json({ error: "Cannot modify other superadmin or DEV accounts" });
@@ -134,6 +139,11 @@ router.post(
     // Check target user's role
     const targetUser = await staff.findOne({ _id });
     if (!targetUser) return res.status(404).json({ error: "User not found" });
+    
+    // DEV users cannot reset their own password through this endpoint
+    if (req.user?.role === "dev" && targetUser.role === "dev" && req.user?.id === targetUser._id.toString()) {
+      return res.status(403).json({ error: "DEV users cannot reset their own password through this endpoint" });
+    }
     
     // Superadmins cannot reset password for other superadmins or DEV users
     if (req.user?.role === "superadmin" && (targetUser.role === "superadmin" || targetUser.role === "dev")) {
@@ -414,6 +424,11 @@ router.delete("/:id", requireAuth(["superadmin", "dev"]), async (req, res) => {
   // Check target user's role
   const targetUser = await staff.findOne({ _id });
   if (!targetUser) return res.status(404).json({ error: "User not found" });
+  
+  // DEV users cannot delete their own account
+  if (req.user?.role === "dev" && targetUser.role === "dev" && req.user?.id === targetUser._id.toString()) {
+    return res.status(403).json({ error: "DEV users cannot delete their own account" });
+  }
   
   // Superadmins cannot delete other superadmins or DEV users
   if (req.user?.role === "superadmin" && (targetUser.role === "superadmin" || targetUser.role === "dev")) {
