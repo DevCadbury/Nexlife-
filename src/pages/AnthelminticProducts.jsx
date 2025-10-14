@@ -83,6 +83,15 @@ const AnthelminticProducts = () => {
       packaging: "Blister",
       image: albendazoleImage2,
     },
+    {
+      id: 3,
+      name: "Pyrantel Pamoate Dispersible Tablet",
+      description:
+        "Each Uncoated Dispersible Tablet Contains : Pyrantel Pamoate USP Eq. to Pyrantel Pamoate___250mg",
+      type: "Uncoated Tablet",
+      packaging: "Blister",
+      image: albendazoleImage,
+    },
   ];
 
   // Memoized search results to prevent unnecessary re-renders
@@ -352,7 +361,7 @@ const AnthelminticProducts = () => {
             className="mt-12 mb-16"
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto justify-items-center">
-              {anthelminticProducts.map((product) => (
+              {anthelminticProducts.slice(0, 2).map((product) => (
                 <motion.div
                   key={product.id}
                   initial={{ opacity: 0, y: 20 }}
