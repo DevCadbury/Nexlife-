@@ -352,6 +352,88 @@
   border-color: #3b82f6 !important;
 }
 
+/* Hide Google Translate branding and logo */
+#google_translate_element .goog-te-gadget-simple,
+#google_translate_element_mobile .goog-te-gadget-simple {
+  background-color: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+#google_translate_element .goog-te-gadget-simple img,
+#google_translate_element_mobile .goog-te-gadget-simple img {
+  display: none !important;
+}
+
+#google_translate_element .goog-te-gadget-icon,
+#google_translate_element_mobile .goog-te-gadget-icon {
+  display: none !important;
+}
+
+#google_translate_element .goog-te-gadget-simple .goog-te-menu-value span,
+#google_translate_element_mobile .goog-te-gadget-simple .goog-te-menu-value span {
+  color: white !important;
+}
+
+/* Hide the "Powered by" text */
+#google_translate_element .goog-te-gadget-simple .goog-te-menu-value span:first-child,
+#google_translate_element_mobile .goog-te-gadget-simple .goog-te-menu-value span:first-child {
+  display: none !important;
+}
+
+/* Remove top frame added by Google Translate */
+.goog-te-banner-frame {
+  display: none !important;
+}
+
+body {
+  top: 0 !important;
+}
+
+.skiptranslate {
+  display: inline-block !important;
+}
+
+/* Style the dropdown */
+.goog-te-combo {
+  font-family: inherit !important;
+  cursor: pointer !important;
+  outline: none !important;
+}
+
+.goog-te-combo:hover {
+  opacity: 0.9 !important;
+}
+
+.goog-te-combo:focus {
+  outline: none !important;
+  border-color: rgba(59, 130, 246, 0.5) !important;
+}
+
+/* Dark mode support for Google Translate dropdown menu */
+.dark .goog-te-menu-frame {
+  background-color: #1e293b !important;
+  border-color: #475569 !important;
+}
+
+.dark .goog-te-menu2 {
+  background-color: #1e293b !important;
+  border-color: #475569 !important;
+}
+
+.dark .goog-te-menu2-item div,
+.dark .goog-te-menu2-item span {
+  color: #e2e8f0 !important;
+}
+
+.dark .goog-te-menu2-item:hover {
+  background-color: #334155 !important;
+}
+
+.dark .goog-te-menu2-item-selected {
+  background-color: #475569 !important;
+}
+
 /* Office Gallery Auto-scroll Animation */
 @keyframes scroll {
   0% {

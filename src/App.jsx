@@ -45,6 +45,8 @@ import AntiConvulsantCapsules from "./pages/capules/anti-convulsant";
 import SurgicalProducts from "./pages/surgical";
 import Services from "./pages/Services";
 import Gallery from "./pages/Gallery";
+import ProductGallery from "./pages/ProductGallery";
+import Certifications from "./pages/Certifications";
 import GlobalPresence from "./pages/GlobalPresence";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
@@ -207,6 +209,8 @@ function AppContent() {
 
             <Route path="/services" element={<Services />} />
             <Route path="/gallery" element={<Gallery />} />
+            <Route path="/product-gallery" element={<ProductGallery />} />
+            <Route path="/certifications" element={<Certifications />} />
             <Route path="/global-presence" element={<GlobalPresence />} />
             <Route path="/contact" element={<Contact />} />
             {/* 404 Route - Must be last */}
