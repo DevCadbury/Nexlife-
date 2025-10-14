@@ -83,15 +83,6 @@ const AnthelminticProducts = () => {
       packaging: "Blister",
       image: albendazoleImage2,
     },
-    {
-      id: 3,
-      name: "Pyrantel Pamoate Dispersible Tablet",
-      description:
-        "Each Uncoated Dispersible Tablet Contains : Pyrantel Pamoate USP Eq. to Pyrantel Pamoate___250mg",
-      type: "Uncoated Tablet",
-      packaging: "Blister",
-      image: albendazoleImage,
-    },
   ];
 
   // Memoized search results to prevent unnecessary re-renders
