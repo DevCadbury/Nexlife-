@@ -29,6 +29,7 @@
     "CLOUDINARY_CLOUD_NAME": "dqnhpmoej",
     "CLOUDINARY_API_KEY": "159867665417568",
     "CLOUDINARY_API_SECRET": "UjVH-Wj-XwiiKyYdeewjRxnDIzA",
+    "CLOUDINARY_CLOUD_NAME1": "dqnhpmoej",
     "IMAP_HOST": "imap.hostinger.com",
     "IMAP_PORT": "993",
     "IMAP_SECURE": "true",
