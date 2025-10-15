@@ -22,20 +22,24 @@ import {
   ChevronDown,
   Check,
   Settings as SettingsIcon,
+  Package,
+  Award,
 } from "lucide-react";
 
 const tabs = [
-  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/analytics", label: "Analytics", icon: BarChart2 },
-  { href: "/admin/api-docs", label: "API Docs", icon: ScrollText },
-  { href: "/admin/inquiries", label: "Inquiries", icon: MessageCircle },
-  { href: "/admin/subscribers", label: "Subscribers", icon: Users },
-  { href: "/admin/campaigns", label: "Campaigns", icon: Megaphone },
-  { href: "/admin/gallery", label: "Gallery", icon: ImageIcon },
-  { href: "/admin/staff", label: "Staff", icon: UserCog },
-  { href: "/admin/logs", label: "Logs", icon: ScrollText },
-  { href: "/admin/export", label: "Export", icon: Download },
-  { href: "/admin/settings", label: "Settings", icon: SettingsIcon },
+  { href: "/admin", label: "Dashboard", icon: LayoutDashboard, roles: ["all"] },
+  { href: "/admin/analytics", label: "Analytics", icon: BarChart2, roles: ["all"] },
+  { href: "/admin/api-docs", label: "API Docs", icon: ScrollText, roles: ["dev"] },
+  { href: "/admin/inquiries", label: "Inquiries", icon: MessageCircle, roles: ["all"] },
+  { href: "/admin/subscribers", label: "Subscribers", icon: Users, roles: ["all"] },
+  { href: "/admin/campaigns", label: "Campaigns", icon: Megaphone, roles: ["all"] },
+  { href: "/admin/gallery", label: "Gallery", icon: ImageIcon, roles: ["superadmin", "dev"] },
+  { href: "/admin/products-gallery", label: "Products", icon: Package, roles: ["superadmin", "dev"] },
+  { href: "/admin/certifications", label: "Certifications", icon: Award, roles: ["superadmin", "dev"] },
+  { href: "/admin/staff", label: "Staff", icon: UserCog, roles: ["superadmin", "dev"] },
+  { href: "/admin/logs", label: "Logs", icon: ScrollText, roles: ["superadmin", "dev"] },
+  { href: "/admin/export", label: "Export", icon: Download, roles: ["superadmin", "dev"] },
+  { href: "/admin/settings", label: "Settings", icon: SettingsIcon, roles: ["all"] },
 ];
 
 export default function AdminLayout({
@@ -361,15 +365,19 @@ export default function AdminLayout({
           {tabs
             .filter((t) => {
               const userRole = profile?.user?.role;
-              // Hide logs and staff from non-superadmin/dev users
-              if (t.href === "/admin/logs" || t.href === "/admin/staff") {
-                return userRole === "superadmin" || userRole === "dev";
+              
+              // If roles is "all", show to everyone
+              if (t.roles && t.roles.includes("all")) {
+                return true;
               }
-              // Hide gallery from non-superadmin/dev users
-              if (t.href === "/admin/gallery") {
-                return userRole === "superadmin" || userRole === "dev";
+              
+              // Check if user's role is in the allowed roles list
+              if (t.roles && userRole) {
+                return t.roles.includes(userRole);
               }
-              return true;
+              
+              // Default: hide if no role info
+              return false;
             })
             .map((t, index) => {
               const Icon = t.icon;
