@@ -28,7 +28,7 @@ router.get("/", async (req, res) => {
   const { productsGallery } = await getCollections();
   const items = await productsGallery
     .find({ visible: { $ne: false } })
-    .project({ adminNote: 0 })
+    .project({ adminNote: 0, uploadedBy: 0 })
     .sort({ sequence: 1, createdAt: -1 })
     .toArray();
   res.json({ total: items.length, items });
@@ -46,7 +46,7 @@ router.get("/category/:category", async (req, res) => {
   
   const items = await productsGallery
     .find(query)
-    .project({ adminNote: 0 })
+    .project({ adminNote: 0, uploadedBy: 0 })
     .sort({ sequence: 1, createdAt: -1 })
     .toArray();
   res.json({ total: items.length, items });

@@ -211,10 +211,10 @@ const ProductGallery = () => {
                   <div className="relative bg-white dark:bg-slate-800 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border border-slate-200 dark:border-slate-700">
                     {/* Card Header with Image or Gradient */}
                     <div className="h-48 relative overflow-hidden bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600">
-                      {product.imageUrl ? (
+                      {product.image?.url ? (
                         <>
                           <img
-                            src={product.imageUrl}
+                            src={product.image.url}
                             alt={product.name}
                             className="w-full h-full object-cover"
                             onError={(e) => {
@@ -350,10 +350,10 @@ const ProductGallery = () => {
               {/* Modal Content */}
               <div className="p-6 space-y-6">
                 {/* Product Image */}
-                {selectedProduct.imageUrl && (
+                {selectedProduct.image?.url && (
                   <div className="relative h-80 rounded-2xl overflow-hidden bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600">
                     <img
-                      src={selectedProduct.imageUrl}
+                      src={selectedProduct.image.url}
                       alt={selectedProduct.name}
                       className="w-full h-full object-contain p-4"
                       onError={(e) => {

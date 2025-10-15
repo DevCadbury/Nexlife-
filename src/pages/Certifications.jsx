@@ -218,10 +218,10 @@ const Certifications = () => {
                 <div className="relative bg-white dark:bg-slate-800 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border border-slate-200 dark:border-slate-700">
                   {/* Certificate Image */}
                   <div className="relative h-64 overflow-hidden bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600">
-                    {cert.imageUrl ? (
+                    {cert.image?.url ? (
                       <>
                         <img
-                          src={cert.imageUrl}
+                          src={cert.image.url}
                           alt={cert.title}
                           className="w-full h-full object-cover"
                           onError={(e) => {
@@ -378,10 +378,10 @@ const Certifications = () => {
               <div className="p-6 space-y-6">
                 {/* Certificate Image */}
                 <div className="relative h-96 bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 rounded-2xl overflow-hidden">
-                  {selectedCert.imageUrl ? (
+                  {selectedCert.image?.url ? (
                     <>
                       <img
-                        src={selectedCert.imageUrl}
+                        src={selectedCert.image.url}
                         alt={selectedCert.title}
                         className="w-full h-full object-contain p-4"
                         onError={(e) => {

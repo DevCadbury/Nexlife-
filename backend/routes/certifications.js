@@ -28,7 +28,7 @@ router.get("/", async (req, res) => {
   const { certifications } = await getCollections();
   const items = await certifications
     .find({ visible: { $ne: false } })
-    .project({ adminNote: 0 })
+    .project({ adminNote: 0, uploadedBy: 0 })
     .sort({ sequence: 1, createdAt: -1 })
     .toArray();
   res.json({ total: items.length, items });
@@ -46,7 +46,7 @@ router.get("/type/:type", async (req, res) => {
   
   const items = await certifications
     .find(query)
-    .project({ adminNote: 0 })
+    .project({ adminNote: 0, uploadedBy: 0 })
     .sort({ sequence: 1, createdAt: -1 })
     .toArray();
   res.json({ total: items.length, items });
@@ -97,7 +97,7 @@ router.post(
       // If image file is uploaded
       if (req.file) {
         await new Promise((resolve, reject) => {
-          const uploadStream = certificationscertificationsCloudinary.uploader.upload_stream(
+          const uploadStream = certificationsCloudinary.uploader.upload_stream(
             {
               folder: "nexlife-certifications",
               resource_type: "image",
