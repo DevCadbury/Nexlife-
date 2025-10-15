@@ -21,6 +21,7 @@ import {
   Building2,
   Save,
   Move3D,
+  Shield,
 } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
 
@@ -51,6 +52,7 @@ interface Certification {
 
 export default function CertificationsPage() {
   const { data, mutate } = useSWR("/certifications/admin", fetcher);
+  const { data: profile } = useSWR("/auth/me", fetcher);
   const [uploading, setUploading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [editingCert, setEditingCert] = useState<Certification | null>(null);
@@ -70,6 +72,14 @@ export default function CertificationsPage() {
   });
 
   const { toast } = useToast();
+  const userRole = profile?.user?.role;
+
+  // Check if user has permission to access certifications
+  useEffect(() => {
+    if (profile && userRole !== "superadmin" && userRole !== "dev") {
+      window.location.href = "/admin";
+    }
+  }, [profile, userRole]);
 
   // Sync certifications state with fetched data
   useEffect(() => {
@@ -269,6 +279,33 @@ export default function CertificationsPage() {
   }
 
   const types = [...new Set(certifications.map((c: Certification) => c.type))].filter(Boolean);
+
+  // Show permission denied message if user doesn't have access
+  if (profile && userRole !== "superadmin" && userRole !== "dev") {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-6 flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-white dark:bg-slate-800 rounded-xl p-8 shadow-2xl border border-red-200 dark:border-red-800 max-w-md text-center"
+        >
+          <Shield className="w-16 h-16 text-red-600 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
+            Access Denied
+          </h2>
+          <p className="text-slate-600 dark:text-slate-400 mb-6">
+            You don't have permission to access the Certifications page. This page is only accessible to Superadmin and Dev roles.
+          </p>
+          <button
+            onClick={() => window.location.href = "/admin"}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+          >
+            Go to Dashboard
+          </button>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-6">
