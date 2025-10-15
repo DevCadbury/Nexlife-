@@ -1,8 +1,8 @@
 "use client";
 import useSWR from "swr";
 import { fetcher, api } from "@/lib/api";
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence, Reorder } from "framer-motion";
 import {
   Upload,
   Trash2,
@@ -18,7 +18,10 @@ import {
   AlertCircle,
   Package,
   StickyNote,
+  Save,
+  Move3D,
 } from "lucide-react";
+import { useToast } from "@/components/ui/toast";
 
 interface ProductImage {
   url: string;
@@ -54,6 +57,9 @@ export default function ProductsGallery() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
+  const [reorderMode, setReorderMode] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [savingOrder, setSavingOrder] = useState(false);
   
   const [formData, setFormData] = useState({
     name: "",
@@ -65,22 +71,14 @@ export default function ProductsGallery() {
     category: "",
   });
 
-  const [toast, setToast] = useState<{
-    message: string;
-    type: "success" | "error";
-    visible: boolean;
-  }>({
-    message: "",
-    type: "success",
-    visible: false,
-  });
+  const { toast } = useToast();
 
-  const showToast = (message: string, type: "success" | "error" = "success") => {
-    setToast({ message, type, visible: true });
-    setTimeout(() => {
-      setToast((prev) => ({ ...prev, visible: false }));
-    }, 4000);
-  };
+  // Sync products state with fetched data
+  useEffect(() => {
+    if (data?.items) {
+      setProducts(data.items);
+    }
+  }, [data]);
 
   const openModal = (product?: Product) => {
     if (product) {
@@ -153,18 +151,28 @@ export default function ProductsGallery() {
         await api.patch(`/products-gallery/${editingProduct._id}`, formDataToSend, {
           headers: { "Content-Type": "multipart/form-data" },
         });
-        showToast("Product updated successfully", "success");
+        toast({
+          title: "Success",
+          description: "Product updated successfully",
+        });
       } else {
         await api.post("/products-gallery", formDataToSend, {
           headers: { "Content-Type": "multipart/form-data" },
         });
-        showToast("Product created successfully", "success");
+        toast({
+          title: "Success",
+          description: "Product created successfully",
+        });
       }
 
       mutate();
       closeModal();
     } catch (error: any) {
-      showToast(error.message || "Error saving product", "error");
+      toast({
+        title: "Error",
+        description: error.message || "Error saving product",
+        variant: "error",
+      });
     } finally {
       setUploading(false);
     }
@@ -175,10 +183,17 @@ export default function ProductsGallery() {
       await api.patch(`/products-gallery/${product._id}/visibility`, {
         visible: !product.visible,
       });
-      showToast(`Product ${!product.visible ? "shown" : "hidden"}`, "success");
+      toast({
+        title: "Success",
+        description: `Product ${!product.visible ? "shown" : "hidden"}`,
+      });
       mutate();
     } catch (error: any) {
-      showToast(error.message || "Error updating visibility", "error");
+      toast({
+        title: "Error",
+        description: error.message || "Error updating visibility",
+        variant: "error",
+      });
     }
   }
 
@@ -186,10 +201,17 @@ export default function ProductsGallery() {
     if (!confirm(`Delete "${product.name}"?`)) return;
     try {
       await api.delete(`/products-gallery/${product._id}`);
-      showToast("Product deleted", "success");
+      toast({
+        title: "Success",
+        description: "Product deleted",
+      });
       mutate();
     } catch (error: any) {
-      showToast(error.message || "Error deleting product", "error");
+      toast({
+        title: "Error",
+        description: error.message || "Error deleting product",
+        variant: "error",
+      });
     }
   }
 
@@ -198,21 +220,59 @@ export default function ProductsGallery() {
       await api.patch(`/products-gallery/${productId}/sequence`, { direction });
       mutate();
     } catch (error: any) {
-      showToast(error.message || "Error moving product", "error");
+      toast({
+        title: "Error",
+        description: error.message || "Error moving product",
+        variant: "error",
+      });
     }
   }
 
   async function updateNote(product: Product, note: string) {
     try {
       await api.patch(`/products-gallery/${product._id}/note`, { note });
-      showToast("Note updated", "success");
+      toast({
+        title: "Success",
+        description: "Note updated",
+      });
       mutate();
     } catch (error: any) {
-      showToast(error.message || "Error updating note", "error");
+      toast({
+        title: "Error",
+        description: error.message || "Error updating note",
+        variant: "error",
+      });
     }
   }
 
-  const products = data?.items || [];
+  async function updateSequence() {
+    setSavingOrder(true);
+    try {
+      const updates = products.map((product, index) => ({
+        id: product._id,
+        sequence: index,
+      }));
+      
+      await api.post("/products-gallery/reorder", { sequences: updates });
+      
+      toast({
+        title: "Success",
+        description: "Product order saved successfully",
+      });
+      
+      await mutate();
+      setReorderMode(false);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Error saving order",
+        variant: "error",
+      });
+    } finally {
+      setSavingOrder(false);
+    }
+  }
+
   const categories = [...new Set(products.map((p: Product) => p.category))].filter(Boolean);
 
   return (
@@ -234,15 +294,55 @@ export default function ProductsGallery() {
                 Manage product catalog with images and details
               </p>
             </div>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => openModal()}
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-            >
-              <Plus className="w-5 h-5" />
-              Add Product
-            </motion.button>
+            <div className="flex gap-3">
+              {reorderMode ? (
+                <>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={updateSequence}
+                    disabled={savingOrder}
+                    className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
+                  >
+                    <Save className="w-5 h-5" />
+                    {savingOrder ? "Saving..." : "Save Order"}
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => {
+                      setReorderMode(false);
+                      setProducts(data?.items || []);
+                    }}
+                    className="flex items-center gap-2 bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                    Cancel
+                  </motion.button>
+                </>
+              ) : (
+                <>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setReorderMode(true)}
+                    className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                  >
+                    <Move3D className="w-5 h-5" />
+                    Reorder Products
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => openModal()}
+                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                  >
+                    <Plus className="w-5 h-5" />
+                    Add Product
+                  </motion.button>
+                </>
+              )}
+            </div>
           </div>
         </motion.div>
 
@@ -300,24 +400,66 @@ export default function ProductsGallery() {
         </motion.div>
 
         {/* Products Grid */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-        >
-          {products.map((product: Product, index: number) => (
-            <motion.div
-              key={product._id}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.1 }}
-              className={`bg-white dark:bg-slate-800 rounded-xl p-4 shadow-lg border-2 transition-all ${
-                product.visible
-                  ? "border-green-200 dark:border-green-600"
-                  : "border-red-200 dark:border-red-600 opacity-60"
-              }`}
-            >
+        {reorderMode ? (
+          <Reorder.Group
+            axis="y"
+            values={products}
+            onReorder={setProducts}
+            className="space-y-4"
+          >
+            {products.map((product: Product) => (
+              <Reorder.Item
+                key={product._id}
+                value={product}
+                className={`bg-white dark:bg-slate-800 rounded-xl p-4 shadow-lg border-2 transition-all cursor-move ${
+                  product.visible
+                    ? "border-green-200 dark:border-green-600"
+                    : "border-red-200 dark:border-red-600 opacity-60"
+                }`}
+              >
+                <div className="flex items-center gap-4">
+                  <Move3D className="w-6 h-6 text-slate-400" />
+                  {product.image?.url && (
+                    <img
+                      src={product.image.url}
+                      alt={product.name}
+                      className="w-16 h-16 object-cover rounded-lg"
+                    />
+                  )}
+                  <div className="flex-1">
+                    <h3 className="font-bold text-slate-900 dark:text-white">{product.name}</h3>
+                    {product.brandName && (
+                      <p className="text-sm text-slate-600 dark:text-slate-400">
+                        Brand: {product.brandName}
+                      </p>
+                    )}
+                    <span className="inline-block px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded-full mt-1">
+                      {product.category}
+                    </span>
+                  </div>
+                </div>
+              </Reorder.Item>
+            ))}
+          </Reorder.Group>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            {products.map((product: Product, index: number) => (
+              <motion.div
+                key={product._id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: index * 0.1 }}
+                className={`bg-white dark:bg-slate-800 rounded-xl p-4 shadow-lg border-2 transition-all ${
+                  product.visible
+                    ? "border-green-200 dark:border-green-600"
+                    : "border-red-200 dark:border-red-600 opacity-60"
+                }`}
+              >
               {/* Product Image */}
               {product.image?.url && (
                 <div className="aspect-square overflow-hidden rounded-lg mb-4 bg-slate-100 dark:bg-slate-700">
@@ -402,7 +544,8 @@ export default function ProductsGallery() {
               )}
             </motion.div>
           ))}
-        </motion.div>
+          </motion.div>
+        )}
 
         {/* Modal */}
         <AnimatePresence>
@@ -591,39 +734,6 @@ export default function ProductsGallery() {
                   </div>
                 </form>
               </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Toast */}
-        <AnimatePresence>
-          {toast.visible && (
-            <motion.div
-              initial={{ opacity: 0, y: -50 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -50 }}
-              className="fixed top-6 right-6 z-[9999]"
-            >
-              <div
-                className={`flex items-center gap-3 px-5 py-4 rounded-xl shadow-2xl backdrop-blur-xl border-2 ${
-                  toast.type === "success"
-                    ? "bg-emerald-500 text-white border-emerald-400"
-                    : "bg-red-500 text-white border-red-400"
-                }`}
-              >
-                {toast.type === "success" ? (
-                  <Eye className="w-5 h-5" />
-                ) : (
-                  <AlertCircle className="w-5 h-5" />
-                )}
-                <p className="text-sm font-medium">{toast.message}</p>
-                <button
-                  onClick={() => setToast((prev) => ({ ...prev, visible: false }))}
-                  className="ml-2 text-white/70 hover:text-white"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
             </motion.div>
           )}
         </AnimatePresence>
