@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import SEOHead from "../components/SEOHead";
 
-const API_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3001";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001/api";
 
 const ProductGallery = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -49,12 +49,15 @@ const ProductGallery = () => {
         
         const data = await response.json();
         
+        // Handle both array and object responses
+        const productArray = Array.isArray(data) ? data : (data.items || []);
+        
         // Only show visible products to public
-        const visibleProducts = data.filter(product => product.visible !== false);
+        const visibleProducts = productArray.filter(product => product.visible !== false);
         setProducts(visibleProducts);
         
         // Extract unique categories
-        const uniqueCategories = ["All", ...new Set(data.map(p => p.category).filter(Boolean))];
+        const uniqueCategories = ["All", ...new Set(productArray.map(p => p.category).filter(Boolean))];
         setCategories(uniqueCategories);
       } catch (err) {
         console.error("Error fetching products:", err);

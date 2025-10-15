@@ -44,12 +44,15 @@ const Certifications = () => {
         
         const data = await response.json();
         
+        // Handle both array and object responses
+        const certArray = Array.isArray(data) ? data : (data.items || []);
+        
         // Only show visible certifications to public
-        const visibleCertifications = data.filter(cert => cert.visible !== false);
+        const visibleCertifications = certArray.filter(cert => cert.visible !== false);
         setCertifications(visibleCertifications);
         
         // Extract unique types
-        const uniqueTypes = ["All", ...new Set(data.map(c => c.type).filter(Boolean))];
+        const uniqueTypes = ["All", ...new Set(certArray.map(c => c.type).filter(Boolean))];
         setCertificationTypes(uniqueTypes);
       } catch (err) {
         console.error("Error fetching certifications:", err);
