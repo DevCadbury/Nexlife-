@@ -50,6 +50,8 @@ export async function getCollections() {
     staff: db.collection("staff"),
     logs: db.collection("logs"),
     gallery: db.collection("gallery"),
+    productsGallery: db.collection("productsGallery"),
+    certifications: db.collection("certifications"),
     campaigns: db.collection("campaigns"),
     visitors: db.collection("visitors"),
   };
@@ -89,6 +91,23 @@ async function ensureIndexes(db) {
     .createIndexes([
       { key: { userEmail: 1, createdAt: -1 } },
       { key: { likes: -1 } },
+      { key: { sequence: 1 } },
+    ]);
+  await db
+    .collection("productsGallery")
+    .createIndexes([
+      { key: { category: 1, sequence: 1 } },
+      { key: { likes: -1 } },
+      { key: { sequence: 1 } },
+      { key: { visible: 1, sequence: 1 } },
+    ]);
+  await db
+    .collection("certifications")
+    .createIndexes([
+      { key: { type: 1, sequence: 1 } },
+      { key: { likes: -1 } },
+      { key: { sequence: 1 } },
+      { key: { visible: 1, sequence: 1 } },
     ]);
   await db
     .collection("campaigns")

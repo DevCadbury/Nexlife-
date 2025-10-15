@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Award,
@@ -9,82 +9,61 @@ import {
   ZoomIn,
   Calendar,
   Building2,
+  Loader2,
+  AlertCircle,
+  ImageOff,
 } from "lucide-react";
 import SEOHead from "../components/SEOHead";
 
-// Sample certification data - replace with your actual certifications
-const certifications = [
-  {
-    id: 1,
-    title: "WHO-GMP Certificate",
-    description: "World Health Organization - Good Manufacturing Practice",
-    image: "/src/assets/images/certifications/who-gmp.jpg",
-    issueDate: "January 2024",
-    issuedBy: "World Health Organization",
-    validUntil: "January 2027",
-    type: "Manufacturing",
-  },
-  {
-    id: 2,
-    title: "ISO 9001:2015",
-    description: "Quality Management System Certification",
-    image: "/src/assets/images/certifications/iso-9001.jpg",
-    issueDate: "March 2023",
-    issuedBy: "International Organization for Standardization",
-    validUntil: "March 2026",
-    type: "Quality",
-  },
-  {
-    id: 3,
-    title: "ISO 14001:2015",
-    description: "Environmental Management System",
-    image: "/src/assets/images/certifications/iso-14001.jpg",
-    issueDate: "March 2023",
-    issuedBy: "International Organization for Standardization",
-    validUntil: "March 2026",
-    type: "Environmental",
-  },
-  {
-    id: 4,
-    title: "Drug License",
-    description: "Pharmaceutical Manufacturing License",
-    image: "/src/assets/images/certifications/drug-license.jpg",
-    issueDate: "June 2022",
-    issuedBy: "Drug Control Authority",
-    validUntil: "June 2027",
-    type: "Legal",
-  },
-  {
-    id: 5,
-    title: "Export License",
-    description: "International Export Authorization",
-    image: "/src/assets/images/certifications/export-license.jpg",
-    issueDate: "August 2023",
-    issuedBy: "Ministry of Commerce",
-    validUntil: "August 2028",
-    type: "Legal",
-  },
-  {
-    id: 6,
-    title: "CE Marking",
-    description: "European Conformity Certification",
-    image: "/src/assets/images/certifications/ce-marking.jpg",
-    issueDate: "February 2024",
-    issuedBy: "European Commission",
-    validUntil: "February 2029",
-    type: "Quality",
-  },
-];
-
-const certificationTypes = ["All", "Manufacturing", "Quality", "Environmental", "Legal"];
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001/api";
 
 const Certifications = () => {
   const [selectedCert, setSelectedCert] = useState(null);
   const [selectedType, setSelectedType] = useState("All");
+  const [certifications, setCertifications] = useState([]);
+  const [certificationTypes, setCertificationTypes] = useState(["All"]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const filteredCertifications = certifications.filter(
-    (cert) => selectedType === "All" || cert.type === selectedType
-  );
+  // Fetch certifications from API
+  useEffect(() => {
+    const fetchCertifications = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const url = selectedType === "All" 
+          ? `${API_URL}/certifications`
+          : `${API_URL}/certifications/type/${selectedType}`;
+        
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch certifications: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        // Only show visible certifications to public
+        const visibleCertifications = data.filter(cert => cert.visible !== false);
+        setCertifications(visibleCertifications);
+        
+        // Extract unique types
+        const uniqueTypes = ["All", ...new Set(data.map(c => c.type).filter(Boolean))];
+        setCertificationTypes(uniqueTypes);
+      } catch (err) {
+        console.error("Error fetching certifications:", err);
+        setError(err.message);
+        setCertifications([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCertifications();
+  }, [selectedType]);
+
+  const filteredCertifications = certifications;
 
   return (
     <>
@@ -119,19 +98,55 @@ const Certifications = () => {
             </p>
           </motion.div>
 
+          {/* Loading State */}
+          {loading && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex flex-col items-center justify-center py-20"
+            >
+              <Loader2 className="w-16 h-16 text-blue-600 animate-spin mb-4" />
+              <p className="text-lg text-slate-600 dark:text-slate-400">Loading certifications...</p>
+            </motion.div>
+          )}
+
+          {/* Error State */}
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="max-w-md mx-auto"
+            >
+              <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-2xl p-8 text-center">
+                <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+                <h3 className="text-xl font-bold text-red-900 dark:text-red-300 mb-2">
+                  Failed to Load Certifications
+                </h3>
+                <p className="text-red-700 dark:text-red-400 mb-4">{error}</p>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="px-6 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 transition-colors"
+                >
+                  Try Again
+                </button>
+              </div>
+            </motion.div>
+          )}
+
           {/* Stats Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12"
-          >
-            {[
-              { icon: ShieldCheck, label: "Total Certifications", value: certifications.length },
-              { icon: Award, label: "ISO Standards", value: "2" },
-              { icon: FileCheck, label: "International", value: "5+" },
-              { icon: Building2, label: "Years in Business", value: "10+" },
-            ].map((stat, index) => (
+          {!loading && !error && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12"
+            >
+              {[
+                { icon: ShieldCheck, label: "Total Certifications", value: certifications.length },
+                { icon: Award, label: "ISO Standards", value: certifications.filter(c => c.title?.includes('ISO')).length },
+                { icon: FileCheck, label: "International", value: certifications.filter(c => c.type === 'Quality' || c.type === 'Manufacturing').length },
+                { icon: Building2, label: "Active", value: certifications.length },
+              ].map((stat, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -148,12 +163,14 @@ const Certifications = () => {
                   </div>
                   <div className="text-sm text-slate-600 dark:text-slate-400">{stat.label}</div>
                 </div>
-              </motion.div>
-            ))}
-          </motion.div>
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
 
           {/* Filter Section */}
-          <motion.div
+          {!loading && !error && (
+            <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
@@ -173,11 +190,13 @@ const Certifications = () => {
               >
                 {type}
               </motion.button>
-            ))}
-          </motion.div>
+                ))}
+            </motion.div>
+          )}
 
           {/* Certifications Grid */}
-          <motion.div
+          {!loading && !error && (
+            <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
@@ -185,7 +204,7 @@ const Certifications = () => {
           >
             {filteredCertifications.map((cert, index) => (
               <motion.div
-                key={cert.id}
+                key={cert._id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 * index }}
@@ -194,12 +213,32 @@ const Certifications = () => {
                 onClick={() => setSelectedCert(cert)}
               >
                 <div className="relative bg-white dark:bg-slate-800 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border border-slate-200 dark:border-slate-700">
-                  {/* Certificate Image Placeholder */}
-                  <div className="relative h-64 bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 overflow-hidden">
-                    <div className="absolute inset-0 bg-white/10 backdrop-blur-sm" />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Award className="w-32 h-32 text-white/30" />
-                    </div>
+                  {/* Certificate Image */}
+                  <div className="relative h-64 overflow-hidden bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600">
+                    {cert.imageUrl ? (
+                      <>
+                        <img
+                          src={cert.imageUrl}
+                          alt={cert.title}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextElementSibling.style.display = 'flex';
+                          }}
+                        />
+                        <div className="absolute inset-0 hidden items-center justify-center bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600">
+                          <div className="absolute inset-0 bg-white/10 backdrop-blur-sm" />
+                          <Award className="w-32 h-32 text-white/30 relative z-10" />
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="absolute inset-0 bg-white/10 backdrop-blur-sm" />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <Award className="w-32 h-32 text-white/30" />
+                        </div>
+                      </>
+                    )}
                     {/* Type Badge */}
                     <div className="absolute top-4 right-4">
                       <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-bold text-white border border-white/30">
@@ -243,17 +282,38 @@ const Certifications = () => {
                     </motion.button>
                   </div>
                 </div>
-              </motion.div>
-            ))}
-          </motion.div>
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+
+          {/* No Results */}
+          {!loading && !error && filteredCertifications.length === 0 && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="text-center py-16"
+            >
+              <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-slate-200 dark:bg-slate-700 mb-4">
+                <Award className="w-12 h-12 text-slate-400" />
+              </div>
+              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
+                No certifications found
+              </h3>
+              <p className="text-slate-600 dark:text-slate-400">
+                Please check back later for updates
+              </p>
+            </motion.div>
+          )}
 
           {/* Trust Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className="mt-16 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-3xl p-8 md:p-12 text-center shadow-2xl"
-          >
+          {!loading && !error && certifications.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              className="mt-16 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-3xl p-8 md:p-12 text-center shadow-2xl"
+            >
             <ShieldCheck className="w-16 h-16 text-white mx-auto mb-6" />
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
               Certified Excellence
@@ -272,8 +332,9 @@ const Certifications = () => {
               <div className="bg-white/20 backdrop-blur-sm px-6 py-3 rounded-full border border-white/30">
                 <span className="text-white font-semibold">Internationally Recognized</span>
               </div>
-            </div>
-          </motion.div>
+              </div>
+            </motion.div>
+          )}
         </div>
       </div>
 
@@ -314,10 +375,30 @@ const Certifications = () => {
               <div className="p-6 space-y-6">
                 {/* Certificate Image */}
                 <div className="relative h-96 bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 rounded-2xl overflow-hidden">
-                  <div className="absolute inset-0 bg-white/10 backdrop-blur-sm" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Award className="w-48 h-48 text-white/30" />
-                  </div>
+                  {selectedCert.imageUrl ? (
+                    <>
+                      <img
+                        src={selectedCert.imageUrl}
+                        alt={selectedCert.title}
+                        className="w-full h-full object-contain p-4"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextElementSibling.style.display = 'flex';
+                        }}
+                      />
+                      <div className="absolute inset-0 hidden items-center justify-center">
+                        <div className="absolute inset-0 bg-white/10 backdrop-blur-sm" />
+                        <Award className="w-48 h-48 text-white/30 relative z-10" />
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="absolute inset-0 bg-white/10 backdrop-blur-sm" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Award className="w-48 h-48 text-white/30" />
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 {/* Details Grid */}

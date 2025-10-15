@@ -11,6 +11,8 @@ import analyticsRouter from "./routes/analytics.js";
 import authRouter, { seedSuperAdmin } from "./routes/auth.js";
 import staffRouter from "./routes/staff.js";
 import galleryRouter from "./routes/gallery.js";
+import productsGalleryRouter from "./routes/products-gallery.js";
+import certificationsRouter from "./routes/certifications.js";
 import inboundRouter from "./routes/inbound.js";
 import logsRouter from "./routes/logs.js";
 import { startInboundImapPoller } from "./inbound-imap.js";
@@ -697,6 +699,8 @@ app.use("/api/subscribers", subscribersRouter);
 app.use("/api/export", exportsRouter);
 app.use("/api/analytics", analyticsRouter);
 app.use("/api/gallery", galleryRouter);
+app.use("/api/products-gallery", productsGalleryRouter);
+app.use("/api/certifications", certificationsRouter);
 app.use("/api/inbound", inboundRouter);
 app.use("/api/logs", logsRouter);
 

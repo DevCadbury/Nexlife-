@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Package,
@@ -12,94 +12,68 @@ import {
   ShieldCheck,
   Filter,
   ChevronDown,
+  Loader2,
+  AlertCircle,
+  ImageOff,
 } from "lucide-react";
 import SEOHead from "../components/SEOHead";
 
-// Sample product data - you can expand this with your actual products
-const products = [
-  {
-    id: 1,
-    name: "Paracetamol 500mg",
-    brandName: "PARACET-500",
-    image: "/src/assets/images/products/paracetamol.jpg",
-    components: ["Paracetamol 500mg"],
-    uses: "Fever, Pain relief, Headache, Body ache",
-    class: "Analgesic & Antipyretic",
-    packing: "10x10 Tablets",
-    category: "Analgesic",
-  },
-  {
-    id: 2,
-    name: "Amoxicillin 500mg",
-    brandName: "AMOXI-500",
-    image: "/src/assets/images/products/amoxicillin.jpg",
-    components: ["Amoxicillin 500mg"],
-    uses: "Bacterial infections, Respiratory infections, UTI",
-    class: "Antibiotic (Penicillin group)",
-    packing: "10x10 Capsules",
-    category: "Antibiotic",
-  },
-  {
-    id: 3,
-    name: "Cetirizine 10mg",
-    brandName: "CETRI-10",
-    image: "/src/assets/images/products/cetirizine.jpg",
-    components: ["Cetirizine Hydrochloride 10mg"],
-    uses: "Allergic rhinitis, Urticaria, Allergies",
-    class: "Antihistamine",
-    packing: "10x10 Tablets",
-    category: "Anti-Allergic",
-  },
-  {
-    id: 4,
-    name: "Metformin 500mg",
-    brandName: "METFOR-500",
-    image: "/src/assets/images/products/metformin.jpg",
-    components: ["Metformin Hydrochloride 500mg"],
-    uses: "Type 2 Diabetes, Blood sugar control",
-    class: "Antidiabetic (Biguanide)",
-    packing: "10x15 Tablets",
-    category: "Anti-Diabetic",
-  },
-  {
-    id: 5,
-    name: "Azithromycin 500mg",
-    brandName: "AZITHRO-500",
-    image: "/src/assets/images/products/azithromycin.jpg",
-    components: ["Azithromycin 500mg"],
-    uses: "Respiratory infections, Skin infections",
-    class: "Antibiotic (Macrolide)",
-    packing: "3 Tablets",
-    category: "Antibiotic",
-  },
-  {
-    id: 6,
-    name: "Omeprazole 20mg",
-    brandName: "OMEPRA-20",
-    image: "/src/assets/images/products/omeprazole.jpg",
-    components: ["Omeprazole 20mg"],
-    uses: "Acidity, GERD, Peptic ulcer",
-    class: "Proton Pump Inhibitor",
-    packing: "10x10 Capsules",
-    category: "Anti-Ulcerative",
-  },
-];
-
-const categories = ["All", "Analgesic", "Antibiotic", "Anti-Allergic", "Anti-Diabetic", "Anti-Ulcerative"];
+const API_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3001";
 
 const ProductGallery = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [showFilter, setShowFilter] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState(["All"]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch products from API
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const url = selectedCategory === "All" 
+          ? `${API_URL}/products-gallery`
+          : `${API_URL}/products-gallery/category/${selectedCategory}`;
+        
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch products: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        // Only show visible products to public
+        const visibleProducts = data.filter(product => product.visible !== false);
+        setProducts(visibleProducts);
+        
+        // Extract unique categories
+        const uniqueCategories = ["All", ...new Set(data.map(p => p.category).filter(Boolean))];
+        setCategories(uniqueCategories);
+      } catch (err) {
+        console.error("Error fetching products:", err);
+        setError(err.message);
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, [selectedCategory]);
 
   const filteredProducts = products.filter((product) => {
     const matchesSearch =
-      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.brandName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.components.some((comp) => comp.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesCategory = selectedCategory === "All" || product.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+      product.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.brandName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.components?.some((comp) => comp.toLowerCase().includes(searchTerm.toLowerCase()));
+    return matchesSearch;
   });
 
   return (
@@ -165,47 +139,105 @@ const ProductGallery = () => {
             </div>
           </motion.div>
 
+          {/* Loading State */}
+          {loading && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex flex-col items-center justify-center py-20"
+            >
+              <Loader2 className="w-16 h-16 text-blue-600 animate-spin mb-4" />
+              <p className="text-lg text-slate-600 dark:text-slate-400">Loading products...</p>
+            </motion.div>
+          )}
+
+          {/* Error State */}
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="max-w-md mx-auto"
+            >
+              <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-2xl p-8 text-center">
+                <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+                <h3 className="text-xl font-bold text-red-900 dark:text-red-300 mb-2">
+                  Failed to Load Products
+                </h3>
+                <p className="text-red-700 dark:text-red-400 mb-4">{error}</p>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="px-6 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 transition-colors"
+                >
+                  Try Again
+                </button>
+              </div>
+            </motion.div>
+          )}
+
           {/* Results Count */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center mb-6"
-          >
-            <p className="text-slate-600 dark:text-slate-400">
-              Showing <span className="font-bold text-blue-600">{filteredProducts.length}</span> products
-            </p>
-          </motion.div>
+          {!loading && !error && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center mb-6"
+            >
+              <p className="text-slate-600 dark:text-slate-400">
+                Showing <span className="font-bold text-blue-600">{filteredProducts.length}</span> products
+              </p>
+            </motion.div>
+          )}
 
           {/* Products Grid */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-          >
-            {filteredProducts.map((product, index) => (
-              <motion.div
-                key={product.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                whileHover={{ y: -8, scale: 1.02 }}
-                className="group cursor-pointer"
-                onClick={() => setSelectedProduct(product)}
-              >
-                <div className="relative bg-white dark:bg-slate-800 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border border-slate-200 dark:border-slate-700">
-                  {/* Card Header with Gradient */}
-                  <div className="h-48 bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 relative overflow-hidden">
-                    <div className="absolute inset-0 bg-white/10 backdrop-blur-sm" />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Package className="w-24 h-24 text-white/30" />
+          {!loading && !error && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            >
+              {filteredProducts.map((product, index) => (
+                <motion.div
+                  key={product._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  whileHover={{ y: -8, scale: 1.02 }}
+                  className="group cursor-pointer"
+                  onClick={() => setSelectedProduct(product)}
+                >
+                  <div className="relative bg-white dark:bg-slate-800 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border border-slate-200 dark:border-slate-700">
+                    {/* Card Header with Image or Gradient */}
+                    <div className="h-48 relative overflow-hidden bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600">
+                      {product.imageUrl ? (
+                        <>
+                          <img
+                            src={product.imageUrl}
+                            alt={product.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              e.target.nextElementSibling.style.display = 'flex';
+                            }}
+                          />
+                          <div className="absolute inset-0 hidden items-center justify-center bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600">
+                            <div className="absolute inset-0 bg-white/10 backdrop-blur-sm" />
+                            <Package className="w-24 h-24 text-white/30 relative z-10" />
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="absolute inset-0 bg-white/10 backdrop-blur-sm" />
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <Package className="w-24 h-24 text-white/30" />
+                          </div>
+                        </>
+                      )}
+                      <div className="absolute top-4 right-4">
+                        <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-bold text-white border border-white/30">
+                          {product.category}
+                        </span>
+                      </div>
                     </div>
-                    <div className="absolute top-4 right-4">
-                      <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-bold text-white border border-white/30">
-                        {product.category}
-                      </span>
-                    </div>
-                  </div>
 
                   {/* Card Content */}
                   <div className="p-6 space-y-4">
@@ -249,11 +281,12 @@ const ProductGallery = () => {
                   </div>
                 </div>
               </motion.div>
-            ))}
-          </motion.div>
+              ))}
+            </motion.div>
+          )}
 
           {/* No Results */}
-          {filteredProducts.length === 0 && (
+          {!loading && !error && filteredProducts.length === 0 && (
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -313,6 +346,20 @@ const ProductGallery = () => {
 
               {/* Modal Content */}
               <div className="p-6 space-y-6">
+                {/* Product Image */}
+                {selectedProduct.imageUrl && (
+                  <div className="relative h-80 rounded-2xl overflow-hidden bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600">
+                    <img
+                      src={selectedProduct.imageUrl}
+                      alt={selectedProduct.name}
+                      className="w-full h-full object-contain p-4"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                )}
+
                 {/* Components */}
                 <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-700 dark:to-slate-600 rounded-2xl p-6">
                   <div className="flex items-center gap-3 mb-4">
