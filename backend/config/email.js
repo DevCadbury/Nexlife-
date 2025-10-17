@@ -334,6 +334,138 @@ This is an automated confirmation email. Please do not reply to this message.
     text: `Your verification code is ${data.code}. It expires in 5 minutes.`,
   }),
 
+  campaign: (data) => ({
+    subject: data.subject || 'Important Update from Nexlife International',
+    html: `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${data.subject || 'Nexlife International'}</title>
+      </head>
+      <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f8fafc;">
+        <div style="max-width: 600px; margin: 40px auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+          
+          <!-- Header with Gradient -->
+          <div style="background: linear-gradient(135deg, #22d3ee 0%, #6366f1 50%, #a855f7 100%); padding: 40px 20px; text-align: center;">
+            <h1 style="margin: 0; font-size: 28px; font-weight: 700; color: white; letter-spacing: -0.5px;">${data.subject || 'Important Update'}</h1>
+            <p style="margin: 10px 0 0 0; color: rgba(255, 255, 255, 0.9); font-size: 14px;">Nexlife International</p>
+          </div>
+
+          <!-- Content -->
+          <div style="padding: 40px 30px;">
+            ${data.announcement ? `
+              <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-left: 4px solid #f59e0b; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
+                <p style="margin: 0; color: #92400e; font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">📢 ANNOUNCEMENT</p>
+              </div>
+            ` : ''}
+
+            <div style="color: #1e293b; font-size: 16px; line-height: 1.8; margin-bottom: 30px;">
+              ${convertMarkdownToHtml(data.message)}
+            </div>
+
+            <!-- Company Info Section -->
+            <div style="background: linear-gradient(135deg, #f0f9ff 0%, #f5f3ff 100%); border-radius: 12px; padding: 30px; margin: 30px 0; border: 2px solid #e0e7ff;">
+              <div style="text-align: center; margin-bottom: 20px;">
+                <h2 style="margin: 0 0 10px 0; color: #1e293b; font-size: 24px; font-weight: 700;">🌿 Nexlife International</h2>
+                <p style="margin: 0; color: #475569; font-size: 16px; font-weight: 600;">Your Trusted Partner in Global Pharmaceutical Solutions</p>
+              </div>
+
+              <div style="color: #475569; font-size: 14px; line-height: 1.8; text-align: center;">
+                <p style="margin: 0 0 15px 0;">Based in <strong style="color: #6366f1;">Surat, India</strong>, Nexlife International is a global leader in</p>
+                <p style="margin: 0 0 15px 0;"><strong style="color: #6366f1;">pharmaceutical import and export.</strong></p>
+                <p style="margin: 0 0 15px 0;">We deliver <strong style="color: #22c55e;">WHO-GMP, ISO, and CE certified</strong> medicines across</p>
+                <p style="margin: 0 0 20px 0;"><strong>Asia, Africa, Europe, and South America.</strong></p>
+                
+                <div style="background: white; border-radius: 8px; padding: 15px; margin: 20px 0; border: 1px solid #e0e7ff;">
+                  <p style="margin: 0; color: #1e293b; font-size: 14px;">Our portfolio includes <strong style="color: #6366f1;">tablets, injections, syrups, creams,</strong> and <strong style="color: #6366f1;">medical devices</strong> —</p>
+                  <p style="margin: 5px 0 0 0; color: #1e293b; font-size: 14px;">ensuring <strong style="color: #22c55e;">quality, safety, and reliability</strong> at every step.</p>
+                </div>
+
+                <p style="margin: 20px 0 0 0; color: #6366f1; font-size: 16px; font-weight: 600; font-style: italic;">Innovating healthcare, delivering trust — worldwide.</p>
+              </div>
+
+              <!-- Contact Buttons -->
+              <div style="text-align: center; margin-top: 25px;">
+                <a href="https://www.nexlifeinternational.com/catalogue.pdf" style="display: inline-block; background: linear-gradient(135deg, #f59e0b, #ea580c); color: white; padding: 12px 30px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px; margin: 5px; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);">
+                  📄 Download Catalogue
+                </a>
+                <a href="https://www.nexlifeinternational.com/contact" style="display: inline-block; background: linear-gradient(135deg, #22d3ee, #6366f1); color: white; padding: 12px 30px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px; margin: 5px; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);">
+                  📞 Contact Us
+                </a>
+                <a href="https://wa.me/919664843790" style="display: inline-block; background: linear-gradient(135deg, #22c55e, #16a34a); color: white; padding: 12px 30px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px; margin: 5px; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);">
+                  💬 WhatsApp
+                </a>
+              </div>
+            </div>
+
+            ${data.note ? `
+              <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 15px; margin: 20px 0;">
+                <p style="margin: 0; color: #92400e; font-size: 13px; font-weight: 600;">📝 Note: ${data.note}</p>
+              </div>
+            ` : ''}
+          </div>
+
+          <!-- Footer -->
+          <div style="background: #1e293b; padding: 30px; text-align: center;">
+            <div style="margin-bottom: 20px;">
+              <p style="margin: 0 0 10px 0; color: #e2e8f0; font-weight: 600; font-size: 14px;">Contact Information</p>
+              <p style="margin: 5px 0; color: #94a3b8; font-size: 13px;">📧 Email: <a href="mailto:Info@nexlifeinternational.com" style="color: #22d3ee; text-decoration: none;">Info@nexlifeinternational.com</a></p>
+              <p style="margin: 5px 0; color: #94a3b8; font-size: 13px;">📞 Phone: +91 96648 43790 | +91 84015 46910</p>
+              <p style="margin: 5px 0; color: #94a3b8; font-size: 13px;">💬 WhatsApp: <a href="https://wa.me/919664843790" style="color: #22d3ee; text-decoration: none;">+91 96648 43790</a></p>
+              <p style="margin: 5px 0; color: #94a3b8; font-size: 13px;">📍 S-223, Angel Business Center – 2, Mota Varachha, Surat - 394101</p>
+            </div>
+
+            <div style="border-top: 1px solid #334155; padding-top: 20px; margin-top: 20px;">
+              <p style="margin: 0 0 10px 0; color: #64748b; font-size: 12px;">© ${new Date().getFullYear()} Nexlife International. All rights reserved.</p>
+              <p style="margin: 0; color: #64748b; font-size: 11px;">
+                <a href="https://www.nexlifeinternational.com" style="color: #64748b; text-decoration: none;">Visit Website</a> | 
+                <a href="https://www.nexlifeinternational.com/contact" style="color: #64748b; text-decoration: none; margin: 0 5px;">Contact</a> | 
+                <a href="mailto:Info@nexlifeinternational.com?subject=Unsubscribe" style="color: #64748b; text-decoration: none;">Unsubscribe</a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+    text: `
+${data.subject || 'Important Update from Nexlife International'}
+
+${data.announcement ? '📢 ANNOUNCEMENT\n\n' : ''}
+
+${convertMarkdownToText(data.message)}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🌿 Nexlife International
+Your Trusted Partner in Global Pharmaceutical Solutions
+
+Based in Surat, India, Nexlife International is a global leader in pharmaceutical import and export.
+
+We deliver WHO-GMP, ISO, and CE certified medicines across Asia, Africa, Europe, and South America.
+
+Our portfolio includes tablets, injections, syrups, creams, and medical devices — ensuring quality, safety, and reliability at every step.
+
+Innovating healthcare, delivering trust — worldwide.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Contact Information:
+📧 Email: Info@nexlifeinternational.com
+📞 Phone: +91 96648 43790 | +91 84015 46910
+💬 WhatsApp: https://wa.me/919664843790
+📍 Address: S-223, Angel Business Center – 2, Mota Varachha, Surat - 394101
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+© ${new Date().getFullYear()} Nexlife International. All rights reserved.
+Visit Website: https://www.nexlifeinternational.com
+To unsubscribe, reply with "Unsubscribe" in the subject line.
+    `,
+  }),
+
   staffWelcome: (data) => ({
     subject: `Welcome to Nexlife International - Your Account Details`,
     html: `

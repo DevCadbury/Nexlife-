@@ -742,6 +742,17 @@ app.post("/api/test-email", requireDashboardAuth, async (req, res) => {
   }
 });
 
+// Serve product catalogue PDF
+app.get("/catalogue.pdf", (req, res) => {
+  const pdfPath = path.join(__dirname, 'public', 'admin', 'PRODUCT-CATALOGE.pdf');
+  res.download(pdfPath, 'Nexlife-Product-Catalogue.pdf', (err) => {
+    if (err) {
+      console.error("Error serving catalogue:", err);
+      res.status(404).json({ error: "Catalogue not found" });
+    }
+  });
+});
+
 // Mount new routers
 app.use("/api/auth", authRouter);
 app.use("/api/staff", staffRouter);

@@ -243,9 +243,13 @@ export default function Campaigns() {
     fetcher
   );
 
-  // Fetch campaign history - Mock data for now
-  const campaignHistory: any[] = [];
+  // Fetch campaign history
+  const { data: campaignHistoryData, mutate: mutateCampaigns } = useSWR(
+    "/subscribers/campaigns?limit=100",
+    fetcher
+  );
 
+  const campaignHistory = campaignHistoryData?.items || [];
   const subscribers = subscribersData?.items || [];
   const filteredSubscribers = subscribers.filter((sub: any) =>
     sub.email.toLowerCase().includes(searchQuery.toLowerCase())
@@ -387,6 +391,9 @@ export default function Campaigns() {
       if (recipientMode === "selected") {
         setSelectedRecipients([]);
       }
+      
+      // Refresh campaign history
+      mutateCampaigns();
     } catch (error) {
       console.error("Failed to send campaign:", error);
       setResult({ sent: 0, failed: 0 });

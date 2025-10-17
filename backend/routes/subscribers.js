@@ -553,10 +553,37 @@ router.delete("/:email", requireAuth(), async (req, res) => {
   }
 });
 
+// GET /api/subscribers/campaigns - Get campaign history
+router.get("/campaigns", requireAuth(), async (req, res) => {
+  try {
+    const { campaigns } = await getCollections();
+    const limit = parseInt(req.query.limit) || 50;
+    const skip = parseInt(req.query.skip) || 0;
+    
+    const campaignList = await campaigns
+      .find({})
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .toArray();
+    
+    const total = await campaigns.countDocuments({});
+    
+    res.json({ 
+      success: true, 
+      total,
+      items: campaignList 
+    });
+  } catch (err) {
+    console.error("Get campaign history failed", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // POST /api/subscribers/campaign - basic campaign send
 router.post("/campaign", requireAuth(), async (req, res) => {
   try {
-    const { subject, message, recipients } = req.body || {};
+    const { subject, message, recipients, announcement, note } = req.body || {};
     if (!subject || !message)
       return res.status(400).json({ error: "Subject and message required" });
     const { subscribers, campaigns } = await getCollections();
@@ -581,11 +608,12 @@ router.post("/campaign", requireAuth(), async (req, res) => {
     };
     const inserted = await campaigns.insertOne(campaign);
 
-    const results = await sendBulkEmail(targetEmails, "contact", {
-      name: "Subscriber",
-      email: process.env.SMTP_USER,
+    // Use the new campaign template instead of contact template
+    const results = await sendBulkEmail(targetEmails, "campaign", {
       subject,
       message,
+      announcement: announcement || false,
+      note: note || null,
     });
 
     const sent = results.filter((r) => r.success).length;
