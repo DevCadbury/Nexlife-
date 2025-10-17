@@ -87,15 +87,10 @@ export default function Staff() {
       if (!token) return { role: "", name: "" };
 
       const payload = JSON.parse(atob(token.split(".")[1]));
-      console.log("JWT payload:", payload);
-      console.log("Token parts:", token.split("."));
 
       // Try different possible role fields
       const role = payload.role || payload.userRole || payload.user?.role || "";
       const name = payload.name || payload.userName || payload.user?.name || "";
-
-      console.log("Extracted role:", role);
-      console.log("Extracted name:", name);
 
       return { role, name };
     } catch (error) {

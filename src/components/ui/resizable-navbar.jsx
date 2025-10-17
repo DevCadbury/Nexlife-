@@ -204,17 +204,13 @@ export const NavBody = ({ children }) => {
 
 export const NavbarLogo = ({ src, alt = "Nexlife International" }) => {
   return (
-    <Link to="/" className="relative flex items-center gap-2 group">
+    <Link to="/" className="relative flex items-center gap-2">
       {src ? (
-        <div className="relative p-2 rounded-xl bg-white dark:bg-white shadow-[0_4px_16px_rgba(59,130,246,0.2)] dark:shadow-[0_4px_16px_rgba(59,130,246,0.3)] border border-blue-100/50 dark:border-blue-200/30 transition-all duration-300 group-hover:shadow-[0_6px_24px_rgba(59,130,246,0.35)] group-hover:scale-105">
-          {/* Subtle glow effect */}
-          <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-br from-blue-400/20 via-indigo-400/20 to-blue-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-sm"></div>
-          <img
-            src={src}
-            alt={alt}
-            className="relative h-10 w-auto"
-          />
-        </div>
+        <img
+          src={src}
+          alt={alt}
+          className="h-10 w-auto drop-shadow-[0_2px_8px_rgba(59,130,246,0.35)]"
+        />
       ) : (
         <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 shadow-[0_6px_20px_rgba(59,130,246,0.45)]" />
       )}

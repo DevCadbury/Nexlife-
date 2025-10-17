@@ -22,7 +22,7 @@ const createTransporter = () => {
 // Email templates
 export const emailTemplates = {
   contact: (data) => ({
-    subject: `[Nexlife Website] Contact Form - ${data.subject}`,
+    subject: `[Nexlife Website] Contact Form - ${data.subject || 'New Inquiry'}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background: linear-gradient(135deg, #22d3ee, #6366f1); padding: 20px; text-align: center; color: white;">
@@ -44,11 +44,23 @@ export const emailTemplates = {
               }</td>
             </tr>
             <tr>
-              <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; font-weight: bold; color: #475569;">Subject:</td>
+              <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; font-weight: bold; color: #475569;">Phone:</td>
               <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; color: #1e293b;">${
-                data.subject
+                data.phone || 'Not provided'
               }</td>
             </tr>
+            <tr>
+              <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; font-weight: bold; color: #475569;">Subject:</td>
+              <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; color: #1e293b;">${
+                data.subject || 'No subject'
+              }</td>
+            </tr>
+            ${data.productName ? `
+            <tr>
+              <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; font-weight: bold; color: #475569;">Product Interest:</td>
+              <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; color: #1e293b;">${data.productName}</td>
+            </tr>
+            ` : ''}
           </table>
           <h3 style="color: #1e293b; margin-top: 20px;">Message</h3>
           <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #6366f1;">
@@ -66,7 +78,9 @@ New Contact Form Submission
 
 Name: ${data.name}
 Email: ${data.email}
-Subject: ${data.subject}
+Phone: ${data.phone || 'Not provided'}
+Subject: ${data.subject || 'No subject'}
+${data.productName ? `Product Interest: ${data.productName}` : ''}
 
 Message:
 ${convertMarkdownToText(data.message)}
@@ -74,6 +88,111 @@ ${convertMarkdownToText(data.message)}
 ---
 This email was sent from the Nexlife International website contact form.
 Reply directly to this email to respond to ${data.name}.
+    `,
+  }),
+
+  contactConfirmation: (data) => ({
+    subject: `Thank you for contacting Nexlife International`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: linear-gradient(135deg, #22d3ee, #6366f1); padding: 20px; text-align: center; color: white;">
+          <h1 style="margin: 0; font-size: 24px;">Thank You for Contacting Us!</h1>
+        </div>
+        <div style="padding: 30px; background: #f8fafc;">
+          <h2 style="color: #1e293b; margin-top: 0;">Hello ${data.name}!</h2>
+          <p style="color: #475569; font-size: 16px; line-height: 1.6;">
+            Thank you for reaching out to Nexlife International. We have received your message and our team will get back to you within 24 hours.
+          </p>
+
+          <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #22c55e; margin: 20px 0;">
+            <h3 style="color: #1e293b; margin-top: 0;">Your Message Details</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; color: #475569; width: 120px;">Name:</td>
+                <td style="padding: 8px 0; color: #1e293b;">${data.name}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; color: #475569;">Email:</td>
+                <td style="padding: 8px 0; color: #1e293b;">${data.email}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; color: #475569;">Phone:</td>
+                <td style="padding: 8px 0; color: #1e293b;">${data.phone || 'Not provided'}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; color: #475569;">Subject:</td>
+                <td style="padding: 8px 0; color: #1e293b;">${data.subject || 'General Inquiry'}</td>
+              </tr>
+              ${data.productName ? `
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; color: #475569;">Product Interest:</td>
+                <td style="padding: 8px 0; color: #1e293b;">${data.productName}</td>
+              </tr>
+              ` : ''}
+              <tr>
+                <td style="padding: 8px 0; font-weight: bold; color: #475569;">Received:</td>
+                <td style="padding: 8px 0; color: #1e293b;">${new Date().toLocaleString()}</td>
+              </tr>
+            </table>
+          </div>
+
+          <div style="background: #dbeafe; border: 1px solid #3b82f6; border-radius: 8px; padding: 15px; margin: 20px 0;">
+            <p style="margin: 0; color: #1e40af; font-weight: bold;">📋 What happens next?</p>
+            <ul style="margin: 10px 0 0 0; color: #1e40af; padding-left: 20px;">
+              <li>Our team will review your message within 24 hours</li>
+              <li>We'll send you a detailed response to your inquiry</li>
+              <li>For urgent matters, feel free to call us directly</li>
+            </ul>
+          </div>
+
+          <div style="background: #f0fdf4; border: 1px solid #22c55e; border-radius: 8px; padding: 15px; margin: 20px 0;">
+            <p style="margin: 0 0 8px 0; color: #166534; font-weight: bold;">📄 Product Catalogue Attached!</p>
+            <p style="margin: 0; color: #166534; font-size: 14px;">
+              We've attached our comprehensive product catalogue for your reference. Browse through our wide range of pharmaceutical products while you wait for our response.
+            </p>
+          </div>
+        </div>
+        <div style="background: #1e293b; padding: 20px; text-align: center; color: #94a3b8; font-size: 12px;">
+          <p><strong>Contact Information:</strong></p>
+          <p>📧 Email: Info@nexlifeinternational.com</p>
+          <p>📞 Phone: +91 96648 43790 | +91 84015 46910</p>
+          <p>💬 WhatsApp: <a href="https://wa.me/919664843790" style="color: #22d3ee;">+91 96648 43790</a></p>
+          <p>📍 Address: S-223, Angel Business Center – 2, Near ABC Circle, Mota Varachha, Surat - 394101 (Gujarat)</p>
+          <p style="margin-top: 15px;">This is an automated confirmation email. Please do not reply to this message.</p>
+        </div>
+      </div>
+    `,
+    text: `
+Thank you for contacting Nexlife International!
+
+Hello ${data.name}!
+
+Thank you for reaching out to Nexlife International. We have received your message and our team will get back to you within 24 hours.
+
+Your Message Details:
+- Name: ${data.name}
+- Email: ${data.email}
+- Phone: ${data.phone || 'Not provided'}
+- Subject: ${data.subject || 'General Inquiry'}
+${data.productName ? `- Product Interest: ${data.productName}` : ''}
+- Received: ${new Date().toLocaleString()}
+
+What happens next?
+- Our team will review your message within 24 hours
+- We'll send you a detailed response to your inquiry
+- For urgent matters, feel free to call us directly
+
+Product Catalogue Attached!
+We've attached our comprehensive product catalogue for your reference. Browse through our wide range of pharmaceutical products while you wait for our response.
+
+Contact Information:
+Email: Info@nexlifeinternational.com
+Phone: +91 96648 43790 | +91 84015 46910
+WhatsApp: https://wa.me/919664843790
+Address: S-223, Angel Business Center – 2, Near ABC Circle, Mota Varachha, Surat - 394101 (Gujarat)
+
+---
+This is an automated confirmation email. Please do not reply to this message.
     `,
   }),
 

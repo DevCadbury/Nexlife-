@@ -570,34 +570,34 @@ export default function AdminLayout({
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 6 }}
-                  className="absolute right-0 mt-2 w-64 rounded-xl border border-slate-800 bg-slate-950/95 backdrop-blur shadow-xl ring-1 ring-indigo-500/10 p-4 z-50"
+                  className="absolute right-0 mt-2 w-64 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/95 backdrop-blur shadow-xl ring-1 ring-slate-200 dark:ring-indigo-500/10 p-4 z-50"
                   onMouseEnter={handleCardMouseEnter}
                   onMouseLeave={handleCardMouseLeave}
                 >
                   <div className="space-y-3">
                     <div>
-                      <div className="font-medium text-slate-200">
+                      <div className="font-medium text-slate-900 dark:text-slate-200">
                         {profile?.user?.name || "User"}
                       </div>
                       {profile?.user?.email && (
                         <div
-                          className="text-sm text-slate-400 truncate"
+                          className="text-sm text-slate-600 dark:text-slate-400 truncate"
                           title={profile.user.email}
                         >
                           {profile.user.email}
                         </div>
                       )}
-                      <div className="text-xs text-slate-500 mt-1">
-                        Role: <span className="capitalize text-slate-300">{profile?.user?.role || "Staff"}</span>
+                      <div className="text-xs text-slate-500 dark:text-slate-500 mt-1">
+                        Role: <span className="capitalize text-slate-700 dark:text-slate-300">{profile?.user?.role || "Staff"}</span>
                       </div>
-                      <div className="text-xs text-slate-500 mt-1">
+                      <div className="text-xs text-slate-500 dark:text-slate-500 mt-1">
                         Account ID: {profile?.user?.id?.slice(-8) || "N/A"}
                       </div>
                     </div>
 
-                    <div className="border-t border-slate-700 pt-3">
-                      <div className="text-xs text-slate-500 mb-2">Last Login</div>
-                      <div className="text-sm text-slate-300">
+                    <div className="border-t border-slate-200 dark:border-slate-700 pt-3">
+                      <div className="text-xs text-slate-500 dark:text-slate-500 mb-2">Last Login</div>
+                      <div className="text-sm text-slate-700 dark:text-slate-300">
                         {getLastLoginTime()
                           ? getLastLoginTime()?.toLocaleString()
                           : "Today"
@@ -605,10 +605,10 @@ export default function AdminLayout({
                       </div>
                     </div>
 
-                    <div className="border-t border-slate-700 pt-3 space-y-2">
+                    <div className="border-t border-slate-200 dark:border-slate-700 pt-3 space-y-2">
                       <Link
                         href="/admin/settings"
-                        className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-300 hover:bg-slate-800/50 rounded-lg transition-colors duration-200"
+                        className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50 rounded-lg transition-colors duration-200"
                         onClick={() => setHoverOpen(false)}
                       >
                         <SettingsIcon className="w-4 h-4" />
@@ -627,7 +627,7 @@ export default function AdminLayout({
                               window.location.href = '/login';
                             }
                           }}
-                          className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-400 hover:bg-red-900/30 rounded-lg transition-colors duration-200"
+                          className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors duration-200"
                         >
                           <LogOut className="w-4 h-4" />
                           Logout
@@ -643,13 +643,13 @@ export default function AdminLayout({
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 10 }}
-                  className="absolute right-0 mt-2 w-48 rounded-xl border border-slate-800 bg-slate-950/95 backdrop-blur shadow-xl ring-1 ring-indigo-500/10"
+                  className="absolute right-0 mt-2 w-48 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/95 backdrop-blur shadow-xl ring-1 ring-slate-200 dark:ring-indigo-500/10"
                 >
-                  <div className="p-3 border-b border-slate-800">
-                    <div className="font-medium">
+                  <div className="p-3 border-b border-slate-200 dark:border-slate-800">
+                    <div className="font-medium text-slate-900 dark:text-white">
                       {profile?.user?.name || "User"}
                     </div>
-                    <div className="text-sm text-slate-400">
+                    <div className="text-sm text-slate-600 dark:text-slate-400">
                       {profile?.user?.email}
                     </div>
                   </div>
@@ -667,19 +667,19 @@ export default function AdminLayout({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             ref={popRef}
-            className="fixed right-6 top-16 z-50 w-[560px] max-w-[90vw] rounded-xl border border-slate-800 bg-slate-950/95 backdrop-blur shadow-xl ring-1 ring-indigo-500/10"
+            className="fixed right-6 top-16 z-50 w-[560px] max-w-[90vw] rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/95 backdrop-blur shadow-xl ring-1 ring-slate-200 dark:ring-indigo-500/10"
             style={{
               boxShadow:
-                "0 10px 30px rgba(0,0,0,.35), 0 0 0 1px rgba(99,102,241,.08)",
+                "0 10px 30px rgba(0,0,0,.1), 0 0 0 1px rgba(148,163,184,.1)",
             }}
           >
             <div className="p-4">
               <div className="flex items-center justify-between mb-3">
-                <div className="font-bold">Notifications</div>
+                <div className="font-bold text-slate-900 dark:text-white">Notifications</div>
                 <div className="flex items-center gap-2">
                   {(items.length > 0 || replyItems.length > 0) && (
                     <button
-                      className="text-xs rounded-lg bg-slate-800 px-3 py-1.5 hover:bg-slate-700 transition-colors duration-200 flex items-center gap-2"
+                      className="text-xs rounded-lg bg-slate-100 dark:bg-slate-800 px-3 py-1.5 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors duration-200 flex items-center gap-2"
                       onClick={() => {
                         if (notificationTab === "inquiries") {
                           markAllRead();
@@ -696,12 +696,12 @@ export default function AdminLayout({
               </div>
 
               {/* Tabs */}
-              <div className="flex gap-1 mb-4 bg-slate-800/50 p-1 rounded-lg">
+              <div className="flex gap-1 mb-4 bg-slate-100 dark:bg-slate-800/50 p-1 rounded-lg">
                 <button
                   className={`flex-1 px-3 py-2 text-sm rounded-md transition-colors duration-200 ${
                     notificationTab === "inquiries"
-                      ? "bg-slate-700 text-white"
-                      : "text-slate-400 hover:text-white"
+                      ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                   }`}
                   onClick={() => setNotificationTab("inquiries")}
                 >
@@ -710,8 +710,8 @@ export default function AdminLayout({
                 <button
                   className={`flex-1 px-3 py-2 text-sm rounded-md transition-colors duration-200 ${
                     notificationTab === "replies"
-                      ? "bg-slate-700 text-white"
-                      : "text-slate-400 hover:text-white"
+                      ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                   }`}
                   onClick={() => setNotificationTab("replies")}
                 >
@@ -719,11 +719,11 @@ export default function AdminLayout({
                 </button>
               </div>
 
-              <div className="max-h-[60vh] overflow-y-auto divide-y divide-slate-800 rounded-lg">
+              <div className="max-h-[60vh] overflow-y-auto divide-y divide-slate-200 dark:divide-slate-800 rounded-lg">
                 {notificationTab === "inquiries" ? (
                   <>
                     {items.length === 0 && (
-                      <div className="text-sm text-slate-400 p-4 text-center">
+                      <div className="text-sm text-slate-500 dark:text-slate-400 p-4 text-center">
                         No new inquiries
                       </div>
                     )}
@@ -732,19 +732,19 @@ export default function AdminLayout({
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         key={i._id || `inquiry-${index}-${i.createdAt}`}
-                        className="p-4 flex items-start justify-between gap-3 hover:bg-slate-900/40 transition-colors duration-200"
+                        className="p-4 flex items-start justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors duration-200"
                       >
                         <div>
-                          <div className="font-semibold">
+                          <div className="font-semibold text-slate-900 dark:text-white">
                             {i.name}{" "}
-                            <span className="text-cyan-300">• {i.email}</span>
+                            <span className="text-blue-600 dark:text-cyan-400">• {i.email}</span>
                           </div>
                           {i.subject && (
-                            <div className="text-sm text-slate-300">
+                            <div className="text-sm text-slate-700 dark:text-slate-300">
                               {i.subject}
                             </div>
                           )}
-                          <div className="text-xs text-slate-500">
+                          <div className="text-xs text-slate-500 dark:text-slate-500">
                             {i.createdAt
                               ? new Date(i.createdAt).toLocaleString()
                               : ""}
@@ -752,7 +752,7 @@ export default function AdminLayout({
                         </div>
                         <div className="flex items-center gap-2">
                           <button
-                            className="text-xs rounded-lg bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 transition-colors duration-200"
+                            className="text-xs rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 transition-colors duration-200"
                             onClick={() => {
                               setOpen(false);
                               router.push(`/admin/inquiries`);
@@ -761,7 +761,7 @@ export default function AdminLayout({
                             View
                           </button>
                           <button
-                            className="text-xs rounded-lg bg-slate-800 hover:bg-slate-700 px-3 py-1.5 transition-colors duration-200"
+                            className="text-xs rounded-lg bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-3 py-1.5 transition-colors duration-200"
                             onClick={() => markRead(i._id)}
                           >
                             Mark read
@@ -773,7 +773,7 @@ export default function AdminLayout({
                 ) : (
                   <>
                     {replyItems.length === 0 && (
-                      <div className="text-sm text-slate-400 p-4 text-center">
+                      <div className="text-sm text-slate-500 dark:text-slate-400 p-4 text-center">
                         No new replies
                       </div>
                     )}
@@ -782,26 +782,26 @@ export default function AdminLayout({
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         key={reply._id || `reply-${index}-${reply.createdAt}`}
-                        className="p-4 flex items-start justify-between gap-3 hover:bg-slate-900/40 transition-colors duration-200"
+                        className="p-4 flex items-start justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors duration-200"
                       >
                         <div>
-                          <div className="font-semibold">
+                          <div className="font-semibold text-slate-900 dark:text-white">
                             New reply from{" "}
-                            <span className="text-green-300">
+                            <span className="text-green-600 dark:text-green-400">
                               {reply.fromName || reply.from}
                             </span>
                           </div>
-                          <div className="text-sm text-slate-300">
+                          <div className="text-sm text-slate-700 dark:text-slate-300">
                             {reply.subject}
                           </div>
-                          <div className="text-xs text-slate-500">
+                          <div className="text-xs text-slate-500 dark:text-slate-500">
                             {reply.inquiryEmail && (
-                              <span className="text-cyan-300">
+                              <span className="text-blue-600 dark:text-cyan-400">
                                 • {reply.inquiryEmail}
                               </span>
                             )}
                           </div>
-                          <div className="text-xs text-slate-500">
+                          <div className="text-xs text-slate-500 dark:text-slate-500">
                             {reply.createdAt
                               ? new Date(reply.createdAt).toLocaleString()
                               : ""}
@@ -809,7 +809,7 @@ export default function AdminLayout({
                         </div>
                         <div className="flex items-center gap-2">
                           <button
-                            className="text-xs rounded-lg bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 transition-colors duration-200"
+                            className="text-xs rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 transition-colors duration-200"
                             onClick={() => {
                               setOpen(false);
                               router.push(
@@ -822,7 +822,7 @@ export default function AdminLayout({
                             View Thread
                           </button>
                           <button
-                            className="text-xs rounded-lg bg-slate-800 hover:bg-slate-700 px-3 py-1.5 transition-colors duration-200"
+                            className="text-xs rounded-lg bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-3 py-1.5 transition-colors duration-200"
                             onClick={() => markReplyRead(reply._id)}
                           >
                             Mark read

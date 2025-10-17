@@ -198,11 +198,50 @@ router.get("/visitors/countries", requireAuth(), async (req, res) => {
   }
 });
 
-// POST /api/analytics/visitors/track - track a page visit
-router.post("/visitors/track", requireAuth(), async (req, res) => {
+// GET /api/analytics/visitors/trends?range=30 - visitor time series by date
+router.get("/visitors/trends", requireAuth(), async (req, res) => {
+  try {
+    const range = req.query.range === 'all' ? null : Math.min(Number(req.query.range) || 30, 365);
+    const { visitors } = await getCollections();
+    
+    let matchStage = {};
+    if (range !== null) {
+      const since = addDays(startOfDay(), -range + 1);
+      matchStage = { createdAt: { $gte: since } };
+    }
+
+    const agg = await visitors
+      .aggregate([
+        { $match: matchStage },
+        {
+          $group: {
+            _id: {
+              $dateToString: { format: "%Y-%m-%d", date: "$createdAt" }
+            },
+            count: { $sum: 1 }
+          }
+        },
+        { $sort: { _id: 1 } }
+      ])
+      .toArray();
+
+    const series = agg.map(item => ({
+      _id: item._id,
+      count: item.count
+    }));
+
+    res.json({ range: range || 'all', series });
+  } catch (e) {
+    console.error("Error getting visitor trends:", e);
+    res.status(500).json({ error: "Failed to get visitor trends" });
+  }
+});
+
+// POST /api/analytics/visitors/track - track a page visit (NO AUTH REQUIRED - public endpoint)
+router.post("/visitors/track", async (req, res) => {
   try {
     const { visitors } = await getCollections();
-    const { page, country, ip, userAgent, referrer } = req.body;
+    const { page, country, visitorId, ip, userAgent, referrer, timestamp } = req.body;
 
     // Basic validation
     if (!page) {
@@ -212,9 +251,11 @@ router.post("/visitors/track", requireAuth(), async (req, res) => {
     const visit = {
       page,
       country: country || "Unknown",
-      ip: ip || req.ip,
-      userAgent: userAgent || req.get('User-Agent'),
-      referrer: referrer || req.get('Referrer'),
+      visitorId: visitorId || null,
+      ip: ip || req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress,
+      userAgent: userAgent || req.get('User-Agent') || '',
+      referrer: referrer || req.get('Referrer') || '',
+      timestamp: timestamp || new Date().toISOString(),
       createdAt: new Date(),
     };
 
@@ -300,6 +341,86 @@ router.get("/visitors/overview", requireAuth(), async (req, res) => {
   } catch (e) {
     console.error("Error getting visitor overview:", e);
     res.status(500).json({ error: "Failed to get visitor overview" });
+  }
+});
+
+// GET /api/analytics/visitors/pages-by-country?range=30 - detailed page visits by country
+router.get("/visitors/pages-by-country", requireAuth(), async (req, res) => {
+  try {
+    const range = req.query.range === 'all' ? null : Math.min(Number(req.query.range) || 30, 365);
+    const { visitors } = await getCollections();
+    
+    let matchStage = {};
+    if (range !== null) {
+      const since = addDays(startOfDay(), -range + 1);
+      matchStage = { createdAt: { $gte: since } };
+    }
+
+    const agg = await visitors
+      .aggregate([
+        { $match: matchStage },
+        {
+          $group: {
+            _id: {
+              page: "$page",
+              country: "$country"
+            },
+            visits: { $sum: 1 },
+            uniqueVisitors: { $addToSet: "$ip" }
+          }
+        },
+        {
+          $project: {
+            page: "$_id.page",
+            country: "$_id.country",
+            visits: 1,
+            uniqueVisitors: { $size: "$uniqueVisitors" }
+          }
+        },
+        {
+          $group: {
+            _id: "$page",
+            totalVisits: { $sum: "$visits" },
+            uniqueVisitors: { $addToSet: "$uniqueVisitors" },
+            countries: {
+              $push: {
+                country: "$country",
+                visits: "$visits",
+                uniqueVisitors: "$uniqueVisitors"
+              }
+            }
+          }
+        },
+        {
+          $project: {
+            page: "$_id",
+            totalVisits: 1,
+            uniqueVisitors: {
+              $size: {
+                $reduce: {
+                  input: "$uniqueVisitors",
+                  initialValue: [],
+                  in: { $setUnion: ["$$value", "$$this"] }
+                }
+              }
+            },
+            countries: {
+              $sortArray: {
+                input: "$countries",
+                sortBy: { visits: -1 }
+              }
+            }
+          }
+        },
+        { $sort: { totalVisits: -1 } },
+        { $limit: 20 }
+      ])
+      .toArray();
+
+    res.json({ range: range || 'all', pages: agg });
+  } catch (e) {
+    console.error("Error getting page-by-country stats:", e);
+    res.status(500).json({ error: "Failed to get page-by-country statistics" });
   }
 });
 

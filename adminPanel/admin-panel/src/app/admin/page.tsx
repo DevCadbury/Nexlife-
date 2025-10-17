@@ -144,10 +144,10 @@ export default function Dashboard() {
       label: "Enquiries",
       icon: BarChart3,
       color: "from-blue-500 to-cyan-500",
-      bgColor: "from-blue-50 to-cyan-50 dark:from-blue-950/20 dark:to-cyan-950/20",
+      bgColor: "from-blue-100 to-cyan-100 dark:from-blue-950/20 dark:to-cyan-950/20",
       borderColor: "border-blue-200 dark:border-blue-800",
-      textColor: "text-blue-700 dark:text-blue-300",
-      iconBg: "bg-blue-100 dark:bg-blue-900/40",
+      textColor: "text-blue-800 dark:text-blue-300",
+      iconBg: "bg-blue-200 dark:bg-blue-900/40",
       trend: `${trends.submissions.up ? '+' : '-'}${trends.submissions.value.toFixed(1)}%`,
       trendUp: trends.submissions.up
     },
@@ -156,10 +156,10 @@ export default function Dashboard() {
       label: "Replied",
       icon: Mail,
       color: "from-green-500 to-emerald-500",
-      bgColor: "from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20",
+      bgColor: "from-green-100 to-emerald-100 dark:from-green-950/20 dark:to-emerald-950/20",
       borderColor: "border-green-200 dark:border-green-800",
-      textColor: "text-green-700 dark:text-green-300",
-      iconBg: "bg-green-100 dark:bg-green-900/40",
+      textColor: "text-green-800 dark:text-green-300",
+      iconBg: "bg-green-200 dark:bg-green-900/40",
       trend: `${trends.replies.up ? '+' : '-'}${trends.replies.value.toFixed(1)}%`,
       trendUp: trends.replies.up
     },
@@ -168,10 +168,10 @@ export default function Dashboard() {
       label: "Campaigns",
       icon: Users,
       color: "from-purple-500 to-violet-500",
-      bgColor: "from-purple-50 to-violet-50 dark:from-purple-950/20 dark:to-violet-950/20",
+      bgColor: "from-purple-100 to-violet-100 dark:from-purple-950/20 dark:to-violet-950/20",
       borderColor: "border-purple-200 dark:border-purple-800",
-      textColor: "text-purple-700 dark:text-purple-300",
-      iconBg: "bg-purple-100 dark:bg-purple-900/40",
+      textColor: "text-purple-800 dark:text-purple-300",
+      iconBg: "bg-purple-200 dark:bg-purple-900/40",
       trend: `${trends.totalCampaigns.up ? '+' : '-'}${trends.totalCampaigns.value.toFixed(1)}%`,
       trendUp: trends.totalCampaigns.up
     },
@@ -180,10 +180,10 @@ export default function Dashboard() {
       label: "Images",
       icon: ImageIcon,
       color: "from-orange-500 to-red-500",
-      bgColor: "from-orange-50 to-red-50 dark:from-orange-950/20 dark:to-red-950/20",
+      bgColor: "from-orange-100 to-red-100 dark:from-orange-950/20 dark:to-red-950/20",
       borderColor: "border-orange-200 dark:border-orange-800",
-      textColor: "text-orange-700 dark:text-orange-300",
-      iconBg: "bg-orange-100 dark:bg-orange-900/40",
+      textColor: "text-orange-800 dark:text-orange-300",
+      iconBg: "bg-orange-200 dark:bg-orange-900/40",
       trend: `${trends.totalImages.up ? '+' : '-'}${trends.totalImages.value.toFixed(1)}%`,
       trendUp: trends.totalImages.up
     },
@@ -192,34 +192,34 @@ export default function Dashboard() {
       label: "Likes",
       icon: Heart,
       color: "from-pink-500 to-rose-500",
-      bgColor: "from-pink-50 to-rose-50 dark:from-pink-950/20 dark:to-rose-950/20",
+      bgColor: "from-pink-100 to-rose-100 dark:from-pink-950/20 dark:to-rose-950/20",
       borderColor: "border-pink-200 dark:border-pink-800",
-      textColor: "text-pink-700 dark:text-pink-300",
-      iconBg: "bg-pink-100 dark:bg-pink-900/40",
+      textColor: "text-pink-800 dark:text-pink-300",
+      iconBg: "bg-pink-200 dark:bg-pink-900/40",
       trend: `${trends.totalLikes.up ? '+' : '-'}${trends.totalLikes.value.toFixed(1)}%`,
       trendUp: trends.totalLikes.up
     },
   ];
 
   return (
-    <div suppressHydrationWarning={true} className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 p-6">
+    <div suppressHydrationWarning={true} className="min-h-screen bg-gradient-to-br from-slate-100 via-blue-100/50 to-indigo-100/60 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 p-6">
       {/* Hero Section */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="mb-8"
       >
-        <Card className="bg-gradient-to-r from-white via-blue-50/50 to-indigo-50/50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 border-0 shadow-xl backdrop-blur-sm">
+        <Card className="bg-gradient-to-r from-white via-blue-100/60 to-indigo-100/60 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 border border-slate-200 dark:border-0 shadow-xl backdrop-blur-sm">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div className="space-y-2">
-                <CardDescription className="text-slate-600 dark:text-slate-400 text-lg">
+                <CardDescription className="text-slate-700 dark:text-slate-400 text-lg">
                   Welcome back, {mounted && profile?.user?.name ? profile.user.name : "Admin"}
                 </CardDescription>
                 <CardTitle className="text-4xl font-bold bg-gradient-to-r from-slate-900 via-blue-800 to-indigo-800 dark:from-white dark:via-blue-200 dark:to-indigo-200 bg-clip-text text-transparent">
                   Dashboard Overview
                 </CardTitle>
-                <p className="text-slate-600 dark:text-slate-400 flex items-center gap-2">
+                <p className="text-slate-700 dark:text-slate-400 flex items-center gap-2">
                   <Activity className="w-4 h-4" />
                   Real-time analytics and insights
                 </p>
@@ -284,14 +284,14 @@ export default function Dashboard() {
           transition={{ delay: 0.2 }}
           className="lg:col-span-2"
         >
-          <Card className="bg-white dark:bg-slate-900/60 border-slate-200 dark:border-slate-700 shadow-xl hover:shadow-2xl transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-slate-50 to-blue-50/50 dark:from-slate-800 dark:to-slate-700">
+          <Card className="bg-white/90 dark:bg-slate-900/60 border-slate-300 dark:border-slate-700 shadow-xl hover:shadow-2xl transition-all duration-300">
+            <CardHeader className="flex flex-row items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-slate-100 to-blue-100/70 dark:from-slate-800 dark:to-slate-700">
               <div>
                 <CardTitle className="text-slate-900 dark:text-white flex items-center gap-2">
                   <Users className="w-5 h-5 text-blue-600" />
                   Latest Customers
                 </CardTitle>
-                <CardDescription className="text-slate-600 dark:text-slate-400">
+                <CardDescription className="text-slate-700 dark:text-slate-400">
                   Recent enquiry submissions
                 </CardDescription>
               </div>
@@ -309,8 +309,8 @@ export default function Dashboard() {
             <CardContent className="p-0">
               <ScrollArea className="h-[320px]">
                 <Table>
-                  <TableHeader className="bg-slate-50 dark:bg-slate-800/50">
-                    <TableRow className="border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/30">
+                  <TableHeader className="bg-slate-100 dark:bg-slate-800/50">
+                    <TableRow className="border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800/30">
                       <TableHead className="text-slate-900 dark:text-white font-semibold">Customer</TableHead>
                       <TableHead className="text-slate-900 dark:text-white font-semibold">Subject</TableHead>
                       <TableHead className="text-slate-900 dark:text-white font-semibold">Status</TableHead>
@@ -360,7 +360,7 @@ export default function Dashboard() {
                                     <div className="font-semibold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                                       {r.name}
                                     </div>
-                                    <div className="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-400">
+                                    <div className="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-400">
                                       <a
                                         href={`mailto:${r.email}`}
                                         className="flex items-center gap-1 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
@@ -399,7 +399,7 @@ export default function Dashboard() {
                                 </Badge>
                               </TableCell>
                               <TableCell className="py-4">
-                                <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                                <div className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-400">
                                   <Clock className="w-4 h-4" />
                                   <span className="font-medium">
                                     {r.createdAt
@@ -423,32 +423,32 @@ export default function Dashboard() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.3 }}
         >
-          <Card className="bg-white dark:bg-slate-900/60 border-slate-200 dark:border-slate-700 shadow-xl hover:shadow-2xl transition-all duration-300">
-            <CardHeader className="border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-slate-50 to-green-50/50 dark:from-slate-800 dark:to-slate-700">
+          <Card className="bg-white/90 dark:bg-slate-900/60 border-slate-300 dark:border-slate-700 shadow-xl hover:shadow-2xl transition-all duration-300">
+            <CardHeader className="border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-slate-100 to-green-100/70 dark:from-slate-800 dark:to-slate-700">
               <CardTitle className="text-slate-900 dark:text-white flex items-center gap-2">
                 <BarChart3 className="w-5 h-5 text-green-600" />
                 Status Distribution
               </CardTitle>
-              <CardDescription className="text-slate-600 dark:text-slate-400">
+              <CardDescription className="text-slate-700 dark:text-slate-400">
                 Enquiry status breakdown
               </CardDescription>
             </CardHeader>
             {/* Status Summary */}
-            <div className="px-6 py-3 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
+            <div className="px-6 py-3 bg-slate-100 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
               <div className="flex items-center gap-6 text-sm">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                  <span className="text-slate-600 dark:text-slate-400">New:</span>
+                  <span className="text-slate-700 dark:text-slate-400">New:</span>
                   <span className="font-semibold text-red-600 dark:text-red-400">{status?.new || 0}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <span className="text-slate-600 dark:text-slate-400">Read:</span>
+                  <span className="text-slate-700 dark:text-slate-400">Read:</span>
                   <span className="font-semibold text-blue-600 dark:text-blue-400">{status?.read || 0}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-slate-600 dark:text-slate-400">Replied:</span>
+                  <span className="text-slate-700 dark:text-slate-400">Replied:</span>
                   <span className="font-semibold text-green-600 dark:text-green-400">{status?.replied || 0}</span>
                 </div>
               </div>
@@ -517,7 +517,7 @@ export default function Dashboard() {
                         (status?.replied || 0)
                       ).toLocaleString()}
                     </div>
-                    <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">
+                    <p className="text-sm text-slate-700 dark:text-slate-400 font-medium">
                       Total Enquiries
                     </p>
                   </div>
@@ -536,15 +536,15 @@ export default function Dashboard() {
           transition={{ delay: 0.4 }}
           className="lg:col-span-2"
         >
-          <Card className="bg-white dark:bg-slate-900/60 border-slate-200 dark:border-slate-700 shadow-xl hover:shadow-2xl transition-all duration-300">
-            <CardHeader className="border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-slate-50 to-purple-50/50 dark:from-slate-800 dark:to-slate-700">
+          <Card className="bg-white/90 dark:bg-slate-900/60 border-slate-300 dark:border-slate-700 shadow-xl hover:shadow-2xl transition-all duration-300">
+            <CardHeader className="border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-slate-100 to-purple-100/70 dark:from-slate-800 dark:to-slate-700">
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-slate-900 dark:text-white flex items-center gap-2">
                     <TrendingUp className="w-5 h-5 text-purple-600" />
                     Submissions Trend ({timespanLabel})
                   </CardTitle>
-                  <CardDescription className="text-slate-600 dark:text-slate-400">
+                  <CardDescription className="text-slate-700 dark:text-slate-400">
                     Interactive chart showing enquiry patterns over time
                   </CardDescription>
                 </div>
@@ -558,7 +558,7 @@ export default function Dashboard() {
                       className={`px-3 py-1 text-xs font-medium transition-all duration-200 ${
                         selectedTimespan === option.key
                           ? 'bg-purple-600 hover:bg-purple-700 text-white shadow-md'
-                          : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
+                          : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
                       }`}
                     >
                       {option.label}
@@ -568,7 +568,7 @@ export default function Dashboard() {
               </div>
             </CardHeader>
             <CardContent className="p-6">
-              <div className="h-[450px] bg-gradient-to-br from-slate-50 to-blue-50/30 dark:from-slate-800 dark:to-slate-700 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
+              <div className="h-[450px] bg-gradient-to-br from-slate-100 to-blue-100/50 dark:from-slate-800 dark:to-slate-700 rounded-xl p-4 border border-slate-300 dark:border-slate-700">
                 {loadingSub ? (
                   <Skeleton className="h-full w-full rounded-xl" />
                 ) : (
@@ -589,13 +589,13 @@ export default function Dashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
         >
-          <Card className="bg-white dark:bg-slate-900/60 border-slate-200 dark:border-slate-700 shadow-xl hover:shadow-2xl transition-all duration-300">
-            <CardHeader className="border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-slate-50 to-indigo-50/50 dark:from-slate-800 dark:to-slate-700">
+          <Card className="bg-white/90 dark:bg-slate-900/60 border-slate-300 dark:border-slate-700 shadow-xl hover:shadow-2xl transition-all duration-300">
+            <CardHeader className="border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-slate-100 to-indigo-100/70 dark:from-slate-800 dark:to-slate-700">
               <CardTitle className="text-slate-900 dark:text-white flex items-center gap-2">
                 <Eye className="w-5 h-5 text-indigo-600" />
                 Top Countries (30 days)
               </CardTitle>
-              <CardDescription className="text-slate-600 dark:text-slate-400">
+              <CardDescription className="text-slate-700 dark:text-slate-400">
                 Visitor analytics by location
               </CardDescription>
             </CardHeader>
@@ -634,7 +634,7 @@ export default function Dashboard() {
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: index * 0.1 }}
-                          className="group p-4 bg-gradient-to-r from-slate-50 to-white dark:from-slate-800 dark:to-slate-700 rounded-xl border border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500 transition-all duration-300 hover:shadow-md"
+                          className="group p-4 bg-gradient-to-r from-slate-100 to-white dark:from-slate-800 dark:to-slate-700 rounded-xl border border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500 transition-all duration-300 hover:shadow-md"
                         >
                           <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-3">
@@ -647,7 +647,7 @@ export default function Dashboard() {
                                 <span className="font-semibold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                                   {row.country}
                                 </span>
-                                <div className="text-sm text-slate-600 dark:text-slate-400">
+                                <div className="text-sm text-slate-700 dark:text-slate-400">
                                   {row.count.toLocaleString()} visitors
                                 </div>
                               </div>
@@ -675,7 +675,7 @@ export default function Dashboard() {
                     {(!geo || (geo.series || []).length === 0) && (
                       <div className="text-center py-8">
                         <Eye className="w-12 h-12 text-slate-400 mx-auto mb-3" />
-                        <h3 className="text-lg font-medium text-slate-600 dark:text-slate-400 mb-2">
+                        <h3 className="text-lg font-medium text-slate-700 dark:text-slate-400 mb-2">
                           No visitor data
                         </h3>
                         <p className="text-slate-500 dark:text-slate-500 text-sm">

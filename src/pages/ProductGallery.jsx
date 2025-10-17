@@ -26,22 +26,17 @@ const ProductGallery = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [showFilter, setShowFilter] = useState(false);
   const [products, setProducts] = useState([]);
+  const [allProducts, setAllProducts] = useState([]); // Store all products for category extraction
   const [categories, setCategories] = useState(["All"]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [imageZoom, setImageZoom] = useState(1); // For modal image zoom
 
-  // Fetch products from API
+  // Fetch all products once to get categories
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchAllProducts = async () => {
       try {
-        setLoading(true);
-        setError(null);
-        
-        const url = selectedCategory === "All" 
-          ? `${API_URL}/products-gallery`
-          : `${API_URL}/products-gallery/category/${selectedCategory}`;
-        
-        const response = await fetch(url);
+        const response = await fetch(`${API_URL}/products-gallery`);
         
         if (!response.ok) {
           throw new Error(`Failed to fetch products: ${response.statusText}`);
@@ -54,13 +49,39 @@ const ProductGallery = () => {
         
         // Only show visible products to public
         const visibleProducts = productArray.filter(product => product.visible !== false);
-        setProducts(visibleProducts);
+        setAllProducts(visibleProducts);
         
-        // Extract unique categories
-        const uniqueCategories = ["All", ...new Set(productArray.map(p => p.category).filter(Boolean))];
+        // Extract unique categories from all products
+        const uniqueCategories = ["All", ...new Set(visibleProducts.map(p => p.category).filter(Boolean))];
         setCategories(uniqueCategories);
       } catch (err) {
         console.error("Error fetching products:", err);
+        setError(err.message);
+      }
+    };
+
+    fetchAllProducts();
+  }, []);
+
+  // Filter products based on selected category
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        if (selectedCategory === "All") {
+          // Show all products from cached data
+          setProducts(allProducts);
+        } else {
+          // Filter by category from cached data or fetch from API
+          const filteredByCategory = allProducts.filter(
+            product => product.category === selectedCategory
+          );
+          setProducts(filteredByCategory);
+        }
+      } catch (err) {
+        console.error("Error filtering products:", err);
         setError(err.message);
         setProducts([]);
       } finally {
@@ -68,8 +89,10 @@ const ProductGallery = () => {
       }
     };
 
-    fetchProducts();
-  }, [selectedCategory]);
+    if (allProducts.length > 0) {
+      fetchProducts();
+    }
+  }, [selectedCategory, allProducts]);
 
   const filteredProducts = products.filter((product) => {
     const matchesSearch =
@@ -208,15 +231,15 @@ const ProductGallery = () => {
                   className="group cursor-pointer"
                   onClick={() => setSelectedProduct(product)}
                 >
-                  <div className="relative bg-white dark:bg-slate-800 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border border-slate-200 dark:border-slate-700">
+                  <div className="relative bg-white dark:bg-slate-800 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border-4 border-slate-300 dark:border-slate-600 hover:border-blue-500 dark:hover:border-blue-500 h-full flex flex-col">
                     {/* Card Header with Image or Gradient */}
-                    <div className="h-48 relative overflow-hidden bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600">
+                    <div className="h-64 relative overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-600 border-b-4 border-blue-600 dark:border-blue-400">
                       {product.image?.url ? (
                         <>
                           <img
                             src={product.image.url}
                             alt={product.name}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                             onError={(e) => {
                               e.target.style.display = 'none';
                               e.target.nextElementSibling.style.display = 'flex';
@@ -229,44 +252,45 @@ const ProductGallery = () => {
                         </>
                       ) : (
                         <>
+                          <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600" />
                           <div className="absolute inset-0 bg-white/10 backdrop-blur-sm" />
-                          <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="absolute inset-0 flex items-center justify-center transition-transform duration-500 group-hover:scale-105">
                             <Package className="w-24 h-24 text-white/30" />
                           </div>
                         </>
                       )}
                       <div className="absolute top-4 right-4">
-                        <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-bold text-white border border-white/30">
+                        <span className="px-3 py-1 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-full text-xs font-bold text-slate-800 dark:text-white border-2 border-white/60 dark:border-slate-600/60 shadow-lg">
                           {product.category}
                         </span>
                       </div>
                     </div>
 
                   {/* Card Content */}
-                  <div className="p-6 space-y-4">
+                  <div className="p-6 space-y-4 flex-grow flex flex-col">
                     {/* Product Name & Brand */}
-                    <div>
-                      <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                    <div className="min-h-[4rem]">
+                      <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
                         {product.name}
                       </h3>
-                      <p className="text-sm font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-2">
-                        <Tag className="w-4 h-4" />
-                        {product.brandName}
+                      <p className="text-sm font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-2 truncate">
+                        <Tag className="w-4 h-4 flex-shrink-0" />
+                        <span className="truncate">{product.brandName}</span>
                       </p>
                     </div>
 
                     {/* Quick Info */}
-                    <div className="space-y-2">
+                    <div className="space-y-2 flex-grow">
                       <div className="flex items-start gap-2">
                         <Pill className="w-4 h-4 text-indigo-600 dark:text-indigo-400 mt-1 flex-shrink-0" />
-                        <p className="text-sm text-slate-600 dark:text-slate-400">
+                        <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2">
                           <span className="font-semibold">Components:</span>{" "}
                           {product.components.join(", ")}
                         </p>
                       </div>
                       <div className="flex items-start gap-2">
                         <Package className="w-4 h-4 text-purple-600 dark:text-purple-400 mt-1 flex-shrink-0" />
-                        <p className="text-sm text-slate-600 dark:text-slate-400">
+                        <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2">
                           <span className="font-semibold">Packing:</span> {product.packing}
                         </p>
                       </div>
@@ -316,127 +340,183 @@ const ProductGallery = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            onClick={() => setSelectedProduct(null)}
+            className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-4"
+            onClick={() => {
+              setSelectedProduct(null);
+              setImageZoom(1);
+            }}
           >
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-6xl w-full max-h-[95vh] overflow-hidden border-2 border-slate-200 dark:border-slate-700"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Modal Header */}
-              <div className="sticky top-0 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 p-6 flex justify-between items-start z-10">
-                <div>
-                  <h2 className="text-3xl font-bold text-white mb-2">
-                    {selectedProduct.name}
-                  </h2>
-                  <p className="text-blue-100 font-semibold flex items-center gap-2">
-                    <Tag className="w-5 h-5" />
-                    Brand: {selectedProduct.brandName}
-                  </p>
+              {/* Modal Header - Compact */}
+              <div className="sticky top-0 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 px-6 py-4 flex justify-between items-center z-10 shadow-lg">
+                <div className="flex items-center gap-4 flex-1 min-w-0">
+                  <div className="p-2 bg-white/20 rounded-xl">
+                    <Package className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-2xl font-bold text-white mb-1 truncate">
+                      {selectedProduct.name}
+                    </h2>
+                    <p className="text-blue-100 text-sm font-medium flex items-center gap-2">
+                      <Tag className="w-4 h-4 flex-shrink-0" />
+                      <span className="truncate">{selectedProduct.brandName}</span>
+                    </p>
+                  </div>
+                  <div className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-xl border border-white/30">
+                    <p className="text-xs text-blue-100 font-medium">Category</p>
+                    <p className="text-sm font-bold text-white">{selectedProduct.category}</p>
+                  </div>
                 </div>
                 <motion.button
                   whileHover={{ scale: 1.1, rotate: 90 }}
                   whileTap={{ scale: 0.9 }}
-                  onClick={() => setSelectedProduct(null)}
-                  className="p-2 bg-white/20 hover:bg-white/30 rounded-full transition-colors"
+                  onClick={() => {
+                    setSelectedProduct(null);
+                    setImageZoom(1);
+                  }}
+                  className="ml-4 p-2 bg-white/20 hover:bg-white/30 rounded-xl transition-colors flex-shrink-0"
                 >
-                  <X className="w-6 h-6 text-white" />
+                  <X className="w-5 h-5 text-white" />
                 </motion.button>
               </div>
 
-              {/* Modal Content */}
-              <div className="p-6 space-y-6">
-                {/* Product Image */}
-                {selectedProduct.image?.url && (
-                  <div className="relative h-80 rounded-2xl overflow-hidden bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600">
-                    <img
-                      src={selectedProduct.image.url}
-                      alt={selectedProduct.name}
-                      className="w-full h-full object-contain p-4"
-                      onError={(e) => {
-                        e.target.style.display = 'none';
-                      }}
-                    />
-                  </div>
-                )}
-
-                {/* Components */}
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-700 dark:to-slate-600 rounded-2xl p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="p-3 bg-blue-600 rounded-xl">
-                      <Pill className="w-6 h-6 text-white" />
+              {/* Modal Content - Compact Grid Layout */}
+              <div className="overflow-y-auto max-h-[calc(95vh-80px)]">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 p-6">
+                  {/* LEFT COLUMN - Product Image */}
+                  {selectedProduct.image?.url && (
+                    <div className="space-y-3">
+                      <div className="relative h-[400px] rounded-xl overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-600 border-2 border-slate-200 dark:border-slate-600 shadow-lg">
+                        <div className="absolute inset-0 overflow-auto flex items-center justify-center p-4" style={{ cursor: imageZoom > 1 ? 'zoom-out' : 'zoom-in' }}>
+                          <img
+                            src={selectedProduct.image.url}
+                            alt={selectedProduct.name}
+                            className="max-w-full h-auto object-contain transition-transform duration-300"
+                            style={{ transform: `scale(${imageZoom})`, transformOrigin: 'center' }}
+                            onClick={() => {
+                              if (imageZoom === 1) setImageZoom(2);
+                              else if (imageZoom === 2) setImageZoom(3);
+                              else setImageZoom(1);
+                            }}
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                            }}
+                          />
+                        </div>
+                        {/* Zoom Indicator */}
+                        <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-sm text-white px-2 py-1 rounded-lg text-xs font-semibold border border-white/30">
+                          {imageZoom}x
+                        </div>
+                      </div>
+                      
+                      {/* Zoom Controls - Compact */}
+                      <div className="flex items-center justify-center gap-2">
+                        <button
+                          onClick={() => setImageZoom(Math.max(1, imageZoom - 0.5))}
+                          disabled={imageZoom <= 1}
+                          className="px-3 py-1.5 bg-slate-600 hover:bg-slate-700 disabled:bg-slate-400 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium transition-colors"
+                        >
+                          <span className="text-base">−</span>
+                        </button>
+                        <button
+                          onClick={() => setImageZoom(1)}
+                          className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+                        >
+                          Reset
+                        </button>
+                        <button
+                          onClick={() => setImageZoom(Math.min(5, imageZoom + 0.5))}
+                          disabled={imageZoom >= 5}
+                          className="px-3 py-1.5 bg-slate-600 hover:bg-slate-700 disabled:bg-slate-400 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium transition-colors"
+                        >
+                          <span className="text-base">+</span>
+                        </button>
+                      </div>
+                      <p className="text-center text-xs text-slate-500 dark:text-slate-400">
+                        Click image to zoom or use controls
+                      </p>
                     </div>
-                    <h3 className="text-xl font-bold text-slate-900 dark:text-white">
-                      Components
-                    </h3>
-                  </div>
-                  <ul className="space-y-2">
-                    {selectedProduct.components.map((component, index) => (
-                      <li
-                        key={index}
-                        className="flex items-center gap-2 text-slate-700 dark:text-slate-300"
-                      >
-                        <div className="w-2 h-2 bg-blue-600 rounded-full" />
-                        <span className="font-medium">{component}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                  )}
 
-                {/* Uses */}
-                <div className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-slate-700 dark:to-slate-600 rounded-2xl p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="p-3 bg-indigo-600 rounded-xl">
-                      <BookOpen className="w-6 h-6 text-white" />
+                  {/* RIGHT COLUMN - Product Details */}
+                  <div className="space-y-4">
+                    {/* Components */}
+                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-700 dark:to-slate-600 rounded-xl p-4 border border-blue-200 dark:border-blue-800 shadow">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="p-2 bg-blue-600 rounded-lg">
+                          <Pill className="w-4 h-4 text-white" />
+                        </div>
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                          Components
+                        </h3>
+                      </div>
+                      <ul className="space-y-1.5">
+                        {selectedProduct.components.map((component, index) => (
+                          <li
+                            key={index}
+                            className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300"
+                          >
+                            <div className="w-1.5 h-1.5 bg-blue-600 rounded-full flex-shrink-0" />
+                            <span className="font-medium break-words">{component}</span>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                    <h3 className="text-xl font-bold text-slate-900 dark:text-white">
-                      Uses
-                    </h3>
-                  </div>
-                  <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
-                    {selectedProduct.uses}
-                  </p>
-                </div>
 
-                {/* Class */}
-                <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-slate-700 dark:to-slate-600 rounded-2xl p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="p-3 bg-purple-600 rounded-xl">
-                      <Layers className="w-6 h-6 text-white" />
+                    {/* Uses */}
+                    <div className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-slate-700 dark:to-slate-600 rounded-xl p-4 border border-indigo-200 dark:border-indigo-800 shadow">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="p-2 bg-indigo-600 rounded-lg">
+                          <BookOpen className="w-4 h-4 text-white" />
+                        </div>
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                          Uses
+                        </h3>
+                      </div>
+                      <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed break-words">
+                        {selectedProduct.uses}
+                      </p>
                     </div>
-                    <h3 className="text-xl font-bold text-slate-900 dark:text-white">
-                      Drug Class
-                    </h3>
-                  </div>
-                  <p className="text-slate-700 dark:text-slate-300 font-semibold">
-                    {selectedProduct.class}
-                  </p>
-                </div>
 
-                {/* Packing */}
-                <div className="bg-gradient-to-br from-pink-50 to-rose-50 dark:from-slate-700 dark:to-slate-600 rounded-2xl p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="p-3 bg-pink-600 rounded-xl">
-                      <Package className="w-6 h-6 text-white" />
+                    {/* Class & Packing - Side by Side */}
+                    <div className="grid grid-cols-2 gap-4">
+                      {/* Class */}
+                      <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-slate-700 dark:to-slate-600 rounded-xl p-4 border border-purple-200 dark:border-purple-800 shadow">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="p-1.5 bg-purple-600 rounded-lg">
+                            <Layers className="w-3.5 h-3.5 text-white" />
+                          </div>
+                          <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                            Drug Class
+                          </h3>
+                        </div>
+                        <p className="text-sm text-slate-700 dark:text-slate-300 font-semibold break-words">
+                          {selectedProduct.class}
+                        </p>
+                      </div>
+
+                      {/* Packing */}
+                      <div className="bg-gradient-to-br from-pink-50 to-rose-50 dark:from-slate-700 dark:to-slate-600 rounded-xl p-4 border border-pink-200 dark:border-pink-800 shadow">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="p-1.5 bg-pink-600 rounded-lg">
+                            <Package className="w-3.5 h-3.5 text-white" />
+                          </div>
+                          <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                            Packing
+                          </h3>
+                        </div>
+                        <p className="text-sm text-slate-700 dark:text-slate-300 font-semibold break-words">
+                          {selectedProduct.packing}
+                        </p>
+                      </div>
                     </div>
-                    <h3 className="text-xl font-bold text-slate-900 dark:text-white">
-                      Packing
-                    </h3>
                   </div>
-                  <p className="text-slate-700 dark:text-slate-300 font-semibold">
-                    {selectedProduct.packing}
-                  </p>
-                </div>
-
-                {/* Category Badge */}
-                <div className="flex items-center justify-center gap-2 p-4 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl">
-                  <ShieldCheck className="w-5 h-5 text-white" />
-                  <span className="text-white font-bold">
-                    Category: {selectedProduct.category}
-                  </span>
                 </div>
               </div>
             </motion.div>

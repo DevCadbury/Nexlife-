@@ -21,22 +21,17 @@ const Certifications = () => {
   const [selectedCert, setSelectedCert] = useState(null);
   const [selectedType, setSelectedType] = useState("All");
   const [certifications, setCertifications] = useState([]);
+  const [allCertifications, setAllCertifications] = useState([]); // Store all certifications
   const [certificationTypes, setCertificationTypes] = useState(["All"]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [imageZoom, setImageZoom] = useState(1); // For modal image zoom
 
-  // Fetch certifications from API
+  // Fetch all certifications once to get types
   useEffect(() => {
-    const fetchCertifications = async () => {
+    const fetchAllCertifications = async () => {
       try {
-        setLoading(true);
-        setError(null);
-        
-        const url = selectedType === "All" 
-          ? `${API_URL}/certifications`
-          : `${API_URL}/certifications/type/${selectedType}`;
-        
-        const response = await fetch(url);
+        const response = await fetch(`${API_URL}/certifications`);
         
         if (!response.ok) {
           throw new Error(`Failed to fetch certifications: ${response.statusText}`);
@@ -49,13 +44,39 @@ const Certifications = () => {
         
         // Only show visible certifications to public
         const visibleCertifications = certArray.filter(cert => cert.visible !== false);
-        setCertifications(visibleCertifications);
+        setAllCertifications(visibleCertifications);
         
-        // Extract unique types
-        const uniqueTypes = ["All", ...new Set(certArray.map(c => c.type).filter(Boolean))];
+        // Extract unique types from all certifications
+        const uniqueTypes = ["All", ...new Set(visibleCertifications.map(c => c.type).filter(Boolean))];
         setCertificationTypes(uniqueTypes);
       } catch (err) {
         console.error("Error fetching certifications:", err);
+        setError(err.message);
+      }
+    };
+
+    fetchAllCertifications();
+  }, []);
+
+  // Filter certifications based on selected type
+  useEffect(() => {
+    const filterCertifications = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        if (selectedType === "All") {
+          // Show all certifications from cached data
+          setCertifications(allCertifications);
+        } else {
+          // Filter by type from cached data
+          const filteredByType = allCertifications.filter(
+            cert => cert.type === selectedType
+          );
+          setCertifications(filteredByType);
+        }
+      } catch (err) {
+        console.error("Error filtering certifications:", err);
         setError(err.message);
         setCertifications([]);
       } finally {
@@ -63,8 +84,10 @@ const Certifications = () => {
       }
     };
 
-    fetchCertifications();
-  }, [selectedType]);
+    if (allCertifications.length > 0) {
+      filterCertifications();
+    }
+  }, [selectedType, allCertifications]);
 
   const filteredCertifications = certifications;
 
@@ -142,7 +165,7 @@ const Certifications = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12"
+              className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-12"
             >
               {[
                 { icon: ShieldCheck, label: "Total Certifications", value: certifications.length },
@@ -155,16 +178,16 @@ const Certifications = () => {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.2 + index * 0.1 }}
-                className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-xl border border-slate-200 dark:border-slate-700"
+                className="bg-white dark:bg-slate-800 rounded-2xl p-4 md:p-6 shadow-xl border border-slate-200 dark:border-slate-700"
               >
                 <div className="flex flex-col items-center text-center">
-                  <div className="p-3 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl mb-3">
-                    <stat.icon className="w-6 h-6 text-white" />
+                  <div className="p-2 md:p-3 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl mb-2 md:mb-3">
+                    <stat.icon className="w-5 h-5 md:w-6 md:h-6 text-white" />
                   </div>
-                  <div className="text-3xl font-bold text-slate-900 dark:text-white mb-1">
+                  <div className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mb-1">
                     {stat.value}
                   </div>
-                  <div className="text-sm text-slate-600 dark:text-slate-400">{stat.label}</div>
+                  <div className="text-xs md:text-sm text-slate-600 dark:text-slate-400 line-clamp-2">{stat.label}</div>
                 </div>
                 </motion.div>
               ))}
@@ -215,15 +238,15 @@ const Certifications = () => {
                 className="group cursor-pointer"
                 onClick={() => setSelectedCert(cert)}
               >
-                <div className="relative bg-white dark:bg-slate-800 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border border-slate-200 dark:border-slate-700">
+                <div className="relative bg-white dark:bg-slate-800 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border-4 border-slate-300 dark:border-slate-600 hover:border-blue-500 dark:hover:border-blue-500 h-full flex flex-col">
                   {/* Certificate Image */}
-                  <div className="relative h-64 overflow-hidden bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600">
+                  <div className="relative h-80 overflow-hidden bg-white dark:bg-slate-700 border-b-4 border-blue-600 dark:border-blue-400 flex items-center justify-center p-3">
                     {cert.image?.url ? (
                       <>
                         <img
                           src={cert.image.url}
                           alt={cert.title}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
                           onError={(e) => {
                             e.target.style.display = 'none';
                             e.target.nextElementSibling.style.display = 'flex';
@@ -236,28 +259,25 @@ const Certifications = () => {
                       </>
                     ) : (
                       <>
+                        <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600" />
                         <div className="absolute inset-0 bg-white/10 backdrop-blur-sm" />
-                        <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="absolute inset-0 flex items-center justify-center transition-transform duration-500 group-hover:scale-105">
                           <Award className="w-32 h-32 text-white/30" />
                         </div>
                       </>
                     )}
                     {/* Type Badge */}
                     <div className="absolute top-4 right-4">
-                      <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-bold text-white border border-white/30">
+                      <span className="px-3 py-1 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-full text-xs font-bold text-slate-800 dark:text-white border-2 border-white/60 dark:border-slate-600/60 shadow-lg">
                         {cert.type}
                       </span>
-                    </div>
-                    {/* Zoom Overlay */}
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center">
-                      <ZoomIn className="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transform scale-50 group-hover:scale-100 transition-all duration-300" />
                     </div>
                   </div>
 
                   {/* Certificate Info */}
-                  <div className="p-6 space-y-4">
-                    <div>
-                      <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                  <div className="p-6 space-y-4 flex-grow flex flex-col">
+                    <div className="min-h-[4rem] flex-grow">
+                      <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
                         {cert.title}
                       </h3>
                       <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2">
@@ -265,14 +285,16 @@ const Certifications = () => {
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                      <Calendar className="w-4 h-4" />
-                      <span>Issued: {cert.issueDate}</span>
-                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                        <Calendar className="w-4 h-4 flex-shrink-0" />
+                        <span className="truncate">Issued: {cert.issueDate}</span>
+                      </div>
 
-                    <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                      <Building2 className="w-4 h-4" />
-                      <span className="line-clamp-1">{cert.issuedBy}</span>
+                      <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                        <Building2 className="w-4 h-4 flex-shrink-0" />
+                        <span className="line-clamp-1">{cert.issuedBy}</span>
+                      </div>
                     </div>
 
                     <motion.button
@@ -348,116 +370,163 @@ const Certifications = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            onClick={() => setSelectedCert(null)}
+            className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-4"
+            onClick={() => {
+              setSelectedCert(null);
+              setImageZoom(1);
+            }}
           >
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-6xl w-full max-h-[95vh] overflow-hidden border-2 border-slate-200 dark:border-slate-700"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Modal Header */}
-              <div className="sticky top-0 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 p-6 flex justify-between items-start z-10">
-                <div>
-                  <h2 className="text-3xl font-bold text-white mb-2">{selectedCert.title}</h2>
-                  <p className="text-blue-100">{selectedCert.description}</p>
+              {/* Modal Header - Compact */}
+              <div className="sticky top-0 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 px-6 py-4 flex justify-between items-center z-10 shadow-lg">
+                <div className="flex items-center gap-4 flex-1 min-w-0">
+                  <div className="p-2 bg-white/20 rounded-xl">
+                    <Award className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-2xl font-bold text-white mb-1 truncate">
+                      {selectedCert.title}
+                    </h2>
+                    <p className="text-blue-100 text-sm font-medium truncate">
+                      {selectedCert.description}
+                    </p>
+                  </div>
+                  <div className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-xl border border-white/30">
+                    <p className="text-xs text-blue-100 font-medium">Type</p>
+                    <p className="text-sm font-bold text-white">{selectedCert.type}</p>
+                  </div>
                 </div>
                 <motion.button
                   whileHover={{ scale: 1.1, rotate: 90 }}
                   whileTap={{ scale: 0.9 }}
-                  onClick={() => setSelectedCert(null)}
-                  className="p-2 bg-white/20 hover:bg-white/30 rounded-full transition-colors"
+                  onClick={() => {
+                    setSelectedCert(null);
+                    setImageZoom(1);
+                  }}
+                  className="ml-4 p-2 bg-white/20 hover:bg-white/30 rounded-xl transition-colors flex-shrink-0"
                 >
-                  <X className="w-6 h-6 text-white" />
+                  <X className="w-5 h-5 text-white" />
                 </motion.button>
               </div>
 
-              {/* Modal Content */}
-              <div className="p-6 space-y-6">
-                {/* Certificate Image */}
-                <div className="relative h-96 bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 rounded-2xl overflow-hidden">
-                  {selectedCert.image?.url ? (
-                    <>
-                      <img
-                        src={selectedCert.image.url}
-                        alt={selectedCert.title}
-                        className="w-full h-full object-contain p-4"
-                        onError={(e) => {
-                          e.target.style.display = 'none';
-                          e.target.nextElementSibling.style.display = 'flex';
-                        }}
-                      />
-                      <div className="absolute inset-0 hidden items-center justify-center">
-                        <div className="absolute inset-0 bg-white/10 backdrop-blur-sm" />
-                        <Award className="w-48 h-48 text-white/30 relative z-10" />
+              {/* Modal Content - Compact Grid Layout */}
+              <div className="overflow-y-auto max-h-[calc(95vh-80px)]">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 p-6">
+                  {/* LEFT COLUMN - Certificate Image */}
+                  {selectedCert.image?.url && (
+                    <div className="space-y-3">
+                      <div className="relative h-[600px] rounded-xl overflow-hidden bg-white dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 shadow-lg">
+                        <div className="absolute inset-0 overflow-auto flex items-center justify-center p-2" style={{ cursor: imageZoom > 1 ? 'zoom-out' : 'zoom-in' }}>
+                          <img
+                            src={selectedCert.image.url}
+                            alt={selectedCert.title}
+                            className="w-full h-full object-contain transition-transform duration-300"
+                            style={{ transform: `scale(${imageZoom})`, transformOrigin: 'center' }}
+                            onClick={() => {
+                              if (imageZoom === 1) setImageZoom(2);
+                              else if (imageZoom === 2) setImageZoom(3);
+                              else setImageZoom(1);
+                            }}
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                            }}
+                          />
+                        </div>
+                        {/* Zoom Indicator */}
+                        <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-sm text-white px-2 py-1 rounded-lg text-xs font-semibold border border-white/30">
+                          {imageZoom}x
+                        </div>
                       </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="absolute inset-0 bg-white/10 backdrop-blur-sm" />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <Award className="w-48 h-48 text-white/30" />
+                      
+                      {/* Zoom Controls - Compact */}
+                      <div className="flex items-center justify-center gap-2">
+                        <button
+                          onClick={() => setImageZoom(Math.max(1, imageZoom - 0.5))}
+                          disabled={imageZoom <= 1}
+                          className="px-3 py-1.5 bg-slate-600 hover:bg-slate-700 disabled:bg-slate-400 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium transition-colors"
+                        >
+                          <span className="text-base">−</span>
+                        </button>
+                        <button
+                          onClick={() => setImageZoom(1)}
+                          className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+                        >
+                          Reset
+                        </button>
+                        <button
+                          onClick={() => setImageZoom(Math.min(5, imageZoom + 0.5))}
+                          disabled={imageZoom >= 5}
+                          className="px-3 py-1.5 bg-slate-600 hover:bg-slate-700 disabled:bg-slate-400 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium transition-colors"
+                        >
+                          <span className="text-base">+</span>
+                        </button>
                       </div>
-                    </>
+                      <p className="text-center text-xs text-slate-500 dark:text-slate-400">
+                        Click image to zoom or use controls
+                      </p>
+                    </div>
                   )}
-                </div>
 
-                {/* Details Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-700 dark:to-slate-600 rounded-2xl p-6">
-                    <div className="flex items-center gap-3 mb-3">
-                      <Calendar className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                      <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                        Issue Date
-                      </h3>
+                  {/* RIGHT COLUMN - Certificate Details */}
+                  <div className="space-y-4">
+                    {/* Issue Date */}
+                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-700 dark:to-slate-600 rounded-xl p-4 border border-blue-200 dark:border-blue-800 shadow">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="p-2 bg-blue-600 rounded-lg">
+                          <Calendar className="w-4 h-4 text-white" />
+                        </div>
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                          Issue Date
+                        </h3>
+                      </div>
+                      <p className="text-sm text-slate-700 dark:text-slate-300 font-semibold">
+                        {selectedCert.issueDate}
+                      </p>
                     </div>
-                    <p className="text-slate-700 dark:text-slate-300 font-semibold">
-                      {selectedCert.issueDate}
-                    </p>
-                  </div>
 
-                  <div className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-slate-700 dark:to-slate-600 rounded-2xl p-6">
-                    <div className="flex items-center gap-3 mb-3">
-                      <Calendar className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
-                      <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                        Valid Until
-                      </h3>
+                    {/* Valid Until */}
+                    <div className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-slate-700 dark:to-slate-600 rounded-xl p-4 border border-indigo-200 dark:border-indigo-800 shadow">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="p-2 bg-indigo-600 rounded-lg">
+                          <Calendar className="w-4 h-4 text-white" />
+                        </div>
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                          Valid Until
+                        </h3>
+                      </div>
+                      <p className="text-sm text-slate-700 dark:text-slate-300 font-semibold">
+                        {selectedCert.validUntil}
+                      </p>
                     </div>
-                    <p className="text-slate-700 dark:text-slate-300 font-semibold">
-                      {selectedCert.validUntil}
-                    </p>
-                  </div>
 
-                  <div className="md:col-span-2 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-slate-700 dark:to-slate-600 rounded-2xl p-6">
-                    <div className="flex items-center gap-3 mb-3">
-                      <Building2 className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-                      <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                        Issued By
-                      </h3>
+                    {/* Issued By */}
+                    <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-slate-700 dark:to-slate-600 rounded-xl p-4 border border-purple-200 dark:border-purple-800 shadow">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="p-2 bg-purple-600 rounded-lg">
+                          <Building2 className="w-4 h-4 text-white" />
+                        </div>
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                          Issued By
+                        </h3>
+                      </div>
+                      <p className="text-sm text-slate-700 dark:text-slate-300 font-semibold break-words">
+                        {selectedCert.issuedBy}
+                      </p>
                     </div>
-                    <p className="text-slate-700 dark:text-slate-300 font-semibold">
-                      {selectedCert.issuedBy}
-                    </p>
+
+                    {/* Certificate Type Badge */}
+                    <div className="flex items-center justify-center gap-2 p-4 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl border border-blue-700 dark:border-blue-400 shadow-lg">
+                      <ShieldCheck className="w-5 h-5 text-white" />
+                      <span className="text-white font-bold">Certification Type: {selectedCert.type}</span>
+                    </div>
                   </div>
                 </div>
-
-                {/* Type Badge */}
-                <div className="flex items-center justify-center gap-2 p-4 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl">
-                  <ShieldCheck className="w-5 h-5 text-white" />
-                  <span className="text-white font-bold">Type: {selectedCert.type}</span>
-                </div>
-
-                {/* Download Button */}
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="w-full py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-bold shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-500/40 transition-all flex items-center justify-center gap-2"
-                >
-                  <Download className="w-5 h-5" />
-                  Download Certificate
-                </motion.button>
               </div>
             </motion.div>
           </motion.div>

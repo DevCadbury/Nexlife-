@@ -47,6 +47,22 @@ const statColors = {
 
 export default function Analytics() {
   const [selectedTimespan, setSelectedTimespan] = React.useState('1M');
+  const [isDarkMode, setIsDarkMode] = React.useState(false);
+
+  // Detect dark mode
+  React.useEffect(() => {
+    const checkDarkMode = () => {
+      setIsDarkMode(document.documentElement.classList.contains('dark'));
+    };
+    
+    checkDarkMode();
+    
+    // Watch for theme changes
+    const observer = new MutationObserver(checkDarkMode);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    
+    return () => observer.disconnect();
+  }, []);
 
   // Timespan options
   const timespanOptions = [
@@ -74,8 +90,16 @@ export default function Analytics() {
     selectedTimespanData?.days ? `/analytics/visitors/countries?range=${selectedTimespanData.days}` : "/analytics/visitors/countries?range=all",
     fetcher
   );
+  const { data: visitorTrends } = useSWR(
+    selectedTimespanData?.days ? `/analytics/visitors/trends?range=${selectedTimespanData.days}` : "/analytics/visitors/trends?range=all",
+    fetcher
+  );
   const { data: visitorOverview } = useSWR(
     selectedTimespanData?.days ? `/analytics/visitors/overview?range=${selectedTimespanData.days}` : "/analytics/visitors/overview?range=all",
+    fetcher
+  );
+  const { data: pagesByCountry } = useSWR(
+    selectedTimespanData?.days ? `/analytics/visitors/pages-by-country?range=${selectedTimespanData.days}` : "/analytics/visitors/pages-by-country?range=all",
     fetcher
   );
 
@@ -86,11 +110,11 @@ export default function Analytics() {
 
   const pieData = status ? [status.new, status.read, status.replied] : [];
 
-  // Process visitor data for area chart
-  const visitorSeries = visitors?.series?.map((item: any) => ({
-    _id: item.country,
+  // Process visitor trends data for area chart (time series)
+  const visitorSeries = (visitorTrends?.series || []).map((item: any) => ({
+    _id: item._id,
     count: item.count,
-  })) || [];
+  }));
 
   const getTrendIcon = (key: string) => {
     // Mock trend logic - in real app, compare with previous period
@@ -141,7 +165,7 @@ export default function Analytics() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
             >
-              <Card className="group relative overflow-hidden bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-0 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
+              <Card className="group relative overflow-hidden bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-300 dark:border-0 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
                 <div className={`absolute inset-0 bg-gradient-to-br ${colorClass} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}></div>
                 <CardContent className="relative p-6">
                   <div className="flex items-center justify-between mb-4">
@@ -151,7 +175,7 @@ export default function Analytics() {
                     {getTrendIcon(k)}
                   </div>
                   <div className="space-y-2">
-                    <div className="text-slate-600 dark:text-slate-400 text-sm font-medium capitalize">
+                    <div className="text-slate-700 dark:text-slate-400 text-sm font-medium capitalize">
                       {k.replace(/([A-Z])/g, ' $1').trim()}
                     </div>
                     <div className="text-3xl font-extrabold text-slate-900 dark:text-white">
@@ -165,45 +189,52 @@ export default function Analytics() {
         })}
       </div>
 
+      {/* Time Range Selector - Centralized */}
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+        className="flex items-center justify-center gap-2 p-4 bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-300 dark:border-slate-700 rounded-xl shadow-lg"
+      >
+        <span className="text-sm font-semibold text-slate-700 dark:text-slate-300 mr-2">Time Range:</span>
+        <div className="flex gap-2">
+          {timespanOptions.map((option) => (
+            <Button
+              key={option.key}
+              variant={selectedTimespan === option.key ? "default" : "outline"}
+              size="sm"
+              onClick={() => setSelectedTimespan(option.key)}
+              className={`px-4 py-2 text-sm font-medium transition-all duration-200 ${
+                selectedTimespan === option.key
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md scale-105'
+                  : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 hover:scale-105'
+              }`}
+            >
+              {option.label}
+            </Button>
+          ))}
+        </div>
+      </motion.div>
+
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.6 }}
+          className="h-full"
         >
-          <Card className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-0 shadow-xl overflow-hidden">
-            <div className="bg-gradient-to-r from-slate-50 to-blue-50 dark:from-slate-800 dark:to-slate-700 p-6 border-b border-slate-200/60 dark:border-slate-700/60">
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                    <FileText className="w-5 h-5 text-blue-600" />
-                    Submissions ({timespanLabel})
-                  </CardTitle>
-                  <CardDescription className="text-slate-600 dark:text-slate-400 mt-1">
-                    Interactive chart - scroll to zoom, drag to pan
-                  </CardDescription>
-                </div>
-                <div className="flex gap-1">
-                  {timespanOptions.map((option) => (
-                    <Button
-                      key={option.key}
-                      variant={selectedTimespan === option.key ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setSelectedTimespan(option.key)}
-                      className={`px-3 py-1 text-xs font-medium transition-all duration-200 ${
-                        selectedTimespan === option.key
-                          ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-md'
-                          : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
-                      }`}
-                    >
-                      {option.label}
-                    </Button>
-                  ))}
-                </div>
-              </div>
+          <Card className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-300 dark:border-0 shadow-xl overflow-hidden h-full flex flex-col">
+            <div className="bg-gradient-to-r from-slate-100 to-blue-100/70 dark:from-slate-800 dark:to-slate-700 p-6 border-b border-slate-200/60 dark:border-slate-700/60">
+              <CardTitle className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <FileText className="w-5 h-5 text-blue-600" />
+                Submissions
+              </CardTitle>
+              <CardDescription className="text-slate-700 dark:text-slate-400 mt-1">
+                {timespanLabel} - Interactive chart
+              </CardDescription>
             </div>
-            <CardContent className="p-6">
+            <CardContent className="p-6 flex-1">
               <ChartAreaInteractive series={series} timespan={selectedTimespan} />
             </CardContent>
           </Card>
@@ -213,19 +244,20 @@ export default function Analytics() {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.7 }}
+          className="h-full"
         >
-          <Card className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-0 shadow-xl overflow-hidden">
-            <div className="bg-gradient-to-r from-slate-50 to-green-50 dark:from-slate-800 dark:to-slate-700 p-6 border-b border-slate-200/60 dark:border-slate-700/60">
+          <Card className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-300 dark:border-0 shadow-xl overflow-hidden h-full flex flex-col">
+            <div className="bg-gradient-to-r from-slate-100 to-green-100/70 dark:from-slate-800 dark:to-slate-700 p-6 border-b border-slate-200/60 dark:border-slate-700/60">
               <CardTitle className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <MessageSquare className="w-5 h-5 text-green-600" />
-                Status Breakdown ({timespanLabel})
+                Status Breakdown
               </CardTitle>
-              <CardDescription className="text-slate-600 dark:text-slate-400 mt-1">
-                Distribution of inquiry statuses across the selected period
+              <CardDescription className="text-slate-700 dark:text-slate-400 mt-1">
+                {timespanLabel} - Inquiry status distribution
               </CardDescription>
             </div>
-            <CardContent className="p-6">
-              <div className="relative">
+            <CardContent className="p-6 flex-1 flex items-center justify-center">
+              <div className="relative w-full max-w-[280px] aspect-square">
                 <Doughnut
                   data={{
                     labels: ["New", "Read", "Replied"],
@@ -254,17 +286,17 @@ export default function Analytics() {
                       legend: {
                         position: "bottom",
                         labels: {
-                          color: "rgb(100 116 139)",
-                          font: { size: 14, weight: "bold" },
+                          color: isDarkMode ? "rgb(148 163 184)" : "rgb(71 85 105)",
+                          font: { size: 14, weight: "bold" as const },
                           padding: 20,
                           usePointStyle: true,
                         },
                       },
                       tooltip: {
-                        backgroundColor: "rgba(15, 23, 42, 0.9)",
-                        titleColor: "rgb(248 250 252)",
-                        bodyColor: "rgb(203 213 225)",
-                        borderColor: "rgb(51 65 85)",
+                        backgroundColor: isDarkMode ? "rgba(15, 23, 42, 0.95)" : "rgba(255, 255, 255, 0.95)",
+                        titleColor: isDarkMode ? "rgb(248 250 252)" : "rgb(15 23 42)",
+                        bodyColor: isDarkMode ? "rgb(203 213 225)" : "rgb(71 85 105)",
+                        borderColor: isDarkMode ? "rgb(51 65 85)" : "rgb(226 232 240)",
                         borderWidth: 1,
                         cornerRadius: 8,
                         displayColors: true,
@@ -274,7 +306,7 @@ export default function Analytics() {
                       animateScale: true,
                       animateRotate: true,
                       duration: 1000,
-                      easing: "easeOutQuart",
+                      easing: "easeOutQuart" as const,
                     },
                     maintainAspectRatio: false,
                   }}
@@ -298,121 +330,330 @@ export default function Analytics() {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.8 }}
+          className="h-full"
         >
-          <Card className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-0 shadow-xl overflow-hidden">
-            <div className="bg-gradient-to-r from-slate-50 to-purple-50 dark:from-slate-800 dark:to-slate-700 p-6 border-b border-slate-200/60 dark:border-slate-700/60">
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                    <Eye className="w-5 h-5 text-purple-600" />
-                    Visitor Analytics ({timespanLabel})
-                  </CardTitle>
-                  <CardDescription className="text-slate-600 dark:text-slate-400 mt-1">
-                    Website visitor trends and activity
-                  </CardDescription>
-                </div>
-                <div className="flex gap-1">
-                  {timespanOptions.map((option) => (
-                    <Button
-                      key={option.key}
-                      variant={selectedTimespan === option.key ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setSelectedTimespan(option.key)}
-                      className={`px-3 py-1 text-xs font-medium transition-all duration-200 ${
-                        selectedTimespan === option.key
-                          ? 'bg-purple-600 hover:bg-purple-700 text-white shadow-md'
-                          : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
-                      }`}
-                    >
-                      {option.label}
-                    </Button>
-                  ))}
-                </div>
-              </div>
+          <Card className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-300 dark:border-0 shadow-xl overflow-hidden h-full flex flex-col">
+            <div className="bg-gradient-to-r from-slate-100 to-purple-100/70 dark:from-slate-800 dark:to-slate-700 p-6 border-b border-slate-200/60 dark:border-slate-700/60">
+              <CardTitle className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <Eye className="w-5 h-5 text-purple-600" />
+                Visitor Analytics
+              </CardTitle>
+              <CardDescription className="text-slate-700 dark:text-slate-400 mt-1">
+                {timespanLabel} - Website visitor trends with page-by-country breakdown
+              </CardDescription>
             </div>
-            <CardContent className="p-6">
-              <div className="space-y-6">
+            <CardContent className="p-6 flex-1">
+              <div className="space-y-6 h-full flex flex-col">
                 {/* Visitor Overview Stats */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 gap-3">
                   <div className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Activity className="w-4 h-4 text-blue-600" />
-                      <span className="text-sm font-medium text-blue-800 dark:text-blue-300">Total Visits</span>
-                    </div>
-                    <div className="text-2xl font-bold text-blue-900 dark:text-blue-100">
-                      {visitorOverview?.totalVisits || 0}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Activity className="w-4 h-4 text-blue-600" />
+                        <span className="text-sm font-medium text-blue-800 dark:text-blue-300">Total Visits</span>
+                      </div>
+                      <div className="text-2xl font-bold text-blue-900 dark:text-blue-100">
+                        {visitorOverview?.totalVisits || 0}
+                      </div>
                     </div>
                   </div>
                   <div className="bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-lg p-4 border border-green-200 dark:border-green-800">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Eye className="w-4 h-4 text-green-600" />
-                      <span className="text-sm font-medium text-green-800 dark:text-green-300">Unique Visitors</span>
-                    </div>
-                    <div className="text-2xl font-bold text-green-900 dark:text-green-100">
-                      {visitorOverview?.uniqueVisitors || 0}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Eye className="w-4 h-4 text-green-600" />
+                        <span className="text-sm font-medium text-green-800 dark:text-green-300">Unique Visitors</span>
+                      </div>
+                      <div className="text-2xl font-bold text-green-900 dark:text-green-100">
+                        {visitorOverview?.uniqueVisitors || 0}
+                      </div>
                     </div>
                   </div>
                   <div className="bg-gradient-to-r from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-lg p-4 border border-purple-200 dark:border-purple-800">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Clock className="w-4 h-4 text-purple-600" />
-                      <span className="text-sm font-medium text-purple-800 dark:text-purple-300">Last Activity</span>
-                    </div>
-                    <div className="text-sm font-bold text-purple-900 dark:text-purple-100">
-                      {visitorOverview?.totalVisits > 0 ? 'Active' : 'No recent activity'}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-4 h-4 text-purple-600" />
+                        <span className="text-sm font-medium text-purple-800 dark:text-purple-300">Status</span>
+                      </div>
+                      <div className="text-sm font-bold text-purple-900 dark:text-purple-100">
+                        {visitorOverview?.totalVisits > 0 ? 'Active' : 'Inactive'}
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Visitor Area Chart */}
-                <div className="bg-gradient-to-br from-slate-50 to-blue-50/30 dark:from-slate-800 dark:to-slate-700 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
-                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-                    <Eye className="w-5 h-5 text-purple-600" />
-                    Visitor Trends by Country
-                  </h3>
-                  {visitorSeries.length > 0 ? (
-                    <ChartAreaInteractive
-                      series={visitorSeries}
-                      timespan={selectedTimespan}
-                      title="Visitor Trends"
-                    />
-                  ) : (
-                    <div className="text-center py-8">
-                      <Eye className="w-12 h-12 text-slate-400 mx-auto mb-3" />
-                      <h3 className="text-lg font-medium text-slate-600 dark:text-slate-400 mb-2">
-                        No visitor data
-                      </h3>
-                      <p className="text-slate-500 dark:text-slate-500 text-sm">
-                        Visitor analytics will appear here once users visit your website.
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Top Pages */}
-                {visitorOverview?.topPages && visitorOverview.topPages.length > 0 && (
-                  <div className="bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-700 rounded-lg p-4 border border-slate-200 dark:border-slate-600">
-                    <h4 className="text-md font-semibold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
-                      <FileText className="w-4 h-4 text-slate-600" />
-                      Popular Pages
+                {/* Top Pages with Country Info - Enhanced */}
+                {pagesByCountry?.pages && pagesByCountry.pages.length > 0 ? (
+                  <div className="bg-gradient-to-r from-slate-100 to-slate-100 dark:from-slate-800 dark:to-slate-700 rounded-lg p-4 border border-slate-300 dark:border-slate-600 flex-1">
+                    <h4 className="text-sm font-semibold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
+                      <FileText className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                      Top Pages by Country
                     </h4>
-                    <div className="space-y-2">
-                      {visitorOverview.topPages.slice(0, 5).map((page: any, index: number) => (
-                        <div key={page.page} className="flex items-center justify-between py-2 px-3 bg-white dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-600">
-                          <div className="flex items-center gap-3">
-                            <span className="text-sm font-medium text-slate-500 dark:text-slate-400">#{index + 1}</span>
-                            <span className="text-sm font-medium text-slate-900 dark:text-white">{page.page}</span>
+                    <div className="space-y-3 max-h-[280px] overflow-y-auto pr-2 custom-scrollbar">
+                      {pagesByCountry.pages.slice(0, 8).map((page: any, index: number) => (
+                        <div key={page.page} className="bg-white dark:bg-slate-900 rounded-lg p-3 border border-slate-300 dark:border-slate-600 hover:shadow-md transition-all">
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              <span className="text-xs font-bold text-white bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full w-5 h-5 flex items-center justify-center shrink-0">
+                                {index + 1}
+                              </span>
+                              <span className="text-xs font-semibold text-slate-900 dark:text-white truncate">{page.page}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 px-2 py-1 rounded font-semibold">
+                                {page.totalVisits} visits
+                              </span>
+                            </div>
                           </div>
-                          <span className="text-sm text-slate-600 dark:text-slate-400">{page.visits} visits</span>
+                          <div className="flex flex-wrap gap-1.5 mt-2">
+                            {page.countries.slice(0, 3).map((country: any) => (
+                              <div
+                                key={country.country}
+                                className="text-xs bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 text-slate-800 dark:text-slate-200 px-2 py-1 rounded-md border border-slate-300 dark:border-slate-500 font-medium"
+                              >
+                                {country.country}: {country.visits}
+                              </div>
+                            ))}
+                            {page.countries.length > 3 && (
+                              <div className="text-xs bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-900/40 dark:to-indigo-900/40 text-purple-800 dark:text-purple-300 px-2 py-1 rounded-md border border-purple-300 dark:border-purple-700 font-medium">
+                                +{page.countries.length - 3} more
+                              </div>
+                            )}
+                          </div>
                         </div>
                       ))}
                     </div>
                   </div>
-                )}
+                ) : visitorOverview?.topPages && visitorOverview.topPages.length > 0 ? (
+                  <div className="bg-gradient-to-r from-slate-100 to-slate-100 dark:from-slate-800 dark:to-slate-700 rounded-lg p-4 border border-slate-300 dark:border-slate-600 flex-1">
+                    <h4 className="text-sm font-semibold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
+                      <FileText className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                      Top Pages
+                    </h4>
+                    <div className="space-y-2 max-h-[280px] overflow-y-auto pr-2 custom-scrollbar">
+                      {visitorOverview.topPages.slice(0, 10).map((page: any, index: number) => (
+                        <div key={page.page} className="flex items-center justify-between py-2 px-3 bg-white dark:bg-slate-900 rounded border border-slate-300 dark:border-slate-600 hover:shadow-sm transition-all">
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <span className="text-xs font-medium text-slate-500 dark:text-slate-400 shrink-0">#{index + 1}</span>
+                            <span className="text-xs font-medium text-slate-900 dark:text-white truncate">{page.page}</span>
+                          </div>
+                          <span className="text-xs text-slate-700 dark:text-slate-400 font-semibold shrink-0 ml-2">{page.visits}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
               </div>
             </CardContent>
           </Card>
         </motion.div>
       </div>
+
+      {/* Visitor Trends by Country - Full Width Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.85 }}
+      >
+        <Card className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-300 dark:border-0 shadow-xl overflow-hidden">
+          <div className="bg-gradient-to-r from-slate-100 via-purple-100/70 to-indigo-100/70 dark:from-slate-800 dark:to-slate-700 p-6 border-b border-slate-200/60 dark:border-slate-700/60">
+            <CardTitle className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <Eye className="w-5 h-5 text-purple-600" />
+              Visitor Trends Over Time
+            </CardTitle>
+            <CardDescription className="text-slate-700 dark:text-slate-400 mt-1">
+              {timespanLabel} - Daily website visitor counts (all page visits)
+            </CardDescription>
+          </div>
+          <CardContent className="p-6">
+            <div className="bg-gradient-to-br from-slate-100 to-blue-100/50 dark:from-slate-800 dark:to-slate-700 rounded-xl p-6 border border-slate-300 dark:border-slate-700">
+              {visitorSeries.length > 0 ? (
+                <ChartAreaInteractive
+                  series={visitorSeries}
+                  timespan={selectedTimespan}
+                  title="Daily Visitor Count"
+                />
+              ) : (
+                <div className="text-center py-12">
+                  <Eye className="w-16 h-16 text-slate-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-slate-700 dark:text-slate-400 mb-2">
+                    No visitor data available
+                  </h3>
+                  <p className="text-slate-500 dark:text-slate-500 text-sm max-w-md mx-auto">
+                    Visitor analytics will appear here once users start visiting your website. Make sure the tracking script is active on your website.
+                  </p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Page-by-Country Analytics Section */}
+      {pagesByCountry && pagesByCountry.pages && pagesByCountry.pages.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.9 }}
+        >
+          <Card className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-300 dark:border-0 shadow-xl overflow-hidden">
+            <div className="bg-gradient-to-r from-slate-100 via-indigo-100/70 to-purple-100/70 dark:from-slate-800 dark:to-slate-700 p-6 border-b border-slate-200/60 dark:border-slate-700/60">
+              <CardTitle className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-2">
+                <FileText className="w-5 h-5 text-indigo-600" />
+                Page Visits by Country
+              </CardTitle>
+              <CardDescription className="text-slate-700 dark:text-slate-400">
+                {timespanLabel} - Detailed breakdown showing which pages are visited from which countries, including repeat visits
+              </CardDescription>
+            </div>
+            <CardContent className="p-6">
+              <div className="space-y-6">
+                {pagesByCountry.pages.map((pageData: any, pageIndex: number) => (
+                  <motion.div
+                    key={pageData.page}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: pageIndex * 0.1 }}
+                    className="bg-gradient-to-r from-slate-50 to-white dark:from-slate-800/50 dark:to-slate-700/50 rounded-xl p-6 border border-slate-300 dark:border-slate-600 hover:shadow-xl transition-all duration-300"
+                  >
+                    {/* Page Header */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5 pb-4 border-b border-slate-200 dark:border-slate-600">
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-600 text-white font-bold text-lg shadow-lg shrink-0">
+                          {pageIndex + 1}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1 truncate">
+                            {pageData.page}
+                          </h3>
+                          <p className="text-sm text-slate-700 dark:text-slate-400">
+                            <span className="font-semibold text-indigo-600 dark:text-indigo-400">
+                              {pageData.totalVisits.toLocaleString()}
+                            </span>
+                            {' '}total visits from{' '}
+                            <span className="font-semibold text-purple-600 dark:text-purple-400">
+                              {pageData.countries.length}
+                            </span>
+                            {' '}{pageData.countries.length === 1 ? 'country' : 'countries'}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="bg-gradient-to-r from-blue-100 to-cyan-100 dark:from-blue-900/40 dark:to-cyan-900/40 px-4 py-2 rounded-lg border border-blue-200 dark:border-blue-700 shadow-sm">
+                          <div className="flex items-center gap-2">
+                            <Eye className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Unique:</span>
+                            <span className="text-lg font-bold text-blue-800 dark:text-blue-300">
+                              {pageData.uniqueVisitors}
+                            </span>
+                          </div>
+                        </div>
+                        {pageData.totalVisits > pageData.uniqueVisitors && (
+                          <div className="bg-gradient-to-r from-orange-100 to-amber-100 dark:from-orange-900/40 dark:to-amber-900/40 px-4 py-2 rounded-lg border border-orange-200 dark:border-orange-700 shadow-sm">
+                            <div className="flex items-center gap-2">
+                              <TrendingUp className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Repeat:</span>
+                              <span className="text-lg font-bold text-orange-800 dark:text-orange-300">
+                                {pageData.totalVisits - pageData.uniqueVisitors}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Country Breakdown Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                      {pageData.countries.map((countryData: any, index: number) => {
+                        const percentage = ((countryData.visits / pageData.totalVisits) * 100).toFixed(1);
+                        const colors = [
+                          "from-blue-500 to-cyan-500",
+                          "from-green-500 to-emerald-500",
+                          "from-purple-500 to-violet-500",
+                          "from-orange-500 to-amber-500",
+                          "from-pink-500 to-rose-500",
+                          "from-indigo-500 to-blue-500",
+                          "from-teal-500 to-cyan-500",
+                          "from-red-500 to-pink-500",
+                        ];
+                        const colorClass = colors[index % colors.length];
+                        
+                        return (
+                          <motion.div
+                            key={countryData.country}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: index * 0.05 }}
+                            className="group relative bg-white dark:bg-slate-900 rounded-xl p-4 border-2 border-slate-200 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+                          >
+                            {/* Country Header */}
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="flex items-center gap-2 flex-1 min-w-0">
+                                <div className={`w-3 h-3 rounded-full bg-gradient-to-r ${colorClass} shadow-md`}></div>
+                                <span className="font-bold text-slate-900 dark:text-white text-sm truncate">
+                                  {countryData.country}
+                                </span>
+                              </div>
+                              <span className={`text-xs font-bold bg-gradient-to-r ${colorClass} text-white px-2.5 py-1 rounded-full shadow-sm`}>
+                                {percentage}%
+                              </span>
+                            </div>
+                            
+                            {/* Visit Stats */}
+                            <div className="space-y-2 mb-3">
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="text-slate-600 dark:text-slate-400 font-medium">Total Visits</span>
+                                <span className="font-bold text-slate-900 dark:text-white">
+                                  {countryData.visits}
+                                </span>
+                              </div>
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="text-slate-600 dark:text-slate-400 font-medium">Unique</span>
+                                <span className="font-bold text-green-600 dark:text-green-400">
+                                  {countryData.uniqueVisitors}
+                                </span>
+                              </div>
+                              {countryData.visits > countryData.uniqueVisitors && (
+                                <div className="flex items-center justify-between text-xs">
+                                  <span className="text-slate-600 dark:text-slate-400 font-medium">Repeats</span>
+                                  <span className="font-bold text-indigo-600 dark:text-indigo-400">
+                                    {countryData.visits - countryData.uniqueVisitors}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                            
+                            {/* Progress Bar */}
+                            <div className="relative">
+                              <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                                <motion.div
+                                  initial={{ width: 0 }}
+                                  animate={{ width: `${percentage}%` }}
+                                  transition={{ duration: 0.8, delay: index * 0.05 }}
+                                  className={`h-full bg-gradient-to-r ${colorClass} shadow-inner`}
+                                ></motion.div>
+                              </div>
+                            </div>
+                            
+                            {/* Repeat Visit Badge */}
+                            {countryData.visits > countryData.uniqueVisitors && (
+                              <div className="absolute -top-2 -right-2">
+                                <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg flex items-center gap-1">
+                                  <TrendingUp className="w-3 h-3" />
+                                  Repeat
+                                </div>
+                              </div>
+                            )}
+                          </motion.div>
+                        );
+                      })}
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
     </motion.div>
   );
 }

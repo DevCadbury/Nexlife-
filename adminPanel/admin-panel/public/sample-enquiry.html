@@ -546,10 +546,6 @@
           ? "http://localhost:4000/api"
           : "http://localhost:4000/api";
 
-      // Development mode indicator
-      console.log("Development Mode:", window.location.hostname);
-      console.log("API Base URL:", API_BASE_URL);
-
       // Test backend connection
       async function testBackendConnection() {
         try {
@@ -557,12 +553,7 @@
             method: "GET",
             mode: "cors",
           });
-          console.log(
-            "Backend connection test:",
-            response.ok ? "SUCCESS" : "FAILED"
-          );
         } catch (error) {
-          console.log("Backend connection test: FAILED -", error.message);
         }
       }
 
@@ -610,9 +601,6 @@
               newsletter: data.newsletter === "on",
             };
 
-            console.log("Submitting enquiry data:", enquiryData);
-            console.log("Using API URL:", API_BASE_URL);
-
             // Submit to backend API
             const response = await fetch(`${API_BASE_URL}/inquiries`, {
               method: "POST",
@@ -638,7 +626,6 @@
             }
 
             const result = await response.json();
-            console.log("Enquiry submitted successfully:", result);
 
             // Hide loading overlay
             document.getElementById("loadingOverlay").classList.add("hidden");

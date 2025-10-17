@@ -256,6 +256,23 @@ export function ChartAreaInteractive({
   const [hoverX, setHoverX] = React.useState<string | null>(null);
   const [hoverY, setHoverY] = React.useState<number | null>(null);
 
+  // Detect dark mode
+  const [isDarkMode, setIsDarkMode] = React.useState(false);
+
+  React.useEffect(() => {
+    const checkDarkMode = () => {
+      setIsDarkMode(document.documentElement.classList.contains('dark'));
+    };
+    
+    checkDarkMode();
+    
+    // Watch for theme changes
+    const observer = new MutationObserver(checkDarkMode);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    
+    return () => observer.disconnect();
+  }, []);
+
   function setLastN(n: number) {
     const len = data.length;
     if (!len) return;
@@ -267,7 +284,7 @@ export function ChartAreaInteractive({
   const Content = (
     <div className="p-0">
       {/* Compact legend with selection stats */}
-      <div className="mb-3 flex flex-wrap items-center gap-3 text-xs text-slate-400">
+      <div className="mb-3 flex flex-wrap items-center gap-3 text-xs text-slate-600 dark:text-slate-400">
         <span className="inline-flex items-center gap-1">
           <span
             className="h-2 w-2 rounded-full"
@@ -277,29 +294,29 @@ export function ChartAreaInteractive({
         </span>
         <span>
           Avg:{" "}
-          <span className="text-slate-200">
+          <span className="text-slate-900 dark:text-slate-200 font-semibold">
             {slice.mean ? slice.mean.toFixed(1) : 0}
           </span>
         </span>
         <span>
           Min:{" "}
-          <span className="text-slate-200">
+          <span className="text-slate-900 dark:text-slate-200 font-semibold">
             {slice.min?.toFixed ? slice.min.toFixed(0) : slice.min}
           </span>
           {slice.minLabel ? ` (${slice.items.find(item => item.month === slice.minLabel)?.date || slice.minLabel})` : ""}
         </span>
         <span>
           Max:{" "}
-          <span className="text-slate-200">
+          <span className="text-slate-900 dark:text-slate-200 font-semibold">
             {slice.max?.toFixed ? slice.max.toFixed(0) : slice.max}
           </span>
           {slice.maxLabel ? ` (${slice.items.find(item => item.month === slice.maxLabel)?.date || slice.maxLabel})` : ""}
         </span>
         <span>
           Range:{" "}
-          <span className="text-slate-200">{slice.items[0]?.date || "-"}</span>{" "}
+          <span className="text-slate-900 dark:text-slate-200 font-semibold">{slice.items[0]?.date || "-"}</span>{" "}
           →{" "}
-          <span className="text-slate-200">
+          <span className="text-slate-900 dark:text-slate-200 font-semibold">
             {slice.items[slice.items.length - 1]?.date || "-"}
           </span>
         </span>
@@ -331,28 +348,38 @@ export function ChartAreaInteractive({
                 data={data}
                 margin={{ left: 12, right: 12, top: 12, bottom: 12 }}
               >
-                <CartesianGrid vertical={false} stroke="rgba(148,163,184,.15)" />
+                <CartesianGrid 
+                  vertical={false} 
+                  stroke={isDarkMode ? "rgba(148,163,184,.15)" : "rgba(100,116,139,.2)"}
+                />
                 <XAxis
                   dataKey="date"
                   tickLine={false}
                   axisLine={false}
                   tickMargin={8}
-                  stroke="#94a3b8"
+                  stroke={isDarkMode ? "#94a3b8" : "#475569"}
+                  style={{ fill: isDarkMode ? "#94a3b8" : "#475569" }}
                 />
                 <YAxis
-                  stroke="#94a3b8"
+                  stroke={isDarkMode ? "#94a3b8" : "#475569"}
+                  style={{ fill: isDarkMode ? "#94a3b8" : "#475569" }}
                   tickLine={false}
                   axisLine={false}
                   tickFormatter={(v) => Math.round(v).toString()}
                 />
                 <Tooltip
                   contentStyle={{
-                    background: "#0b1220",
-                    border: "1px solid #1f2937",
+                    background: isDarkMode ? "#0b1220" : "#ffffff",
+                    border: isDarkMode ? "1px solid #1f2937" : "1px solid #e2e8f0",
                     borderRadius: 12,
                   }}
-                  labelStyle={{ color: "#e5e7eb", fontWeight: 600 }}
-                  itemStyle={{ color: "#cbd5e1" }}
+                  labelStyle={{ 
+                    color: isDarkMode ? "#e5e7eb" : "#1e293b", 
+                    fontWeight: 600 
+                  }}
+                  itemStyle={{ 
+                    color: isDarkMode ? "#cbd5e1" : "#475569" 
+                  }}
                   formatter={(value: any) => [value, "Enquiries"]}
                 />
                 <Area

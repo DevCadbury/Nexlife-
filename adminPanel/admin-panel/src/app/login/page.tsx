@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { Eye, EyeOff, Mail, Lock, Loader2, Shield, Sparkles } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -152,12 +153,27 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+      {/* Theme Toggle - Top Right */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="absolute top-6 right-6 z-50"
+      >
+        <motion.div
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="p-3 rounded-xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200 dark:border-slate-800 shadow-lg hover:shadow-xl transition-all"
+        >
+          <ThemeToggle />
+        </motion.div>
+      </motion.div>
+
       {/* Animated Background Elements */}
       <div className="absolute inset-0">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-purple-500/5 rounded-full blur-2xl animate-pulse delay-500" />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/10 dark:bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-indigo-500/10 dark:bg-indigo-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-purple-500/5 dark:bg-purple-500/5 rounded-full blur-2xl animate-pulse delay-500" />
       </div>
 
       {/* Floating Particles */}
@@ -165,7 +181,7 @@ export default function Login() {
         {[...Array(20)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute w-1 h-1 bg-cyan-400/20 rounded-full"
+            className="absolute w-1 h-1 bg-cyan-400/20 dark:bg-cyan-400/20 rounded-full"
             initial={{
               x: Math.random() * window.innerWidth,
               y: Math.random() * window.innerHeight,
@@ -193,7 +209,7 @@ export default function Login() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
           onSubmit={submit}
-          className="w-full max-w-md border border-slate-800/60 rounded-3xl p-8 bg-slate-900/40 backdrop-blur-xl shadow-[0_20px_80px_rgba(0,0,0,0.4)] transition-all duration-300 hover:shadow-[0_25px_100px_rgba(0,0,0,0.6)] hover:border-slate-700/60"
+          className="w-full max-w-md border border-slate-200 dark:border-slate-800/60 rounded-3xl p-8 bg-white/80 dark:bg-slate-900/40 backdrop-blur-xl shadow-xl dark:shadow-[0_20px_80px_rgba(0,0,0,0.4)] transition-all duration-300 hover:shadow-2xl dark:hover:shadow-[0_25px_100px_rgba(0,0,0,0.6)] hover:border-slate-300 dark:hover:border-slate-700/60"
         >
           {/* Header */}
           <motion.div
@@ -228,7 +244,7 @@ export default function Login() {
               Nexlife CRM
             </motion.h1>
             <motion.div
-              className="text-sm text-slate-400 flex items-center justify-center gap-2"
+              className="text-sm text-slate-600 dark:text-slate-400 flex items-center justify-center gap-2"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4 }}
@@ -247,13 +263,13 @@ export default function Login() {
               transition={{ delay: 0.5 }}
               className="relative"
             >
-              <label className="block text-sm font-medium text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                 Email Address
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-500 dark:text-slate-400" />
                 <input
-                  className="w-full pl-12 pr-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all duration-200 text-white placeholder-slate-400"
+                  className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all duration-200 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400"
                   placeholder="admin@nexlife.com"
                   type="email"
                   value={email}
@@ -271,13 +287,13 @@ export default function Login() {
                 transition={{ delay: 0.6 }}
                 className="relative"
               >
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                   Password
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-500 dark:text-slate-400" />
                   <input
-                    className="w-full pl-12 pr-12 py-3 bg-slate-800/50 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all duration-200 text-white placeholder-slate-400"
+                    className="w-full pl-12 pr-12 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all duration-200 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400"
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
                     value={password}
@@ -287,7 +303,7 @@ export default function Login() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-300 transition-colors"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
                   >
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
@@ -303,18 +319,18 @@ export default function Login() {
                 transition={{ delay: 0.6 }}
                 className="relative"
               >
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                   New Password
                 </label>
                 <input
-                  className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all duration-200 text-white placeholder-slate-400"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all duration-200 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400"
                   type="password"
                   placeholder="Enter new password"
                   value={newPass}
                   onChange={(e) => setNewPass(e.target.value)}
                   disabled={isLoading}
                 />
-                <div className="text-[11px] text-slate-400 mt-2">
+                <div className="text-[11px] text-slate-600 dark:text-slate-400 mt-2">
                   Must be 8+ chars with upper, lower, number and symbol.
                 </div>
               </motion.div>
@@ -412,7 +428,7 @@ export default function Login() {
                 setNewPass("");
                 setShowOtp(false);
               }}
-              className="text-sm text-slate-400 hover:text-indigo-400 transition-colors underline underline-offset-2"
+              className="text-sm text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors underline underline-offset-2"
             >
               {mode === "login" ? "Forgot password?" : "Back to login"}
             </button>
@@ -432,7 +448,7 @@ export default function Login() {
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                className="w-full max-w-sm rounded-3xl border border-slate-800/60 bg-slate-900/90 backdrop-blur-xl p-6 shadow-2xl ring-1 ring-indigo-500/20"
+                className="w-full max-w-sm rounded-3xl border border-slate-200 dark:border-slate-800/60 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl p-6 shadow-2xl ring-1 ring-slate-200 dark:ring-indigo-500/20"
               >
                 <div className="mb-6 text-center">
                   <motion.div
@@ -441,8 +457,8 @@ export default function Login() {
                   >
                     <Shield className="w-6 h-6 text-white" />
                   </motion.div>
-                  <div className="font-bold text-lg text-white mb-2">Verify Code</div>
-                  <div className="text-sm text-slate-400">
+                  <div className="font-bold text-lg text-slate-900 dark:text-white mb-2">Verify Code</div>
+                  <div className="text-sm text-slate-600 dark:text-slate-400">
                     Enter the 6-digit OTP sent to your email
                   </div>
                 </div>
@@ -455,10 +471,10 @@ export default function Login() {
                   {Array.from({ length: 6 }).map((_, i) => (
                     <motion.div
                       key={i}
-                      className="aspect-[1/1] rounded-xl border-2 border-slate-700 bg-slate-800/50 text-center grid place-items-center text-xl font-bold tracking-widest text-white transition-all duration-200"
+                      className="aspect-[1/1] rounded-xl border-2 border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800/50 text-center grid place-items-center text-xl font-bold tracking-widest text-slate-900 dark:text-white transition-all duration-200"
                       animate={{
-                        borderColor: code[i] ? "#6366f1" : "#374151",
-                        backgroundColor: code[i] ? "#1e1b4b" : "#1f2937",
+                        borderColor: code[i] ? "#6366f1" : (document.documentElement.classList.contains('dark') ? "#374151" : "#cbd5e1"),
+                        backgroundColor: code[i] ? (document.documentElement.classList.contains('dark') ? "#1e1b4b" : "#e0e7ff") : (document.documentElement.classList.contains('dark') ? "#1f2937" : "#f1f5f9"),
                       }}
                     >
                       {code[i] || ""}

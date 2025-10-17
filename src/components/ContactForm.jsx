@@ -13,10 +13,59 @@ const ContactForm = () => {
     name: "",
     email: "",
     phone: "",
+    countryCode: "+91",
     subject: "",
     productName: "",
     message: "",
   });
+
+  // Popular country codes
+  const countryCodes = [
+    { code: "+91", country: "India", flag: "🇮🇳" },
+    { code: "+1", country: "USA/Canada", flag: "🇺🇸" },
+    { code: "+44", country: "UK", flag: "🇬🇧" },
+    { code: "+971", country: "UAE", flag: "🇦🇪" },
+    { code: "+966", country: "Saudi Arabia", flag: "🇸🇦" },
+    { code: "+65", country: "Singapore", flag: "🇸🇬" },
+    { code: "+60", country: "Malaysia", flag: "🇲🇾" },
+    { code: "+62", country: "Indonesia", flag: "🇮🇩" },
+    { code: "+86", country: "China", flag: "🇨🇳" },
+    { code: "+81", country: "Japan", flag: "🇯🇵" },
+    { code: "+82", country: "South Korea", flag: "🇰🇷" },
+    { code: "+61", country: "Australia", flag: "🇦🇺" },
+    { code: "+49", country: "Germany", flag: "🇩🇪" },
+    { code: "+33", country: "France", flag: "🇫🇷" },
+    { code: "+39", country: "Italy", flag: "🇮🇹" },
+    { code: "+34", country: "Spain", flag: "🇪🇸" },
+    { code: "+7", country: "Russia", flag: "🇷🇺" },
+    { code: "+55", country: "Brazil", flag: "🇧🇷" },
+    { code: "+27", country: "South Africa", flag: "🇿🇦" },
+    { code: "+20", country: "Egypt", flag: "🇪🇬" },
+    { code: "+234", country: "Nigeria", flag: "🇳🇬" },
+    { code: "+254", country: "Kenya", flag: "🇰🇪" },
+    { code: "+52", country: "Mexico", flag: "🇲🇽" },
+    { code: "+54", country: "Argentina", flag: "🇦🇷" },
+    { code: "+64", country: "New Zealand", flag: "🇳🇿" },
+    { code: "+90", country: "Turkey", flag: "🇹🇷" },
+    { code: "+92", country: "Pakistan", flag: "🇵🇰" },
+    { code: "+880", country: "Bangladesh", flag: "🇧🇩" },
+    { code: "+94", country: "Sri Lanka", flag: "🇱🇰" },
+    { code: "+977", country: "Nepal", flag: "🇳🇵" },
+    { code: "+66", country: "Thailand", flag: "🇹🇭" },
+    { code: "+84", country: "Vietnam", flag: "🇻🇳" },
+    { code: "+63", country: "Philippines", flag: "🇵🇭" },
+    { code: "+98", country: "Iran", flag: "🇮🇷" },
+    { code: "+964", country: "Iraq", flag: "🇮🇶" },
+    { code: "+962", country: "Jordan", flag: "🇯🇴" },
+    { code: "+961", country: "Lebanon", flag: "🇱🇧" },
+    { code: "+974", country: "Qatar", flag: "🇶🇦" },
+    { code: "+968", country: "Oman", flag: "🇴🇲" },
+    { code: "+965", country: "Kuwait", flag: "🇰🇼" },
+    { code: "+973", country: "Bahrain", flag: "🇧🇭" },
+    { code: "+212", country: "Morocco", flag: "🇲🇦" },
+    { code: "+213", country: "Algeria", flag: "🇩🇿" },
+    { code: "+216", country: "Tunisia", flag: "🇹🇳" },
+  ];
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -32,9 +81,24 @@ const ContactForm = () => {
     setSubmitStatus(null);
 
     try {
-      await submitContact(formData);
+      // Combine country code with phone number
+      const fullPhoneNumber = `${formData.countryCode}${formData.phone}`;
+      const submissionData = {
+        ...formData,
+        phone: fullPhoneNumber,
+      };
+      
+      await submitContact(submissionData);
       setSubmitStatus("success");
-      setFormData({ name: "", email: "", phone: "", subject: "", productName: "", message: "" });
+      setFormData({ 
+        name: "", 
+        email: "", 
+        phone: "", 
+        countryCode: "+91",
+        subject: "", 
+        productName: "", 
+        message: "" 
+      });
     } catch (error) {
       console.error("Contact submit error:", error);
       setSubmitStatus("error");
@@ -96,7 +160,7 @@ const ContactForm = () => {
           />
         </div>
 
-        {/* Phone Field */}
+        {/* Phone Field with Country Code */}
         <div>
           <label
             htmlFor="phone"
@@ -104,16 +168,33 @@ const ContactForm = () => {
           >
             Phone Number *
           </label>
-          <input
-            type="tel"
-            id="phone"
-            name="phone"
-            value={formData.phone}
-            onChange={handleInputChange}
-            required
-            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white transition-colors"
-            placeholder="Enter your phone number"
-          />
+          <div className="flex gap-2">
+            <select
+              name="countryCode"
+              value={formData.countryCode}
+              onChange={handleInputChange}
+              className="w-32 px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white transition-colors"
+            >
+              {countryCodes.map((country) => (
+                <option key={country.code} value={country.code}>
+                  {country.flag} {country.code}
+                </option>
+              ))}
+            </select>
+            <input
+              type="tel"
+              id="phone"
+              name="phone"
+              value={formData.phone}
+              onChange={handleInputChange}
+              required
+              className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white transition-colors"
+              placeholder="Enter phone number"
+            />
+          </div>
+          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            Selected: {formData.countryCode}{formData.phone || "XXXXXXXXXX"}
+          </p>
         </div>
 
         {/* Subject Field */}
@@ -219,7 +300,7 @@ const ContactForm = () => {
               )}
               <span className="text-sm font-medium">
                 {submitStatus === "success"
-                  ? "Message sent successfully! We've received your inquiry and sent you a confirmation email with our product catalogue. We'll get back to you within 24 hours."
+                  ? "Message sent successfully! We've received your inquiry and sent you a confirmation email with our product catalogue attached. We'll contact you soon or within 24 hours."
                   : "Failed to send message. Please try again or contact us directly."}
               </span>
             </motion.div>

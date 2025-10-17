@@ -558,13 +558,13 @@ app.post("/api/likes/:id", async (req, res) => {
 
 // Enhanced contact endpoint with validation and better error handling
 app.post("/api/contact", async (req, res) => {
-  const { name, email, subject, message } = req.body || {};
+  const { name, email, subject, message, phone, productName } = req.body || {};
 
   // Validation
-  if (!name || !email || !subject || !message) {
+  if (!name || !email || !message) {
     return res.status(400).json({
       error: "Missing required fields",
-      required: ["name", "email", "subject", "message"],
+      required: ["name", "email", "message"],
     });
   }
 
@@ -586,23 +586,74 @@ app.post("/api/contact", async (req, res) => {
 
   try {
     const toAddress = process.env.CONTACT_TO || process.env.SMTP_USER;
-    const result = await sendEmail(toAddress, "contact", {
+    
+    // Send notification email to admin
+    const adminResult = await sendEmail(toAddress, "contact", {
       name,
       email,
-      subject,
+      subject: subject || "New Contact Form Submission",
       message,
+      phone,
+      productName,
     });
 
-    if (result.success) {
+    // Send confirmation email to customer with PDF attachment
+    const __dirname = path.dirname(fileURLToPath(import.meta.url));
+    const pdfPath = path.join(__dirname, 'public', 'admin', 'PRODUCT-CATALOGE.pdf');
+    
+    let confirmationResult;
+    try {
+      confirmationResult = await sendEmail(
+        email, 
+        "contactConfirmation", 
+        {
+          name,
+          email,
+          subject: subject || "General Inquiry",
+          phone,
+          productName,
+        },
+        {
+          replyTo: toAddress,
+          attachments: [
+            {
+              filename: 'Nexlife-Product-Catalogue.pdf',
+              path: pdfPath,
+              contentType: 'application/pdf'
+            }
+          ]
+        }
+      );
+    } catch (pdfError) {
+      console.error("Error sending confirmation with PDF:", pdfError);
+      // Still send confirmation without PDF if attachment fails
+      confirmationResult = await sendEmail(
+        email, 
+        "contactConfirmation", 
+        {
+          name,
+          email,
+          subject: subject || "General Inquiry",
+          phone,
+          productName,
+        },
+        {
+          replyTo: toAddress,
+        }
+      );
+    }
+
+    if (adminResult.success) {
       res.json({
         success: true,
-        message: "Message sent successfully",
-        messageId: result.messageId,
+        message: "Message sent successfully. Check your email for confirmation.",
+        messageId: adminResult.messageId,
+        confirmationSent: confirmationResult?.success || false,
       });
     } else {
       res
         .status(500)
-        .json({ error: "Failed to send message", details: result.error });
+        .json({ error: "Failed to send message", details: adminResult.error });
     }
   } catch (err) {
     console.error("Contact form error:", err);

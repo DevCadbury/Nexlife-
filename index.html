@@ -184,102 +184,10 @@
       }
     <!-- Visitor Tracking Script -->
     <script>
-      // Visitor tracking script for Nexlife International website
-      (function() {
-        // Only track if not on admin panel
-        if (window.location.pathname.startsWith('/admin')) {
-          return;
-        }
-
-        // Track the visit using XMLHttpRequest (more compatible)
-        function trackVisit() {
-          const data = JSON.stringify({
-            page: window.location.pathname,
-            country: 'Unknown',
-            ip: '',
-            userAgent: navigator.userAgent,
-            referrer: document.referrer
-          });
-
-          console.log('Tracking visit to:', window.location.pathname);
-
-          // Try fetch first, fallback to XMLHttpRequest
-          if (window.fetch) {
-            fetch('http://localhost:4001/api/analytics/visitors/track', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: data
-            })
-            .then(response => {
-              if (response.ok) {
-                console.log('Visit tracked successfully (fetch)');
-              } else {
-                console.warn('Failed to track visit (fetch):', response.status);
-              }
-            })
-            .catch(err => {
-              console.warn('Failed to track visit (fetch):', err);
-              // Fallback to XMLHttpRequest
-              trackWithXHR(data);
-            });
-          } else {
-            trackWithXHR(data);
-          }
-        }
-
-        function trackWithXHR(data) {
-          const xhr = new XMLHttpRequest();
-          xhr.open('POST', 'http://localhost:4001/api/analytics/visitors/track', true);
-          xhr.setRequestHeader('Content-Type', 'application/json');
-          xhr.onreadystatechange = function() {
-            if (xhr.readyState === 4) {
-              if (xhr.status === 200) {
-                console.log('Visit tracked successfully (XHR)');
-              } else {
-                console.warn('Failed to track visit (XHR):', xhr.status);
-              }
-            }
-          };
-          xhr.send(data);
-        }
-
-        // Track visit immediately
-        console.log('Starting visitor tracking...');
-        trackVisit();
-
-        // Also track on visibility change (when tab becomes visible again)
-        document.addEventListener('visibilitychange', function() {
-          if (!document.hidden) {
-            console.log('Page became visible, tracking visit');
-            trackVisit();
-          }
-        });
-
-        // Track on page unload (refresh/close) using sendBeacon
-        window.addEventListener('beforeunload', function() {
-          console.log('Page unloading, sending beacon...');
-          if (navigator.sendBeacon) {
-            navigator.sendBeacon('http://localhost:4001/api/analytics/visitors/track',
-              JSON.stringify({
-                page: window.location.pathname,
-                country: 'Unknown',
-                ip: '',
-                userAgent: navigator.userAgent,
-                referrer: document.referrer
-              })
-            );
-          }
-        });
-
-        // Also track on page load completion
-        window.addEventListener('load', function() {
-          console.log('Page fully loaded, confirming tracking');
-          setTimeout(trackVisit, 1000); // Track again after 1 second
-        });
-      })();
+      // Inject backend URL from environment variable
+      window.__VITE_BACKEND_URL__ = '%VITE_BACKEND_URL%';
     </script>
+    <script src="/visitor-tracker.js"></script>
   </head>
   <body>
     <div id="root"></div>

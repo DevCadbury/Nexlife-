@@ -12,23 +12,26 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-/* Explicit dark mode override when html has .dark */
-.dark {
+/* Explicit dark mode colors */
+html.dark {
   --background: #0a0a0a;
   --foreground: #ededed;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not(.light) {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+    color-scheme: dark;
+  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Shimmer animation for loading states */
@@ -43,4 +46,81 @@ body {
 
 .animate-shimmer {
   animation: shimmer 2s infinite;
+}
+
+/* Smooth transitions for theme changes */
+* {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Prevent transition on page load */
+.no-transition * {
+  transition: none !important;
+}
+
+/* Custom scrollbar styles */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgb(241 245 249 / 0.5);
+  border-radius: 4px;
+}
+
+html.dark .custom-scrollbar::-webkit-scrollbar-track {
+  background: rgb(15 23 42 / 0.5);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgb(148 163 184 / 0.8);
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgb(100 116 139 / 0.9);
+}
+
+html.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgb(71 85 105 / 0.8);
+}
+
+html.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgb(100 116 139 / 0.9);
+}
+
+/* Global scrollbar improvements */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgb(248 250 252);
+}
+
+html.dark ::-webkit-scrollbar-track {
+  background: rgb(15 23 42);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(203 213 225);
+  border-radius: 5px;
+  transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(148 163 184);
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: rgb(51 65 85);
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgb(71 85 105);
 }
