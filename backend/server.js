@@ -18,6 +18,7 @@ import logsRouter from "./routes/logs.js";
 import { startInboundImapPoller } from "./inbound-imap.js";
 import path from "path";
 import { fileURLToPath } from "url";
+import fs from "fs";
 // duplicate imports removed
 import { getCollections, getConnectionStatus } from "./db.js";
 import { sendEmail, validateEmail, emailTemplates } from "./config/email.js";
@@ -744,11 +745,27 @@ app.post("/api/test-email", requireDashboardAuth, async (req, res) => {
 
 // Serve product catalogue PDF
 app.get("/catalogue.pdf", (req, res) => {
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
   const pdfPath = path.join(__dirname, 'public', 'admin', 'PRODUCT-CATALOGE.pdf');
-  res.download(pdfPath, 'Nexlife-Product-Catalogue.pdf', (err) => {
+  
+  // Check if file exists
+  if (!fs.existsSync(pdfPath)) {
+    console.error("Catalogue PDF not found at:", pdfPath);
+    return res.status(404).json({ error: "Catalogue not found" });
+  }
+  
+  // Set proper headers for PDF download
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', 'attachment; filename="Nexlife-Product-Catalogue.pdf"');
+  
+  // Send the file
+  res.sendFile(pdfPath, (err) => {
     if (err) {
       console.error("Error serving catalogue:", err);
-      res.status(404).json({ error: "Catalogue not found" });
+      if (!res.headersSent) {
+        res.status(500).json({ error: "Error serving catalogue" });
+      }
     }
   });
 });
