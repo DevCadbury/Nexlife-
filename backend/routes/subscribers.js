@@ -583,7 +583,7 @@ router.get("/campaigns", requireAuth(), async (req, res) => {
 // POST /api/subscribers/campaign - basic campaign send
 router.post("/campaign", requireAuth(), async (req, res) => {
   try {
-    const { subject, message, recipients, announcement, note } = req.body || {};
+    const { subject, message, recipients, announcement, note, isHtml } = req.body || {};
     if (!subject || !message)
       return res.status(400).json({ error: "Subject and message required" });
     const { subscribers, campaigns } = await getCollections();
@@ -604,17 +604,33 @@ router.post("/campaign", requireAuth(), async (req, res) => {
       message,
       recipients: targetEmails,
       status: "sending",
+      isHtml: isHtml || false,
       createdAt: new Date(),
     };
     const inserted = await campaigns.insertOne(campaign);
 
-    // Use the new campaign template instead of contact template
-    const results = await sendBulkEmail(targetEmails, "campaign", {
-      subject,
-      message,
-      announcement: announcement || false,
-      note: note || null,
-    });
+    // Check if message is already a complete HTML document
+    const isCompleteHtml = isHtml && (
+      message.trim().toLowerCase().startsWith('<!doctype html') || 
+      message.trim().toLowerCase().startsWith('<html')
+    );
+
+    let results;
+    if (isCompleteHtml) {
+      // Send raw HTML without template wrapper
+      results = await sendBulkEmail(targetEmails, "rawHtml", {
+        subject,
+        html: message,
+      });
+    } else {
+      // Use the campaign template
+      results = await sendBulkEmail(targetEmails, "campaign", {
+        subject,
+        message,
+        announcement: announcement || false,
+        note: note || null,
+      });
+    }
 
     const sent = results.filter((r) => r.success).length;
     const failed = results.length - sent;

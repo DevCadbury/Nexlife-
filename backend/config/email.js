@@ -362,6 +362,12 @@ This is an automated confirmation email. Please do not reply to this message.
     text: `Your verification code is ${data.code}. It expires in 5 minutes.`,
   }),
 
+  rawHtml: (data) => ({
+    subject: data.subject || 'Update from Nexlife International',
+    html: data.html, // Use the HTML as-is without any wrapper
+    text: data.text || 'Please view this email in an HTML-compatible email client.',
+  }),
+
   campaign: (data) => ({
     subject: data.subject || 'Important Update from Nexlife International',
     html: `<!DOCTYPE html>
