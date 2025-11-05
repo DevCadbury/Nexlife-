@@ -31,7 +31,6 @@ import {
   X,
 } from "lucide-react";
 import DownloadButton from "../components/DownloadButton";
-import PharmaBackground from "../components/PharmaBackground";
 import { GlowingEffect } from "../components/ui/glowing-effect";
 import DebugInfo from "../components/DebugInfo";
 import heroImage from "../assets/images/3721740.jpg";
@@ -411,9 +410,6 @@ const Home = () => {
     <div className="min-h-screen">
       {/* Hero Section */}
       <section className="section-padding bg-gradient-to-br from-blue-50 via-white to-blue-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 relative overflow-hidden">
-        {/* Pharmaceutical Background */}
-        <PharmaBackground />
-
         <div className="container-custom relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Left Side - Text Content */}
@@ -596,9 +592,6 @@ const Home = () => {
 
       {/* Pharmaceutical Products Section */}
       <section className="section-padding bg-gradient-to-br from-blue-50 to-white dark:from-gray-800 dark:to-gray-900 relative overflow-hidden">
-        {/* Pharmaceutical Background */}
-        <PharmaBackground variant="subtle" />
-
         <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-r from-blue-500 via-purple-500 to-blue-600"></div>
         <div className="container-custom relative z-10">
           {/* 4 Product Cards in Grid */}
@@ -1102,9 +1095,6 @@ const Home = () => {
 
       {/* Why Choose Us Section - Enhanced Tiles */}
       <section className="section-padding bg-white dark:bg-gray-900">
-        {/* Pharmaceutical Background */}
-        <PharmaBackground variant="subtle" />
-
         <div className="container-custom">
           <motion.div
             variants={containerVariants}
@@ -1169,9 +1159,6 @@ const Home = () => {
 
       {/* NEXLIFE INTERNATIONAL STANDS FOR Section - Enhanced Tiles */}
       <section className="section-padding bg-gradient-to-r from-gray-50 to-blue-50 dark:from-gray-800 dark:to-gray-900">
-        {/* Pharmaceutical Background */}
-        <PharmaBackground variant="subtle" />
-
         <div className="container-custom">
           <motion.div
             variants={containerVariants}
@@ -1240,9 +1227,6 @@ const Home = () => {
 
       {/* Mission, Vision, Goal Section - Enhanced Cards */}
       <section className="section-padding bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-800 dark:to-gray-900">
-        {/* Pharmaceutical Background */}
-        <PharmaBackground variant="subtle" />
-
         <div className="container-custom">
           <motion.div
             variants={containerVariants}
@@ -1487,9 +1471,6 @@ const Home = () => {
 
       {/* Customer Reviews Section */}
       <section className="py-20 bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-800 dark:to-gray-900 relative overflow-hidden">
-        {/* Pharmaceutical Background */}
-        <PharmaBackground variant="subtle" />
-
         <div className="container-custom relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -1857,9 +1838,6 @@ const Home = () => {
 
       {/* Enhanced CTA Section */}
       <section className="section-padding bg-gradient-to-r from-primary-500 to-secondary-500 relative overflow-hidden">
-        {/* Pharmaceutical Background */}
-        <PharmaBackground />
-
         <div className="absolute inset-0 bg-gradient-to-r from-primary-600/20 to-secondary-600/20" />
         <div className="container-custom text-center relative z-10">
           <motion.div

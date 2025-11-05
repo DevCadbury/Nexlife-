@@ -3,6 +3,56 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Performance Optimizations */
+* {
+  /* Enable GPU acceleration for smooth scrolling */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  /* Smooth scrolling with better performance */
+  scroll-behavior: smooth;
+  /* Prevent layout shifts */
+  overflow-x: hidden;
+}
+
+body {
+  /* Prevent layout shifts during load */
+  overflow-x: hidden;
+  /* Better text rendering */
+  text-rendering: optimizeLegibility;
+}
+
+/* Optimize images for performance */
+img {
+  /* Prevent layout shifts */
+  max-width: 100%;
+  height: auto;
+  /* Better image rendering */
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+/* Optimize motion elements */
+[class*="motion-"] {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* Neon rotating border utilities */
 @keyframes neon-rotate {
   to {
