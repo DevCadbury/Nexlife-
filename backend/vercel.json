@@ -17,14 +17,14 @@
     "SMTP_PORT": "587",
     "SMTP_SECURE": "false",
     "SMTP_USER": "info@nexlifeinternational.com",
-    "SMTP_PASS": "Nexlife@2025",
+    "SMTP_PASS": "S223@nexlife",
     "CONTACT_TO": "info@nexlifeinternational.com",
-    "DASH_PASSWORD": "Nexlife@2025",
+    "DASH_PASSWORD": "S223@nexlife",
     "MONGODB_URI": "mongodb+srv://prince844121:.chaman1@cluster0.6e60blu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
     "MONGODB_DB": "nexlife",
     "JWT_SECRET": "9cb50b98caa56aaef6c1a0408510f7539be5a1e2d33989ae52f2b14646551a65",
     "SUPERADMIN_EMAIL": "info@nexlifeinternational.com",
-    "SUPERADMIN_PASSWORD": "Nexlife@2025",
+    "SUPERADMIN_PASSWORD": "S223@nexlife",
     "ADMIN_URL": "https://nexlife-admin.vercel.app",
     "CLOUDINARY_CLOUD_NAME": "dqnhpmoej",
     "CLOUDINARY_API_KEY": "159867665417568",
@@ -34,6 +34,6 @@
     "IMAP_PORT": "993",
     "IMAP_SECURE": "true",
     "IMAP_USER": "info@nexlifeinternational.com",
-    "IMAP_PASS": "Nexlife@2025"
+    "IMAP_PASS": "S223@nexlife"
   }
 }
