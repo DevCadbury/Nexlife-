@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { motion, useInView, animate, useMotionValue } from "framer-motion";
@@ -187,48 +187,47 @@ const Home = () => {
     },
   ];
 
-  const containerVariants = {
+  // Optimized animation variants - memoized to prevent recreating on every render
+  const containerVariants = useMemo(() => ({
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.2,
+        staggerChildren: 0.15, // Reduced from 0.2 for faster perception
       },
     },
-  };
+  }), []);
 
-  const itemVariants = {
+  const itemVariants = useMemo(() => ({
     hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
       y: 0,
       transition: {
-        duration: 0.5,
+        duration: 0.4, // Reduced from 0.5 for snappier feel
       },
     },
-  };
+  }), []);
 
-  const tileVariants = {
-    hidden: { opacity: 0, scale: 0.8, rotateY: -15 },
+  const tileVariants = useMemo(() => ({
+    hidden: { opacity: 0, scale: 0.9 }, // Removed rotateY for better performance
     visible: {
       opacity: 1,
       scale: 1,
-      rotateY: 0,
       transition: {
-        duration: 0.5,
+        duration: 0.4,
         ease: "easeOut",
       },
     },
     hover: {
-      scale: 1.05,
-      rotateY: 5,
-      y: -10,
+      scale: 1.03, // Reduced from 1.05 for subtler effect
+      y: -8, // Reduced from -10
       transition: {
-        duration: 0.3,
+        duration: 0.2,
         ease: "easeOut",
       },
     },
-  };
+  }), []);
 
   const [statsInView, setStatsInView] = useState(false);
 
@@ -294,25 +293,25 @@ const Home = () => {
   const carouselRef = useRef(null);
   const autoSlideRef = useRef(null);
 
-  const heroImages = [
+  const heroImages = useMemo(() => [
     { src: heroImage, alt: "Pharmaceutical logistics" },
     { src: heroImage2, alt: "Global pharmaceutical network" },
     { src: heroImage3, alt: "International trade" },
-  ];
+  ], []);
 
-  const nextSlide = () => {
+  const nextSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev + 1) % heroImages.length);
-  };
+  }, [heroImages.length]);
 
-  const prevSlide = () => {
+  const prevSlide = useCallback(() => {
     setCurrentSlide(
       (prev) => (prev - 1 + heroImages.length) % heroImages.length
     );
-  };
+  }, [heroImages.length]);
 
-  const goToSlide = (index) => {
+  const goToSlide = useCallback((index) => {
     setCurrentSlide(index);
-  };
+  }, []);
 
   useEffect(() => {
     // Auto-slide functionality
@@ -320,7 +319,7 @@ const Home = () => {
       setCurrentSlide((prev) => (prev + 1) % heroImages.length);
     };
 
-    autoSlideRef.current = setInterval(autoSlide, 3000); // Change slide every 3 seconds
+    autoSlideRef.current = setInterval(autoSlide, 5000); // Increased to 5 seconds for better performance
 
     return () => {
       if (autoSlideRef.current) {
@@ -329,18 +328,18 @@ const Home = () => {
     };
   }, [heroImages.length]);
 
-  // Pause auto-slide on hover
-  const handleCarouselHover = () => {
+  // Pause auto-slide on hover - memoized
+  const handleCarouselHover = useCallback(() => {
     if (autoSlideRef.current) {
       clearInterval(autoSlideRef.current);
     }
-  };
+  }, []);
 
-  const handleCarouselLeave = () => {
+  const handleCarouselLeave = useCallback(() => {
     autoSlideRef.current = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % heroImages.length);
-    }, 3000);
-  };
+    }, 5000); // Increased to 5 seconds for better performance
+  }, [heroImages.length]);
 
   // Office Gallery auto-scroll state and handlers
   const officeGalleryRef = useRef(null);
@@ -353,7 +352,7 @@ const Home = () => {
   const [isFloatingOpen, setIsFloatingOpen] = useState(false);
 
   // Auto tick that continuously spins through all 6 images in a loop
-  const officeAutoTick = () => {
+  const officeAutoTick = useCallback(() => {
     const container = officeGalleryRef.current;
     if (!container) {
       return;
@@ -382,17 +381,17 @@ const Home = () => {
         setOfficeIndex(0);
       }, 1000); // Wait for smooth scroll to complete
     }
-  };
+  }, []);
 
   useEffect(() => {
-    // start auto scroll with ping-pong behavior
+    // start auto scroll - increased interval for better performance
     if (officeAutoRef.current) clearInterval(officeAutoRef.current);
-    officeAutoRef.current = setInterval(officeAutoTick, 3000);
+    officeAutoRef.current = setInterval(officeAutoTick, 4000); // Increased from 3000ms
     return () => {
       if (officeAutoRef.current) clearInterval(officeAutoRef.current);
       officeAutoRef.current = null;
     };
-  }, []); // Remove officeIndex dependency to prevent infinite loops
+  }, [officeAutoTick]); // Added dependency
 
   // Cleanup all intervals on component unmount
   useEffect(() => {
@@ -524,15 +523,11 @@ const Home = () => {
                     <img
                       src={image.src}
                       alt={image.alt}
+                      loading={index === 0 ? "eager" : "lazy"}
                       className="absolute inset-0 h-full w-full object-cover"
                     />
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-indigo-500/10" />
-                    <GlowingEffect
-                      spread={55}
-                      glow
-                      proximity={80}
-                      inactiveZone={0.02}
-                    />
+                    {/* GlowingEffect disabled for better performance */}
                   </motion.div>
                 ))}
 
@@ -912,6 +907,7 @@ const Home = () => {
                 <img
                   src={product1}
                   alt="Premium Antibiotic Formula"
+                  loading="lazy"
                   className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500 border-2 border-gray-300 dark:border-gray-600 rounded-lg"
                 />
 

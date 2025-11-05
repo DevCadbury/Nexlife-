@@ -49,5 +49,11 @@ export default defineConfig({
   server: {
     port: 3000,
     host: true,
+    allowedHosts: [
+      'hemeralopic-genie-considerably.ngrok-free.dev',
+      '.ngrok-free.app',
+      '.ngrok.io',
+      '.ngrok-free.dev',
+    ],
   },
 });

@@ -1,54 +1,20 @@
-import React, { useMemo } from "react";
+import React from "react";
 import styled from "styled-components";
 
-const PharmaBackground = ({ variant = "default" }) => {
-  // Pre-calculate positions to avoid random generation on every render
-  const elements = useMemo(() => {
-    const positions = [];
-
-    // Reduced element counts for better performance
-    const elementCounts = {
-      crosses: variant === "subtle" ? 8 : 12,
-      pills: variant === "subtle" ? 6 : 10,
-      dnaNodes: variant === "subtle" ? 4 : 6,
-      networkLines: variant === "subtle" ? 3 : 5,
-      equipment: variant === "subtle" ? 2 : 4,
-      symbols: variant === "subtle" ? 3 : 5,
-    };
-
-    // Generate positions once
-    Object.entries(elementCounts).forEach(([type, count]) => {
-      for (let i = 0; i < count; i++) {
-        positions.push({
-          type,
-          left: Math.random() * 100,
-          top: Math.random() * 100,
-          delay: Math.random() * 3,
-        });
-      }
-    });
-
-    return positions;
-  }, [variant]);
-
+// Optimized: Pure CSS background with minimal DOM elements
+const PharmaBackground = React.memo(({ variant = "default" }) => {
   return (
     <StyledWrapper $variant={variant}>
       <div className="background-container">
-        {elements.map((element, i) => (
-          <div
-            key={i}
-            className={`element ${element.type}`}
-            style={{
-              left: `${element.left}%`,
-              top: `${element.top}%`,
-              animationDelay: `${element.delay}s`,
-            }}
-          />
-        ))}
+        {/* Ultra-minimal decorative elements - CSS only */}
+        <div className="pattern-overlay" />
+        <div className="gradient-orb orb-1" />
+        <div className="gradient-orb orb-2" />
+        <div className="gradient-orb orb-3" />
       </div>
     </StyledWrapper>
   );
-};
+});
 
 const StyledWrapper = styled.div`
   .background-container {
@@ -60,124 +26,130 @@ const StyledWrapper = styled.div`
     overflow: hidden;
     z-index: 0;
     pointer-events: none;
+    /* Static gradient background - no JS needed */
     background: ${(props) =>
       props.$variant === "subtle"
-        ? "linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(147, 197, 253, 0.06) 25%, rgba(191, 219, 254, 0.04) 50%, rgba(219, 234, 254, 0.03) 75%, rgba(239, 246, 255, 0.02) 100%)"
-        : "linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(147, 197, 253, 0.12) 25%, rgba(191, 219, 254, 0.08) 50%, rgba(219, 234, 254, 0.06) 75%, rgba(239, 246, 255, 0.04) 100%)"};
+        ? "linear-gradient(135deg, rgba(59, 130, 246, 0.06) 0%, rgba(147, 197, 253, 0.04) 25%, rgba(191, 219, 254, 0.03) 50%, rgba(219, 234, 254, 0.02) 75%, rgba(239, 246, 255, 0.01) 100%)"
+        : "linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 197, 253, 0.08) 25%, rgba(191, 219, 254, 0.06) 50%, rgba(219, 234, 254, 0.04) 75%, rgba(239, 246, 255, 0.02) 100%)"};
   }
 
-  .element {
+  /* CSS-only pattern overlay using repeating gradient */
+  .pattern-overlay {
     position: absolute;
-    pointer-events: none;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: ${(props) => (props.$variant === "subtle" ? "0.03" : "0.05")};
+    background-image: 
+      radial-gradient(circle at 20% 30%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
+      radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.06) 0%, transparent 50%);
+    background-size: 100% 100%;
+    background-position: 0% 0%;
+    animation: pattern-drift 60s ease-in-out infinite;
+  }
+
+  /* Subtle animated gradient orbs - GPU accelerated */
+  .gradient-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: ${(props) => (props.$variant === "subtle" ? "0.15" : "0.25")};
+    animation: float-orb 20s ease-in-out infinite;
     will-change: transform;
-    animation: gentle-float 12s ease-in-out infinite;
   }
 
-  /* Medical Cross - simplified */
-  .crosses {
-    width: 16px;
-    height: 16px;
-    opacity: ${(props) => (props.$variant === "subtle" ? "0.1" : "0.15")};
-    background: #3b82f6;
-    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  .orb-1 {
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, transparent 70%);
+    top: 10%;
+    left: 15%;
+    animation-duration: 25s;
   }
 
-  /* Pill Capsule - simplified */
-  .pills {
-    width: 24px;
-    height: 8px;
-    background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
-    border-radius: 4px;
-    opacity: ${(props) => (props.$variant === "subtle" ? "0.08" : "0.12")};
+  .orb-2 {
+    width: 250px;
+    height: 250px;
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.25) 0%, transparent 70%);
+    top: 60%;
+    right: 20%;
+    animation-duration: 30s;
+    animation-delay: -10s;
   }
 
-  /* DNA Node - simplified */
-  .dnaNodes {
-    width: 6px;
-    height: 6px;
-    background: #8b5cf6;
-    border-radius: 50%;
-    opacity: ${(props) => (props.$variant === "subtle" ? "0.06" : "0.1")};
+  .orb-3 {
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.2) 0%, transparent 70%);
+    bottom: 15%;
+    left: 50%;
+    animation-duration: 35s;
+    animation-delay: -20s;
   }
 
-  /* Network Line - simplified */
-  .networkLines {
-    width: 40px;
-    height: 1px;
-    background: linear-gradient(
-      90deg,
-      transparent 0%,
-      #3b82f6 50%,
-      transparent 100%
-    );
-    opacity: ${(props) => (props.$variant === "subtle" ? "0.05" : "0.08")};
-  }
-
-  /* Medical Equipment - simplified */
-  .equipment {
-    width: 16px;
-    height: 16px;
-    background: #ef4444;
-    border-radius: 50%;
-    opacity: ${(props) => (props.$variant === "subtle" ? "0.05" : "0.08")};
-  }
-
-  /* Pharmaceutical Symbol - simplified */
-  .symbols {
-    width: 12px;
-    height: 12px;
-    background: #f59e0b;
-    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
-    opacity: ${(props) => (props.$variant === "subtle" ? "0.03" : "0.06")};
-  }
-
-  /* Optimized animation - only transform, no rotation */
-  @keyframes gentle-float {
-    0%,
-    100% {
-      transform: translateY(0px);
+  /* Extremely lightweight animations - GPU accelerated only */
+  @keyframes pattern-drift {
+    0%, 100% {
+      background-position: 0% 0%;
     }
     50% {
-      transform: translateY(-8px);
+      background-position: 100% 100%;
     }
   }
 
-  /* Reduced motion for accessibility */
+  @keyframes float-orb {
+    0%, 100% {
+      transform: translate(0, 0) scale(1);
+    }
+    33% {
+      transform: translate(20px, -20px) scale(1.05);
+    }
+    66% {
+      transform: translate(-20px, 20px) scale(0.95);
+    }
+  }
+
+  /* Respect user motion preferences */
   @media (prefers-reduced-motion: reduce) {
-    .element {
+    .pattern-overlay,
+    .gradient-orb {
       animation: none;
     }
   }
 
-  /* Mobile optimizations */
+  /* Mobile optimizations - hide blur effects on mobile for performance */
   @media (max-width: 768px) {
-    .crosses {
-      width: 12px;
-      height: 12px;
+    .gradient-orb {
+      filter: blur(40px);
+      opacity: ${(props) => (props.$variant === "subtle" ? "0.1" : "0.15")};
     }
 
-    .pills {
-      width: 20px;
-      height: 6px;
+    .orb-1 {
+      width: 200px;
+      height: 200px;
     }
 
-    .dnaNodes {
-      width: 4px;
-      height: 4px;
+    .orb-2 {
+      width: 180px;
+      height: 180px;
     }
 
-    .networkLines {
-      width: 30px;
+    .orb-3 {
+      width: 150px;
+      height: 150px;
+    }
+  }
+
+  /* Further optimization for low-end devices */
+  @media (max-width: 480px) {
+    .pattern-overlay {
+      opacity: 0.02;
     }
 
-    .equipment {
-      width: 12px;
-      height: 12px;
-    }
-
-    .symbols {
-      width: 10px;
-      height: 10px;
+    .gradient-orb {
+      display: none; /* Hide blur effects on very small screens */
     }
   }
 `;
