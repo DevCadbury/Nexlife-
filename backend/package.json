@@ -9,6 +9,7 @@
     "dev": "nodemon server.js",
     "build": "echo Backend has no build step",
     "test-email": "node test-email.js",
+    "test-connection": "node test-email-connection.js",
     "setup-email": "node setup-email.js"
   },
   "dependencies": {

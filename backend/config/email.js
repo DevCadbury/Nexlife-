@@ -5,18 +5,46 @@ dotenv.config();
 
 // Hostinger SMTP Configuration
 const createTransporter = () => {
-  return nodemailer.createTransport({
-    host: process.env.SMTP_HOST || "smtp.hostinger.com",
-    port: parseInt(process.env.SMTP_PORT) || 587,
-    secure: process.env.SMTP_SECURE === "true" || false, // true for 465, false for other ports
+  const smtpHost = process.env.SMTP_HOST || "smtp.hostinger.com";
+  const smtpPort = parseInt(process.env.SMTP_PORT) || 587;
+  const smtpUser = process.env.SMTP_USER;
+  const smtpPass = process.env.SMTP_PASS;
+  
+  // Validate required credentials
+  if (!smtpUser || !smtpPass) {
+    console.error('[EMAIL] Missing SMTP credentials - SMTP_USER or SMTP_PASS not set');
+    throw new Error('SMTP credentials not configured');
+  }
+
+  console.log(`[EMAIL] Creating transporter for ${smtpUser} via ${smtpHost}:${smtpPort}`);
+
+  const config = {
+    host: smtpHost,
+    port: smtpPort,
+    secure: smtpPort === 465, // true for 465, false for 587
     auth: {
-      user: process.env.SMTP_USER, // Your Hostinger email address
-      pass: process.env.SMTP_PASS, // Your Hostinger email password
+      user: smtpUser,
+      pass: smtpPass,
     },
+    // Hostinger-specific settings for better compatibility
     tls: {
       rejectUnauthorized: false,
+      minVersion: 'TLSv1.2',
     },
-  });
+    // Important for Vercel/serverless environments
+    pool: false, // Disable connection pooling in serverless
+    maxConnections: 1,
+    maxMessages: 1,
+    // Add longer timeout for serverless cold starts
+    connectionTimeout: 60000, // 60 seconds
+    greetingTimeout: 30000,
+    socketTimeout: 60000,
+    // Enable debug logging in production to see what's happening
+    debug: process.env.NODE_ENV === 'production',
+    logger: process.env.NODE_ENV === 'production',
+  };
+
+  return nodemailer.createTransport(config);
 };
 
 // Email templates
@@ -701,11 +729,22 @@ export const validateEmail = (email) => {
 
 // Send email function
 export const sendEmail = async (to, template, data, options = {}) => {
+  let transporter = null;
+  
   try {
-    const transporter = createTransporter();
+    console.log(`[EMAIL] Attempting to send ${template} email to ${to}`);
+    
+    transporter = createTransporter();
 
-    // Verify transporter configuration
-    await transporter.verify();
+    // Verify transporter configuration with timeout
+    console.log('[EMAIL] Verifying SMTP connection...');
+    const verifyPromise = transporter.verify();
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('SMTP verification timeout after 30s')), 30000)
+    );
+    
+    await Promise.race([verifyPromise, timeoutPromise]);
+    console.log('[EMAIL] SMTP connection verified successfully');
 
     const emailTemplate = emailTemplates[template](data);
 
@@ -719,12 +758,41 @@ export const sendEmail = async (to, template, data, options = {}) => {
       ...options,
     };
 
+    console.log(`[EMAIL] Sending email with subject: "${emailTemplate.subject}"`);
     const result = await transporter.sendMail(mailOptions);
-    console.log("Email sent successfully:", result.messageId);
+    console.log(`[EMAIL] ✅ Email sent successfully. MessageID: ${result.messageId}`);
+    
     return { success: true, messageId: result.messageId };
   } catch (error) {
-    console.error("Email sending failed:", error);
-    return { success: false, error: error.message };
+    console.error('[EMAIL] ❌ Email sending failed:', {
+      code: error.code,
+      command: error.command,
+      response: error.response,
+      responseCode: error.responseCode,
+      message: error.message,
+      stack: error.stack
+    });
+    
+    // Provide more specific error messages
+    let errorMessage = error.message;
+    if (error.code === 'EAUTH') {
+      errorMessage = 'SMTP Authentication failed. Please verify your email credentials in Vercel environment variables.';
+    } else if (error.code === 'ETIMEDOUT' || error.code === 'ECONNECTION') {
+      errorMessage = 'SMTP connection timeout. Please check your SMTP host and port settings.';
+    } else if (error.code === 'ESOCKET') {
+      errorMessage = 'SMTP socket error. This may be due to firewall or network restrictions.';
+    }
+    
+    return { success: false, error: errorMessage, details: error };
+  } finally {
+    // Close the transporter in serverless environment
+    if (transporter) {
+      try {
+        transporter.close();
+      } catch (e) {
+        // Ignore close errors
+      }
+    }
   }
 };
 
