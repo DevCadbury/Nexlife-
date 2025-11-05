@@ -362,7 +362,9 @@ export default function Campaigns() {
 
   // Send campaign
   async function sendCampaign() {
-    if (!subject.trim() || (!message.trim() && !htmlContent.trim()) || loading) return;
+    // Validate based on content type
+    const contentToSend = selectedTemplate === "raw" ? htmlContent : (useHtml ? message : message);
+    if (!subject.trim() || !contentToSend.trim() || loading) return;
     
     if (recipientMode === "selected" && selectedRecipients.length === 0) {
       alert("Please select at least one recipient");
@@ -375,7 +377,7 @@ export default function Campaigns() {
     try {
       const payload: any = {
         subject,
-        message: useHtml ? htmlContent : message,
+        message: selectedTemplate === "raw" ? htmlContent : (useHtml ? generateEmailHtml() : message),
         isHtml: useHtml,
       };
       
@@ -493,31 +495,33 @@ export default function Campaigns() {
                   </div>
 
                   {/* Template Selection */}
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      Email Template
-                    </label>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                      {Object.entries(emailTemplates).map(([key, template]) => (
-                        <button
-                          key={key}
-                          onClick={() => setSelectedTemplate(key)}
-                          className={`p-3 rounded-lg border-2 transition-all ${
-                            selectedTemplate === key
-                              ? "border-blue-600 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20"
-                              : "border-slate-300 dark:border-slate-600 hover:border-blue-400 dark:hover:border-blue-500"
-                          }`}
-                        >
-                          <div className="text-sm font-medium text-slate-900 dark:text-white">
-                            {template.name}
-                          </div>
-                          <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                            {template.preview}
-                          </div>
-                        </button>
-                      ))}
+                  {useHtml && selectedTemplate !== "raw" && (
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        Email Template
+                      </label>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        {Object.entries(emailTemplates).map(([key, template]) => (
+                          <button
+                            key={key}
+                            onClick={() => setSelectedTemplate(key)}
+                            className={`p-3 rounded-lg border-2 transition-all ${
+                              selectedTemplate === key
+                                ? "border-blue-600 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20"
+                                : "border-slate-300 dark:border-slate-600 hover:border-blue-400 dark:hover:border-blue-500"
+                            }`}
+                          >
+                            <div className="text-sm font-medium text-slate-900 dark:text-white">
+                              {template.name}
+                            </div>
+                            <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                              {template.preview}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* Content Type Toggle */}
                   <div>
@@ -526,7 +530,7 @@ export default function Campaigns() {
                     </label>
                     <div className="flex gap-3">
                       <button
-                        onClick={() => setUseHtml(false)}
+                        onClick={() => { setUseHtml(false); setSelectedTemplate("newsletter"); }}
                         className={`flex-1 py-3 px-4 rounded-lg border-2 transition-all flex items-center justify-center gap-2 ${
                           !useHtml
                             ? "border-blue-600 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300"
@@ -537,15 +541,26 @@ export default function Campaigns() {
                         Plain Text
                       </button>
                       <button
-                        onClick={() => setUseHtml(true)}
+                        onClick={() => { setUseHtml(true); setSelectedTemplate("newsletter"); }}
                         className={`flex-1 py-3 px-4 rounded-lg border-2 transition-all flex items-center justify-center gap-2 ${
-                          useHtml
+                          useHtml && selectedTemplate !== "raw"
                             ? "border-blue-600 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300"
                             : "border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-blue-400"
                         }`}
                       >
                         <Code className="w-5 h-5" />
                         HTML Template
+                      </button>
+                      <button
+                        onClick={() => { setUseHtml(true); setSelectedTemplate("raw"); }}
+                        className={`flex-1 py-3 px-4 rounded-lg border-2 transition-all flex items-center justify-center gap-2 ${
+                          useHtml && selectedTemplate === "raw"
+                            ? "border-purple-600 dark:border-purple-400 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300"
+                            : "border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-purple-400"
+                        }`}
+                      >
+                        <Palette className="w-5 h-5" />
+                        Raw HTML
                       </button>
                     </div>
                   </div>
@@ -555,7 +570,40 @@ export default function Campaigns() {
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       Message Content *
                     </label>
-                    {useHtml ? (
+                    {useHtml && selectedTemplate === "raw" ? (
+                      <div className="space-y-3">
+                        <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-3 text-sm text-purple-800 dark:text-purple-300">
+                          <strong>Raw HTML Mode:</strong> Paste your complete HTML email with inline CSS. The CSS will be automatically processed for email client compatibility.
+                        </div>
+                        <textarea
+                          className="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg px-4 py-3 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors resize-vertical font-mono text-xs"
+                          rows={16}
+                          placeholder="<!DOCTYPE html>&#10;<html>&#10;<head>&#10;  <style>&#10;    body { font-family: Arial; }&#10;    .container { max-width: 600px; }&#10;  </style>&#10;</head>&#10;<body>&#10;  <div class='container'>Your content here</div>&#10;</body>&#10;</html>"
+                          value={htmlContent}
+                          onChange={(e) => setHtmlContent(e.target.value)}
+                        />
+                        <button
+                          onClick={() => setShowPreview(!showPreview)}
+                          className="flex items-center gap-2 text-sm text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300"
+                        >
+                          <Eye className="w-4 h-4" />
+                          {showPreview ? "Hide" : "Show"} Preview
+                        </button>
+                        {showPreview && (
+                          <div className="border border-slate-300 dark:border-slate-600 rounded-lg overflow-hidden bg-white dark:bg-slate-900">
+                            <div className="bg-slate-100 dark:bg-slate-800 px-4 py-2 text-xs text-slate-600 dark:text-slate-400 border-b border-slate-300 dark:border-slate-700">
+                              Email Preview (CSS will be inlined automatically when sent)
+                            </div>
+                            <iframe
+                              srcDoc={htmlContent}
+                              className="w-full min-h-[500px] border-0"
+                              title="Email Preview"
+                              sandbox="allow-same-origin"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    ) : useHtml ? (
                       <div className="space-y-3">
                         <textarea
                           className="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg px-4 py-3 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors resize-vertical font-mono text-sm"
@@ -572,8 +620,13 @@ export default function Campaigns() {
                           {showPreview ? "Hide" : "Show"} Preview
                         </button>
                         {showPreview && (
-                          <div className="border border-slate-300 dark:border-slate-600 rounded-lg p-4 bg-white dark:bg-slate-900 max-h-96 overflow-y-auto">
-                            <div dangerouslySetInnerHTML={{ __html: generateEmailHtml() }} />
+                          <div className="border border-slate-300 dark:border-slate-600 rounded-lg overflow-hidden bg-white dark:bg-slate-900">
+                            <iframe
+                              srcDoc={generateEmailHtml()}
+                              className="w-full min-h-[500px] border-0"
+                              title="Email Preview"
+                              sandbox="allow-same-origin"
+                            />
                           </div>
                         )}
                       </div>
@@ -813,7 +866,7 @@ export default function Campaigns() {
                 {/* Send Button */}
                 <button
                   onClick={sendCampaign}
-                  disabled={loading || !subject.trim() || !message.trim()}
+                  disabled={loading || !subject.trim() || (selectedTemplate === "raw" ? !htmlContent.trim() : !message.trim())}
                   className="w-full mt-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:from-slate-400 disabled:to-slate-400 disabled:cursor-not-allowed text-white py-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2 shadow-lg"
                 >
                   {loading ? (

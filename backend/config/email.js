@@ -3,6 +3,88 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+// Helper function to inline CSS styles for email compatibility
+// Extracts <style> tags and applies them as inline styles
+function inlineStyles(html) {
+  if (!html || typeof html !== 'string') return html;
+  
+  // Extract all <style> tags content
+  const styleRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi;
+  let styles = {};
+  let match;
+  
+  while ((match = styleRegex.exec(html)) !== null) {
+    const cssContent = match[1];
+    // Parse CSS rules
+    const ruleRegex = /([^{]+)\{([^}]+)\}/g;
+    let ruleMatch;
+    
+    while ((ruleMatch = ruleRegex.exec(cssContent)) !== null) {
+      const selector = ruleMatch[1].trim();
+      const rules = ruleMatch[2].trim();
+      
+      // Store styles for each selector
+      if (!styles[selector]) {
+        styles[selector] = [];
+      }
+      styles[selector].push(rules);
+    }
+  }
+  
+  // If no styles found or HTML already has extensive inline styles, return as-is
+  if (Object.keys(styles).length === 0 || html.includes('style=') && html.split('style=').length > 10) {
+    return html;
+  }
+  
+  // Apply inline styles to matching elements
+  let inlinedHtml = html;
+  
+  // Simple selector matching for common cases
+  Object.keys(styles).forEach(selector => {
+    const styleRules = styles[selector].join('; ');
+    
+    // Handle class selectors
+    if (selector.startsWith('.')) {
+      const className = selector.slice(1).split(/[\s:.,]/)[0];
+      const classRegex = new RegExp(`(<[^>]+class=["'][^"']*\\b${className}\\b[^"']*["'][^>]*)(>)`, 'gi');
+      inlinedHtml = inlinedHtml.replace(classRegex, (match, opening, closing) => {
+        if (opening.includes('style=')) {
+          return opening.replace(/style=["']([^"']*)["']/, `style="$1; ${styleRules}"`) + closing;
+        } else {
+          return `${opening} style="${styleRules}"${closing}`;
+        }
+      });
+    }
+    
+    // Handle element selectors (body, table, td, etc.)
+    if (/^[a-z]+$/i.test(selector)) {
+      const elementRegex = new RegExp(`(<${selector}[^>]*)(>)`, 'gi');
+      inlinedHtml = inlinedHtml.replace(elementRegex, (match, opening, closing) => {
+        if (opening.includes('style=')) {
+          return opening.replace(/style=["']([^"']*)["']/, `style="$1; ${styleRules}"`) + closing;
+        } else {
+          return `${opening} style="${styleRules}"${closing}`;
+        }
+      });
+    }
+    
+    // Handle ID selectors
+    if (selector.startsWith('#')) {
+      const id = selector.slice(1).split(/[\s:.,]/)[0];
+      const idRegex = new RegExp(`(<[^>]+id=["']${id}["'][^>]*)(>)`, 'gi');
+      inlinedHtml = inlinedHtml.replace(idRegex, (match, opening, closing) => {
+        if (opening.includes('style=')) {
+          return opening.replace(/style=["']([^"']*)["']/, `style="$1; ${styleRules}"`) + closing;
+        } else {
+          return `${opening} style="${styleRules}"${closing}`;
+        }
+      });
+    }
+  });
+  
+  return inlinedHtml;
+}
+
 // Hostinger SMTP Configuration
 const createTransporter = () => {
   const smtpHost = process.env.SMTP_HOST || "smtp.hostinger.com";
@@ -364,7 +446,7 @@ This is an automated confirmation email. Please do not reply to this message.
 
   rawHtml: (data) => ({
     subject: data.subject || 'Update from Nexlife International',
-    html: data.html, // Use the HTML as-is without any wrapper
+    html: inlineStyles(data.html), // Inline CSS for email client compatibility
     text: data.text || 'Please view this email in an HTML-compatible email client.',
   }),
 
