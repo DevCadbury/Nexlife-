@@ -326,37 +326,38 @@ export default function AdminLayout({
         suppressHydrationWarning={true}
         className="fixed left-0 top-0 h-screen w-[280px] border-r border-slate-200/60 dark:border-slate-700/60 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-xl z-30 overflow-y-auto"
       >
-        <div className="p-6 border-b border-slate-200/60 dark:border-slate-700/60 bg-gradient-to-r from-blue-50/50 to-indigo-50/50 dark:from-slate-800/50 dark:to-slate-700/50">
+        <div className="p-6 border-b border-slate-200/60 dark:border-slate-700/60">
           <div className="flex items-center gap-3 mb-4">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-blue-500 via-purple-500 to-pink-500 shadow-lg flex items-center justify-center">
-              <BarChart2 className="w-6 h-6 text-white" />
+            <div className="h-10 w-10 rounded-lg bg-white dark:bg-slate-800 shadow-md flex items-center justify-center p-2 border border-slate-200 dark:border-slate-700">
+              <img src="/nexlife_logo.png" alt="Nexlife" className="w-full h-full object-contain" />
             </div>
-            <h1 className="text-xl font-extrabold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
-              Nexlife CRM
+            <h1 className="text-lg font-bold text-slate-900 dark:text-white">
+              Nexlife <span className="text-blue-600 dark:text-blue-400">CRM</span>
             </h1>
           </div>
           {profile?.user?.name && (
             <div className="space-y-2">
-              <div className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                Welcome back!
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
-                  {profile.user.name?.[0]?.toUpperCase() || "U"}
+              <div className="text-xs text-slate-500 dark:text-slate-400 mb-1">Welcome back!</div>
+              <div className="bg-slate-100 dark:bg-slate-800 rounded-full px-3 py-2">
+                <div className="text-sm font-medium text-slate-900 dark:text-white mb-1">
+                  {profile.user.name}
                 </div>
-                <div>
-                  <div className="text-sm font-medium text-slate-900 dark:text-white">
-                    {profile.user.name}
-                  </div>
-                  {profile.user.email && (
-                    <div
-                      className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[180px]"
-                      title={profile.user.email}
-                    >
-                      {profile.user.email}
-                    </div>
-                  )}
-                </div>
+                {profile.user.email && (
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(profile.user.email);
+                      // Optional: show a toast notification
+                    }}
+                    className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors group"
+                    title="Click to copy email"
+                  >
+                    <span className="truncate max-w-[180px]">{profile.user.email}</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 opacity-60 group-hover:opacity-100">
+                      <rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect>
+                      <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path>
+                    </svg>
+                  </button>
+                )}
               </div>
             </div>
           )}
@@ -448,7 +449,7 @@ export default function AdminLayout({
         </div>
       </motion.aside>
 
-      <main className="ml-[280px] flex flex-col min-h-screen">
+      <main className="ml-[280px] mr-[calc(20vw-280px)] flex flex-col min-h-screen max-w-[80vw]">
         <motion.header
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -477,7 +478,7 @@ export default function AdminLayout({
               </div>
             </div>
 
-            <div className="flex items-center gap-4 ml-[280px]">
+            <div className="flex items-center gap-4 ml-[280px] max-w-[80vw]">
               {/* Notifications */}
               <motion.button
                 whileHover={{ scale: 1.05 }}

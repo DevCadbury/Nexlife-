@@ -245,31 +245,31 @@ export default function Dashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
-            whileHover={{ y: -4, scale: 1.02 }}
-            className={`bg-gradient-to-br ${bgColor} ${borderColor} border-2 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group`}
+            whileHover={{ y: -2, scale: 1.01 }}
+            className={`bg-gradient-to-br ${bgColor} ${borderColor} border-2 rounded-xl p-4 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group`}
           >
             {loadingOv ? (
-              <Skeleton className="h-20 w-full rounded-xl" />
+              <Skeleton className="h-16 w-full rounded-xl" />
             ) : (
               <>
-                <div className="flex items-center justify-between mb-4">
-                  <div className={`p-3 rounded-xl ${iconBg} group-hover:scale-110 transition-transform duration-300`}>
-                    <Icon className={`h-6 w-6 ${textColor}`} />
+                <div className="flex items-center justify-between mb-3">
+                  <div className={`p-2 rounded-lg ${iconBg} group-hover:scale-110 transition-transform duration-300`}>
+                    <Icon className={`h-4 w-4 ${textColor}`} />
                   </div>
-                  <div className={`flex items-center gap-1 text-sm font-medium ${trendUp ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                    {trendUp ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+                  <div className={`flex items-center gap-0.5 text-xs font-medium ${trendUp ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                    {trendUp ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                     {trend}
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <p className={`text-sm font-medium ${textColor} opacity-80`}>
+                  <p className={`text-xs font-medium ${textColor} opacity-80`}>
                     {label}
                   </p>
-                  <p className="text-3xl font-bold text-slate-900 dark:text-white">
+                  <p className="text-2xl font-bold text-slate-900 dark:text-white">
                     {ov?.[k]?.toLocaleString() ?? 0}
                   </p>
                 </div>
-                <div className={`h-1 bg-gradient-to-r ${color} rounded-full mt-4 opacity-60 group-hover:opacity-100 transition-opacity duration-300`}></div>
+                <div className={`h-0.5 bg-gradient-to-r ${color} rounded-full mt-3 opacity-60 group-hover:opacity-100 transition-opacity duration-300`}></div>
               </>
             )}
           </motion.div>

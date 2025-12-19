@@ -54,6 +54,7 @@ export async function getCollections() {
     certifications: db.collection("certifications"),
     campaigns: db.collection("campaigns"),
     visitors: db.collection("visitors"),
+    templates: db.collection("templates"),
   };
 }
 
@@ -119,6 +120,13 @@ async function ensureIndexes(db) {
       { key: { page: 1, createdAt: -1 } },
       { key: { country: 1, createdAt: -1 } },
       { key: { ip: 1, createdAt: -1 } },
+    ]);
+  await db
+    .collection("templates")
+    .createIndexes([
+      { key: { createdAt: -1 } },
+      { key: { name: 1 } },
+      { key: { createdBy: 1, createdAt: -1 } },
     ]);
 }
 

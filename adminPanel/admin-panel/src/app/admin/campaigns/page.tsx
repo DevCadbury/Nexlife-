@@ -216,7 +216,7 @@ const emailTemplates = {
 
 export default function Campaigns() {
   // State Management
-  const [activeTab, setActiveTab] = useState<"create" | "history">("create");
+  const [activeTab, setActiveTab] = useState<"create" | "history" | "templates">("create");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [htmlContent, setHtmlContent] = useState("");
@@ -225,6 +225,21 @@ export default function Campaigns() {
   const [showPreview, setShowPreview] = useState(false);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{ sent?: number; failed?: number } | null>(null);
+  
+  // Template Management
+  const [templateName, setTemplateName] = useState("");
+  const [templateSubject, setTemplateSubject] = useState("");
+  const [templateDescription, setTemplateDescription] = useState("");
+  const [templateHtml, setTemplateHtml] = useState("");
+  const [editingTemplateId, setEditingTemplateId] = useState<string | null>(null);
+  const [showTemplatePreview, setShowTemplatePreview] = useState(false);
+  const [previewTemplateHtml, setPreviewTemplateHtml] = useState("");
+  
+  // Notification state
+  const [notification, setNotification] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
+  
+  // Campaign detail expansion state
+  const [expandedCampaigns, setExpandedCampaigns] = useState<Set<string>>(new Set());
   
   // Recipient Management
   const [selectedRecipients, setSelectedRecipients] = useState<string[]>([]);
@@ -249,8 +264,15 @@ export default function Campaigns() {
     fetcher
   );
 
+  // Fetch custom templates
+  const { data: templatesData, mutate: mutateTemplates } = useSWR(
+    "/templates",
+    fetcher
+  );
+
   const campaignHistory = campaignHistoryData?.items || [];
   const subscribers = subscribersData?.items || [];
+  const customTemplates = templatesData?.items || [];
   const filteredSubscribers = subscribers.filter((sub: any) =>
     sub.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -271,7 +293,8 @@ export default function Campaigns() {
   };
 
   useEffect(() => {
-    if (useHtml && selectedTemplate) {
+    // Only regenerate HTML if using built-in templates, not raw HTML
+    if (useHtml && selectedTemplate && selectedTemplate !== "raw") {
       setHtmlContent(generateEmailHtml());
     }
   }, [subject, message, selectedTemplate, useHtml]);
@@ -360,9 +383,102 @@ export default function Campaigns() {
     URL.revokeObjectURL(url);
   };
 
+  // Template Management Functions
+  async function saveTemplate() {
+    if (!templateName.trim() || !templateHtml.trim() || loading) return;
+    
+    setLoading(true);
+    try {
+      if (editingTemplateId) {
+        await api.put(`/templates/${editingTemplateId}`, {
+          name: templateName,
+          subject: templateSubject,
+          htmlContent: templateHtml,
+          description: templateDescription,
+        });
+      } else {
+        await api.post("/templates", {
+          name: templateName,
+          subject: templateSubject,
+          htmlContent: templateHtml,
+          description: templateDescription,
+        });
+      }
+      
+      mutateTemplates();
+      setTemplateName("");
+      setTemplateSubject("");
+      setTemplateDescription("");
+      setTemplateHtml("");
+      setEditingTemplateId(null);
+    } catch (error) {
+      console.error("Failed to save template:", error);
+      alert("Failed to save template");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function deleteTemplate(id: string) {
+    if (!confirm("Are you sure you want to delete this template?")) return;
+    
+    setLoading(true);
+    try {
+      await api.delete(`/templates/${id}`);
+      mutateTemplates();
+    } catch (error) {
+      console.error("Failed to delete template:", error);
+      alert("Failed to delete template");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function loadTemplateForEditing(template: any) {
+    setTemplateName(template.name);
+    setTemplateSubject(template.subject || "");
+    setTemplateDescription(template.description || "");
+    setTemplateHtml(template.htmlContent);
+    setEditingTemplateId(template._id);
+  }
+
+  function cancelEditTemplate() {
+    setTemplateName("");
+    setTemplateSubject("");
+    setTemplateDescription("");
+    setTemplateHtml("");
+    setEditingTemplateId(null);
+  }
+
+  function previewTemplate(html: string) {
+    setPreviewTemplateHtml(html);
+    setShowTemplatePreview(true);
+  }
+
+  function useCustomTemplate(template: any) {
+    setHtmlContent(template.htmlContent);
+    setUseHtml(true);
+    setSelectedTemplate("raw");
+    setMessage("");
+    // Load subject if template has one (always load, even if empty)
+    setSubject(template.subject || "");
+    setActiveTab("create");
+    // Show confirmation that template was loaded
+    const subjectMsg = template.subject ? ` with subject "${template.subject}"` : "";
+    setNotification({
+      type: 'success',
+      message: `Template "${template.name}"${subjectMsg} loaded in Raw HTML mode. Ready to send!`
+    });
+    setTimeout(() => setNotification(null), 5000);
+  }
+
   // Send campaign
   async function sendCampaign() {
-    if (!subject.trim() || (!message.trim() && !htmlContent.trim()) || loading) return;
+    // Validate based on content type - check if using raw HTML or template
+    const isRawHtml = selectedTemplate === "raw" && htmlContent.trim();
+    const contentToSend = isRawHtml ? htmlContent : (useHtml ? message : message);
+    
+    if (!subject.trim() || !contentToSend.trim() || loading) return;
     
     if (recipientMode === "selected" && selectedRecipients.length === 0) {
       alert("Please select at least one recipient");
@@ -375,8 +491,8 @@ export default function Campaigns() {
     try {
       const payload: any = {
         subject,
-        message: useHtml ? htmlContent : message,
-        isHtml: useHtml,
+        message: isRawHtml ? htmlContent : (useHtml ? generateEmailHtml() : message),
+        isHtml: isRawHtml || useHtml,
       };
       
       if (recipientMode === "selected") {
@@ -405,6 +521,37 @@ export default function Campaigns() {
   return (
     <div suppressHydrationWarning={true} className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 p-6">
       <div className="max-w-7xl mx-auto">
+        {/* Notification Toast */}
+        <AnimatePresence>
+          {notification && (
+            <motion.div
+              initial={{ opacity: 0, y: -50 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -50 }}
+              className="fixed top-4 right-4 z-50 max-w-md"
+            >
+              <div className={`rounded-lg shadow-lg p-4 ${
+                notification.type === 'success' ? 'bg-green-500' :
+                notification.type === 'error' ? 'bg-red-500' :
+                'bg-blue-500'
+              } text-white`}>
+                <div className="flex items-start gap-3">
+                  {notification.type === 'success' && <CheckCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />}
+                  {notification.type === 'error' && <XCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />}
+                  {notification.type === 'info' && <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />}
+                  <p className="flex-1">{notification.message}</p>
+                  <button
+                    onClick={() => setNotification(null)}
+                    className="text-white hover:text-gray-200"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -435,6 +582,25 @@ export default function Campaigns() {
               Create Campaign
             </div>
             {activeTab === "create" && (
+              <motion.div
+                layoutId="activeTab"
+                className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 dark:bg-blue-400"
+              />
+            )}
+          </button>
+          <button
+            onClick={() => setActiveTab("templates")}
+            className={`pb-3 px-4 font-medium transition-colors relative ${
+              activeTab === "templates"
+                ? "text-blue-600 dark:text-blue-400"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <Code className="w-5 h-5" />
+              Templates ({customTemplates.length})
+            </div>
+            {activeTab === "templates" && (
               <motion.div
                 layoutId="activeTab"
                 className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 dark:bg-blue-400"
@@ -493,31 +659,33 @@ export default function Campaigns() {
                   </div>
 
                   {/* Template Selection */}
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      Email Template
-                    </label>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                      {Object.entries(emailTemplates).map(([key, template]) => (
-                        <button
-                          key={key}
-                          onClick={() => setSelectedTemplate(key)}
-                          className={`p-3 rounded-lg border-2 transition-all ${
-                            selectedTemplate === key
-                              ? "border-blue-600 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20"
-                              : "border-slate-300 dark:border-slate-600 hover:border-blue-400 dark:hover:border-blue-500"
-                          }`}
-                        >
-                          <div className="text-sm font-medium text-slate-900 dark:text-white">
-                            {template.name}
-                          </div>
-                          <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                            {template.preview}
-                          </div>
-                        </button>
-                      ))}
+                  {useHtml && selectedTemplate !== "raw" && (
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        Email Template
+                      </label>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        {Object.entries(emailTemplates).map(([key, template]) => (
+                          <button
+                            key={key}
+                            onClick={() => setSelectedTemplate(key)}
+                            className={`p-3 rounded-lg border-2 transition-all ${
+                              selectedTemplate === key
+                                ? "border-blue-600 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20"
+                                : "border-slate-300 dark:border-slate-600 hover:border-blue-400 dark:hover:border-blue-500"
+                            }`}
+                          >
+                            <div className="text-sm font-medium text-slate-900 dark:text-white">
+                              {template.name}
+                            </div>
+                            <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                              {template.preview}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* Content Type Toggle */}
                   <div>
@@ -526,7 +694,7 @@ export default function Campaigns() {
                     </label>
                     <div className="flex gap-3">
                       <button
-                        onClick={() => setUseHtml(false)}
+                        onClick={() => { setUseHtml(false); setSelectedTemplate("newsletter"); }}
                         className={`flex-1 py-3 px-4 rounded-lg border-2 transition-all flex items-center justify-center gap-2 ${
                           !useHtml
                             ? "border-blue-600 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300"
@@ -537,15 +705,26 @@ export default function Campaigns() {
                         Plain Text
                       </button>
                       <button
-                        onClick={() => setUseHtml(true)}
+                        onClick={() => { setUseHtml(true); setSelectedTemplate("newsletter"); }}
                         className={`flex-1 py-3 px-4 rounded-lg border-2 transition-all flex items-center justify-center gap-2 ${
-                          useHtml
+                          useHtml && selectedTemplate !== "raw"
                             ? "border-blue-600 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300"
                             : "border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-blue-400"
                         }`}
                       >
                         <Code className="w-5 h-5" />
                         HTML Template
+                      </button>
+                      <button
+                        onClick={() => { setUseHtml(true); setSelectedTemplate("raw"); }}
+                        className={`flex-1 py-3 px-4 rounded-lg border-2 transition-all flex items-center justify-center gap-2 ${
+                          useHtml && selectedTemplate === "raw"
+                            ? "border-purple-600 dark:border-purple-400 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300"
+                            : "border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-purple-400"
+                        }`}
+                      >
+                        <Palette className="w-5 h-5" />
+                        Raw HTML
                       </button>
                     </div>
                   </div>
@@ -555,7 +734,40 @@ export default function Campaigns() {
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       Message Content *
                     </label>
-                    {useHtml ? (
+                    {useHtml && selectedTemplate === "raw" ? (
+                      <div className="space-y-3">
+                        <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-3 text-sm text-purple-800 dark:text-purple-300">
+                          <strong>Raw HTML Mode:</strong> Paste your complete HTML email with inline CSS. The CSS will be automatically processed for email client compatibility.
+                        </div>
+                        <textarea
+                          className="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg px-4 py-3 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors resize-vertical font-mono text-xs"
+                          rows={16}
+                          placeholder="<!DOCTYPE html>&#10;<html>&#10;<head>&#10;  <style>&#10;    body { font-family: Arial; }&#10;    .container { max-width: 600px; }&#10;  </style>&#10;</head>&#10;<body>&#10;  <div class='container'>Your content here</div>&#10;</body>&#10;</html>"
+                          value={htmlContent}
+                          onChange={(e) => setHtmlContent(e.target.value)}
+                        />
+                        <button
+                          onClick={() => setShowPreview(!showPreview)}
+                          className="flex items-center gap-2 text-sm text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300"
+                        >
+                          <Eye className="w-4 h-4" />
+                          {showPreview ? "Hide" : "Show"} Preview
+                        </button>
+                        {showPreview && (
+                          <div className="border border-slate-300 dark:border-slate-600 rounded-lg overflow-hidden bg-white dark:bg-slate-900">
+                            <div className="bg-slate-100 dark:bg-slate-800 px-4 py-2 text-xs text-slate-600 dark:text-slate-400 border-b border-slate-300 dark:border-slate-700">
+                              Email Preview (CSS will be inlined automatically when sent)
+                            </div>
+                            <iframe
+                              srcDoc={htmlContent}
+                              className="w-full min-h-[500px] border-0"
+                              title="Email Preview"
+                              sandbox="allow-same-origin"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    ) : useHtml ? (
                       <div className="space-y-3">
                         <textarea
                           className="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg px-4 py-3 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors resize-vertical font-mono text-sm"
@@ -572,8 +784,13 @@ export default function Campaigns() {
                           {showPreview ? "Hide" : "Show"} Preview
                         </button>
                         {showPreview && (
-                          <div className="border border-slate-300 dark:border-slate-600 rounded-lg p-4 bg-white dark:bg-slate-900 max-h-96 overflow-y-auto">
-                            <div dangerouslySetInnerHTML={{ __html: generateEmailHtml() }} />
+                          <div className="border border-slate-300 dark:border-slate-600 rounded-lg overflow-hidden bg-white dark:bg-slate-900">
+                            <iframe
+                              srcDoc={generateEmailHtml()}
+                              className="w-full min-h-[500px] border-0"
+                              title="Email Preview"
+                              sandbox="allow-same-origin"
+                            />
                           </div>
                         )}
                       </div>
@@ -813,7 +1030,7 @@ export default function Campaigns() {
                 {/* Send Button */}
                 <button
                   onClick={sendCampaign}
-                  disabled={loading || !subject.trim() || !message.trim()}
+                  disabled={loading || !subject.trim() || (selectedTemplate === "raw" ? !htmlContent.trim() : !message.trim())}
                   className="w-full mt-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:from-slate-400 disabled:to-slate-400 disabled:cursor-not-allowed text-white py-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2 shadow-lg"
                 >
                   {loading ? (
@@ -830,6 +1047,203 @@ export default function Campaigns() {
                 </button>
               </motion.div>
             </div>
+          </div>
+        ) : activeTab === "templates" ? (
+          // Templates Management Tab
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Create/Edit Template Form */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700"
+            >
+              <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                <Code className="w-5 h-5" />
+                {editingTemplateId ? "Edit Template" : "Create New Template"}
+              </h2>
+
+              <div className="space-y-4">
+                {/* Template Name */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Template Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={templateName}
+                    onChange={(e) => setTemplateName(e.target.value)}
+                    placeholder="e.g., Product Launch Template"
+                    className="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg px-4 py-2 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                {/* Template Subject (Optional) */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Default Subject <span className="text-xs text-slate-500">(Optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={templateSubject}
+                    onChange={(e) => setTemplateSubject(e.target.value)}
+                    placeholder="e.g., New Product Launch - Special Offer"
+                    className="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg px-4 py-2 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                {/* Template Description */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Description
+                  </label>
+                  <textarea
+                    value={templateDescription}
+                    onChange={(e) => setTemplateDescription(e.target.value)}
+                    placeholder="Brief description of this template..."
+                    rows={2}
+                    className="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg px-4 py-2 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                  />
+                </div>
+
+                {/* HTML Content */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    HTML Content *
+                  </label>
+                  <textarea
+                    value={templateHtml}
+                    onChange={(e) => setTemplateHtml(e.target.value)}
+                    placeholder="Paste your HTML template here..."
+                    rows={12}
+                    className="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg px-4 py-2 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-xs resize-none"
+                  />
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-2">
+                  <button
+                    onClick={saveTemplate}
+                    disabled={loading || !templateName.trim() || !templateHtml.trim()}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed text-white py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="w-4 h-4" />
+                        {editingTemplateId ? "Update Template" : "Save Template"}
+                      </>
+                    )}
+                  </button>
+                  {editingTemplateId && (
+                    <button
+                      onClick={cancelEditTemplate}
+                      className="px-4 bg-slate-600 hover:bg-slate-700 text-white py-2 rounded-lg font-medium transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  )}
+                  {templateHtml.trim() && (
+                    <button
+                      onClick={() => previewTemplate(templateHtml)}
+                      className="px-4 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+                    >
+                      <Eye className="w-4 h-4" />
+                      Preview
+                    </button>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Saved Templates List */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700"
+            >
+              <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-4">
+                Saved Templates ({customTemplates.length})
+              </h2>
+
+              {customTemplates.length === 0 ? (
+                <div className="text-center py-12">
+                  <Code className="w-16 h-16 text-slate-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-slate-700 dark:text-slate-400 mb-2">
+                    No templates yet
+                  </h3>
+                  <p className="text-slate-500 dark:text-slate-500">
+                    Create your first custom template
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3 max-h-[600px] overflow-y-auto">
+                  {customTemplates.map((template: any) => (
+                    <div
+                      key={template._id}
+                      className="border border-slate-200 dark:border-slate-700 rounded-lg p-4 hover:shadow-md transition-shadow"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-slate-900 dark:text-white">
+                            {template.name}
+                          </h3>
+                          {template.subject && (
+                            <p className="text-xs text-blue-600 dark:text-blue-400 mt-1 font-medium">
+                              Subject: {template.subject}
+                            </p>
+                          )}
+                          {template.description && (
+                            <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
+                              {template.description}
+                            </p>
+                          )}
+                          <div className="flex items-center gap-2 mt-2 text-xs text-slate-500 dark:text-slate-400">
+                            <Clock className="w-3 h-3" />
+                            {new Date(template.createdAt).toLocaleDateString()}
+                            {template.createdByName && (
+                              <span>• by {template.createdByName}</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex gap-2 mt-3">
+                        <button
+                          onClick={() => useCustomTemplate(template)}
+                          className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-1.5 px-3 rounded text-xs font-medium transition-colors flex items-center justify-center gap-1"
+                        >
+                          <Send className="w-3 h-3" />
+                          Use
+                        </button>
+                        <button
+                          onClick={() => previewTemplate(template.htmlContent)}
+                          className="bg-green-600 hover:bg-green-700 text-white py-1.5 px-3 rounded text-xs font-medium transition-colors flex items-center gap-1"
+                        >
+                          <Eye className="w-3 h-3" />
+                          Preview
+                        </button>
+                        <button
+                          onClick={() => loadTemplateForEditing(template)}
+                          className="bg-yellow-600 hover:bg-yellow-700 text-white py-1.5 px-3 rounded text-xs font-medium transition-colors"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => deleteTemplate(template._id)}
+                          className="bg-red-600 hover:bg-red-700 text-white py-1.5 px-3 rounded text-xs font-medium transition-colors flex items-center gap-1"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </motion.div>
           </div>
         ) : (
           // Campaign History Tab
@@ -854,45 +1268,147 @@ export default function Campaigns() {
               </div>
             ) : (
               <div className="space-y-4">
-                {campaignHistory.map((campaign: any) => (
-                  <div
-                    key={campaign.id}
-                    className="border border-slate-200 dark:border-slate-700 rounded-lg p-4 hover:shadow-md transition-shadow"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-slate-900 dark:text-white">
-                          {campaign.subject}
-                        </h3>
-                        <div className="flex items-center gap-4 mt-2 text-sm text-slate-600 dark:text-slate-400">
-                          <div className="flex items-center gap-1">
-                            <Clock className="w-4 h-4" />
-                            {new Date(campaign.createdAt).toLocaleString()}
+                {campaignHistory.map((campaign: any, index: number) => {
+                  const campaignId = campaign._id || campaign.id || index.toString();
+                  const isExpanded = expandedCampaigns.has(campaignId);
+                  
+                  const toggleExpand = () => {
+                    setExpandedCampaigns(prev => {
+                      const newSet = new Set(prev);
+                      if (newSet.has(campaignId)) {
+                        newSet.delete(campaignId);
+                      } else {
+                        newSet.add(campaignId);
+                      }
+                      return newSet;
+                    });
+                  };
+                  
+                  return (
+                    <div
+                      key={campaign.id || index}
+                      className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden hover:shadow-sm transition-shadow"
+                    >
+                      <div className="p-3">
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-slate-900 dark:text-white text-sm">
+                              {campaign.subject}
+                            </h3>
+                            <div className="flex items-center gap-2 mt-1 text-xs text-slate-600 dark:text-slate-400">
+                              <div className="flex items-center gap-1">
+                                <Clock className="w-3 h-3" />
+                                {new Date(campaign.createdAt).toLocaleString()}
+                              </div>
+                              {campaign.sentByName && (
+                                <div className="flex items-center gap-1">
+                                  <Users className="w-3 h-3" />
+                                  {campaign.sentByName}
+                                </div>
+                              )}
+                            </div>
                           </div>
-                          <div className="flex items-center gap-1">
-                            <CheckCircle2 className="w-4 h-4 text-green-600" />
-                            {campaign.sent} sent
+                          <div className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                            campaign.status === "completed"
+                              ? "bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300"
+                              : campaign.status === "sending"
+                              ? "bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300"
+                              : "bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-300"
+                          }`}>
+                            {campaign.status}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="flex items-center gap-1.5">
+                            <CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-400" />
+                            <div>
+                              <span className="text-lg font-bold text-green-700 dark:text-green-300">
+                                {campaign.sent || 0}
+                              </span>
+                              <span className="text-xs text-green-600 dark:text-green-400 ml-1">sent</span>
+                            </div>
                           </div>
                           {campaign.failed > 0 && (
-                            <div className="flex items-center gap-1">
-                              <XCircle className="w-4 h-4 text-red-600" />
-                              {campaign.failed} failed
+                            <div className="flex items-center gap-1.5">
+                              <XCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
+                              <div>
+                                <span className="text-lg font-bold text-red-700 dark:text-red-300">
+                                  {campaign.failed}
+                                </span>
+                                <span className="text-xs text-red-600 dark:text-red-400 ml-1">failed</span>
+                              </div>
                             </div>
                           )}
                         </div>
+
+                        <button
+                          onClick={toggleExpand}
+                          className="w-full flex items-center justify-center gap-1.5 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium py-1.5 border-t border-slate-200 dark:border-slate-700"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          {isExpanded ? "Hide" : "Details"}
+                        </button>
                       </div>
-                      <div className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        campaign.status === "completed"
-                          ? "bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300"
-                          : campaign.status === "sending"
-                          ? "bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300"
-                          : "bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-300"
-                      }`}>
-                        {campaign.status}
-                      </div>
+
+                      <AnimatePresence>
+                        {isExpanded && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50"
+                          >
+                            <div className="p-4 space-y-4">
+                              {campaign.sentTo && campaign.sentTo.length > 0 && (
+                                <div>
+                                  <h4 className="font-semibold text-green-700 dark:text-green-400 mb-2 flex items-center gap-2">
+                                    <CheckCircle2 className="w-4 h-4" />
+                                    Successfully Sent To ({campaign.sentTo.length})
+                                  </h4>
+                                  <div className="bg-white dark:bg-slate-800 rounded-lg p-3 max-h-40 overflow-y-auto">
+                                    <div className="flex flex-wrap gap-2">
+                                      {campaign.sentTo.map((email: string, i: number) => (
+                                        <span
+                                          key={i}
+                                          className="text-xs bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300 px-2 py-1 rounded"
+                                        >
+                                          {email}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+
+                              {campaign.failedTo && campaign.failedTo.length > 0 && (
+                                <div>
+                                  <h4 className="font-semibold text-red-700 dark:text-red-400 mb-2 flex items-center gap-2">
+                                    <XCircle className="w-4 h-4" />
+                                    Failed To Send ({campaign.failedTo.length})
+                                  </h4>
+                                  <div className="bg-white dark:bg-slate-800 rounded-lg p-3 max-h-40 overflow-y-auto">
+                                    <div className="flex flex-wrap gap-2">
+                                      {campaign.failedTo.map((email: string, i: number) => (
+                                        <span
+                                          key={i}
+                                          className="text-xs bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-300 px-2 py-1 rounded"
+                                        >
+                                          {email}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </motion.div>
@@ -1010,6 +1526,48 @@ export default function Campaigns() {
                   >
                     Done
                   </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Template Preview Modal */}
+        <AnimatePresence>
+          {showTemplatePreview && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+              onClick={() => setShowTemplatePreview(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+              >
+                <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                    <Eye className="w-5 h-5" />
+                    Template Preview
+                  </h3>
+                  <button
+                    onClick={() => setShowTemplatePreview(false)}
+                    className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+
+                <div className="flex-1 overflow-y-auto p-6 bg-slate-50 dark:bg-slate-900">
+                  <iframe
+                    srcDoc={previewTemplateHtml}
+                    className="w-full h-full min-h-[500px] bg-white rounded-lg shadow-lg"
+                    title="Template Preview"
+                  />
                 </div>
               </motion.div>
             </motion.div>

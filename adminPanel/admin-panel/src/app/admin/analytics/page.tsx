@@ -138,9 +138,9 @@ export default function Analytics() {
       >
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="relative z-10">
-          <h1 className="text-3xl font-extrabold mb-2">Analytics Dashboard</h1>
-          <p className="text-blue-100 text-lg">
-            Comprehensive insights into your platform's performance and user engagement
+          <h1 className="text-2xl font-bold mb-1">Analytics Dashboard</h1>
+          <p className="text-blue-100 text-sm">
+            Platform performance and user engagement insights
           </p>
         </div>
         <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
@@ -165,20 +165,19 @@ export default function Analytics() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
             >
-              <Card className="group relative overflow-hidden bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-300 dark:border-0 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
+              <Card className="group relative overflow-hidden bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-300 dark:border-0 shadow-lg hover:shadow-xl transition-all duration-300">
                 <div className={`absolute inset-0 bg-gradient-to-br ${colorClass} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}></div>
-                <CardContent className="relative p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className={`p-3 rounded-xl bg-gradient-to-br ${colorClass} shadow-lg`}>
-                      <Icon className="w-6 h-6 text-white" />
+                <CardContent className="relative p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className={`p-2 rounded-lg bg-gradient-to-br ${colorClass} shadow-md`}>
+                      <Icon className="w-4 h-4 text-white" />
                     </div>
-                    {getTrendIcon(k)}
                   </div>
-                  <div className="space-y-2">
-                    <div className="text-slate-700 dark:text-slate-400 text-sm font-medium capitalize">
+                  <div className="space-y-1">
+                    <div className="text-slate-700 dark:text-slate-400 text-xs font-medium capitalize">
                       {k.replace(/([A-Z])/g, ' $1').trim()}
                     </div>
-                    <div className="text-3xl font-extrabold text-slate-900 dark:text-white">
+                    <div className="text-2xl font-bold text-slate-900 dark:text-white">
                       {ov?.[k]?.toLocaleString() ?? 0}
                     </div>
                   </div>
@@ -461,7 +460,7 @@ export default function Analytics() {
               Visitor Trends Over Time
             </CardTitle>
             <CardDescription className="text-slate-700 dark:text-slate-400 mt-1">
-              {timespanLabel} - Daily website visitor counts (all page visits)
+              {timespanLabel} - Daily website visitor trends
             </CardDescription>
           </div>
           <CardContent className="p-6">

@@ -29,11 +29,13 @@ export default function Subscribers() {
   const { data, mutate } = useSWR("/subscribers", fetcher);
   const { data: statsData, mutate: mutateStats } = useSWR("/subscribers/stats", fetcher);
   const { data: profile } = useSWR("/auth/me", fetcher);
+  const { data: staffList } = useSWR(profile?.user?.role === "superadmin" ? "/staff" : null, fetcher);
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [selectedEmails, setSelectedEmails] = useState<string[]>([]);
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [activeTab, setActiveTab] = useState<"single" | "bulk" | "import">("single");
+  const [staffFilter, setStaffFilter] = useState<string>("all");
   const [confirmDialog, setConfirmDialog] = useState<{
     open: boolean;
     title: string;
@@ -80,20 +82,23 @@ export default function Subscribers() {
     const subscriber = data?.items?.find((s: any) => s.email === emailToRemove);
     if (!subscriber) return;
     
-    // Check if admin can delete (within 24 hours)
+    // Check if admin/staff can delete (within 24 hours)
     let title = "Remove Subscriber";
     let message = `Are you sure you want to remove ${emailToRemove} from the newsletter?`;
     let variant: 'danger' | 'warning' | 'info' = 'danger';
     
-    if (userRole === "admin") {
+    if (userRole === "admin" || userRole === "staff") {
       const addedAt = new Date(subscriber.added_at || subscriber.createdAt);
       const now = new Date();
       const hoursDiff = (now.getTime() - addedAt.getTime()) / (1000 * 60 * 60);
       
       if (hoursDiff > 24) {
-        title = "Lock Subscriber";
-        message = `This subscriber is older than 24 hours and will be locked from your view (not permanently deleted). Continue?`;
-        variant = 'warning';
+        toast({
+          variant: "error",
+          title: "Cannot delete",
+          description: "You can only delete subscribers within 24 hours of adding them. Please contact a superadmin for removal.",
+        });
+        return;
       }
     }
     
@@ -191,7 +196,7 @@ export default function Subscribers() {
   }
 
   function getTimeRemaining(subscriber: any) {
-    if (userRole !== "admin") return null;
+    if (userRole !== "admin" && userRole !== "staff") return null;
     
     const addedAt = new Date(subscriber.added_at || subscriber.createdAt);
     const expiryTime = new Date(addedAt.getTime() + 24 * 60 * 60 * 1000);
@@ -267,11 +272,16 @@ export default function Subscribers() {
                     Superadmin
                   </span>
                 )}
+                {(userRole === "admin" || userRole === "staff") && (
+                  <span className="text-xs text-slate-500 dark:text-slate-400 ml-2">
+                    (Your subscribers only)
+                  </span>
+                )}
               </h1>
               <p className="text-slate-600 dark:text-slate-400 mt-2">
                 {userRole === "superadmin" 
                   ? "Manage all newsletter subscribers" 
-                  : "Manage your newsletter subscribers"
+                  : "Manage your newsletter subscribers (24h edit window)"
                 }
               </p>
             </div>
@@ -293,6 +303,22 @@ export default function Subscribers() {
                 </div>
               )}
               
+              {/* Staff Filter for Superadmin */}
+              {userRole === "superadmin" && staffList?.items && (
+                <select
+                  value={staffFilter}
+                  onChange={(e) => setStaffFilter(e.target.value)}
+                  className="px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">All Staff</option>
+                  {staffList.items.map((staff: any) => (
+                    <option key={staff._id} value={staff._id}>
+                      {staff.name} ({staff.role})
+                    </option>
+                  ))}
+                </select>
+              )}
+              
               {/* Bulk Actions for Superadmin */}
               {userRole === "superadmin" && selectedEmails.length > 0 && (
                 <button
@@ -310,7 +336,7 @@ export default function Subscribers() {
               )}
               
               <a
-                href="/api/export/contacts.csv"
+                href="http://localhost:4000/api/export/contacts.csv"
                 className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
               >
                 <Download className="w-4 h-4" />
@@ -439,7 +465,7 @@ export default function Subscribers() {
               <h2 className="text-xl font-semibold text-slate-900 dark:text-white flex items-center gap-2">
                 <Mail className="w-5 h-5" />
                 Subscriber List
-                {userRole === "admin" && (
+                {(userRole === "admin" || userRole === "staff") && (
                   <span className="text-xs text-slate-500 dark:text-slate-400 ml-2">
                     (Only your subscribers shown)
                   </span>
@@ -489,7 +515,7 @@ export default function Subscribers() {
                     <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
                       Subscription Date
                     </th>
-                    {userRole === "admin" && (
+                    {(userRole === "admin" || userRole === "staff") && (
                       <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
                         Delete Window
                       </th>
@@ -500,7 +526,12 @@ export default function Subscribers() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-                  {data.items.map((subscriber: any, index: number) => {
+                  {data.items
+                    .filter((subscriber: any) => {
+                      if (userRole !== "superadmin" || staffFilter === "all") return true;
+                      return subscriber.added_by === staffFilter;
+                    })
+                    .map((subscriber: any, index: number) => {
                     const canDeleteThis = canDelete(subscriber);
                     const timeRemaining = getTimeRemaining(subscriber);
                     
@@ -539,8 +570,19 @@ export default function Subscribers() {
                                 {subscriber.email}
                               </div>
                               {userRole === "superadmin" && subscriber.added_by && (
-                                <div className="text-xs text-slate-500 dark:text-slate-400">
-                                  Added by: {subscriber.staff_name || subscriber.added_by}
+                                <div className="flex items-center gap-2 mt-1">
+                                  <span className="text-xs text-slate-500 dark:text-slate-400">Added by:</span>
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800">
+                                    <span className="text-red-600 dark:text-red-400">
+                                      {subscriber.staff_name || subscriber.added_by}
+                                    </span>
+                                    {subscriber.staff_role && (
+                                      <>
+                                        <span className="text-slate-400">•</span>
+                                        <span className="text-blue-600 dark:text-blue-400">{subscriber.staff_role}</span>
+                                      </>
+                                    )}
+                                  </span>
                                 </div>
                               )}
                             </div>
@@ -563,8 +605,8 @@ export default function Subscribers() {
                           </div>
                         </td>
                         
-                        {/* Delete Window Column for Admin */}
-                        {userRole === "admin" && (
+                        {/* Delete Window Column for Admin/Staff */}
+                        {(userRole === "admin" || userRole === "staff") && (
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center text-xs">
                               {canDeleteThis ? (
@@ -586,9 +628,9 @@ export default function Subscribers() {
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <button
                             onClick={() => remove(subscriber.email)}
-                            disabled={userRole === "admin" && !canDeleteThis}
+                            disabled={(userRole === "admin" || userRole === "staff") && !canDeleteThis}
                             className={`p-2 rounded-lg transition-colors ${
-                              canDeleteThis
+                              (userRole === "superadmin" || canDeleteThis)
                                 ? "text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20"
                                 : "text-gray-400 cursor-not-allowed"
                             }`}
@@ -597,7 +639,7 @@ export default function Subscribers() {
                                 ? "Remove subscriber"
                                 : canDeleteThis
                                 ? "Remove subscriber (within 24h window)"
-                                : "Cannot delete - contact superadmin"
+                                : "Cannot delete - 24h window expired. Contact superadmin"
                             }
                           >
                             <Trash2 className="w-4 h-4" />

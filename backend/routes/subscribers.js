@@ -53,6 +53,7 @@ router.get("/stats", requireAuth(), async (req, res) => {
         active: total - locked - adminDeleted
       });
     } else {
+      // Both admin and staff see only their own stats
       const total = await subscribers.countDocuments({
         added_by: userId,
         deleted_by_admin: { $ne: true },
@@ -87,8 +88,8 @@ router.get("/", requireAuth(), async (req, res) => {
     if (role === "superadmin") {
       // Superadmin sees all subscribers except those deleted by superadmin
       matchQuery = { deleted_by_super: { $ne: true } };
-    } else if (role === "admin") {
-      // Admin sees only their own unlocked subscribers
+    } else if (role === "admin" || role === "staff") {
+      // Admin and staff see only their own unlocked subscribers
       matchQuery = {
         added_by: userId,
         is_locked: { $ne: true },
@@ -106,15 +107,16 @@ router.get("/", requireAuth(), async (req, res) => {
           let: { addedBy: { $toObjectId: "$added_by" } },
           pipeline: [
             { $match: { $expr: { $eq: ["$_id", "$$addedBy"] } } },
-            { $project: { name: 1, email: 1 } }
+            { $project: { name: 1, email: 1, role: 1 } }
           ],
           as: "addedByUser"
         }
       },
       {
         $addFields: {
-          added_by_name: { $arrayElemAt: ["$addedByUser.name", 0] },
-          added_by_email: { $arrayElemAt: ["$addedByUser.email", 0] }
+          staff_name: { $arrayElemAt: ["$addedByUser.name", 0] },
+          staff_email: { $arrayElemAt: ["$addedByUser.email", 0] },
+          staff_role: { $arrayElemAt: ["$addedByUser.role", 0] }
         }
       },
       {
@@ -124,14 +126,20 @@ router.get("/", requireAuth(), async (req, res) => {
           createdAt: 1,
           added_at: 1,
           added_by: 1,
-          added_by_name: 1,
-          added_by_email: 1,
+          staff_name: 1,
+          staff_email: 1,
+          staff_role: 1,
           is_locked: 1,
           deleted_by_admin: 1,
           deleted_by_super: 1
         }
       },
-      { $sort: { createdAt: -1 } }
+      {
+        $addFields: {
+          sortDate: { $ifNull: ["$added_at", "$createdAt"] }
+        }
+      },
+      { $sort: { sortDate: -1 } }
     ]).toArray();
       
     res.json({ total: items.length, items });
@@ -502,8 +510,8 @@ router.delete("/:email", requireAuth(), async (req, res) => {
         actorName: name,
         meta: { email: normalizedEmail, deletedBy: "superadmin" },
       });
-    } else if (role === "admin") {
-      // Check if admin owns this subscriber
+    } else if (role === "admin" || role === "staff") {
+      // Check if admin/staff owns this subscriber
       if (subscriber.added_by !== userId) {
         return res.status(403).json({ error: "You can only delete subscribers you added" });
       }
@@ -524,10 +532,10 @@ router.delete("/:email", requireAuth(), async (req, res) => {
           type: "subscriber.removed",
           actorId: userId,
           actorName: name,
-          meta: { email: normalizedEmail, deletedBy: "admin", withinTimeLimit: true },
+          meta: { email: normalizedEmail, deletedBy: role, withinTimeLimit: true },
         });
       } else {
-        // After 24 hours - lock subscriber (hide from admin)
+        // After 24 hours - lock subscriber (hide from admin/staff)
         await subscribers.updateOne(
           { email: normalizedEmail },
           { $set: { is_locked: true, locked_at: new Date() } }
@@ -537,7 +545,7 @@ router.delete("/:email", requireAuth(), async (req, res) => {
           type: "subscriber.locked",
           actorId: userId,
           actorName: name,
-          meta: { email: normalizedEmail, reason: "attempted_delete_after_24h" },
+          meta: { email: normalizedEmail, reason: "attempted_delete_after_24h", role },
         });
         
         return res.status(400).json({ 
@@ -583,7 +591,7 @@ router.get("/campaigns", requireAuth(), async (req, res) => {
 // POST /api/subscribers/campaign - basic campaign send
 router.post("/campaign", requireAuth(), async (req, res) => {
   try {
-    const { subject, message, recipients, announcement, note } = req.body || {};
+    const { subject, message, recipients, announcement, note, isHtml } = req.body || {};
     if (!subject || !message)
       return res.status(400).json({ error: "Subject and message required" });
     const { subscribers, campaigns } = await getCollections();
@@ -599,29 +607,58 @@ router.post("/campaign", requireAuth(), async (req, res) => {
       targetEmails = activeSubscribers.map((d) => d.email);
     }
 
+    const { id: userId, name: userName } = req.user;
+    
     const campaign = {
       subject,
       message,
       recipients: targetEmails,
       status: "sending",
+      isHtml: isHtml || false,
+      sentBy: userId,
+      sentByName: userName,
       createdAt: new Date(),
     };
     const inserted = await campaigns.insertOne(campaign);
 
-    // Use the new campaign template instead of contact template
-    const results = await sendBulkEmail(targetEmails, "campaign", {
-      subject,
-      message,
-      announcement: announcement || false,
-      note: note || null,
-    });
+    // Check if message is already a complete HTML document
+    const isCompleteHtml = isHtml && (
+      message.trim().toLowerCase().startsWith('<!doctype html') || 
+      message.trim().toLowerCase().startsWith('<html')
+    );
+
+    let results;
+    if (isCompleteHtml) {
+      // Send raw HTML without template wrapper
+      results = await sendBulkEmail(targetEmails, "rawHtml", {
+        subject,
+        html: message,
+      });
+    } else {
+      // Use the campaign template
+      results = await sendBulkEmail(targetEmails, "campaign", {
+        subject,
+        message,
+        announcement: announcement || false,
+        note: note || null,
+      });
+    }
 
     const sent = results.filter((r) => r.success).length;
     const failed = results.length - sent;
+    const sentTo = results.filter((r) => r.success).map((r) => r.recipient);
+    const failedTo = results.filter((r) => !r.success).map((r) => r.recipient);
 
     await campaigns.updateOne(
       { _id: inserted.insertedId },
-      { $set: { status: "completed", sent, failed, completedAt: new Date() } }
+      { $set: { 
+        status: "completed", 
+        sent, 
+        failed, 
+        sentTo, 
+        failedTo,
+        completedAt: new Date() 
+      } }
     );
     await addLog({
       type: "campaign.sent",

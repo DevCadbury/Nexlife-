@@ -35,20 +35,38 @@ export async function startInboundImapPoller() {
   const intervalMs = Number(process.env.IMAP_POLL_INTERVAL_MS || 30000);
 
   async function cycleOnce() {
+    console.log(`[IMAP] Starting cycle for ${user}@${host}:${port}`);
+    
     const client = new ImapFlow({
       host,
       port,
       secure,
       auth: { user, pass },
-      logger: false,
-      tls: { rejectUnauthorized: false },
+      logger: process.env.NODE_ENV === 'production', // Enable logging in production
+      tls: { 
+        rejectUnauthorized: false,
+        minVersion: 'TLSv1.2',
+      },
+      // Add timeout settings for serverless
+      connectionTimeout: 60000,
+      greetingTimeout: 30000,
+      socketTimeout: 60000,
     });
+    
     client.on("error", (err) => {
       // eslint-disable-next-line no-console
-      console.error("[IMAP] client error", err?.code || err?.message || err);
+      console.error("[IMAP] ❌ Client error:", {
+        code: err?.code,
+        message: err?.message,
+        command: err?.command,
+        response: err?.response,
+      });
     });
+    
     try {
+      console.log('[IMAP] Connecting to mailbox...');
       await client.connect();
+      console.log('[IMAP] ✅ Connected successfully');
       const lock = await client.getMailboxLock("INBOX");
       try {
         // Check mailbox status first
@@ -467,11 +485,27 @@ export async function startInboundImapPoller() {
       }
     } catch (e) {
       // eslint-disable-next-line no-console
-      console.error("IMAP poller error", e?.code || e?.message || e);
+      console.error("[IMAP] ❌ Poller error:", {
+        code: e?.code,
+        message: e?.message,
+        command: e?.command,
+        response: e?.response,
+        stack: process.env.NODE_ENV === 'production' ? e?.stack : undefined,
+      });
+      
+      // Provide specific error guidance
+      if (e?.code === 'EAUTH') {
+        console.error('[IMAP] Authentication failed. Please verify IMAP credentials in Vercel environment variables.');
+      } else if (e?.code === 'ETIMEDOUT' || e?.code === 'ECONNECTION') {
+        console.error('[IMAP] Connection timeout. Please check IMAP host and port settings.');
+      }
     } finally {
       try {
         await client.logout();
-      } catch {}
+      } catch (logoutError) {
+        // Ignore logout errors
+        console.log('[IMAP] Logout completed (or connection already closed)');
+      }
     }
   }
 

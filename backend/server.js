@@ -15,6 +15,7 @@ import productsGalleryRouter from "./routes/products-gallery.js";
 import certificationsRouter from "./routes/certifications.js";
 import inboundRouter from "./routes/inbound.js";
 import logsRouter from "./routes/logs.js";
+import templatesRouter from "./routes/templates.js";
 import { startInboundImapPoller } from "./inbound-imap.js";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -782,6 +783,7 @@ app.use("/api/products-gallery", productsGalleryRouter);
 app.use("/api/certifications", certificationsRouter);
 app.use("/api/inbound", inboundRouter);
 app.use("/api/logs", logsRouter);
+app.use("/api/templates", templatesRouter);
 
 // Start IMAP poller if IMAP_* env vars provided
 startInboundImapPoller().catch((e) => console.error("IMAP poller failed", e));

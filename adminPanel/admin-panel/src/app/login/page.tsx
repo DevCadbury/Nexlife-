@@ -219,38 +219,26 @@ export default function Login() {
             className="text-center mb-8"
           >
             <motion.div
-              whileHover={{ scale: 1.05, rotate: 5 }}
-              className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-gradient-to-tr from-cyan-400 via-indigo-500 to-purple-600 shadow-2xl ring-2 ring-indigo-500/20 mb-4 relative overflow-hidden"
+              whileHover={{ scale: 1.05 }}
+              className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-white dark:bg-slate-800 shadow-xl ring-2 ring-slate-200 dark:ring-slate-700 mb-4 p-3"
             >
-              <Shield className="w-8 h-8 text-white relative z-10" />
-              <motion.div
-                className="absolute inset-0 bg-gradient-to-tr from-cyan-300 to-purple-500"
-                animate={{
-                  rotate: [0, 360],
-                }}
-                transition={{
-                  duration: 8,
-                  repeat: Infinity,
-                  ease: "linear",
-                }}
-              />
+              <img src="/nexlife_logo.png" alt="Nexlife" className="w-full h-full object-contain" />
             </motion.div>
             <motion.h1
-              className="font-extrabold text-2xl bg-gradient-to-r from-cyan-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent mb-2"
+              className="font-bold text-2xl text-slate-900 dark:text-white mb-1"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
             >
-              Nexlife CRM
+              Nexlife International
             </motion.h1>
             <motion.div
-              className="text-sm text-slate-600 dark:text-slate-400 flex items-center justify-center gap-2"
+              className="text-sm text-slate-600 dark:text-slate-400"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4 }}
             >
-              <Sparkles className="w-4 h-4" />
-              Admin Portal
+              Customer Management System
             </motion.div>
           </motion.div>
 
@@ -453,9 +441,9 @@ export default function Login() {
                 <div className="mb-6 text-center">
                   <motion.div
                     whileHover={{ scale: 1.05 }}
-                    className="mx-auto mb-4 h-12 w-12 rounded-xl bg-gradient-to-tr from-cyan-400 to-indigo-500 shadow-lg ring-2 ring-indigo-500/20 flex items-center justify-center"
+                    className="mx-auto mb-4 h-12 w-12 rounded-xl bg-white dark:bg-slate-800 shadow-lg ring-2 ring-indigo-500/20 flex items-center justify-center p-2"
                   >
-                    <Shield className="w-6 h-6 text-white" />
+                    <img src="/nexlife_logo.png" alt="Nexlife" className="w-full h-full object-contain" />
                   </motion.div>
                   <div className="font-bold text-lg text-slate-900 dark:text-white mb-2">Verify Code</div>
                   <div className="text-sm text-slate-600 dark:text-slate-400">
