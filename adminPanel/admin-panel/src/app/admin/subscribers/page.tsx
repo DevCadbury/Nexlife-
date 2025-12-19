@@ -186,8 +186,8 @@ export default function Subscribers() {
   }
 
   function canDelete(subscriber: any) {
-    if (userRole === "superadmin") return true;
-    if (userRole !== "admin") return false;
+    if (userRole === "superadmin" || userRole === "dev") return true;
+    if (userRole !== "admin" && userRole !== "staff") return false;
     
     const addedAt = new Date(subscriber.added_at || subscriber.createdAt);
     const now = new Date();
@@ -196,7 +196,7 @@ export default function Subscribers() {
   }
 
   function getTimeRemaining(subscriber: any) {
-    if (userRole !== "admin" && userRole !== "staff") return null;
+    if (userRole === "superadmin" || userRole === "dev" || (userRole !== "admin" && userRole !== "staff")) return null;
     
     const addedAt = new Date(subscriber.added_at || subscriber.createdAt);
     const expiryTime = new Date(addedAt.getTime() + 24 * 60 * 60 * 1000);
@@ -515,7 +515,7 @@ export default function Subscribers() {
                     <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
                       Subscription Date
                     </th>
-                    {(userRole === "admin" || userRole === "staff") && (
+                    {(userRole === "admin" || userRole === "staff") && userRole !== "dev" && (
                       <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
                         Delete Window
                       </th>
@@ -606,7 +606,7 @@ export default function Subscribers() {
                         </td>
                         
                         {/* Delete Window Column for Admin/Staff */}
-                        {(userRole === "admin" || userRole === "staff") && (
+                        {(userRole === "admin" || userRole === "staff") && userRole !== "dev" && (
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center text-xs">
                               {canDeleteThis ? (
@@ -628,14 +628,14 @@ export default function Subscribers() {
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <button
                             onClick={() => remove(subscriber.email)}
-                            disabled={(userRole === "admin" || userRole === "staff") && !canDeleteThis}
+                            disabled={(userRole === "admin" || userRole === "staff") && userRole !== "dev" && !canDeleteThis}
                             className={`p-2 rounded-lg transition-colors ${
-                              (userRole === "superadmin" || canDeleteThis)
+                              (userRole === "superadmin" || userRole === "dev" || canDeleteThis)
                                 ? "text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20"
                                 : "text-gray-400 cursor-not-allowed"
                             }`}
                             title={
-                              userRole === "superadmin"
+                              (userRole === "superadmin" || userRole === "dev")
                                 ? "Remove subscriber"
                                 : canDeleteThis
                                 ? "Remove subscriber (within 24h window)"

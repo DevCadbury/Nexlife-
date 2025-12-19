@@ -153,43 +153,84 @@ const GlobalPresence = memo(() => {
     return lookup;
   }, [mapData]);
 
-  // Styling function for the map
-  const getStyle = useCallback(({ countryValue, countryCode, minValue, maxValue, color }) => {
-    const country = countryLookup[countryCode];
-    if (!country) {
+  // Comprehensive country name mapping for all countries
+  const countryNames = useMemo(() => ({
+    'af': 'Afghanistan', 'al': 'Albania', 'dz': 'Algeria', 'ad': 'Andorra', 'ao': 'Angola',
+    'ag': 'Antigua and Barbuda', 'ar': 'Argentina', 'am': 'Armenia', 'au': 'Australia', 'at': 'Austria',
+    'az': 'Azerbaijan', 'bs': 'Bahamas', 'bh': 'Bahrain', 'bd': 'Bangladesh', 'bb': 'Barbados',
+    'by': 'Belarus', 'be': 'Belgium', 'bz': 'Belize', 'bj': 'Benin', 'bt': 'Bhutan',
+    'bo': 'Bolivia', 'ba': 'Bosnia and Herzegovina', 'bw': 'Botswana', 'br': 'Brazil', 'bn': 'Brunei',
+    'bg': 'Bulgaria', 'bf': 'Burkina Faso', 'bi': 'Burundi', 'kh': 'Cambodia', 'cm': 'Cameroon',
+    'ca': 'Canada', 'cv': 'Cape Verde', 'cf': 'Central African Republic', 'td': 'Chad', 'cl': 'Chile',
+    'cn': 'China', 'co': 'Colombia', 'km': 'Comoros', 'cg': 'Congo', 'cd': 'DR Congo',
+    'cr': 'Costa Rica', 'ci': 'Ivory Coast', 'hr': 'Croatia', 'cu': 'Cuba', 'cy': 'Cyprus',
+    'cz': 'Czech Republic', 'dk': 'Denmark', 'dj': 'Djibouti', 'dm': 'Dominica', 'do': 'Dominican Republic',
+    'ec': 'Ecuador', 'eg': 'Egypt', 'sv': 'El Salvador', 'gq': 'Equatorial Guinea', 'er': 'Eritrea',
+    'ee': 'Estonia', 'et': 'Ethiopia', 'fj': 'Fiji', 'fi': 'Finland', 'fr': 'France',
+    'ga': 'Gabon', 'gm': 'Gambia', 'ge': 'Georgia', 'de': 'Germany', 'gh': 'Ghana',
+    'gr': 'Greece', 'gd': 'Grenada', 'gt': 'Guatemala', 'gn': 'Guinea', 'gw': 'Guinea-Bissau',
+    'gy': 'Guyana', 'ht': 'Haiti', 'hn': 'Honduras', 'hu': 'Hungary', 'is': 'Iceland',
+    'in': 'India', 'id': 'Indonesia', 'ir': 'Iran', 'iq': 'Iraq', 'ie': 'Ireland',
+    'il': 'Israel', 'it': 'Italy', 'jm': 'Jamaica', 'jp': 'Japan', 'jo': 'Jordan',
+    'kz': 'Kazakhstan', 'ke': 'Kenya', 'ki': 'Kiribati', 'kp': 'North Korea', 'kr': 'South Korea',
+    'kw': 'Kuwait', 'kg': 'Kyrgyzstan', 'la': 'Laos', 'lv': 'Latvia', 'lb': 'Lebanon',
+    'ls': 'Lesotho', 'lr': 'Liberia', 'ly': 'Libya', 'li': 'Liechtenstein', 'lt': 'Lithuania',
+    'lu': 'Luxembourg', 'mk': 'North Macedonia', 'mg': 'Madagascar', 'mw': 'Malawi', 'my': 'Malaysia',
+    'mv': 'Maldives', 'ml': 'Mali', 'mt': 'Malta', 'mh': 'Marshall Islands', 'mr': 'Mauritania',
+    'mu': 'Mauritius', 'mx': 'Mexico', 'fm': 'Micronesia', 'md': 'Moldova', 'mc': 'Monaco',
+    'mn': 'Mongolia', 'me': 'Montenegro', 'ma': 'Morocco', 'mz': 'Mozambique', 'mm': 'Myanmar',
+    'na': 'Namibia', 'nr': 'Nauru', 'np': 'Nepal', 'nl': 'Netherlands', 'nz': 'New Zealand',
+    'ni': 'Nicaragua', 'ne': 'Niger', 'ng': 'Nigeria', 'no': 'Norway', 'om': 'Oman',
+    'pk': 'Pakistan', 'pw': 'Palau', 'ps': 'Palestine', 'pa': 'Panama', 'pg': 'Papua New Guinea',
+    'py': 'Paraguay', 'pe': 'Peru', 'ph': 'Philippines', 'pl': 'Poland', 'pt': 'Portugal',
+    'qa': 'Qatar', 'ro': 'Romania', 'ru': 'Russia', 'rw': 'Rwanda', 'kn': 'Saint Kitts and Nevis',
+    'lc': 'Saint Lucia', 'vc': 'Saint Vincent', 'ws': 'Samoa', 'sm': 'San Marino', 'st': 'Sao Tome and Principe',
+    'sa': 'Saudi Arabia', 'sn': 'Senegal', 'rs': 'Serbia', 'sc': 'Seychelles', 'sl': 'Sierra Leone',
+    'sg': 'Singapore', 'sk': 'Slovakia', 'si': 'Slovenia', 'sb': 'Solomon Islands', 'so': 'Somalia',
+    'za': 'South Africa', 'ss': 'South Sudan', 'es': 'Spain', 'lk': 'Sri Lanka', 'sd': 'Sudan',
+    'sr': 'Suriname', 'sz': 'Eswatini', 'se': 'Sweden', 'ch': 'Switzerland', 'sy': 'Syria',
+    'tw': 'Taiwan', 'tj': 'Tajikistan', 'tz': 'Tanzania', 'th': 'Thailand', 'tl': 'Timor-Leste',
+    'tg': 'Togo', 'to': 'Tonga', 'tt': 'Trinidad and Tobago', 'tn': 'Tunisia', 'tr': 'Turkey',
+    'tm': 'Turkmenistan', 'tv': 'Tuvalu', 'ug': 'Uganda', 'ua': 'Ukraine', 'ae': 'UAE',
+    'gb': 'United Kingdom', 'us': 'United States', 'uy': 'Uruguay', 'uz': 'Uzbekistan', 'vu': 'Vanuatu',
+    'va': 'Vatican City', 've': 'Venezuela', 'vn': 'Vietnam', 'ye': 'Yemen', 'zm': 'Zambia',
+    'zw': 'Zimbabwe', 'gl': 'Greenland', 'eh': 'Western Sahara', 'nc': 'New Caledonia', 'pf': 'French Polynesia'
+  }), []);
+
+  // Styling function for the map - white base with color on interaction
+  const getStyle = useCallback(({ countryValue, countryCode, countryName, minValue, maxValue, color }) => {
+    // Clicked state is handled by useEffect, so skip styling for clicked country here
+    if (countryCode === clickedCountry) {
       return {
-        fill: "#e2e8f0",
-        fillOpacity: 0.6,
-        stroke: "#cbd5e0",
-        strokeWidth: 0.5,
+        fill: "#ef4444",
+        fillOpacity: 1,
+        stroke: "#dc2626",
+        strokeWidth: 2.5,
         strokeOpacity: 1,
-        cursor: "default"
+        cursor: "pointer",
+        transition: "all 0.3s ease"
       };
     }
     
-    // Determine fill color based on state
-    let fillColor = "#3b82f6"; // Default blue
-    let fillOpacity = 0.8;
-    let strokeColor = "#ef4444"; // Red stroke for all service countries
-    let strokeWidth = 1.5; // Thin red border
-    
-    if (countryCode === clickedCountry) {
-      fillColor = "#1d4ed8"; // Dark blue for clicked
-      fillOpacity = 1;
-      strokeColor = "#dc2626"; // Darker red for clicked
-      strokeWidth = 2.5;
-    } else if (countryCode === hoveredCountry) {
-      fillColor = "#60a5fa"; // Bright blue for hover
-      fillOpacity = 1;
-      strokeColor = "#ef4444"; // Keep red on hover
-      strokeWidth = 2;
+    // Hover state - blue fill
+    if (countryCode === hoveredCountry) {
+      return {
+        fill: "#60a5fa",
+        fillOpacity: 1,
+        stroke: "#3b82f6",
+        strokeWidth: 1.5,
+        strokeOpacity: 1,
+        cursor: "pointer",
+        transition: "all 0.3s ease"
+      };
     }
     
+    // Default: white fill with black borders
     return {
-      fill: fillColor,
-      fillOpacity: fillOpacity,
-      stroke: strokeColor,
-      strokeWidth: strokeWidth,
+      fill: "#ffffff",
+      fillOpacity: 1,
+      stroke: "#000000",
+      strokeWidth: 0.5,
       strokeOpacity: 1,
       cursor: "pointer",
       transition: "all 0.3s ease"
@@ -507,7 +548,7 @@ const GlobalPresence = memo(() => {
                       providers with quality products and reliable services.
                     </p>
                     <p className="text-xs md:text-sm text-blue-600 dark:text-blue-400 mt-3 font-semibold">
-                      Hover over countries to see our presence
+                      Hover or click on any country to see details • We serve all countries worldwide
                     </p>
                   </div>
                 </div>
@@ -515,22 +556,27 @@ const GlobalPresence = memo(() => {
 
               {/* Map container with beautiful styling */}
               <div className="relative w-full rounded-2xl overflow-hidden border-2 border-gray-200 dark:border-gray-700 shadow-2xl bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 p-8">
-                {/* Hover tooltip */}
+                {/* Hover tooltip - shows for all countries */}
                 <AnimatePresence>
-                  {hoveredCountry && countryLookup[hoveredCountry] && (
+                  {hoveredCountry && (
                     <motion.div
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
                       className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20 pointer-events-none"
                     >
-                      <div className="bg-white dark:bg-gray-800 px-6 py-3 rounded-xl shadow-2xl border-2 border-blue-500 dark:border-blue-400">
+                      <div className="px-6 py-3 rounded-xl shadow-2xl border-2 bg-white dark:bg-gray-800 border-blue-500 dark:border-blue-400">
                         <div className="text-center">
                           <div className="text-lg font-bold text-gray-900 dark:text-white">
-                            {countryLookup[hoveredCountry].name}
+                            {countryLookup[hoveredCountry]?.name || countryNames[hoveredCountry] || hoveredCountry.toUpperCase()}
                           </div>
-                          <div className="text-sm text-blue-600 dark:text-blue-400 font-medium">
-                            {countryLookup[hoveredCountry].region}
+                          {countryLookup[hoveredCountry] && (
+                            <div className="text-sm text-blue-600 dark:text-blue-400 font-medium">
+                              {countryLookup[hoveredCountry].region}
+                            </div>
+                          )}
+                          <div className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">
+                            ✓ We serve this region
                           </div>
                         </div>
                       </div>
@@ -538,16 +584,28 @@ const GlobalPresence = memo(() => {
                   )}
                 </AnimatePresence>
 
-                <div className="world-map-svg">
+                <div className="world-map-svg" 
+                     onMouseMove={(e) => {
+                       const target = e.target;
+                       if (target.tagName === 'path' && target.getAttribute('data-name')) {
+                         const countryCode = target.getAttribute('data-id');
+                         if (countryCode && countryCode !== hoveredCountry) {
+                           setHoveredCountry(countryCode.toLowerCase());
+                         }
+                       }
+                     }}
+                     onMouseLeave={() => setHoveredCountry(null)}
+                >
                   <WorldMap
-                    color="#3b82f6"
+                    key={clickedCountry || 'default'}
+                    color="#ffffff"
                     title=""
                     value-suffix="countries"
                     size="xxl"
                     data={mapData}
                     richInteraction={true}
-                    tooltipBgColor="rgba(59, 130, 246, 0.9)"
-                    tooltipTextColor="#ffffff"
+                    tooltipBgColor="transparent"
+                    tooltipTextColor="transparent"
                     frame={false}
                     frameColor="transparent"
                     styleFunction={getStyle}
@@ -561,30 +619,35 @@ const GlobalPresence = memo(() => {
                   />
                 </div>
                 
-                {/* Clicked country info */}
+                {/* Clicked country info - shows for all countries */}
                 <AnimatePresence>
-                  {clickedCountry && countryLookup[clickedCountry] && (
+                  {clickedCountry && (
                     <motion.div
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.9 }}
-                      className="absolute top-4 right-4 bg-white dark:bg-gray-800 rounded-xl p-4 shadow-2xl border-2 border-blue-500 dark:border-blue-400 max-w-xs z-10"
+                      className="absolute top-4 right-4 rounded-xl p-4 shadow-2xl border-2 max-w-xs z-10 bg-white dark:bg-gray-800 border-blue-500 dark:border-blue-400"
                     >
                       <button
                         onClick={() => setClickedCountry(null)}
-                        className="absolute top-2 right-2 p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+                        className="absolute top-2 right-2 p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-colors"
                       >
                         <X className="w-4 h-4 text-gray-500" />
                       </button>
                       <div className="pr-6">
                         <div className="text-lg font-bold text-gray-900 dark:text-white mb-1">
-                          {countryLookup[clickedCountry].name}
+                          {countryLookup[clickedCountry]?.name || countryNames[clickedCountry] || clickedCountry.toUpperCase()}
                         </div>
-                        <div className="text-sm text-blue-600 dark:text-blue-400 font-medium mb-3">
-                          {countryLookup[clickedCountry].region}
+                        {countryLookup[clickedCountry] && (
+                          <div className="text-sm text-blue-600 dark:text-blue-400 font-medium mb-2">
+                            {countryLookup[clickedCountry].region}
+                          </div>
+                        )}
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="text-green-600 dark:text-green-400 font-semibold text-sm">✓ Service Available</div>
                         </div>
                         <div className="text-xs text-gray-600 dark:text-gray-400">
-                          We provide pharmaceutical products and services in this region with quality assurance and reliable delivery.
+                          We provide pharmaceutical products and services globally with quality assurance and reliable delivery to this region.
                         </div>
                       </div>
                     </motion.div>
