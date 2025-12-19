@@ -29,7 +29,7 @@ export default function Subscribers() {
   const { data, mutate } = useSWR("/subscribers", fetcher);
   const { data: statsData, mutate: mutateStats } = useSWR("/subscribers/stats", fetcher);
   const { data: profile } = useSWR("/auth/me", fetcher);
-  const { data: staffList } = useSWR(profile?.user?.role === "superadmin" ? "/staff" : null, fetcher);
+  const { data: staffList } = useSWR((profile?.user?.role === "superadmin" || profile?.user?.role === "dev") ? "/staff" : null, fetcher);
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [selectedEmails, setSelectedEmails] = useState<string[]>([]);
@@ -82,7 +82,7 @@ export default function Subscribers() {
     const subscriber = data?.items?.find((s: any) => s.email === emailToRemove);
     if (!subscriber) return;
     
-    // Check if admin/staff can delete (within 24 hours)
+    // Check if admin/staff can delete (within 24 hours) - skip for superadmin/dev
     let title = "Remove Subscriber";
     let message = `Are you sure you want to remove ${emailToRemove} from the newsletter?`;
     let variant: 'danger' | 'warning' | 'info' = 'danger';
@@ -272,6 +272,12 @@ export default function Subscribers() {
                     Superadmin
                   </span>
                 )}
+                {userRole === "dev" && (
+                  <span className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center gap-1">
+                    <Shield className="w-3 h-3" />
+                    Dev
+                  </span>
+                )}
                 {(userRole === "admin" || userRole === "staff") && (
                   <span className="text-xs text-slate-500 dark:text-slate-400 ml-2">
                     (Your subscribers only)
@@ -279,7 +285,7 @@ export default function Subscribers() {
                 )}
               </h1>
               <p className="text-slate-600 dark:text-slate-400 mt-2">
-                {userRole === "superadmin" 
+                {(userRole === "superadmin" || userRole === "dev")
                   ? "Manage all newsletter subscribers" 
                   : "Manage your newsletter subscribers (24h edit window)"
                 }
@@ -303,8 +309,8 @@ export default function Subscribers() {
                 </div>
               )}
               
-              {/* Staff Filter for Superadmin */}
-              {userRole === "superadmin" && staffList?.items && (
+              {/* Staff Filter for Superadmin and Dev */}
+              {(userRole === "superadmin" || userRole === "dev") && staffList?.items && (
                 <select
                   value={staffFilter}
                   onChange={(e) => setStaffFilter(e.target.value)}
@@ -319,8 +325,8 @@ export default function Subscribers() {
                 </select>
               )}
               
-              {/* Bulk Actions for Superadmin */}
-              {userRole === "superadmin" && selectedEmails.length > 0 && (
+              {/* Bulk Actions for Superadmin and Dev */}
+              {(userRole === "superadmin" || userRole === "dev") && selectedEmails.length > 0 && (
                 <button
                   onClick={bulkDelete}
                   disabled={bulkDeleting}
@@ -472,8 +478,8 @@ export default function Subscribers() {
                 )}
               </h2>
               
-              {/* Select All for Superadmin */}
-              {userRole === "superadmin" && data?.items && data.items.length > 0 && (
+              {/* Select All for Superadmin and Dev */}
+              {(userRole === "superadmin" || userRole === "dev") && data?.items && data.items.length > 0 && (
                 <button
                   onClick={toggleSelectAll}
                   className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors"
@@ -504,7 +510,7 @@ export default function Subscribers() {
               <table className="w-full">
                 <thead className="bg-slate-50 dark:bg-slate-700/50">
                   <tr>
-                    {userRole === "superadmin" && (
+                    {(userRole === "superadmin" || userRole === "dev") && (
                       <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
                         Select
                       </th>
@@ -528,7 +534,7 @@ export default function Subscribers() {
                 <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
                   {data.items
                     .filter((subscriber: any) => {
-                      if (userRole !== "superadmin" || staffFilter === "all") return true;
+                      if ((userRole !== "superadmin" && userRole !== "dev") || staffFilter === "all") return true;
                       return subscriber.added_by === staffFilter;
                     })
                     .map((subscriber: any, index: number) => {
@@ -543,8 +549,8 @@ export default function Subscribers() {
                         transition={{ delay: index * 0.05 }}
                         className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
                       >
-                        {/* Select Column for Superadmin */}
-                        {userRole === "superadmin" && (
+                        {/* Select Column for Superadmin and Dev */}
+                        {(userRole === "superadmin" || userRole === "dev") && (
                           <td className="px-6 py-4 whitespace-nowrap">
                             <button
                               onClick={() => toggleSelect(subscriber.email)}
@@ -569,7 +575,7 @@ export default function Subscribers() {
                               <div className="text-sm font-medium text-slate-900 dark:text-white">
                                 {subscriber.email}
                               </div>
-                              {userRole === "superadmin" && subscriber.added_by && (
+                              {(userRole === "superadmin" || userRole === "dev") && subscriber.added_by && (
                                 <div className="flex items-center gap-2 mt-1">
                                   <span className="text-xs text-slate-500 dark:text-slate-400">Added by:</span>
                                   <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800">

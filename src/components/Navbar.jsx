@@ -51,16 +51,12 @@ const Navbar = () => {
         {/* Desktop Navigation */}
         <NavBody>
           <ANavbarLogo src={nexlifeLogo} alt="" />
-          <div className="flex items-center gap-1 ml-8">
+          <div className="flex items-center gap-1 ml-          <div className="flex items-center gap-1 ml-8">
             <NavItems items={navItems} />
           </div>
           <NavbarButton variant="secondary" onClick={handleCallUs}>
             Call Us
           </NavbarButton>
-        </NavBody>
-
-        {/* Mobile Navigation */}
-        <MobileNav>
           <MobileNavHeader>
             <Link to="/" className="flex items-center gap-2">
               <div className="bg-white dark:bg-white rounded-xl p-2 shadow-md">

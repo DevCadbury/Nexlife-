@@ -10,7 +10,7 @@ import {
   Linkedin,
   Instagram,
   MessageCircle,
-} from "lucide-react";
+} from "luci} from "lucide-react";
 import ThemeToggle from "../ThemeToggle";
 
 export const Navbar = ({ children }) => {
@@ -205,22 +205,7 @@ export const Navbar = ({ children }) => {
 export const NavBody = ({ children }) => {
   return (
     <div className="hidden md:flex items-center justify-between px-3 py-2 relative w-full">
-      {children}
-    </div>
-  );
-};
-
-export const NavbarLogo = ({ src, alt = "Nexlife International" }) => {
-  return (
-    <Link to="/" className="relative flex items-center gap-2">
-      {src ? (
-        <img
-          src={src}
-          alt={alt}
-          className="h-10 w-auto drop-shadow-[0_2px_8px_rgba(59,130,246,0.35)]"
-        />
-      ) : (
-        <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 shadow-[0_6px_20px_rgba(59,130,246,0.45)]" />
+ from-blue-600 to-indigo-600 shadow-[0_6px_20px_rgba(59,130,246,0.45)]" />
       )}
     </Link>
   );
