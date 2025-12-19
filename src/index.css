@@ -265,13 +265,14 @@
   background-color: rgba(255, 255, 255, 0.15) !important;
   border: 1px solid rgba(255, 255, 255, 0.3) !important;
   border-radius: 6px !important;
-  padding: 6px 10px !important;
+  padding: 4px 8px !important;
   color: white !important;
-  font-size: 13px !important;
+  font-size: 12px !important;
   cursor: pointer !important;
   outline: none !important;
-  height: 32px !important;
-  min-width: 120px !important;
+  height: 28px !important;
+  min-width: 85px !important;
+  max-width: 100px !important;
 }
 
 /* Mobile specific styling - smaller and compact */
@@ -500,25 +501,41 @@ body {
 /* World map styling for GlobalPresence page */
 .world-map-svg {
   filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+  width: 100%;
+  overflow: hidden;
+}
+
+.world-map-svg svg {
+  width: 100% !important;
+  height: auto !important;
+  max-width: 100%;
+  max-height: 480px;
+}
+
+/* Ensure proper scaling on mobile */
+@media (max-width: 640px) {
+  .world-map-svg svg {
+    max-height: 260px;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .world-map-svg svg {
+    max-height: 360px;
+  }
+}
+
+@media (min-width: 1025px) {
+  .world-map-svg svg {
+    max-height: 520px;
+  }
 }
 
 .world-map-svg svg path {
   transition: all 0.3s ease !important;
 }
 
-/* Hover effect - highlight boundaries with blue */
+/* Remove any conflicting hover styles */
 .world-map-svg svg path:hover {
-  stroke: #2563eb !important;
-  stroke-width: 2.5 !important;
-  filter: drop-shadow(0 0 8px rgba(37, 99, 235, 0.6)) !important;
-}
-
-/* Override any white fills on hover */
-.world-map-svg svg path[fill="#ffffff"],
-.world-map-svg svg path[fill="white"] {
-  fill: #60a5fa !important;
-}
-
-.dark .world-map-svg path[fill="#e2e8f0"] {
-  fill: #374151 !important;
+  cursor: pointer !important;
 }

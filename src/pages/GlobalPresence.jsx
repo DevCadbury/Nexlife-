@@ -533,7 +533,7 @@ const GlobalPresence = memo(() => {
         <section className="section-padding bg-gray-50 dark:bg-gray-800">
           <div className="container-custom">
             {/* Interactive World Map */}
-            <div className="relative max-w-6xl mx-auto">
+            <div className="relative w-full max-w-7xl mx-auto">
               {/* Text section above the map */}
               <div className="mb-8">
                 <div className="bg-gradient-to-r from-white/95 via-white/90 to-white/95 dark:from-gray-800/95 dark:via-gray-800/90 dark:to-gray-800/95 backdrop-blur-md rounded-2xl p-6 border border-gray-200 dark:border-gray-700 shadow-2xl">
@@ -555,7 +555,7 @@ const GlobalPresence = memo(() => {
               </div>
 
               {/* Map container with beautiful styling */}
-              <div className="relative w-full rounded-2xl overflow-hidden border-2 border-gray-200 dark:border-gray-700 shadow-2xl bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 p-8">
+              <div className="relative w-full max-w-7xl mx-auto rounded-2xl overflow-hidden border-2 border-gray-200 dark:border-gray-700 shadow-2xl bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 p-2 sm:p-4 md:p-8">
                 {/* Hover tooltip - shows for all countries */}
                 <AnimatePresence>
                   {hoveredCountry && (
@@ -563,11 +563,11 @@ const GlobalPresence = memo(() => {
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
-                      className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20 pointer-events-none"
+                      className="hidden sm:block absolute top-4 left-1/2 transform -translate-x-1/2 z-20 pointer-events-none"
                     >
-                      <div className="px-6 py-3 rounded-xl shadow-2xl border-2 bg-white dark:bg-gray-800 border-blue-500 dark:border-blue-400">
+                      <div className="px-4 sm:px-6 py-2 sm:py-3 rounded-xl shadow-2xl border-2 bg-white dark:bg-gray-800 border-blue-500 dark:border-blue-400">
                         <div className="text-center">
-                          <div className="text-lg font-bold text-gray-900 dark:text-white">
+                          <div className="text-sm sm:text-lg font-bold text-gray-900 dark:text-white">
                             {countryLookup[hoveredCountry]?.name || countryNames[hoveredCountry] || hoveredCountry.toUpperCase()}
                           </div>
                           {countryLookup[hoveredCountry] && (
@@ -584,7 +584,8 @@ const GlobalPresence = memo(() => {
                   )}
                 </AnimatePresence>
 
-                <div className="world-map-svg" 
+                 <div className="world-map-svg w-full flex items-center justify-center"
+                   style={{ minHeight: '320px', maxHeight: '640px' }}
                      onMouseMove={(e) => {
                        const target = e.target;
                        if (target.tagName === 'path' && target.getAttribute('data-name')) {
@@ -595,19 +596,31 @@ const GlobalPresence = memo(() => {
                        }
                      }}
                      onMouseLeave={() => setHoveredCountry(null)}
+                     onTouchStart={(e) => {
+                       const target = e.target;
+                       if (target.tagName === 'path') {
+                         const countryCode = target.getAttribute('data-id');
+                         if (countryCode) {
+                           const code = countryCode.toLowerCase();
+                           setClickedCountry(clickedCountry === code ? null : code);
+                         }
+                       }
+                     }}
                 >
                   <WorldMap
                     key={clickedCountry || 'default'}
                     color="#ffffff"
                     title=""
                     value-suffix="countries"
-                    size="xxl"
+                    size="responsive"
                     data={mapData}
                     richInteraction={true}
                     tooltipBgColor="transparent"
                     tooltipTextColor="transparent"
                     frame={false}
                     frameColor="transparent"
+                    strokeOpacity={1}
+                    borderColor="#000000"
                     styleFunction={getStyle}
                     onClickFunction={(countryData) => {
                       if (countryData && countryData.countryCode) {
@@ -626,16 +639,16 @@ const GlobalPresence = memo(() => {
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.9 }}
-                      className="absolute top-4 right-4 rounded-xl p-4 shadow-2xl border-2 max-w-xs z-10 bg-white dark:bg-gray-800 border-blue-500 dark:border-blue-400"
+                      className="absolute top-2 right-2 sm:top-4 sm:right-4 rounded-xl p-3 sm:p-4 shadow-2xl border-2 max-w-[90%] sm:max-w-xs z-10 bg-white dark:bg-gray-800 border-blue-500 dark:border-blue-400"
                     >
                       <button
                         onClick={() => setClickedCountry(null)}
-                        className="absolute top-2 right-2 p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-colors"
+                        className="absolute top-1 right-1 sm:top-2 sm:right-2 p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-colors"
                       >
-                        <X className="w-4 h-4 text-gray-500" />
+                        <X className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500" />
                       </button>
-                      <div className="pr-6">
-                        <div className="text-lg font-bold text-gray-900 dark:text-white mb-1">
+                      <div className="pr-5 sm:pr-6">
+                        <div className="text-sm sm:text-lg font-bold text-gray-900 dark:text-white mb-1">
                           {countryLookup[clickedCountry]?.name || countryNames[clickedCountry] || clickedCountry.toUpperCase()}
                         </div>
                         {countryLookup[clickedCountry] && (
