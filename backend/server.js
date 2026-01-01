@@ -61,11 +61,13 @@ app.use(
         'https://nexlife-admin.vercel.app',
         'https://www.nexlifeinternational.com',
         'https://nexlifeinternational.com',
-        'https://nexlife.vercel.app/',
+        'https://nexlife.vercel.app',
         'http://localhost:3000', // For local development
         'http://localhost:3001', // For local development
         'http://localhost:4000', // For local development
-        'http://localhost:4001'  // For local development
+        'http://localhost:4001', // For local development
+        'http://localhost:5173', // Vite dev server
+        'http://127.0.0.1:5173'  // Vite dev server (IP)
       ];
 
       if (allowedOrigins.includes(origin)) {
