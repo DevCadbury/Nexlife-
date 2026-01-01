@@ -13,7 +13,7 @@
   ],
   "env": {
     "NODE_ENV": "production",
-    "SMTP_HOST": "smtp.hostinger.com",
+    "SMTP_HOST": "smtpout.secureserver.net",
     "SMTP_PORT": "587",
     "SMTP_SECURE": "false",
     "SMTP_USER": "info@nexlifeinternational.com",
@@ -30,7 +30,7 @@
     "CLOUDINARY_API_KEY": "159867665417568",
     "CLOUDINARY_API_SECRET": "UjVH-Wj-XwiiKyYdeewjRxnDIzA",
     "CLOUDINARY_CLOUD_NAME1": "dqnhpmoej",
-    "IMAP_HOST": "imap.hostinger.com",
+    "IMAP_HOST": "imap.secureserver.net",
     "IMAP_PORT": "993",
     "IMAP_SECURE": "true",
     "IMAP_USER": "info@nexlifeinternational.com",
