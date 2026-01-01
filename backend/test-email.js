@@ -14,8 +14,8 @@ dotenv.config();
 
 // Test configuration
 const testConfig = {
-  smtpHost: process.env.SMTP_HOST || "smtp.hostinger.com",
-  smtpPort: process.env.SMTP_PORT || 587,
+  smtpHost: process.env.SMTP_HOST,
+  smtpPort: process.env.SMTP_PORT,
   smtpUser: process.env.SMTP_USER,
   smtpPass: process.env.SMTP_PASS,
   testEmail: process.env.TEST_EMAIL || process.env.SMTP_USER,

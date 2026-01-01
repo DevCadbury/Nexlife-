@@ -28,8 +28,8 @@ async function testSMTP() {
   section('🔧 Testing SMTP Configuration');
   
   const config = {
-    host: process.env.SMTP_HOST || 'smtp.hostinger.com',
-    port: parseInt(process.env.SMTP_PORT) || 587,
+    host: process.env.SMTP_HOST,
+    port: parseInt(process.env.SMTP_PORT),
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   };
@@ -115,8 +115,8 @@ async function testIMAP() {
   section('📥 Testing IMAP Configuration');
   
   const config = {
-    host: process.env.IMAP_HOST || 'imap.hostinger.com',
-    port: parseInt(process.env.IMAP_PORT) || 993,
+    host: process.env.IMAP_HOST,
+    port: parseInt(process.env.IMAP_PORT),
     user: process.env.IMAP_USER,
     pass: process.env.IMAP_PASS,
     secure: process.env.IMAP_SECURE !== 'false',

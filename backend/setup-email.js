@@ -51,8 +51,8 @@ async function setupEmail() {
     console.log("----------------------------------");
 
     const smtpHost =
-      (await question("SMTP Host (default: smtp.hostinger.com): ")) ||
-      "smtp.hostinger.com";
+      (await question("SMTP Host (e.g., smtpout.secureserver.net or smtp.hostinger.com): ")) ||
+      "smtpout.secureserver.net";
     const smtpPort = (await question("SMTP Port (default: 587): ")) || "587";
     const smtpSecure = await question("Use SSL/TLS? (y/N): ");
     const smtpUser = await question(
