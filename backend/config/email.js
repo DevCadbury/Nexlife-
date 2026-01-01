@@ -338,6 +338,9 @@ This email was sent from the Nexlife International website newsletter signup.
     `,
   }),
 
+  // Alias: inquiry template (uses contact template structure)
+  inquiry: (data) => emailTemplates.contact(data),
+
   inquiryConfirmation: (data) => ({
     subject: `Thank you for contacting Nexlife International - Inquiry #${data.inquiryId}`,
     html: `
