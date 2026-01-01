@@ -39,7 +39,7 @@ From your Hostinger control panel, note down these settings:
 
    ```env
    # Hostinger Email Configuration
-   SMTP_HOST=smtp.hostinger.com
+   SMTP_HOST=smtpout.secureserver.net
    SMTP_PORT=587
    SMTP_SECURE=false
    SMTP_USER=contact@nexlifeinternational.com

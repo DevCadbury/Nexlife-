@@ -89,11 +89,11 @@ echo 1. Go to Vercel dashboard: https://vercel.com/dashboard
 echo 2. Select your project
 echo 3. Go to Settings - Environment Variables
 echo 4. Verify these variables are set:
-echo    - SMTP_HOST=smtp.hostinger.com
+echo    - SMTP_HOST=smtpout.secureserver.net
 echo    - SMTP_PORT=587
 echo    - SMTP_USER=info@nexlifeinternational.com
 echo    - SMTP_PASS=Nexlife@2025
-echo    - IMAP_HOST=imap.hostinger.com
+echo    - IMAP_HOST=imap.secureserver.net
 echo    - IMAP_PORT=993
 echo    - IMAP_USER=info@nexlifeinternational.com
 echo    - IMAP_PASS=Nexlife@2025

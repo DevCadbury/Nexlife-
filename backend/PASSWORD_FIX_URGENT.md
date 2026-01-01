@@ -60,14 +60,14 @@ Copy this entire list to Vercel (replace existing values):
 NODE_ENV=production
 
 # SMTP Configuration
-SMTP_HOST=smtp.hostinger.com
+SMTP_HOST=smtpout.secureserver.net
 SMTP_PORT=587
 SMTP_SECURE=false
 SMTP_USER=info@nexlifeinternational.com
 SMTP_PASS=S223@nexlife
 
 # IMAP Configuration
-IMAP_HOST=imap.hostinger.com
+IMAP_HOST=imap.secureserver.net
 IMAP_PORT=993
 IMAP_SECURE=true
 IMAP_USER=info@nexlifeinternational.com

@@ -62,13 +62,13 @@ Go to: https://vercel.com/your-username/nexlife-api/settings/environment-variabl
 
 **Set these (use lowercase email!):**
 ```env
-SMTP_HOST=smtp.hostinger.com
+SMTP_HOST=smtpout.secureserver.net
 SMTP_PORT=587
 SMTP_SECURE=false
 SMTP_USER=info@nexlifeinternational.com
 SMTP_PASS=Nexlife@2025
 
-IMAP_HOST=imap.hostinger.com
+IMAP_HOST=imap.secureserver.net
 IMAP_PORT=993
 IMAP_SECURE=true
 IMAP_USER=info@nexlifeinternational.com

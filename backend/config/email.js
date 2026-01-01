@@ -85,9 +85,9 @@ function inlineStyles(html) {
   return inlinedHtml;
 }
 
-// Hostinger SMTP Configuration
+// GoDaddy SMTP Configuration
 const createTransporter = () => {
-  const smtpHost = process.env.SMTP_HOST || "smtp.hostinger.com";
+  const smtpHost = process.env.SMTP_HOST || "smtpout.secureserver.net";
   const smtpPort = parseInt(process.env.SMTP_PORT) || 587;
   const smtpUser = process.env.SMTP_USER;
   const smtpPass = process.env.SMTP_PASS;

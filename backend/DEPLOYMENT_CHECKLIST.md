@@ -34,14 +34,14 @@ Use this checklist to ensure a successful deployment with working email function
 Copy and set these variables exactly (case-sensitive!):
 
 #### SMTP Configuration
-- [ ] `SMTP_HOST` = `smtp.hostinger.com`
+- [ ] `SMTP_HOST` = `smtpout.secureserver.net`
 - [ ] `SMTP_PORT` = `587`
 - [ ] `SMTP_SECURE` = `false`
 - [ ] `SMTP_USER` = `info@nexlifeinternational.com` ⚠️ lowercase!
 - [ ] `SMTP_PASS` = `Nexlife@2025`
 
 #### IMAP Configuration
-- [ ] `IMAP_HOST` = `imap.hostinger.com`
+- [ ] `IMAP_HOST` = `imap.secureserver.net`
 - [ ] `IMAP_PORT` = `993`
 - [ ] `IMAP_SECURE` = `true`
 - [ ] `IMAP_USER` = `info@nexlifeinternational.com` ⚠️ lowercase!
