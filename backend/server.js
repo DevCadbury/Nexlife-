@@ -62,6 +62,7 @@ app.use(
         'https://www.nexlifeinternational.com',
         'https://nexlifeinternational.com',
         'https://nexlife.vercel.app',
+        'https://nexlife-api.vercel.app', // Backend API itself
         'http://localhost:3000', // For local development
         'http://localhost:3001', // For local development
         'http://localhost:4000', // For local development
