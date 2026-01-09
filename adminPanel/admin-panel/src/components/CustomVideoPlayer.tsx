@@ -20,7 +20,7 @@ const CustomVideoPlayer: React.FC<CustomVideoPlayerProps> = ({
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(autoplay);
-  const [showControls, setShowControls] = useState(true);
+  const [showControls, setShowControls] = useState(false); // Hidden by default
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -142,8 +142,9 @@ const CustomVideoPlayer: React.FC<CustomVideoPlayerProps> = ({
   return (
     <div
       className={`relative bg-black group ${className}`}
+      onMouseEnter={() => setShowControls(true)} // Show controls on hover
       onMouseMove={handleMouseMove}
-      onMouseLeave={() => isPlaying && setShowControls(false)}
+      onMouseLeave={() => setShowControls(false)} // Hide controls when mouse leaves
       onClick={(e) => e.stopPropagation()}
     >
       <video
