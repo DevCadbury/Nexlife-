@@ -112,10 +112,6 @@ export default function ProductsGallery() {
   useEffect(() => {
     if (categoriesData?.categories) {
       setCategories(categoriesData.categories);
-      // Auto-expand first category
-      if (categoriesData.categories.length > 0 && expandedCategories.size === 0) {
-        setExpandedCategories(new Set([categoriesData.categories[0].name]));
-      }
     }
   }, [categoriesData]);
 
