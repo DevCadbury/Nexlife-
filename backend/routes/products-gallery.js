@@ -19,7 +19,18 @@ if (process.env.CLOUDINARY_CLOUD_NAME1) {
 
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 8 * 1024 * 1024 },
+  limits: { fileSize: 100 * 1024 * 1024 }, // 100MB for videos (Cloudinary free tier limit)
+  fileFilter: (req, file, cb) => {
+    const allowedMimes = [
+      'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+      'video/mp4', 'video/webm', 'video/quicktime'
+    ];
+    if (allowedMimes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Only images and videos allowed.'));
+    }
+  }
 });
 const router = express.Router();
 
@@ -52,11 +63,97 @@ router.get("/category/:category", async (req, res) => {
   res.json({ total: items.length, items });
 });
 
-// Public: get all categories
+// Public: get all categories with ordering
 router.get("/categories", async (req, res) => {
-  const { productsGallery } = await getCollections();
-  const categories = await productsGallery.distinct("category", { visible: { $ne: false } });
-  res.json({ categories: ["All", ...categories.filter(c => c)] });
+  const { productsGallery, categoryOrder } = await getCollections();
+  
+  // Get distinct categories from products
+  const productCategories = await productsGallery.distinct("category", { visible: { $ne: false } });
+  const validCategories = productCategories.filter(c => c);
+  
+  // Get category order settings
+  const orderSettings = await categoryOrder.find({}).sort({ sequence: 1 }).toArray();
+  const orderedMap = new Map(orderSettings.map(c => [c.category, c.sequence]));
+  
+  // Sort categories by sequence (ordered first), then alphabetically
+  const sortedCategories = validCategories.sort((a, b) => {
+    const seqA = orderedMap.get(a) ?? 999999;
+    const seqB = orderedMap.get(b) ?? 999999;
+    if (seqA !== seqB) return seqA - seqB;
+    return a.localeCompare(b);
+  });
+  
+  res.json({ categories: ["All", ...sortedCategories] });
+});
+
+// Admin: get all categories with metadata - SUPERADMIN & DEV ONLY
+router.get("/categories/admin", requireAuth(["superadmin", "dev"]), async (req, res) => {
+  const { productsGallery, categoryOrder } = await getCollections();
+  
+  // Get all categories from products
+  const productCategories = await productsGallery.distinct("category");
+  const validCategories = productCategories.filter(c => c);
+  
+  // Get category order settings
+  const orderSettings = await categoryOrder.find({}).sort({ sequence: 1 }).toArray();
+  const orderedMap = new Map(orderSettings.map(c => [c.category, { sequence: c.sequence, visible: c.visible }]));
+  
+  // Count products per category
+  const categoryCounts = {};
+  for (const category of validCategories) {
+    const count = await productsGallery.countDocuments({ category });
+    categoryCounts[category] = count;
+  }
+  
+  // Build category list with metadata
+  const categories = validCategories.map(category => ({
+    name: category,
+    count: categoryCounts[category] || 0,
+    sequence: orderedMap.get(category)?.sequence ?? 999999,
+    visible: orderedMap.get(category)?.visible ?? true,
+  })).sort((a, b) => {
+    if (a.sequence !== b.sequence) return a.sequence - b.sequence;
+    return a.name.localeCompare(b.name);
+  });
+  
+  res.json({ categories });
+});
+
+// Admin: update category order - SUPERADMIN & DEV ONLY
+router.post("/categories/reorder", requireAuth(["superadmin", "dev"]), async (req, res) => {
+  try {
+    const { categories } = req.body; // Array of { name, sequence, visible }
+    if (!Array.isArray(categories)) {
+      return res.status(400).json({ error: "Categories must be an array" });
+    }
+
+    const { categoryOrder } = await getCollections();
+    
+    // Upsert category order settings
+    const updatePromises = categories.map(({ name, sequence, visible }) =>
+      categoryOrder.updateOne(
+        { category: name },
+        { $set: { category: name, sequence, visible: visible ?? true, updatedAt: new Date() } },
+        { upsert: true }
+      )
+    );
+
+    await Promise.all(updatePromises);
+
+    await logCommunication(req, {
+      level: ActivityLevel.INFO,
+      type: "categories.reorder",
+      message: `Reordered ${categories.length} categories`,
+      actorId: req.user?.id,
+      actorName: req.user?.name,
+      meta: { count: categories.length },
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error reordering categories:", error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Admin: list all products - SUPERADMIN & DEV ONLY
@@ -77,7 +174,7 @@ router.get(
 router.post(
   "/",
   requireAuth(["superadmin", "dev"]),
-  upload.single("image"),
+  upload.single("media"),
   async (req, res) => {
     try {
       const { name, brandName, components, uses, class: productClass, packing, category } = req.body;
@@ -92,16 +189,19 @@ router.post(
       const maxSequenceItem = await productsGallery.findOne({}, { sort: { sequence: -1 } });
       const nextSequence = (maxSequenceItem?.sequence || 0) + 1;
 
-      let imageData = null;
+      let mediaData = null;
       
-      // If image file is uploaded
+      // If media file is uploaded (image or video)
       if (req.file) {
+        const isVideo = req.file.mimetype.startsWith('video/');
+        const resourceType = isVideo ? 'video' : 'image';
+        
         await new Promise((resolve, reject) => {
           const uploadStream = productsCloudinary.uploader.upload_stream(
             {
               folder: "nexlife-products",
-              resource_type: "image",
-              transformation: [
+              resource_type: resourceType,
+              transformation: isVideo ? [] : [
                 { width: 800, height: 800, crop: "limit" },
                 { quality: "auto" },
                 { fetch_format: "auto" },
@@ -109,13 +209,15 @@ router.post(
             },
             (error, uploaded) => {
               if (error) return reject(error);
-              imageData = {
+              mediaData = {
                 url: uploaded.secure_url,
                 publicId: uploaded.public_id,
                 format: uploaded.format,
                 bytes: uploaded.bytes,
                 width: uploaded.width,
                 height: uploaded.height,
+                type: resourceType,
+                duration: uploaded.duration || null,
               };
               resolve();
             }
@@ -127,12 +229,12 @@ router.post(
       const doc = {
         name: String(name),
         brandName: brandName ? String(brandName) : "",
-        components: components ? (Array.isArray(components) ? components : [components]) : [],
+        components: components ? (Array.isArray(components) ? components : components.split(',').map(c => c.trim())) : [],
         uses: uses ? String(uses) : "",
         class: productClass ? String(productClass) : "",
         packing: packing ? String(packing) : "",
         category: String(category),
-        image: imageData,
+        media: mediaData, // Changed from 'image' to 'media'
         likes: 0,
         views: 0,
         visible: true,
@@ -171,7 +273,7 @@ router.post(
 router.patch(
   "/:id",
   requireAuth(["superadmin", "dev"]),
-  upload.single("image"),
+  upload.single("media"),
   async (req, res) => {
     try {
       const _id = new ObjectId(req.params.id);
@@ -186,7 +288,7 @@ router.patch(
       const updateData = {
         ...(name && { name: String(name) }),
         ...(brandName !== undefined && { brandName: String(brandName) }),
-        ...(components && { components: Array.isArray(components) ? components : [components] }),
+        ...(components && { components: typeof components === 'string' ? components.split(',').map(c => c.trim()) : components }),
         ...(uses !== undefined && { uses: String(uses) }),
         ...(productClass !== undefined && { class: String(productClass) }),
         ...(packing !== undefined && { packing: String(packing) }),
@@ -194,24 +296,28 @@ router.patch(
         updatedAt: new Date(),
       };
 
-      // If new image is uploaded
+      // If new media is uploaded
       if (req.file) {
-        // Delete old image if exists
-        if (existingProduct.image?.publicId) {
+        // Delete old media if exists
+        const oldMedia = existingProduct.media || existingProduct.image;
+        if (oldMedia?.publicId) {
           try {
-            await productsCloudinary.uploader.destroy(existingProduct.image.publicId);
+            const oldResourceType = oldMedia.type || 'image';
+            await productsCloudinary.uploader.destroy(oldMedia.publicId, { resource_type: oldResourceType });
           } catch (err) {
-            console.error("Error deleting old image:", err);
+            console.error("Error deleting old media:", err);
           }
         }
 
-        // Upload new image
+        // Upload new media
+        const isVideo = req.file.mimetype.startsWith('video/');
+        const resourceType = isVideo ? 'video' : 'image';
         await new Promise((resolve, reject) => {
           const uploadStream = productsCloudinary.uploader.upload_stream(
             {
               folder: "nexlife-products",
-              resource_type: "image",
-              transformation: [
+              resource_type: resourceType,
+              transformation: isVideo ? [] : [
                 { width: 800, height: 800, crop: "limit" },
                 { quality: "auto" },
                 { fetch_format: "auto" },
@@ -219,13 +325,15 @@ router.patch(
             },
             (error, uploaded) => {
               if (error) return reject(error);
-              updateData.image = {
+              updateData.media = {
                 url: uploaded.secure_url,
                 publicId: uploaded.public_id,
                 format: uploaded.format,
                 bytes: uploaded.bytes,
                 width: uploaded.width,
                 height: uploaded.height,
+                type: resourceType,
+                duration: uploaded.duration || null,
               };
               resolve();
             }
@@ -265,10 +373,12 @@ router.delete(
       const item = await productsGallery.findOne({ _id });
       if (!item) return res.status(404).json({ error: "Product not found" });
 
-      // Delete image from Cloudinary
-      if (item.image?.publicId) {
+      // Delete media from Cloudinary
+      const media = item.media || item.image;
+      if (media?.publicId) {
         try {
-          await productsCloudinary.uploader.destroy(item.image.publicId);
+          const resourceType = media.type || 'image';
+          await productsCloudinary.uploader.destroy(media.publicId, { resource_type: resourceType });
         } catch (err) {
           console.error("Error deleting image:", err);
         }

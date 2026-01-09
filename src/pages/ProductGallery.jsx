@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Package,
@@ -17,6 +17,7 @@ import {
   ImageOff,
 } from "lucide-react";
 import SEOHead from "../components/SEOHead";
+import CustomVideoPlayer from "../components/CustomVideoPlayer";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001/api";
 
@@ -27,12 +28,29 @@ const ProductGallery = () => {
   const [showFilter, setShowFilter] = useState(false);
   const [products, setProducts] = useState([]);
   const [allProducts, setAllProducts] = useState([]); // Store all products for category extraction
+  const [productsByCategory, setProductsByCategory] = useState({}); // Group products by category
   const [categories, setCategories] = useState(["All"]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [imageZoom, setImageZoom] = useState(1); // For modal image zoom
 
-  // Fetch all products once to get categories
+  // Fetch categories with ordering
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch(`${API_URL}/products-gallery/categories`);
+        if (response.ok) {
+          const data = await response.json();
+          setCategories(data.categories || ["All"]);
+        }
+      } catch (err) {
+        console.error("Error fetching categories:", err);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  // Fetch all products once
   useEffect(() => {
     const fetchAllProducts = async () => {
       try {
@@ -51,9 +69,15 @@ const ProductGallery = () => {
         const visibleProducts = productArray.filter(product => product.visible !== false);
         setAllProducts(visibleProducts);
         
-        // Extract unique categories from all products
-        const uniqueCategories = ["All", ...new Set(visibleProducts.map(p => p.category).filter(Boolean))];
-        setCategories(uniqueCategories);
+        // Group products by category while preserving sequence
+        const grouped = {};
+        visibleProducts.forEach(product => {
+          if (!grouped[product.category]) {
+            grouped[product.category] = [];
+          }
+          grouped[product.category].push(product);
+        });
+        setProductsByCategory(grouped);
       } catch (err) {
         console.error("Error fetching products:", err);
         setError(err.message);
@@ -65,20 +89,23 @@ const ProductGallery = () => {
 
   // Filter products based on selected category
   useEffect(() => {
-    const fetchProducts = async () => {
+    const filterProducts = () => {
       try {
         setLoading(true);
         setError(null);
         
         if (selectedCategory === "All") {
-          // Show all products from cached data
-          setProducts(allProducts);
+          // Show all products organized by category order
+          const orderedProducts = [];
+          categories.forEach(cat => {
+            if (cat !== "All" && productsByCategory[cat]) {
+              orderedProducts.push(...productsByCategory[cat]);
+            }
+          });
+          setProducts(orderedProducts);
         } else {
-          // Filter by category from cached data or fetch from API
-          const filteredByCategory = allProducts.filter(
-            product => product.category === selectedCategory
-          );
-          setProducts(filteredByCategory);
+          // Show products from selected category
+          setProducts(productsByCategory[selectedCategory] || []);
         }
       } catch (err) {
         console.error("Error filtering products:", err);
@@ -89,10 +116,10 @@ const ProductGallery = () => {
       }
     };
 
-    if (allProducts.length > 0) {
-      fetchProducts();
+    if (Object.keys(productsByCategory).length > 0) {
+      filterProducts();
     }
-  }, [selectedCategory, allProducts]);
+  }, [selectedCategory, productsByCategory, categories]);
 
   const filteredProducts = products.filter((product) => {
     const matchesSearch =
@@ -228,37 +255,46 @@ const ProductGallery = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
                   whileHover={{ y: -8, scale: 1.02 }}
-                  className="group cursor-pointer"
-                  onClick={() => setSelectedProduct(product)}
+                  className="group"
                 >
                   <div className="relative bg-white dark:bg-slate-800 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border-4 border-slate-300 dark:border-slate-600 hover:border-blue-500 dark:hover:border-blue-500 h-full flex flex-col">
-                    {/* Card Header with Image or Gradient */}
+                    {/* Card Header with Image/Video or Gradient */}
                     <div className="h-64 relative overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-600 border-b-4 border-blue-600 dark:border-blue-400">
-                      {product.image?.url ? (
-                        <>
-                          <img
-                            src={product.image.url}
-                            alt={product.name}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                            onError={(e) => {
-                              e.target.style.display = 'none';
-                              e.target.nextElementSibling.style.display = 'flex';
-                            }}
+                      {(() => {
+                        const media = product.media || product.image;
+                        if (!media?.url) {
+                          return (
+                            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600">
+                              <div className="absolute inset-0 bg-white/10 backdrop-blur-sm" />
+                              <Package className="w-24 h-24 text-white/30 relative z-10" />
+                            </div>
+                          );
+                        }
+                        
+                        return media.type === 'video' ? (
+                          <CustomVideoPlayer
+                            src={media.url}
+                            className="w-full h-full"
+                            autoplay={true}
                           />
-                          <div className="absolute inset-0 hidden items-center justify-center bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600">
-                            <div className="absolute inset-0 bg-white/10 backdrop-blur-sm" />
-                            <Package className="w-24 h-24 text-white/30 relative z-10" />
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600" />
-                          <div className="absolute inset-0 bg-white/10 backdrop-blur-sm" />
-                          <div className="absolute inset-0 flex items-center justify-center transition-transform duration-500 group-hover:scale-105">
-                            <Package className="w-24 h-24 text-white/30" />
-                          </div>
-                        </>
-                      )}
+                        ) : (
+                          <>
+                            <img
+                              src={media.url}
+                              alt={product.name}
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                                e.target.nextElementSibling.style.display = 'flex';
+                              }}
+                            />
+                            <div className="absolute inset-0 hidden items-center justify-center bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600">
+                              <div className="absolute inset-0 bg-white/10 backdrop-blur-sm" />
+                              <Package className="w-24 h-24 text-white/30 relative z-10" />
+                            </div>
+                          </>
+                        );
+                      })()}
                       <div className="absolute top-4 right-4">
                         <span className="px-3 py-1 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-full text-xs font-bold text-slate-800 dark:text-white border-2 border-white/60 dark:border-slate-600/60 shadow-lg">
                           {product.category}
@@ -300,6 +336,7 @@ const ProductGallery = () => {
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
+                      onClick={() => setSelectedProduct(product)}
                       className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all flex items-center justify-center gap-2"
                     >
                       <FileText className="w-4 h-4" />
@@ -389,60 +426,78 @@ const ProductGallery = () => {
               {/* Modal Content - Compact Grid Layout */}
               <div className="overflow-y-auto max-h-[calc(95vh-80px)]">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 p-6">
-                  {/* LEFT COLUMN - Product Image */}
-                  {selectedProduct.image?.url && (
-                    <div className="space-y-3">
-                      <div className="relative h-[400px] rounded-xl overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-600 border-2 border-slate-200 dark:border-slate-600 shadow-lg">
-                        <div className="absolute inset-0 overflow-auto flex items-center justify-center p-4" style={{ cursor: imageZoom > 1 ? 'zoom-out' : 'zoom-in' }}>
-                          <img
-                            src={selectedProduct.image.url}
-                            alt={selectedProduct.name}
-                            className="max-w-full h-auto object-contain transition-transform duration-300"
-                            style={{ transform: `scale(${imageZoom})`, transformOrigin: 'center' }}
-                            onClick={() => {
-                              if (imageZoom === 1) setImageZoom(2);
-                              else if (imageZoom === 2) setImageZoom(3);
-                              else setImageZoom(1);
-                            }}
-                            onError={(e) => {
-                              e.target.style.display = 'none';
-                            }}
-                          />
+                  {/* LEFT COLUMN - Product Media */}
+                  {(() => {
+                    const media = selectedProduct.media || selectedProduct.image;
+                    if (!media?.url) return null;
+                    
+                    return (
+                      <div className="space-y-3">
+                        <div className="relative h-[400px] rounded-xl overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-600 border-2 border-slate-200 dark:border-slate-600 shadow-lg">
+                          {media.type === 'video' ? (
+                            <CustomVideoPlayer
+                              src={media.url}
+                              className="w-full h-full"
+                            />
+                          ) : (
+                            <>
+                              <div className="absolute inset-0 overflow-auto flex items-center justify-center p-4" style={{ cursor: imageZoom > 1 ? 'zoom-out' : 'zoom-in' }}>
+                                <img
+                                  src={media.url}
+                                  alt={selectedProduct.name}
+                                  className="max-w-full h-auto object-contain transition-transform duration-300"
+                                  style={{ transform: `scale(${imageZoom})`, transformOrigin: 'center' }}
+                                  onClick={() => {
+                                    if (imageZoom === 1) setImageZoom(2);
+                                    else if (imageZoom === 2) setImageZoom(3);
+                                    else setImageZoom(1);
+                                  }}
+                                  onError={(e) => {
+                                    e.target.style.display = 'none';
+                                  }}
+                                />
+                              </div>
+                              {/* Zoom Indicator */}
+                              <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-sm text-white px-2 py-1 rounded-lg text-xs font-semibold border border-white/30">
+                                {imageZoom}x
+                              </div>
+                            </>
+                          )}
                         </div>
-                        {/* Zoom Indicator */}
-                        <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-sm text-white px-2 py-1 rounded-lg text-xs font-semibold border border-white/30">
-                          {imageZoom}x
-                        </div>
-                      </div>
                       
-                      {/* Zoom Controls - Compact */}
-                      <div className="flex items-center justify-center gap-2">
-                        <button
-                          onClick={() => setImageZoom(Math.max(1, imageZoom - 0.5))}
-                          disabled={imageZoom <= 1}
-                          className="px-3 py-1.5 bg-slate-600 hover:bg-slate-700 disabled:bg-slate-400 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium transition-colors"
-                        >
-                          <span className="text-base">−</span>
-                        </button>
-                        <button
-                          onClick={() => setImageZoom(1)}
-                          className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
-                        >
-                          Reset
-                        </button>
-                        <button
-                          onClick={() => setImageZoom(Math.min(5, imageZoom + 0.5))}
-                          disabled={imageZoom >= 5}
-                          className="px-3 py-1.5 bg-slate-600 hover:bg-slate-700 disabled:bg-slate-400 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium transition-colors"
-                        >
-                          <span className="text-base">+</span>
-                        </button>
+                        {/* Zoom Controls - Compact (only for images) */}
+                        {media.type !== 'video' && (
+                          <div className="flex items-center justify-center gap-2">
+                            <button
+                              onClick={() => setImageZoom(Math.max(1, imageZoom - 0.5))}
+                              disabled={imageZoom <= 1}
+                              className="px-3 py-1.5 bg-slate-600 hover:bg-slate-700 disabled:bg-slate-400 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium transition-colors"
+                            >
+                              <span className="text-base">−</span>
+                            </button>
+                            <button
+                              onClick={() => setImageZoom(1)}
+                              className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+                            >
+                              Reset
+                            </button>
+                            <button
+                              onClick={() => setImageZoom(Math.min(5, imageZoom + 0.5))}
+                              disabled={imageZoom >= 5}
+                              className="px-3 py-1.5 bg-slate-600 hover:bg-slate-700 disabled:bg-slate-400 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium transition-colors"
+                            >
+                              <span className="text-base">+</span>
+                            </button>
+                          </div>
+                        )}
+                        {media.type !== 'video' && (
+                          <p className="text-center text-xs text-slate-500 dark:text-slate-400">
+                            Click image to zoom or use controls
+                          </p>
+                        )}
                       </div>
-                      <p className="text-center text-xs text-slate-500 dark:text-slate-400">
-                        Click image to zoom or use controls
-                      </p>
-                    </div>
-                  )}
+                    );
+                  })()}
 
                   {/* RIGHT COLUMN - Product Details */}
                   <div className="space-y-4">

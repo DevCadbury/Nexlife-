@@ -51,6 +51,7 @@ export async function getCollections() {
     logs: db.collection("logs"),
     gallery: db.collection("gallery"),
     productsGallery: db.collection("productsGallery"),
+    categoryOrder: db.collection("categoryOrder"),
     certifications: db.collection("certifications"),
     campaigns: db.collection("campaigns"),
     visitors: db.collection("visitors"),
@@ -101,6 +102,12 @@ async function ensureIndexes(db) {
       { key: { likes: -1 } },
       { key: { sequence: 1 } },
       { key: { visible: 1, sequence: 1 } },
+    ]);
+  await db
+    .collection("categoryOrder")
+    .createIndexes([
+      { key: { category: 1 }, unique: true },
+      { key: { sequence: 1 } },
     ]);
   await db
     .collection("certifications")
