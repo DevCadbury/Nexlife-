@@ -35,7 +35,7 @@ router.get("/stats", requireAuth(), async (req, res) => {
     const { subscribers } = await getCollections();
     const { role, id: userId } = req.user;
     
-    if (role === "superadmin") {
+    if (role === "superadmin" || role === "dev") {
       const total = await subscribers.countDocuments({ deleted_by_super: { $ne: true } });
       const locked = await subscribers.countDocuments({ 
         is_locked: true, 
@@ -85,8 +85,8 @@ router.get("/", requireAuth(), async (req, res) => {
     
     let matchQuery = { deleted_by_super: { $ne: true } };
     
-    if (role === "superadmin") {
-      // Superadmin sees all subscribers except those deleted by superadmin
+    if (role === "superadmin" || role === "dev") {
+      // Superadmin and dev see all subscribers except those deleted by superadmin
       matchQuery = { deleted_by_super: { $ne: true } };
     } else if (role === "admin" || role === "staff") {
       // Admin and staff see only their own unlocked subscribers
@@ -446,8 +446,8 @@ router.post("/import", requireAuth(), upload.single('file'), async (req, res) =>
   }
 });
 
-// DELETE /api/subscribers/bulk - Bulk delete for superadmins
-router.delete("/bulk", requireAuth(["superadmin"]), async (req, res) => {
+// DELETE /api/subscribers/bulk - Bulk delete for superadmins and devs
+router.delete("/bulk", requireAuth(["superadmin", "dev"]), async (req, res) => {
   try {
     const { emails } = req.body || {};
     
@@ -471,7 +471,7 @@ router.delete("/bulk", requireAuth(["superadmin"]), async (req, res) => {
       actorName: name,
       meta: { 
         emails: normalizedEmails, 
-        deletedBy: "superadmin",
+        deletedBy: req.user.role,
         count: result.modifiedCount 
       },
     });
@@ -497,8 +497,8 @@ router.delete("/:email", requireAuth(), async (req, res) => {
       return res.status(404).json({ error: "Subscriber not found" });
     }
     
-    if (role === "superadmin") {
-      // Superadmin can delete any subscriber anytime
+    if (role === "superadmin" || role === "dev") {
+      // Superadmin and dev can delete any subscriber anytime
       await subscribers.updateOne(
         { email: normalizedEmail },
         { $set: { deleted_by_super: true, deleted_at: new Date() } }
@@ -508,7 +508,7 @@ router.delete("/:email", requireAuth(), async (req, res) => {
         type: "subscriber.removed",
         actorId: userId,
         actorName: name,
-        meta: { email: normalizedEmail, deletedBy: "superadmin" },
+        meta: { email: normalizedEmail, deletedBy: role },
       });
     } else if (role === "admin" || role === "staff") {
       // Check if admin/staff owns this subscriber
