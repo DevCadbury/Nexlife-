@@ -1,7 +1,7 @@
 "use client";
 import useSWR from "swr";
 import { fetcher, api } from "@/lib/api";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo, memo } from "react";
 import { motion, AnimatePresence, Reorder } from "framer-motion";
 import {
   Upload,
@@ -128,15 +128,17 @@ export default function ProductsGallery() {
     }
   }, [data, categories]);
 
-  const toggleCategory = (categoryName: string) => {
-    const newExpanded = new Set(expandedCategories);
-    if (newExpanded.has(categoryName)) {
-      newExpanded.delete(categoryName);
-    } else {
-      newExpanded.add(categoryName);
-    }
-    setExpandedCategories(newExpanded);
-  };
+  const toggleCategory = useCallback((categoryName: string) => {
+    setExpandedCategories(prev => {
+      const newExpanded = new Set(prev);
+      if (newExpanded.has(categoryName)) {
+        newExpanded.delete(categoryName);
+      } else {
+        newExpanded.add(categoryName);
+      }
+      return newExpanded;
+    });
+  }, []);
 
   const openModal = (product?: Product, category?: string) => {
     if (product) {
@@ -658,26 +660,34 @@ export default function ProductsGallery() {
                 values={categories}
                 onReorder={setCategories}
                 className="space-y-4"
+                layoutScroll
+                style={{ willChange: 'transform' }}
               >
                 {categories.map((category) => (
                   <Reorder.Item
                     key={category.name}
                     value={category}
-                    className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-lg border-2 border-blue-200 dark:border-blue-600 cursor-move"
+                    className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-lg border-2 border-blue-200 dark:border-blue-600 cursor-move hover:border-blue-400 dark:hover:border-blue-500 transition-colors"
+                    drag="y"
+                    dragConstraints={{ top: 0, bottom: 0 }}
+                    dragElastic={0.1}
+                    dragTransition={{ bounceStiffness: 600, bounceDamping: 20 }}
+                    whileDrag={{ scale: 1.02, boxShadow: "0 10px 30px rgba(0,0,0,0.15)", zIndex: 10 }}
+                    style={{ willChange: 'transform' }}
                   >
                     <div className="flex items-center gap-4">
-                      <Move3D className="w-6 h-6 text-slate-400" />
-                      <Folder className="w-6 h-6 text-blue-600" />
-                      <div className="flex-1">
-                        <h3 className="font-bold text-lg text-slate-900 dark:text-white">
+                      <Move3D className="w-6 h-6 text-slate-400 flex-shrink-0" />
+                      <Folder className="w-6 h-6 text-blue-600 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-bold text-lg text-slate-900 dark:text-white truncate">
                           {category.name}
                         </h3>
                         <p className="text-sm text-slate-600 dark:text-slate-400">
                           {category.count} products
                         </p>
                       </div>
-                      <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-sm rounded-full">
-                        Sequence: {category.sequence}
+                      <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-sm rounded-full flex-shrink-0">
+                        Seq: {category.sequence}
                       </span>
                     </div>
                   </Reorder.Item>
@@ -814,27 +824,37 @@ export default function ProductsGallery() {
                                 }));
                               }}
                               className="p-4 space-y-2"
+                              layoutScroll
+                              style={{ willChange: 'transform' }}
                             >
                               {products.map((product) => (
                                 <Reorder.Item
                                   key={product._id}
                                   value={product}
-                                  className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-4 cursor-move flex items-center gap-4 border-2 border-slate-200 dark:border-slate-600"
+                                  className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-4 cursor-move flex items-center gap-4 border-2 border-slate-200 dark:border-slate-600 hover:border-blue-400 dark:hover:border-blue-500 transition-colors"
+                                  drag="y"
+                                  dragConstraints={{ top: 0, bottom: 0 }}
+                                  dragElastic={0.1}
+                                  dragTransition={{ bounceStiffness: 600, bounceDamping: 20 }}
+                                  whileDrag={{ scale: 1.02, boxShadow: "0 10px 30px rgba(0,0,0,0.15)", zIndex: 10 }}
+                                  style={{ willChange: 'transform' }}
                                 >
-                                  <Move3D className="w-5 h-5 text-slate-400" />
+                                  <Move3D className="w-5 h-5 text-slate-400 flex-shrink-0" />
                                   {(() => {
                                     const media = product.media || product.image;
-                                    if (!media?.url) return null;
+                                    if (!media?.url) return <div className="w-12 h-12 bg-slate-200 dark:bg-slate-600 rounded flex-shrink-0" />;
                                     
                                     return media.type === 'video' ? (
-                                      <video src={media.url} className="w-12 h-12 object-cover rounded" />
+                                      <div className="w-12 h-12 bg-slate-200 dark:bg-slate-600 rounded flex-shrink-0 flex items-center justify-center text-xs">
+                                        🎥
+                                      </div>
                                     ) : (
-                                      <img src={media.url} alt={product.name} className="w-12 h-12 object-cover rounded" />
+                                      <img src={media.url} alt={product.name} className="w-12 h-12 object-cover rounded flex-shrink-0" loading="lazy" />
                                     );
                                   })()}
-                                  <div className="flex-1">
-                                    <h4 className="font-bold text-slate-900 dark:text-white">{product.name}</h4>
-                                    <p className="text-sm text-slate-600 dark:text-slate-400">{product.brandName}</p>
+                                  <div className="flex-1 min-w-0">
+                                    <h4 className="font-bold text-slate-900 dark:text-white truncate">{product.name}</h4>
+                                    <p className="text-sm text-slate-600 dark:text-slate-400 truncate">{product.brandName}</p>
                                   </div>
                                 </Reorder.Item>
                               ))}
@@ -909,7 +929,7 @@ export default function ProductsGallery() {
 }
 
 // Product Card Component
-function ProductCard({
+const ProductCard = memo(function ProductCard({
   product,
   onEdit,
   onToggleVisibility,
@@ -988,7 +1008,7 @@ function ProductCard({
       )}
     </div>
   );
-}
+});
 
 // Product Modal Component
 function ProductModal({
