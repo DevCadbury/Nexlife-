@@ -668,10 +668,8 @@ export default function ProductsGallery() {
                     key={category.name}
                     value={category}
                     className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-lg border-2 border-blue-200 dark:border-blue-600 cursor-move hover:border-blue-400 dark:hover:border-blue-500 transition-colors"
-                    drag="y"
-                    dragConstraints={{ top: 0, bottom: 0 }}
-                    dragElastic={0.1}
-                    dragTransition={{ bounceStiffness: 600, bounceDamping: 20 }}
+                    dragElastic={0.05}
+                    dragTransition={{ bounceStiffness: 600, bounceDamping: 30 }}
                     whileDrag={{ scale: 1.02, boxShadow: "0 10px 30px rgba(0,0,0,0.15)", zIndex: 10 }}
                     style={{ willChange: 'transform' }}
                   >
@@ -832,10 +830,8 @@ export default function ProductsGallery() {
                                   key={product._id}
                                   value={product}
                                   className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-4 cursor-move flex items-center gap-4 border-2 border-slate-200 dark:border-slate-600 hover:border-blue-400 dark:hover:border-blue-500 transition-colors"
-                                  drag="y"
-                                  dragConstraints={{ top: 0, bottom: 0 }}
-                                  dragElastic={0.1}
-                                  dragTransition={{ bounceStiffness: 600, bounceDamping: 20 }}
+                                  dragElastic={0.05}
+                                  dragTransition={{ bounceStiffness: 600, bounceDamping: 30 }}
                                   whileDrag={{ scale: 1.02, boxShadow: "0 10px 30px rgba(0,0,0,0.15)", zIndex: 10 }}
                                   style={{ willChange: 'transform' }}
                                 >
