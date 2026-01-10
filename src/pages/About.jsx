@@ -15,8 +15,7 @@ import aboutUsImage from "../assets/images/about_us.png";
 
 const About = () => {
   const { t } = useTranslation();
-  const [expandedMission, setExpandedMission] = useState(false);
-  const [expandedVision, setExpandedVision] = useState(false);
+  const [expandedSection, setExpandedSection] = useState(null); // 'mission', 'vision', or null
 
   const values = [
     {
@@ -276,143 +275,12 @@ const About = () => {
       {/* Mission & Vision */}
       <section className="section-padding bg-gray-50 dark:bg-gray-800">
         <div className="container-custom">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+          <div className="max-w-4xl mx-auto space-y-8">
             {/* Mission */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-              className="bg-white dark:bg-gray-900 rounded-xl p-8 shadow-lg border-2 border-gray-200 dark:border-gray-700 hover:border-primary-500 dark:hover:border-primary-400 transition-colors duration-300"
-            >
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
-                    <Target className="w-8 h-8 text-white" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    Mission
-                  </h3>
-                </div>
-                <button
-                  onClick={() => setExpandedMission(!expandedMission)}
-                  className="p-2 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
-                >
-                  {expandedMission ? (
-                    <Minus className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-                  ) : (
-                    <Plus className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-                  )}
-                </button>
-              </div>
-
-              <div className="space-y-4">
-                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                  At Nexlife International, our mission is to enhance global
-                  health by offering innovative, affordable, and high-quality
-                  pharmaceutical solutions that align with international
-                  standards.
-                </p>
-
-                <AnimatePresence>
-                  {expandedMission && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="space-y-4"
-                    >
-                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                      We are driven by a commitment to excellence, using
-                      premium-grade materials and upholding uncompromising
-                      ethical and quality practices. Our ambition is to be a
-                      leader in the pharmaceutical industry through continuous
-                      advancement of our product portfolio, ensuring accessible
-                      and effective healthcare for all.
-                    </p>
-                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                      Customer trust and satisfaction are at the heart of what
-                      we do. By ensuring authenticity, timely delivery, and full
-                      regulatory compliance, we strive to build long-term
-                      relationships and make a meaningful impact in the lives of
-                      patients worldwide.
-                    </p>
-                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed font-semibold">
-                      Nexlife International is dedicated to redefining
-                      healthcare—one trusted solution at a time.
-                    </p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </motion.div>
+            <MissionCard expandedSection={expandedSection} setExpandedSection={setExpandedSection} />
 
             {/* Vision */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="bg-white dark:bg-gray-900 rounded-xl p-8 shadow-lg border-2 border-gray-200 dark:border-gray-700 hover:border-primary-500 dark:hover:border-primary-400 transition-colors duration-300"
-            >
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center">
-                    <Eye className="w-8 h-8 text-white" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    Vision
-                  </h3>
-                </div>
-                <button
-                  onClick={() => setExpandedVision(!expandedVision)}
-                  className="p-2 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
-                >
-                  {expandedVision ? (
-                    <Minus className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-                  ) : (
-                    <Plus className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-                  )}
-                </button>
-              </div>
-
-              <div className="space-y-4">
-                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                  At Nexlife International, our vision is to expand global
-                  access to high-quality, affordable medicines through
-                  innovation and a steadfast commitment to excellence in
-                  pharmaceutical manufacturing.
-                </p>
-
-                <AnimatePresence>
-                  {expandedVision && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="space-y-4"
-                    >
-                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                      We aim to be a trusted leader in the international market
-                      by providing tailored healthcare solutions that address
-                      the diverse needs of our clients. Upholding the highest
-                      standards of quality and compliance, we are driven by a
-                      strong ethical foundation that ensures fairness,
-                      integrity, and transparency in every aspect of our
-                      operations.
-                    </p>
-                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed font-semibold">
-                      At Nexlife International, we don't just manufacture
-                      medicines—we build trust, improve lives, and set new
-                      standards for a healthier future.
-                    </p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </motion.div>
+            <VisionCard expandedSection={expandedSection} setExpandedSection={setExpandedSection} />
           </div>
         </div>
       </section>
@@ -497,6 +365,157 @@ const About = () => {
         </div>
       </section>
     </div>
+  );
+};
+
+// Mission Card Component
+const MissionCard = ({ expandedSection, setExpandedSection }) => {
+  const isExpanded = expandedSection === 'mission';
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.8 }}
+      className="bg-white dark:bg-gray-900 rounded-xl p-8 shadow-lg border-2 border-gray-200 dark:border-gray-700 hover:border-primary-500 dark:hover:border-primary-400 transition-colors duration-300"
+    >
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-4">
+          <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+            <Target className="w-8 h-8 text-white" />
+          </div>
+          <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Mission
+          </h3>
+        </div>
+        <button
+          onClick={() => setExpandedSection(isExpanded ? null : 'mission')}
+          className="p-2 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
+        >
+          {isExpanded ? (
+            <Minus className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+          ) : (
+            <Plus className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+          )}
+        </button>
+      </div>
+
+      <div className="space-y-4">
+        <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+          At Nexlife International, our mission is to enhance global
+          health by offering innovative, affordable, and high-quality
+          pharmaceutical solutions that align with international
+          standards.
+        </p>
+
+        <AnimatePresence mode="wait">
+          {isExpanded && (
+            <motion.div
+              key="mission-content"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-4 overflow-hidden"
+            >
+              <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                We are driven by a commitment to excellence, using
+                premium-grade materials and upholding uncompromising
+                ethical and quality practices. Our ambition is to be a
+                leader in the pharmaceutical industry through continuous
+                advancement of our product portfolio, ensuring accessible
+                and effective healthcare for all.
+              </p>
+              <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                Customer trust and satisfaction are at the heart of what
+                we do. By ensuring authenticity, timely delivery, and full
+                regulatory compliance, we strive to build long-term
+                relationships and make a meaningful impact in the lives of
+                patients worldwide.
+              </p>
+              <p className="text-gray-600 dark:text-gray-300 leading-relaxed font-semibold">
+                Nexlife International is dedicated to redefining
+                healthcare—one trusted solution at a time.
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </motion.div>
+  );
+};
+
+// Vision Card Component
+const VisionCard = ({ expandedSection, setExpandedSection }) => {
+  const isExpanded = expandedSection === 'vision';
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.8, delay: 0.2 }}
+      className="bg-white dark:bg-gray-900 rounded-xl p-8 shadow-lg border-2 border-gray-200 dark:border-gray-700 hover:border-primary-500 dark:hover:border-primary-400 transition-colors duration-300"
+    >
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-4">
+          <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center">
+            <Eye className="w-8 h-8 text-white" />
+          </div>
+          <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Vision
+          </h3>
+        </div>
+        <button
+          onClick={() => setExpandedSection(isExpanded ? null : 'vision')}
+          className="p-2 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
+        >
+          {isExpanded ? (
+            <Minus className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+          ) : (
+            <Plus className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+          )}
+        </button>
+      </div>
+
+      <div className="space-y-4">
+        <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+          At Nexlife International, our vision is to expand global
+          access to high-quality, affordable medicines through
+          innovation and a steadfast commitment to excellence in
+          pharmaceutical manufacturing.
+        </p>
+
+        <AnimatePresence mode="wait">
+          {isExpanded && (
+            <motion.div
+              key="vision-content"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-4 overflow-hidden"
+            >
+              <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                We aim to be a trusted leader in the international market
+                by providing tailored healthcare solutions that address
+                the diverse needs of our clients. Upholding the highest
+                standards of quality and compliance, we are driven by a
+                strong ethical foundation that ensures fairness,
+                integrity, and transparency in every aspect of our
+                operations.
+              </p>
+              <p className="text-gray-600 dark:text-gray-300 leading-relaxed font-semibold">
+                At Nexlife International, we don't just manufacture
+                medicines—we build trust, improve lives, and set new
+                standards for a healthier future.
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </motion.div>
   );
 };
 
