@@ -87,6 +87,7 @@ export default function ProductsGallery() {
   const [reorderingCategory, setReorderingCategory] = useState<string | null>(null);
   const [savingOrder, setSavingOrder] = useState(false);
   const [categoryProducts, setCategoryProducts] = useState<Record<string, Product[]>>({});
+  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
   
   const [formData, setFormData] = useState({
     name: "",
@@ -462,6 +463,7 @@ export default function ProductsGallery() {
       
       await mutate();
       setReorderingCategory(null);
+      setSelectedProducts(new Set());
     } catch (error: any) {
       toast({
         title: "Error",
@@ -471,6 +473,63 @@ export default function ProductsGallery() {
     } finally {
       setSavingOrder(false);
     }
+  }
+
+  function toggleProductSelection(productId: string) {
+    setSelectedProducts(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(productId)) {
+        newSet.delete(productId);
+      } else {
+        newSet.add(productId);
+      }
+      return newSet;
+    });
+  }
+
+  function moveProduct(categoryName: string, productId: string, direction: 'up' | 'down') {
+    setCategoryProducts(prev => {
+      const products = [...(prev[categoryName] || [])];
+      const index = products.findIndex(p => p._id === productId);
+      
+      if (index === -1) return prev;
+      if (direction === 'up' && index === 0) return prev;
+      if (direction === 'down' && index === products.length - 1) return prev;
+      
+      const newIndex = direction === 'up' ? index - 1 : index + 1;
+      [products[index], products[newIndex]] = [products[newIndex], products[index]];
+      
+      return {
+        ...prev,
+        [categoryName]: products,
+      };
+    });
+  }
+
+  function moveSelectedProducts(categoryName: string, direction: 'up' | 'down') {
+    setCategoryProducts(prev => {
+      const products = [...(prev[categoryName] || [])];
+      const selectedIds = Array.from(selectedProducts);
+      const selectedIndices = selectedIds
+        .map(id => products.findIndex(p => p._id === id))
+        .filter(idx => idx !== -1)
+        .sort((a, b) => direction === 'up' ? a - b : b - a);
+      
+      if (selectedIndices.length === 0) return prev;
+      
+      for (const index of selectedIndices) {
+        if (direction === 'up' && index > 0 && !selectedIds.includes(products[index - 1]._id)) {
+          [products[index], products[index - 1]] = [products[index - 1], products[index]];
+        } else if (direction === 'down' && index < products.length - 1 && !selectedIds.includes(products[index + 1]._id)) {
+          [products[index], products[index + 1]] = [products[index + 1], products[index]];
+        }
+      }
+      
+      return {
+        ...prev,
+        [categoryName]: products,
+      };
+    });
   }
 
   const totalProducts = data?.items?.length || 0;
@@ -745,6 +804,7 @@ export default function ProductsGallery() {
                               <button
                                 onClick={() => {
                                   setReorderingCategory(null);
+                                  setSelectedProducts(new Set());
                                   mutate();
                                 }}
                                 className="flex items-center gap-2 bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
@@ -812,49 +872,131 @@ export default function ProductsGallery() {
                               </button>
                             </div>
                           ) : isReordering ? (
-                            <Reorder.Group
-                              axis="y"
-                              values={products}
-                              onReorder={(newOrder) => {
-                                setCategoryProducts(prev => ({
-                                  ...prev,
-                                  [category.name]: newOrder,
-                                }));
-                              }}
-                              className="p-4 space-y-2"
-                              layoutScroll
-                              style={{ willChange: 'transform' }}
-                            >
-                              {products.map((product) => (
-                                <Reorder.Item
-                                  key={product._id}
-                                  value={product}
-                                  className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-4 cursor-move flex items-center gap-4 border-2 border-slate-200 dark:border-slate-600 hover:border-blue-400 dark:hover:border-blue-500 transition-colors"
-                                  dragElastic={0.05}
-                                  dragTransition={{ bounceStiffness: 600, bounceDamping: 30 }}
-                                  whileDrag={{ scale: 1.02, boxShadow: "0 10px 30px rgba(0,0,0,0.15)", zIndex: 10 }}
-                                  style={{ willChange: 'transform' }}
-                                >
-                                  <Move3D className="w-5 h-5 text-slate-400 flex-shrink-0" />
-                                  {(() => {
-                                    const media = product.media || product.image;
-                                    if (!media?.url) return <div className="w-12 h-12 bg-slate-200 dark:bg-slate-600 rounded flex-shrink-0" />;
-                                    
-                                    return media.type === 'video' ? (
-                                      <div className="w-12 h-12 bg-slate-200 dark:bg-slate-600 rounded flex-shrink-0 flex items-center justify-center text-xs">
-                                        🎥
-                                      </div>
-                                    ) : (
-                                      <img src={media.url} alt={product.name} className="w-12 h-12 object-cover rounded flex-shrink-0" loading="lazy" />
-                                    );
-                                  })()}
-                                  <div className="flex-1 min-w-0">
-                                    <h4 className="font-bold text-slate-900 dark:text-white truncate">{product.name}</h4>
-                                    <p className="text-sm text-slate-600 dark:text-slate-400 truncate">{product.brandName}</p>
+                            <div className="p-4 space-y-4">
+                              {/* Bulk Actions Bar */}
+                              {selectedProducts.size > 0 && (
+                                <div className="bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-600 rounded-lg p-4 flex items-center justify-between">
+                                  <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                                    {selectedProducts.size} product{selectedProducts.size > 1 ? 's' : ''} selected
+                                  </span>
+                                  <div className="flex gap-2">
+                                    <button
+                                      onClick={() => moveSelectedProducts(category.name, 'up')}
+                                      className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                                    >
+                                      <ChevronUp className="w-4 h-4" />
+                                      Move Up
+                                    </button>
+                                    <button
+                                      onClick={() => moveSelectedProducts(category.name, 'down')}
+                                      className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                                    >
+                                      <ChevronDown className="w-4 h-4" />
+                                      Move Down
+                                    </button>
+                                    <button
+                                      onClick={() => setSelectedProducts(new Set())}
+                                      className="flex items-center gap-2 bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                                    >
+                                      <X className="w-4 h-4" />
+                                      Clear
+                                    </button>
                                   </div>
-                                </Reorder.Item>
-                              ))}
-                            </Reorder.Group>
+                                </div>
+                              )}
+                              
+                              {/* Drag & Drop List */}
+                              <Reorder.Group
+                                axis="y"
+                                values={products}
+                                onReorder={(newOrder) => {
+                                  setCategoryProducts(prev => ({
+                                    ...prev,
+                                    [category.name]: newOrder,
+                                  }));
+                                }}
+                                className="space-y-2"
+                                layoutScroll
+                                style={{ willChange: 'transform' }}
+                              >
+                                {products.map((product, idx) => (
+                                  <Reorder.Item
+                                    key={product._id}
+                                    value={product}
+                                    className={`bg-slate-50 dark:bg-slate-700/50 rounded-lg p-4 flex items-center gap-4 border-2 transition-all ${
+                                      selectedProducts.has(product._id)
+                                        ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20'
+                                        : 'border-slate-200 dark:border-slate-600 hover:border-blue-400 dark:hover:border-blue-500'
+                                    }`}
+                                    dragElastic={0.05}
+                                    dragTransition={{ bounceStiffness: 600, bounceDamping: 30 }}
+                                    whileDrag={{ scale: 1.02, boxShadow: "0 10px 30px rgba(0,0,0,0.15)", zIndex: 10 }}
+                                    style={{ willChange: 'transform' }}
+                                  >
+                                    {/* Checkbox */}
+                                    <input
+                                      type="checkbox"
+                                      checked={selectedProducts.has(product._id)}
+                                      onChange={() => toggleProductSelection(product._id)}
+                                      className="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer flex-shrink-0"
+                                      onClick={(e) => e.stopPropagation()}
+                                    />
+                                    
+                                    {/* Drag Handle */}
+                                    <div className="cursor-move flex-shrink-0">
+                                      <Move3D className="w-5 h-5 text-slate-400" />
+                                    </div>
+                                    
+                                    {/* Product Info */}
+                                    {(() => {
+                                      const media = product.media || product.image;
+                                      if (!media?.url) return <div className="w-12 h-12 bg-slate-200 dark:bg-slate-600 rounded flex-shrink-0" />;
+                                      
+                                      return media.type === 'video' ? (
+                                        <div className="w-12 h-12 bg-slate-200 dark:bg-slate-600 rounded flex-shrink-0 flex items-center justify-center text-xs">
+                                          🎥
+                                        </div>
+                                      ) : (
+                                        <img src={media.url} alt={product.name} className="w-12 h-12 object-cover rounded flex-shrink-0" loading="lazy" />
+                                      );
+                                    })()}
+                                    <div className="flex-1 min-w-0">
+                                      <h4 className="font-bold text-slate-900 dark:text-white truncate">{product.name}</h4>
+                                      <p className="text-sm text-slate-600 dark:text-slate-400 truncate">{product.brandName}</p>
+                                    </div>
+                                    
+                                    {/* Position Indicator */}
+                                    <span className="text-xs text-slate-500 dark:text-slate-400 flex-shrink-0 font-mono">
+                                      #{idx + 1}
+                                    </span>
+                                    
+                                    {/* Up/Down Buttons */}
+                                    <div className="flex gap-1 flex-shrink-0">
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          moveProduct(category.name, product._id, 'up');
+                                        }}
+                                        disabled={idx === 0}
+                                        className="p-2 rounded-lg bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 dark:hover:bg-slate-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                      >
+                                        <ChevronUp className="w-4 h-4" />
+                                      </button>
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          moveProduct(category.name, product._id, 'down');
+                                        }}
+                                        disabled={idx === products.length - 1}
+                                        className="p-2 rounded-lg bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 dark:hover:bg-slate-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                      >
+                                        <ChevronDown className="w-4 h-4" />
+                                      </button>
+                                    </div>
+                                  </Reorder.Item>
+                                ))}
+                              </Reorder.Group>
+                            </div>
                           ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
                               {products.map((product) => (
