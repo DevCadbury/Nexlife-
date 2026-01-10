@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { motion, useInView, animate, useMotionValue } from "framer-motion";
+import { motion, useInView, animate, useMotionValue, AnimatePresence } from "framer-motion";
 import {
   Target,
   Eye,
@@ -314,14 +314,15 @@ const About = () => {
                   standards.
                 </p>
 
-                {expandedMission && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="space-y-4"
-                  >
+                <AnimatePresence>
+                  {expandedMission && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="space-y-4"
+                    >
                     <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
                       We are driven by a commitment to excellence, using
                       premium-grade materials and upholding uncompromising
@@ -341,8 +342,9 @@ const About = () => {
                       Nexlife International is dedicated to redefining
                       healthcare—one trusted solution at a time.
                     </p>
-                  </motion.div>
-                )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </motion.div>
 
@@ -377,20 +379,21 @@ const About = () => {
 
               <div className="space-y-4">
                 <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                  At Nexlife International, our mission is to expand global
+                  At Nexlife International, our vision is to expand global
                   access to high-quality, affordable medicines through
                   innovation and a steadfast commitment to excellence in
                   pharmaceutical manufacturing.
                 </p>
 
-                {expandedVision && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="space-y-4"
-                  >
+                <AnimatePresence>
+                  {expandedVision && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="space-y-4"
+                    >
                     <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
                       We aim to be a trusted leader in the international market
                       by providing tailored healthcare solutions that address
@@ -405,8 +408,9 @@ const About = () => {
                       medicines—we build trust, improve lives, and set new
                       standards for a healthier future.
                     </p>
-                  </motion.div>
-                )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </motion.div>
           </div>
