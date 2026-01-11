@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import useSWR from "swr";
 import { useRouter, usePathname } from "next/navigation";
 import { fetcher } from "@/lib/api";
@@ -112,7 +113,7 @@ export default function Dashboard() {
         mutateGeo()
       ]);
     } catch (error) {
-      console.error('Failed to refresh data:', error);
+      // Failed to refresh data
     } finally {
       setIsRefreshing(false);
     }
@@ -202,32 +203,30 @@ export default function Dashboard() {
   ];
 
   return (
-    <div suppressHydrationWarning={true} className="min-h-screen bg-gradient-to-br from-slate-100 via-blue-100/50 to-indigo-100/60 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 p-6">
-      {/* Hero Section */}
+    <div suppressHydrationWarning={true} className="min-h-screen bg-gradient-to-br from-slate-100 via-blue-100/50 to-indigo-100/60 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 p-4 md:p-6">
+      {/* Hero Section - Compact */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-8"
+        className="mb-6"
       >
         <Card className="bg-gradient-to-r from-white via-blue-100/60 to-indigo-100/60 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 border border-slate-200 dark:border-0 shadow-xl backdrop-blur-sm">
-          <CardContent className="p-6">
+          <CardContent className="p-4 md:p-6">
             <div className="flex items-center justify-between">
               <div className="space-y-2">
-                <CardDescription className="text-slate-700 dark:text-slate-400 text-lg">
-                  Welcome back, {mounted && profile?.user?.name ? profile.user.name : "Admin"}
+                <CardDescription className="text-sm text-slate-700 dark:text-slate-400">
+                  Welcome back, {mounted && profile?.user?.name ? profile.user.name : "NEXLIFE"}
                 </CardDescription>
-                <CardTitle className="text-4xl font-bold bg-gradient-to-r from-slate-900 via-blue-800 to-indigo-800 dark:from-white dark:via-blue-200 dark:to-indigo-200 bg-clip-text text-transparent">
+                <CardTitle className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-slate-900 via-blue-800 to-indigo-800 dark:from-white dark:via-blue-200 dark:to-indigo-200 bg-clip-text text-transparent">
                   Dashboard Overview
                 </CardTitle>
-                <p className="text-slate-700 dark:text-slate-400 flex items-center gap-2">
+                <p className="text-slate-700 dark:text-slate-400 flex items-center gap-2 text-sm">
                   <Activity className="w-4 h-4" />
                   Real-time analytics and insights
                 </p>
               </div>
               <div className="relative">
-                <div className="h-16 w-16 rounded-2xl bg-gradient-to-tr from-blue-500 via-purple-500 to-pink-500 shadow-2xl ring-4 ring-white/20 dark:ring-slate-800/20 flex items-center justify-center">
-                  <BarChart3 className="w-8 h-8 text-white" />
-                </div>
+                <Image src="/assests/dashboard.png" alt="Dashboard" width={64} height={64} className="h-14 w-14 md:h-16 md:w-16" />
                 <div className="absolute -top-1 -right-1 h-6 w-6 bg-green-500 rounded-full border-4 border-white dark:border-slate-900 flex items-center justify-center">
                   <div className="h-2 w-2 bg-white rounded-full animate-pulse"></div>
                 </div>
@@ -453,7 +452,7 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-            <CardContent className="p-6">
+            <CardContent className="p-4">
               {loadingStatus ? (
                 <Skeleton className="h-[280px] w-full rounded-xl" />
               ) : (
@@ -567,7 +566,7 @@ export default function Dashboard() {
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-6">
+            <CardContent className="p-4">
               <div className="h-[450px] bg-gradient-to-br from-slate-100 to-blue-100/50 dark:from-slate-800 dark:to-slate-700 rounded-xl p-4 border border-slate-300 dark:border-slate-700">
                 {loadingSub ? (
                   <Skeleton className="h-full w-full rounded-xl" />
@@ -599,7 +598,7 @@ export default function Dashboard() {
                 Visitor analytics by location
               </CardDescription>
             </CardHeader>
-            <CardContent className="p-6">
+            <CardContent className="p-4">
               {loadingGeo ? (
                 <div className="space-y-4">
                   {Array(5)

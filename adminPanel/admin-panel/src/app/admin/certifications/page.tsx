@@ -318,8 +318,8 @@ export default function CertificationsPage() {
         >
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
-                <Award className="w-8 h-8 text-blue-600" />
+              <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+                <Award className="w-6 h-6 text-blue-600" />
                 Certifications
               </h1>
               <p className="text-slate-600 dark:text-slate-400 mt-2">

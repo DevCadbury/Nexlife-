@@ -1,4 +1,5 @@
 "use client";
+import NextImage from "next/image";
 import useSWR from "swr";
 import { fetcher } from "@/lib/api";
 import { Doughnut } from "react-chartjs-2";
@@ -134,12 +135,12 @@ export default function Analytics() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 p-8 text-white shadow-2xl"
+        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 p-4 md:p-6 text-white shadow-2xl"
       >
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="relative z-10">
-          <h1 className="text-2xl font-bold mb-1">Analytics Dashboard</h1>
-          <p className="text-blue-100 text-sm">
+          <h1 className="text-xl md:text-2xl font-bold mb-1">Analytics Dashboard</h1>
+          <p className="text-blue-100 text-xs md:text-sm">
             Platform performance and user engagement insights
           </p>
         </div>
@@ -504,7 +505,7 @@ export default function Analytics() {
                 {timespanLabel} - Detailed breakdown showing which pages are visited from which countries, including repeat visits
               </CardDescription>
             </div>
-            <CardContent className="p-6">
+            <CardContent className="p-4">
               <div className="space-y-6">
                 {pagesByCountry.pages.map((pageData: any, pageIndex: number) => (
                   <motion.div

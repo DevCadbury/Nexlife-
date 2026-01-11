@@ -67,7 +67,6 @@ export default function Subscribers() {
         description: `${email} has been added to the newsletter`,
       });
     } catch (error: any) {
-      console.error("Failed to add subscriber:", error);
       toast({
         variant: "error",
         title: "Failed to add subscriber",
@@ -120,7 +119,7 @@ export default function Subscribers() {
           });
           setConfirmDialog(prev => ({ ...prev, open: false }));
         } catch (error: any) {
-          console.error("Failed to remove subscriber:", error);
+
           toast({
             variant: "error",
             title: "Failed to remove subscriber",
@@ -155,7 +154,7 @@ export default function Subscribers() {
           });
           setConfirmDialog(prev => ({ ...prev, open: false }));
         } catch (error: any) {
-          console.error("Failed to bulk delete subscribers:", error);
+
           toast({
             variant: "error",
             title: "Failed to delete subscribers",
@@ -223,7 +222,7 @@ export default function Subscribers() {
         description: `Added ${response.data.added} subscribers, updated ${response.data.updated} existing ones`,
       });
     } catch (error: any) {
-      console.error("Failed to import emails:", error);
+
       throw new Error(error.response?.data?.error || "Failed to import emails");
     }
   }
@@ -247,7 +246,7 @@ export default function Subscribers() {
         description: `Added ${response.data.added} subscribers, updated ${response.data.updated} existing ones`,
       });
     } catch (error: any) {
-      console.error("Failed to import file:", error);
+
       throw new Error(error.response?.data?.error || "Failed to import file");
     }
   }
@@ -263,8 +262,8 @@ export default function Subscribers() {
         >
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
-                <Users className="w-8 h-8 text-blue-600" />
+              <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+                <Users className="w-6 h-6 text-blue-600" />
                 Subscribers
                 {userRole === "superadmin" && (
                   <span className="text-sm bg-purple-100 text-purple-800 px-2 py-1 rounded-full flex items-center gap-1">

@@ -167,7 +167,7 @@ export default function Gallery() {
           });
           setConfirmDialog(prev => ({ ...prev, open: false }));
         } catch (error: any) {
-          console.error("Delete failed:", error);
+
           toast({
             variant: "error",
             title: "Delete failed",
@@ -258,7 +258,7 @@ export default function Gallery() {
       
       mutate();
     } catch (error: any) {
-      console.error("Upload failed:", error);
+
       toast({
         variant: "error",
         title: "Upload failed",
@@ -383,8 +383,8 @@ export default function Gallery() {
         >
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
-                <ImageIcon className="w-8 h-8 text-blue-600" />
+              <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+                <ImageIcon className="w-6 h-6 text-blue-600" />
                 Gallery Management
                 {userRole === "superadmin" && (
                   <span className="text-sm bg-purple-100 text-purple-800 px-2 py-1 rounded-full flex items-center gap-1">

@@ -122,12 +122,12 @@ export default function InquiryThreadPage() {
           </Link>
 
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
-              <MessageSquare className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
+              <MessageSquare className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-white">Inquiry Conversation</h1>
-              <p className="text-slate-400">Detailed view of customer inquiry and responses</p>
+              <h1 className="text-2xl font-bold text-white">Inquiry Conversation</h1>
+              <p className="text-slate-400 text-sm">Detailed view of customer inquiry and responses</p>
             </div>
           </div>
         </motion.div>

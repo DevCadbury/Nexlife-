@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState, Suspense } from "react";
+import NextImage from "next/image";
 import { useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -91,13 +92,13 @@ export default function Inquiries() {
         className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 backdrop-blur-xl"
       >
         <div className="text-center space-y-4">
-          <div className="w-24 h-24 mx-auto rounded-3xl bg-gradient-to-br from-blue-500 via-purple-500 to-indigo-600 flex items-center justify-center shadow-2xl border-4 border-white/20 dark:border-white/10">
-            <MessageSquare className="w-12 h-12 text-white drop-shadow-lg" />
+          <div className="w-24 h-24 mx-auto flex items-center justify-center">
+            <NextImage src="/assests/enquiries.png" alt="Enquiries" width={96} height={96} className="w-24 h-24" />
           </div>
-          <h3 className="text-3xl font-bold bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 dark:from-white dark:via-blue-100 dark:to-white bg-clip-text text-transparent">
+          <h3 className="text-2xl font-bold bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 dark:from-white dark:via-blue-100 dark:to-white bg-clip-text text-transparent">
             Loading Enquiries
           </h3>
-          <p className="text-slate-600 dark:text-slate-300 text-lg font-medium">
+          <p className="text-slate-600 dark:text-slate-300 text-base font-medium">
             Preparing your dashboard...
           </p>
         </div>
@@ -255,7 +256,7 @@ function InquiriesContent() {
       insertImage(finalUrl);
       success?.("Image inserted successfully!");
     } catch (error: any) {
-      console.error("Image upload error:", error);
+      // Image upload error
       error?.(error.message || "Failed to upload image");
     } finally {
       setUploadingImage(false);
@@ -543,13 +544,6 @@ function InquiriesContent() {
 
       // Decode JWT payload (simple base64 decode)
       const payload = JSON.parse(atob(token.split(".")[1]));
-      console.log("JWT payload:", payload);
-      console.log(
-        "Token parts:",
-        token
-          .split(".")
-          .map((part, i) => `Part ${i}: ${part.substring(0, 50)}...`)
-      );
 
       // Check multiple possible role fields
       const role =
@@ -563,10 +557,9 @@ function InquiriesContent() {
       const name =
         payload.name || payload.userName || payload.user?.name || "Admin";
 
-      console.log("Extracted role:", role, "name:", name);
+
       return { role, name };
     } catch (error) {
-      console.error("Error decoding token:", error);
       return { role: "", name: "" };
     }
   };
@@ -580,7 +573,7 @@ function InquiriesContent() {
 
     // Get role and name from JWT token
     const userData = getUserRoleFromToken();
-    console.log("Detected user role:", userData.role, "name:", userData.name);
+
 
     // Set agentName from JWT if not already saved
     if (userData.name && !saved) {
@@ -599,11 +592,6 @@ function InquiriesContent() {
 
     // If still no role, show a warning and suggest logout
     if (!fallbackRole) {
-      console.warn(
-        "No role detected! Please logout and login again to get a fresh token with role."
-      );
-      console.log("Current token:", localStorage.getItem("token"));
-
       // Add a temporary logout button for testing
       if (typeof window !== "undefined") {
         const logoutBtn = document.createElement("button");
@@ -686,7 +674,7 @@ function InquiriesContent() {
       }
       setSeenBy(newSeenBy);
     } catch (e) {
-      console.error("Failed to load inquiries", e);
+
     } finally {
       setLoading(false);
     }
@@ -714,37 +702,30 @@ function InquiriesContent() {
       const url = `/api/inquiries/threads/${encodeURIComponent(
         activeEmail
       )}/stream`;
-      console.log("Connecting to SSE:", url);
+
       const eventSource = new EventSource(url);
       setSseConnection(eventSource);
-
-      eventSource.onopen = () => {
-        console.log("SSE connection opened for:", activeEmail);
-      };
 
       eventSource.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
-          console.log("SSE message received:", data);
+
           if (data.type === "thread_update" && data.subtype === "new_reply") {
             // Refresh thread data when new reply arrives
             openThread(activeEmail);
-            success(`New reply from ${data.from}`);
+            success?.(`New reply from ${data.from}`);
           }
         } catch (error) {
-          console.error("SSE message parse error:", error);
+          // Ignore parse errors
         }
       };
 
-      eventSource.onerror = (error) => {
-        console.error("SSE connection error:", error);
-        console.error("SSE readyState:", eventSource.readyState);
+      eventSource.onerror = () => {
         eventSource.close();
         setSseConnection(null);
       };
 
       return () => {
-        console.log("Closing SSE connection for:", activeEmail);
         eventSource.close();
         setSseConnection(null);
       };
@@ -754,43 +735,34 @@ function InquiriesContent() {
   // Dashboard notification connection for all admin/staff
   useEffect(() => {
     const url = "/api/inquiries/notifications/stream";
-    console.log("Connecting to dashboard notifications:", url);
+
     const eventSource = new EventSource(url);
     setDashboardConnection(eventSource);
-
-    eventSource.onopen = () => {
-      console.log("Dashboard notification SSE connection opened");
-    };
 
     eventSource.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        console.log("Dashboard notification received:", data);
         // Trigger load on any dashboard notification to ensure real-time updates
-        load();
-        // Show specific notification for new replies
-        if (
-          data.type === "dashboard_notification" &&
-          data.subtype === "new_reply"
-        ) {
-          success(
-            `New reply added to ${data.inquiryEmail} by ${data.fromName}`
-          );
+        if (data.type === "dashboard_notification") {
+          load();
+          // Show specific notification for new replies
+          if (data.subtype === "new_reply") {
+            success?.(
+              `New reply added to ${data.inquiryEmail} by ${data.fromName}`
+            );
+          }
         }
       } catch (error) {
-        console.error("Dashboard notification parse error:", error);
+        // Ignore parse errors
       }
     };
 
-    eventSource.onerror = (error) => {
-      console.error("Dashboard notification connection error:", error);
-      console.error("Dashboard SSE readyState:", eventSource.readyState);
+    eventSource.onerror = () => {
       eventSource.close();
       setDashboardConnection(null);
     };
 
     return () => {
-      console.log("Closing dashboard notification SSE connection");
       eventSource.close();
       setDashboardConnection(null);
     };
@@ -981,7 +953,7 @@ function InquiriesContent() {
   async function mark(id: string, s: string) {
     try {
       try {
-        console.log("[Inquiries] mark", id, s);
+
       } catch {}
       await api.patch(`/inquiries/${id}/status`, { status: s });
       await load();
@@ -990,7 +962,7 @@ function InquiriesContent() {
       else warn?.("Status updated");
     } catch (e) {
       try {
-        console.error("[Inquiries] mark error", e);
+
       } catch {}
       error?.("Failed to update status");
     }
@@ -1004,7 +976,7 @@ function InquiriesContent() {
     // mark seen by agent
     if (i.email && agentName) {
       api.patch(`/inquiries/${i._id}/mark-seen`, { agentName }).catch((err) => {
-        console.error("Failed to mark inquiry as seen:", err);
+
       });
     }
   }
@@ -1040,12 +1012,12 @@ function InquiriesContent() {
     try {
       await api.patch(`/inquiries/threads/mark-read-all`, { email });
     } catch (e) {
-      console.error("Failed to mark thread as read:", e);
+
     }
     // mark seen by agent
     if (agentName) {
       api.patch("/inquiries/threads/mark-seen", { email, agentName }).catch((err) => {
-        console.error("Failed to mark thread as seen:", err);
+
       });
     }
   }
@@ -1055,14 +1027,14 @@ function InquiriesContent() {
     if (!t) return;
     try {
       try {
-        console.log("[Inquiries] markUnreadLatest", email, t.latest._id);
+
       } catch {}
       await api.patch(`/inquiries/${t.latest._id}/mark-unread`, {});
       await load();
       warn?.("Marked as unread");
     } catch (e) {
       try {
-        console.error("[Inquiries] markUnread error", e);
+
       } catch {}
       error?.("Failed to mark unread");
     }
@@ -1215,8 +1187,8 @@ function InquiriesContent() {
               }}
               className="relative"
             >
-              <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-blue-500 via-purple-500 to-indigo-600 flex items-center justify-center shadow-2xl border-4 border-white/20 dark:border-white/10">
-                <MessageSquare className="w-12 h-12 text-white drop-shadow-lg" />
+              <div className="w-24 h-24 flex items-center justify-center">
+                <NextImage src="/assests/enquiries.png" alt="Enquiries" width={96} height={96} className="w-24 h-24" />
               </div>
 
               {/* Pulsing ring */}
@@ -1241,10 +1213,10 @@ function InquiriesContent() {
               transition={{ delay: 0.2 }}
               className="text-center space-y-2"
             >
-              <h3 className="text-3xl font-bold bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 dark:from-white dark:via-blue-100 dark:to-white bg-clip-text text-transparent">
+              <h3 className="text-2xl font-bold bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 dark:from-white dark:via-blue-100 dark:to-white bg-clip-text text-transparent">
                 Loading Enquiries
               </h3>
-              <p className="text-slate-600 dark:text-slate-300 text-lg font-medium">
+              <p className="text-slate-600 dark:text-slate-300 text-base font-medium">
                 Fetching the latest customer communications...
               </p>
             </motion.div>
@@ -3104,16 +3076,6 @@ function InquiriesContent() {
                           {ev.at ? new Date(ev.at).toLocaleString() : ""}
                         </span>
                         {(() => {
-                          console.log(
-                            "Delete button check - role:",
-                            role,
-                            "ev.type:",
-                            ev.type,
-                            "isSuperadmin:",
-                            role === "superadmin",
-                            "isReply:",
-                            ev.type === "reply"
-                          );
                           return role === "superadmin" && ev.type === "reply";
                         })() && (
                           <button
@@ -3124,16 +3086,12 @@ function InquiriesContent() {
                               if (!confirm("Delete this reply?")) return;
                               try {
                                 const token = localStorage.getItem("token");
-                                console.log("Delete request - token:", token);
+
                                 if (!token) {
                                   error?.("No authentication token found");
                                   return;
                                 }
 
-                                console.log(
-                                  "Sending delete request with token:",
-                                  token.substring(0, 50) + "..."
-                                );
                                 await api.delete(
                                   `/inquiries/${ev.inquiryId}/replies/${ev.replyIdx}`,
                                   {

@@ -51,7 +51,7 @@ export default function ExportPage() {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (error) {
-      console.error("Export error:", error);
+
       alert("Failed to export data. Please try again.");
     }
   };
@@ -86,8 +86,8 @@ export default function ExportPage() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
-            <Database className="w-8 h-8 text-blue-600" />
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+            <Database className="w-6 h-6 text-blue-600" />
             Data Export
           </h1>
           <p className="text-slate-600 dark:text-slate-400 mt-2">

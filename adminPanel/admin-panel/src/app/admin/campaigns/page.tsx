@@ -412,7 +412,7 @@ export default function Campaigns() {
       setTemplateHtml("");
       setEditingTemplateId(null);
     } catch (error) {
-      console.error("Failed to save template:", error);
+
       alert("Failed to save template");
     } finally {
       setLoading(false);
@@ -427,7 +427,7 @@ export default function Campaigns() {
       await api.delete(`/templates/${id}`);
       mutateTemplates();
     } catch (error) {
-      console.error("Failed to delete template:", error);
+
       alert("Failed to delete template");
     } finally {
       setLoading(false);
@@ -511,7 +511,7 @@ export default function Campaigns() {
       // Refresh campaign history
       mutateCampaigns();
     } catch (error) {
-      console.error("Failed to send campaign:", error);
+
       setResult({ sent: 0, failed: 0 });
     } finally {
       setLoading(false);
@@ -558,8 +558,8 @@ export default function Campaigns() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
-            <Mail className="w-8 h-8 text-blue-600" />
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+            <Mail className="w-6 h-6 text-blue-600" />
             Email Campaign Manager
           </h1>
           <p className="text-slate-600 dark:text-slate-400 mt-2">

@@ -18,7 +18,7 @@ export function Toaster({ children }: { children?: React.ReactNode }) {
   const [list, setList] = React.useState<Toast[]>([]);
   const add = (t: Omit<Toast, "id">) => {
     try {
-      console.log("[Toaster] add", t);
+
     } catch {}
     const id = Date.now() + Math.random();
     setList((l) => [...l, { id, ...t }]);
@@ -179,35 +179,35 @@ export function useToast() {
   return {
     toast: (opts: Omit<Toast, "id">) => {
       try {
-        console.log("[useToast] toast", opts);
+
       } catch {}
       add?.(opts);
     },
     success: (description: string, title = "Success") => {
       const p = { description, title, variant: "success" as const };
       try {
-        console.log("[useToast] success", p);
+
       } catch {}
       add?.(p);
     },
     error: (description: string, title = "Error") => {
       const p = { description, title, variant: "error" as const };
       try {
-        console.log("[useToast] error", p);
+
       } catch {}
       add?.(p);
     },
     warn: (description: string, title = "Notice") => {
       const p = { description, title, variant: "warning" as const };
       try {
-        console.log("[useToast] warn", p);
+
       } catch {}
       add?.(p);
     },
     info: (description: string, title = "Info") => {
       const p = { description, title, variant: "info" as const };
       try {
-        console.log("[useToast] info", p);
+
       } catch {}
       add?.(p);
     },

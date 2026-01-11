@@ -19,7 +19,6 @@ async function validateToken(token: string): Promise<boolean> {
 
     return true;
   } catch (error) {
-    console.error("Token validation error:", error);
     return false;
   }
 }

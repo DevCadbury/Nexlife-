@@ -83,11 +83,11 @@ export default function Logs() {
   const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false);
   const [isDeletingAll, setIsDeletingAll] = useState(false);
 
-  console.log("Logs component mounted/rendered");
+
 
   // Update current time every second
   useEffect(() => {
-    console.log("Setting up current time interval");
+
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
@@ -96,12 +96,12 @@ export default function Logs() {
 
   // Check authorization on component mount
   useEffect(() => {
-    console.log("Checking authorization on component mount");
+
     const checkAuthorization = () => {
-      console.log("Running checkAuthorization function");
+
       const { role } = getUserRoleFromToken();
       const authorized = role === "superadmin" || role === "dev";
-      console.log("Authorization check result:", { role, isAuthorized: authorized });
+
       setIsAuthorized(authorized);
       setIsLoading(false);
     };
@@ -130,19 +130,16 @@ export default function Logs() {
       if (!token) return { role: "", name: "" };
 
       const payload = JSON.parse(atob(token.split(".")[1]));
-      console.log("JWT payload:", payload);
-      console.log("Token parts:", token.split("."));
-
       // Try different possible role fields
       const role = payload.role || payload.userRole || payload.user?.role || "";
       const name = payload.name || payload.userName || payload.user?.name || "";
 
-      console.log("Extracted role:", role);
-      console.log("Extracted name:", name);
+
+
 
       return { role, name };
     } catch (error) {
-      console.error("Error decoding token:", error);
+
       return { role: "", name: "" };
     }
   };
@@ -421,7 +418,7 @@ export default function Logs() {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (error) {
-      console.error("Download failed:", error);
+
     }
   };
 
@@ -470,7 +467,7 @@ export default function Logs() {
   };
 
   if (isLoading) {
-    console.log("Rendering loading state");
+
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
@@ -479,7 +476,7 @@ export default function Logs() {
   }
 
   if (!isAuthorized) {
-    console.log("Rendering access denied state - user not authorized");
+
     return (
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
@@ -495,7 +492,7 @@ export default function Logs() {
     );
   }
 
-  console.log("Rendering main logs page - user is authorized");
+
 
   return (
     <div suppressHydrationWarning={true} className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-200 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
@@ -1896,13 +1893,13 @@ export default function Logs() {
                       setLogToDelete(null);
                       showToast('Log entry deleted successfully', 'success');
                     } else {
-                      console.error('Failed to delete log entry:', response.data.error);
+
                       showToast(response.data.error || 'Failed to delete log entry', 'error');
                       setShowDeleteDialog(false);
                       setLogToDelete(null);
                     }
                   } catch (error: any) {
-                    console.error('Error deleting log:', error);
+
                     showToast(error.response?.data?.error || 'Error deleting log', 'error');
                     setShowDeleteDialog(false);
                     setLogToDelete(null);
@@ -2063,7 +2060,7 @@ export default function Logs() {
                       showToast(response.data.error || 'Failed to delete logs', 'error');
                     }
                   } catch (error: any) {
-                    console.error('Error deleting all logs:', error);
+
                     showToast(error.response?.data?.error || 'Failed to delete logs', 'error');
                   } finally {
                     setIsDeletingAll(false);

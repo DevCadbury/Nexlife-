@@ -24,6 +24,8 @@ import {
   Settings as SettingsIcon,
   Package,
   Award,
+  Menu,
+  X,
 } from "lucide-react";
 
 const tabs = [
@@ -50,6 +52,7 @@ export default function AdminLayout({
   const path = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [hoverOpen, setHoverOpen] = useState(false);
   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
@@ -176,7 +179,7 @@ export default function AdminLayout({
       mutateReplies();
       mutate();
     } catch (error) {
-      console.error("Failed to mark reply as read:", error);
+
     }
   }
 
@@ -187,7 +190,7 @@ export default function AdminLayout({
       mutateReplies();
       mutate();
     } catch (error) {
-      console.error("Failed to mark all replies as read:", error);
+
     }
   }
 
@@ -254,13 +257,18 @@ export default function AdminLayout({
 
       return null;
     } catch (error) {
-      console.error("Error decoding token for last login:", error);
+
       return null;
     }
   };
 
   useEffect(() => {
     setMounted(true);
+    // Load sidebar state from localStorage
+    const savedState = localStorage.getItem('sidebarCollapsed');
+    if (savedState !== null) {
+      setSidebarCollapsed(savedState === 'true');
+    }
     function onDoc(e: MouseEvent) {
       if (!open && !profileOpen) return;
       const t = e.target as Node;
@@ -319,13 +327,39 @@ export default function AdminLayout({
 
   return (
     <div suppressHydrationWarning={true} className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/20 to-indigo-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
+      {/* Mobile Overlay */}
+      <AnimatePresence>
+        {!sidebarCollapsed && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => {
+              setSidebarCollapsed(true);
+              localStorage.setItem('sidebarCollapsed', 'true');
+            }}
+            className="fixed inset-0 bg-black/50 z-20 lg:hidden"
+          />
+        )}
+      </AnimatePresence>
+
       <motion.aside
         initial={{ x: -280 }}
-        animate={{ x: 0 }}
+        animate={{ x: sidebarCollapsed ? -280 : 0 }}
         transition={{ type: "spring", stiffness: 100, damping: 20 }}
         suppressHydrationWarning={true}
         className="fixed left-0 top-0 h-screen w-[280px] border-r border-slate-200/60 dark:border-slate-700/60 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-xl z-30 overflow-y-auto"
       >
+        {/* Close Button (Mobile) */}
+        <button
+          onClick={() => {
+            setSidebarCollapsed(true);
+            localStorage.setItem('sidebarCollapsed', 'true');
+          }}
+          className="absolute top-4 right-4 lg:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors z-10"
+        >
+          <X className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+        </button>
         <div className="p-6 border-b border-slate-200/60 dark:border-slate-700/60">
           <div className="flex items-center gap-3 mb-4">
             <div className="h-10 w-10 rounded-lg bg-white dark:bg-slate-800 shadow-md flex items-center justify-center p-2 border border-slate-200 dark:border-slate-700">
@@ -449,7 +483,9 @@ export default function AdminLayout({
         </div>
       </motion.aside>
 
-      <main className="ml-[280px] mr-[calc(20vw-280px)] flex flex-col min-h-screen max-w-[80vw]">
+      <main className={`transition-all duration-300 flex flex-col min-h-screen ${
+        sidebarCollapsed ? 'ml-0 mr-0 max-w-full' : 'ml-0 lg:ml-[280px] mr-0 lg:mr-[calc(20vw-280px)] max-w-full lg:max-w-[80vw]'
+      }`}>
         <motion.header
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -458,6 +494,19 @@ export default function AdminLayout({
         >
           <div className="flex items-center justify-between px-6 py-4">
             <div className="flex items-center gap-4">
+              {/* Hamburger Menu Button */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => {
+                  setSidebarCollapsed(!sidebarCollapsed);
+                  localStorage.setItem('sidebarCollapsed', String(!sidebarCollapsed));
+                }}
+                className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              >
+                <Menu className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+              </motion.button>
+              
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -478,7 +527,7 @@ export default function AdminLayout({
               </div>
             </div>
 
-            <div className="flex items-center gap-4 ml-[280px] max-w-[80vw]">
+            <div className="flex items-center gap-4">
               {/* Notifications */}
               <motion.button
                 whileHover={{ scale: 1.05 }}
