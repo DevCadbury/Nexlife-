@@ -548,23 +548,82 @@ body {
   }
 }
 
+/* World Map Styling - Updated for @yanikemmenegger/react-world-map */
+.world-map-container {
+  position: relative;
+  width: 100%;
+  overflow: visible;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.world-map-container svg {
+  display: block;
+  margin: 0 auto;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+}
+
+/* Default country styling - gray with black border */
+.country-default {
+  stroke: #000000 !important;
+  stroke-width: 1 !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  cursor: default !important;
+}
+
+/* Served country styling - white with black border */
+.country-served {
+  stroke: #000000 !important;
+  stroke-width: 1.5 !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  cursor: pointer !important;
+}
+
+/* Hover effect - blue highlight */
+.country-served:hover {
+  fill: #3b82f6 !important;
+  stroke: #000000 !important;
+  stroke-width: 2 !important;
+}
+
+/* Clicked country - red fill with black border */
+.country-clicked {
+  fill: #ef4444 !important;
+  stroke: #000000 !important;
+  stroke-width: 2.5 !important;
+  cursor: pointer !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.country-clicked:hover {
+  fill: #dc2626 !important;
+  stroke: #000000 !important;
+  stroke-width: 2.5 !important;
+}
+
+/* Responsive map sizing */
+@media (max-width: 640px) {
+  .world-map-container {
+    min-height: 300px;
+    max-height: 400px;
+  }
+}
+
 @media (min-width: 641px) and (max-width: 1024px) {
-  .world-map-svg svg {
-    max-height: 360px;
+  .world-map-container {
+    min-height: 400px;
+    max-height: 550px;
   }
 }
 
 @media (min-width: 1025px) {
-  .world-map-svg svg {
-    max-height: 520px;
+  .world-map-container {
+    min-height: 450px;
+    max-height: 700px;
   }
 }
 
-.world-map-svg svg path {
-  transition: all 0.3s ease !important;
-}
 
-/* Remove any conflicting hover styles */
-.world-map-svg svg path:hover {
-  cursor: pointer !important;
-}

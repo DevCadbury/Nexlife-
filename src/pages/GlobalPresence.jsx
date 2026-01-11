@@ -18,7 +18,7 @@ import {
   Mail,
   MessageCircle,
 } from "lucide-react";
-import { WorldMap } from "react-svg-worldmap";
+import { World, MapProvider } from "@yanikemmenegger/react-world-map";
 import globalReachImage from "../assets/images/global reach.png";
 import globalHeaderImage from "../assets/images/global.png";
 
@@ -95,147 +95,59 @@ const GlobalPresence = memo(() => {
   const [clickedCountry, setClickedCountry] = useState(null);
   const [hoveredCountry, setHoveredCountry] = useState(null);
 
-  // Map data with all countries we serve
-  const mapData = useMemo(() => [
+  // Countries we serve - using ISO 3166-1 alpha-2 codes
+  const servedCountries = useMemo(() => [
     // North America
-    { country: "us", value: 1, name: "United States", region: "North America" },
-    { country: "ca", value: 1, name: "Canada", region: "North America" },
-    { country: "mx", value: 1, name: "Mexico", region: "North America" },
-    
+    "US", "CA", "MX",
     // Europe
-    { country: "gb", value: 1, name: "United Kingdom", region: "Europe" },
-    { country: "de", value: 1, name: "Germany", region: "Europe" },
-    { country: "fr", value: 1, name: "France", region: "Europe" },
-    { country: "it", value: 1, name: "Italy", region: "Europe" },
-    { country: "es", value: 1, name: "Spain", region: "Europe" },
-    { country: "nl", value: 1, name: "Netherlands", region: "Europe" },
-    { country: "ch", value: 1, name: "Switzerland", region: "Europe" },
-    { country: "se", value: 1, name: "Sweden", region: "Europe" },
-    
+    "GB", "DE", "FR", "IT", "ES", "NL", "CH", "SE",
     // Asia Pacific
-    { country: "in", value: 1, name: "India", region: "Asia Pacific" },
-    { country: "cn", value: 1, name: "China", region: "Asia Pacific" },
-    { country: "jp", value: 1, name: "Japan", region: "Asia Pacific" },
-    { country: "kr", value: 1, name: "South Korea", region: "Asia Pacific" },
-    { country: "au", value: 1, name: "Australia", region: "Asia Pacific" },
-    { country: "sg", value: 1, name: "Singapore", region: "Asia Pacific" },
-    { country: "th", value: 1, name: "Thailand", region: "Asia Pacific" },
-    { country: "my", value: 1, name: "Malaysia", region: "Asia Pacific" },
-    
+    "IN", "CN", "JP", "KR", "AU", "SG", "TH", "MY",
     // Middle East
-    { country: "ae", value: 1, name: "UAE", region: "Middle East" },
-    { country: "sa", value: 1, name: "Saudi Arabia", region: "Middle East" },
-    { country: "il", value: 1, name: "Israel", region: "Middle East" },
-    { country: "tr", value: 1, name: "Turkey", region: "Middle East" },
-    { country: "eg", value: 1, name: "Egypt", region: "Middle East" },
-    
+    "AE", "SA", "IL", "TR", "EG",
     // Latin America
-    { country: "br", value: 1, name: "Brazil", region: "Latin America" },
-    { country: "ar", value: 1, name: "Argentina", region: "Latin America" },
-    { country: "cl", value: 1, name: "Chile", region: "Latin America" },
-    { country: "co", value: 1, name: "Colombia", region: "Latin America" },
-    { country: "pe", value: 1, name: "Peru", region: "Latin America" },
-    
+    "BR", "AR", "CL", "CO", "PE",
     // Africa
-    { country: "za", value: 1, name: "South Africa", region: "Africa" },
-    { country: "ng", value: 1, name: "Nigeria", region: "Africa" },
-    { country: "ke", value: 1, name: "Kenya", region: "Africa" },
-    { country: "gh", value: 1, name: "Ghana", region: "Africa" },
-    { country: "ma", value: 1, name: "Morocco", region: "Africa" },
+    "ZA", "NG", "KE", "GH", "MA"
   ], []);
 
-  // Create country lookup map
-  const countryLookup = useMemo(() => {
-    const lookup = {};
-    mapData.forEach(item => {
-      lookup[item.country] = item;
-    });
-    return lookup;
-  }, [mapData]);
-
-  // Comprehensive country name mapping for all countries
-  const countryNames = useMemo(() => ({
-    'af': 'Afghanistan', 'al': 'Albania', 'dz': 'Algeria', 'ad': 'Andorra', 'ao': 'Angola',
-    'ag': 'Antigua and Barbuda', 'ar': 'Argentina', 'am': 'Armenia', 'au': 'Australia', 'at': 'Austria',
-    'az': 'Azerbaijan', 'bs': 'Bahamas', 'bh': 'Bahrain', 'bd': 'Bangladesh', 'bb': 'Barbados',
-    'by': 'Belarus', 'be': 'Belgium', 'bz': 'Belize', 'bj': 'Benin', 'bt': 'Bhutan',
-    'bo': 'Bolivia', 'ba': 'Bosnia and Herzegovina', 'bw': 'Botswana', 'br': 'Brazil', 'bn': 'Brunei',
-    'bg': 'Bulgaria', 'bf': 'Burkina Faso', 'bi': 'Burundi', 'kh': 'Cambodia', 'cm': 'Cameroon',
-    'ca': 'Canada', 'cv': 'Cape Verde', 'cf': 'Central African Republic', 'td': 'Chad', 'cl': 'Chile',
-    'cn': 'China', 'co': 'Colombia', 'km': 'Comoros', 'cg': 'Congo', 'cd': 'DR Congo',
-    'cr': 'Costa Rica', 'ci': 'Ivory Coast', 'hr': 'Croatia', 'cu': 'Cuba', 'cy': 'Cyprus',
-    'cz': 'Czech Republic', 'dk': 'Denmark', 'dj': 'Djibouti', 'dm': 'Dominica', 'do': 'Dominican Republic',
-    'ec': 'Ecuador', 'eg': 'Egypt', 'sv': 'El Salvador', 'gq': 'Equatorial Guinea', 'er': 'Eritrea',
-    'ee': 'Estonia', 'et': 'Ethiopia', 'fj': 'Fiji', 'fi': 'Finland', 'fr': 'France',
-    'ga': 'Gabon', 'gm': 'Gambia', 'ge': 'Georgia', 'de': 'Germany', 'gh': 'Ghana',
-    'gr': 'Greece', 'gd': 'Grenada', 'gt': 'Guatemala', 'gn': 'Guinea', 'gw': 'Guinea-Bissau',
-    'gy': 'Guyana', 'ht': 'Haiti', 'hn': 'Honduras', 'hu': 'Hungary', 'is': 'Iceland',
-    'in': 'India', 'id': 'Indonesia', 'ir': 'Iran', 'iq': 'Iraq', 'ie': 'Ireland',
-    'il': 'Israel', 'it': 'Italy', 'jm': 'Jamaica', 'jp': 'Japan', 'jo': 'Jordan',
-    'kz': 'Kazakhstan', 'ke': 'Kenya', 'ki': 'Kiribati', 'kp': 'North Korea', 'kr': 'South Korea',
-    'kw': 'Kuwait', 'kg': 'Kyrgyzstan', 'la': 'Laos', 'lv': 'Latvia', 'lb': 'Lebanon',
-    'ls': 'Lesotho', 'lr': 'Liberia', 'ly': 'Libya', 'li': 'Liechtenstein', 'lt': 'Lithuania',
-    'lu': 'Luxembourg', 'mk': 'North Macedonia', 'mg': 'Madagascar', 'mw': 'Malawi', 'my': 'Malaysia',
-    'mv': 'Maldives', 'ml': 'Mali', 'mt': 'Malta', 'mh': 'Marshall Islands', 'mr': 'Mauritania',
-    'mu': 'Mauritius', 'mx': 'Mexico', 'fm': 'Micronesia', 'md': 'Moldova', 'mc': 'Monaco',
-    'mn': 'Mongolia', 'me': 'Montenegro', 'ma': 'Morocco', 'mz': 'Mozambique', 'mm': 'Myanmar',
-    'na': 'Namibia', 'nr': 'Nauru', 'np': 'Nepal', 'nl': 'Netherlands', 'nz': 'New Zealand',
-    'ni': 'Nicaragua', 'ne': 'Niger', 'ng': 'Nigeria', 'no': 'Norway', 'om': 'Oman',
-    'pk': 'Pakistan', 'pw': 'Palau', 'ps': 'Palestine', 'pa': 'Panama', 'pg': 'Papua New Guinea',
-    'py': 'Paraguay', 'pe': 'Peru', 'ph': 'Philippines', 'pl': 'Poland', 'pt': 'Portugal',
-    'qa': 'Qatar', 'ro': 'Romania', 'ru': 'Russia', 'rw': 'Rwanda', 'kn': 'Saint Kitts and Nevis',
-    'lc': 'Saint Lucia', 'vc': 'Saint Vincent', 'ws': 'Samoa', 'sm': 'San Marino', 'st': 'Sao Tome and Principe',
-    'sa': 'Saudi Arabia', 'sn': 'Senegal', 'rs': 'Serbia', 'sc': 'Seychelles', 'sl': 'Sierra Leone',
-    'sg': 'Singapore', 'sk': 'Slovakia', 'si': 'Slovenia', 'sb': 'Solomon Islands', 'so': 'Somalia',
-    'za': 'South Africa', 'ss': 'South Sudan', 'es': 'Spain', 'lk': 'Sri Lanka', 'sd': 'Sudan',
-    'sr': 'Suriname', 'sz': 'Eswatini', 'se': 'Sweden', 'ch': 'Switzerland', 'sy': 'Syria',
-    'tw': 'Taiwan', 'tj': 'Tajikistan', 'tz': 'Tanzania', 'th': 'Thailand', 'tl': 'Timor-Leste',
-    'tg': 'Togo', 'to': 'Tonga', 'tt': 'Trinidad and Tobago', 'tn': 'Tunisia', 'tr': 'Turkey',
-    'tm': 'Turkmenistan', 'tv': 'Tuvalu', 'ug': 'Uganda', 'ua': 'Ukraine', 'ae': 'UAE',
-    'gb': 'United Kingdom', 'us': 'United States', 'uy': 'Uruguay', 'uz': 'Uzbekistan', 'vu': 'Vanuatu',
-    'va': 'Vatican City', 've': 'Venezuela', 'vn': 'Vietnam', 'ye': 'Yemen', 'zm': 'Zambia',
-    'zw': 'Zimbabwe', 'gl': 'Greenland', 'eh': 'Western Sahara', 'nc': 'New Caledonia', 'pf': 'French Polynesia'
+  // Country information lookup
+  const countryInfo = useMemo(() => ({
+    "US": { name: "United States", region: "North America" },
+    "CA": { name: "Canada", region: "North America" },
+    "MX": { name: "Mexico", region: "North America" },
+    "GB": { name: "United Kingdom", region: "Europe" },
+    "DE": { name: "Germany", region: "Europe" },
+    "FR": { name: "France", region: "Europe" },
+    "IT": { name: "Italy", region: "Europe" },
+    "ES": { name: "Spain", region: "Europe" },
+    "NL": { name: "Netherlands", region: "Europe" },
+    "CH": { name: "Switzerland", region: "Europe" },
+    "SE": { name: "Sweden", region: "Europe" },
+    "IN": { name: "India", region: "Asia Pacific" },
+    "CN": { name: "China", region: "Asia Pacific" },
+    "JP": { name: "Japan", region: "Asia Pacific" },
+    "KR": { name: "South Korea", region: "Asia Pacific" },
+    "AU": { name: "Australia", region: "Asia Pacific" },
+    "SG": { name: "Singapore", region: "Asia Pacific" },
+    "TH": { name: "Thailand", region: "Asia Pacific" },
+    "MY": { name: "Malaysia", region: "Asia Pacific" },
+    "AE": { name: "UAE", region: "Middle East" },
+    "SA": { name: "Saudi Arabia", region: "Middle East" },
+    "IL": { name: "Israel", region: "Middle East" },
+    "TR": { name: "Turkey", region: "Middle East" },
+    "EG": { name: "Egypt", region: "Middle East" },
+    "BR": { name: "Brazil", region: "Latin America" },
+    "AR": { name: "Argentina", region: "Latin America" },
+    "CL": { name: "Chile", region: "Latin America" },
+    "CO": { name: "Colombia", region: "Latin America" },
+    "PE": { name: "Peru", region: "Latin America" },
+    "ZA": { name: "South Africa", region: "Africa" },
+    "NG": { name: "Nigeria", region: "Africa" },
+    "KE": { name: "Kenya", region: "Africa" },
+    "GH": { name: "Ghana", region: "Africa" },
+    "MA": { name: "Morocco", region: "Africa" }
   }), []);
-
-  // Styling function for the map - white base with color on interaction
-  const getStyle = useCallback(({ countryValue, countryCode, countryName, minValue, maxValue, color }) => {
-    // Clicked state is handled by useEffect, so skip styling for clicked country here
-    if (countryCode === clickedCountry) {
-      return {
-        fill: "#ef4444",
-        fillOpacity: 1,
-        stroke: "#dc2626",
-        strokeWidth: 2.5,
-        strokeOpacity: 1,
-        cursor: "pointer",
-        transition: "all 0.3s ease"
-      };
-    }
-    
-    // Hover state - blue fill
-    if (countryCode === hoveredCountry) {
-      return {
-        fill: "#60a5fa",
-        fillOpacity: 1,
-        stroke: "#3b82f6",
-        strokeWidth: 1.5,
-        strokeOpacity: 1,
-        cursor: "pointer",
-        transition: "all 0.3s ease"
-      };
-    }
-    
-    // Default: white fill with black borders
-    return {
-      fill: "#ffffff",
-      fillOpacity: 1,
-      stroke: "#000000",
-      strokeWidth: 0.5,
-      strokeOpacity: 1,
-      cursor: "pointer",
-      transition: "all 0.3s ease"
-    };
-  }, [countryLookup, clickedCountry, hoveredCountry]);
 
   // Contact handlers
   const handleCall = () => {
@@ -555,26 +467,24 @@ const GlobalPresence = memo(() => {
               </div>
 
               {/* Map container with beautiful styling */}
-              <div className="relative w-full max-w-7xl mx-auto rounded-2xl overflow-hidden border-2 border-gray-200 dark:border-gray-700 shadow-2xl bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 p-2 sm:p-4 md:p-8">
-                {/* Hover tooltip - shows for all countries */}
+              <div className="relative w-full mx-auto rounded-2xl overflow-visible border-2 border-gray-200 dark:border-gray-700 shadow-2xl bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 p-4 sm:p-6 md:p-10 lg:p-12">
+                {/* Hover tooltip */}
                 <AnimatePresence>
-                  {hoveredCountry && (
+                  {hoveredCountry && countryInfo[hoveredCountry] && (
                     <motion.div
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
-                      className="hidden sm:block absolute top-4 left-1/2 transform -translate-x-1/2 z-20 pointer-events-none"
+                      className="absolute top-2 left-1/2 transform -translate-x-1/2 z-50 pointer-events-none"
                     >
-                      <div className="px-4 sm:px-6 py-2 sm:py-3 rounded-xl shadow-2xl border-2 bg-white dark:bg-gray-800 border-blue-500 dark:border-blue-400">
+                      <div className="px-4 sm:px-6 py-2 sm:py-3 rounded-xl shadow-2xl border-2 bg-white dark:bg-gray-800 border-blue-500 dark:border-blue-400 whitespace-nowrap">
                         <div className="text-center">
-                          <div className="text-sm sm:text-lg font-bold text-gray-900 dark:text-white">
-                            {countryLookup[hoveredCountry]?.name || countryNames[hoveredCountry] || hoveredCountry.toUpperCase()}
+                          <div className="text-sm sm:text-base lg:text-lg font-bold text-gray-900 dark:text-white">
+                            {countryInfo[hoveredCountry].name}
                           </div>
-                          {countryLookup[hoveredCountry] && (
-                            <div className="text-sm text-blue-600 dark:text-blue-400 font-medium">
-                              {countryLookup[hoveredCountry].region}
-                            </div>
-                          )}
+                          <div className="text-xs sm:text-sm text-blue-600 dark:text-blue-400 font-medium">
+                            {countryInfo[hoveredCountry].region}
+                          </div>
                           <div className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">
                             ✓ We serve this region
                           </div>
@@ -584,82 +494,75 @@ const GlobalPresence = memo(() => {
                   )}
                 </AnimatePresence>
 
-                 <div className="world-map-svg w-full flex items-center justify-center"
-                   style={{ minHeight: '320px', maxHeight: '640px' }}
-                     onMouseMove={(e) => {
-                       const target = e.target;
-                       if (target.tagName === 'path' && target.getAttribute('data-name')) {
-                         const countryCode = target.getAttribute('data-id');
-                         if (countryCode && countryCode !== hoveredCountry) {
-                           setHoveredCountry(countryCode.toLowerCase());
-                         }
-                       }
-                     }}
-                     onMouseLeave={() => setHoveredCountry(null)}
-                     onTouchStart={(e) => {
-                       const target = e.target;
-                       if (target.tagName === 'path') {
-                         const countryCode = target.getAttribute('data-id');
-                         if (countryCode) {
-                           const code = countryCode.toLowerCase();
-                           setClickedCountry(clickedCountry === code ? null : code);
-                         }
-                       }
-                     }}
+                {/* Interactive World Map */}
+                <div 
+                  className="world-map-container w-full h-auto flex items-center justify-center relative"
+                  style={{ 
+                    minHeight: '400px',
+                    maxHeight: '700px'
+                  }}
                 >
-                  <WorldMap
+                  <MapProvider
                     key={clickedCountry || 'default'}
-                    color="#ffffff"
-                    title=""
-                    value-suffix="countries"
-                    size="responsive"
-                    data={mapData}
-                    richInteraction={true}
-                    tooltipBgColor="transparent"
-                    tooltipTextColor="transparent"
-                    frame={false}
-                    frameColor="transparent"
-                    strokeOpacity={1}
-                    borderColor="#000000"
-                    styleFunction={getStyle}
-                    onClickFunction={(countryData) => {
-                      if (countryData && countryData.countryCode) {
-                        const code = countryData.countryCode.toLowerCase();
-                        setClickedCountry(clickedCountry === code ? null : code);
-                        setHoveredCountry(null);
-                      }
+                    defaultFillColor={clickedCountry ? '#ffffff' : '#ffffff'}
+                    defaultCssClass="country-served"
+                    defaultOnClickHandler={(country) => {
+                      setClickedCountry(clickedCountry === country.alpha2Code ? null : country.alpha2Code);
+                      setHoveredCountry(null);
                     }}
-                  />
+                    initialFillColors={clickedCountry ? {
+                      [clickedCountry]: '#ef4444'
+                    } : {}}
+                    initialCssClasses={clickedCountry ? {
+                      [clickedCountry]: 'country-clicked'
+                    } : {}}
+                    tooltipConfig={{
+                      enabled: true,
+                      renderContent: (country) => (
+                        <div className="bg-white dark:bg-gray-800 border-2 border-blue-500 dark:border-blue-400 rounded-lg p-3 shadow-lg">
+                          <div className="font-bold text-gray-900 dark:text-white">{country.commonName}</div>
+                          <div className="text-sm text-blue-600 dark:text-blue-400">{country.region}</div>
+                          <div className="text-xs text-green-600 dark:text-green-400 mt-1">✓ We serve this region</div>
+                        </div>
+                      )
+                    }}
+                  >
+                    <World className="w-full h-full" />
+                  </MapProvider>
                 </div>
                 
-                {/* Clicked country info - shows for all countries */}
+                {/* Clicked country info */}
                 <AnimatePresence>
-                  {clickedCountry && (
+                  {clickedCountry && countryInfo[clickedCountry] && (
                     <motion.div
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.9 }}
-                      className="absolute top-2 right-2 sm:top-4 sm:right-4 rounded-xl p-3 sm:p-4 shadow-2xl border-2 max-w-[90%] sm:max-w-xs z-10 bg-white dark:bg-gray-800 border-blue-500 dark:border-blue-400"
+                      initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                      className="absolute bottom-4 right-4 left-4 sm:left-auto sm:bottom-6 sm:right-6 rounded-xl p-4 sm:p-5 shadow-2xl border-2 w-auto sm:max-w-sm z-50 bg-white dark:bg-gray-800 border-blue-500 dark:border-blue-400"
                     >
                       <button
-                        onClick={() => setClickedCountry(null)}
-                        className="absolute top-1 right-1 sm:top-2 sm:right-2 p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setClickedCountry(null);
+                        }}
+                        className="absolute top-2 right-2 p-1.5 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-colors"
+                        aria-label="Close"
                       >
-                        <X className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500" />
+                        <X className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                       </button>
-                      <div className="pr-5 sm:pr-6">
-                        <div className="text-sm sm:text-lg font-bold text-gray-900 dark:text-white mb-1">
-                          {countryLookup[clickedCountry]?.name || countryNames[clickedCountry] || clickedCountry.toUpperCase()}
+                      <div className="pr-8">
+                        <div className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-2">
+                          {countryInfo[clickedCountry].name}
                         </div>
-                        {countryLookup[clickedCountry] && (
-                          <div className="text-sm text-blue-600 dark:text-blue-400 font-medium mb-2">
-                            {countryLookup[clickedCountry].region}
-                          </div>
-                        )}
+                        <div className="text-sm sm:text-base text-blue-600 dark:text-blue-400 font-medium mb-3">
+                          📍 {countryInfo[clickedCountry].region}
+                        </div>
                         <div className="flex items-center gap-2 mb-3">
-                          <div className="text-green-600 dark:text-green-400 font-semibold text-sm">✓ Service Available</div>
+                          <div className="text-green-600 dark:text-green-400 font-semibold text-sm sm:text-base">
+                            ✓ Service Available
+                          </div>
                         </div>
-                        <div className="text-xs text-gray-600 dark:text-gray-400">
+                        <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
                           We provide pharmaceutical products and services globally with quality assurance and reliable delivery to this region.
                         </div>
                       </div>
