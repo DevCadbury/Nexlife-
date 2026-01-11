@@ -1438,6 +1438,65 @@ router.get("/notifications/stream", requireAuth(), async (req, res) => {
   });
 });
 
+// Global dashboard notifications stream endpoint
+router.get("/notifications/stream", requireAuth(), async (req, res) => {
+  // Set SSE headers
+  res.writeHead(200, {
+    "Content-Type": "text/event-stream",
+    "Cache-Control": "no-cache",
+    Connection: "keep-alive",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "Cache-Control",
+  });
+
+  // Send initial connection confirmation
+  res.write(
+    `data: ${JSON.stringify({
+      type: "connected",
+      message: "Dashboard notifications connected",
+    })}\n\n`
+  );
+
+  // Store this connection for broadcasting dashboard updates
+  if (!global.dashboardConnections) {
+    global.dashboardConnections = new Set();
+  }
+
+  const connectionId = `dashboard-${Date.now()}-${Math.random()}`;
+  global.dashboardConnections.add({ id: connectionId, res, user: req.user });
+
+  // Clean up on disconnect
+  req.on("close", () => {
+    if (global.dashboardConnections) {
+      global.dashboardConnections.forEach((conn) => {
+        if (conn.id === connectionId) {
+          global.dashboardConnections.delete(conn);
+        }
+      });
+    }
+  });
+
+  // Keep connection alive with periodic ping
+  const pingInterval = setInterval(() => {
+    try {
+      res.write(`data: ${JSON.stringify({ type: "ping" })}\n\n`);
+    } catch (error) {
+      clearInterval(pingInterval);
+      if (global.dashboardConnections) {
+        global.dashboardConnections.forEach((conn) => {
+          if (conn.id === connectionId) {
+            global.dashboardConnections.delete(conn);
+          }
+        });
+      }
+    }
+  }, 30000);
+
+  req.on("close", () => {
+    clearInterval(pingInterval);
+  });
+});
+
 // Helper function to broadcast thread updates
 export const broadcastThreadUpdate = (email, updateData) => {
   if (!global.sseConnections) return;

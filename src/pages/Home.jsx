@@ -48,6 +48,21 @@ import office1 from "../assets/images/office/Office_1.jpg";
 import office2 from "../assets/images/office/Office_2.jpg";
 import office3 from "../assets/images/office/Office_3.jpg";
 import office4 from "../assets/images/office/Office_4.jpg";
+import pillsImage from "../assets/images/home/pills (1).png";
+import syrupImage from "../assets/images/home/syrup.png";
+import surgeryImage from "../assets/images/home/surgery.png";
+import medicalEquipmentImage from "../assets/images/home/medical-equipment.png";
+import clientSatisfactionImage from "../assets/images/home/Client Satisfaction.png";
+import competitivePricingImage from "../assets/images/home/Competitive Pricing.png";
+import supplyChainImage from "../assets/images/home/Supply Chain Reliability.png";
+import employeesImage from "../assets/images/home/EMPLOYEE'S.png";
+import medicineImage from "../assets/images/home/MEDICINE.png";
+import customersImage from "../assets/images/home/CUSTOMERS.png";
+import countriesImage from "../assets/images/home/COUNTRIES.png";
+import ourMissionImage from "../assets/images/home/our mission.png";
+import ourVisionImage from "../assets/images/home/Our Vision.png";
+import ourGoalImage from "../assets/images/home/Our Goal.png";
+import callNowImage from "../assets/images/home/call now.png";
 import office5 from "../assets/images/office/Office_5.jpg";
 import office6 from "../assets/images/office/Office_6.jpg";
 import certificationImage from "../assets/images/image.png";
@@ -58,21 +73,21 @@ const Home = () => {
 
   const whyChooseUs = [
     {
-      icon: Heart,
+      image: clientSatisfactionImage,
       title: "Client Satisfaction",
       description:
         "Your satisfaction is our top priority. We aim to exceed your expectations with every interaction and delivery.",
       color: "from-red-500 to-pink-500",
     },
     {
-      icon: Clock,
+      image: supplyChainImage,
       title: "Supply Chain Reliability",
       description:
         "Timeliness is critical in the pharmaceutical industry. We ensure reliable and consistent supply chain management.",
       color: "from-blue-500 to-cyan-500",
     },
     {
-      icon: DollarSign,
+      image: competitivePricingImage,
       title: "Competitive Pricing",
       description:
         "We offer competitive and affordable pricing without compromising on quality or service standards.",
@@ -82,25 +97,25 @@ const Home = () => {
 
   const companyPillars = [
     {
-      icon: UserCheck,
+      image: employeesImage,
       title: "EMPLOYEE'S",
       description: "Our dedicated team of professionals",
       color: "from-blue-500 to-blue-600",
     },
     {
-      icon: Pill,
+      image: medicineImage,
       title: "MEDICINE",
       description: "Quality pharmaceutical products",
       color: "from-green-500 to-green-600",
     },
     {
-      icon: Users2,
+      image: customersImage,
       title: "CUSTOMERS",
       description: "Customer satisfaction first",
       color: "from-purple-500 to-purple-600",
     },
     {
-      icon: MapPin,
+      image: countriesImage,
       title: "COUNTRIES",
       description: "Global presence worldwide",
       color: "from-orange-500 to-orange-600",
@@ -109,18 +124,21 @@ const Home = () => {
 
   const companyInfo = [
     {
+      image: ourMissionImage,
       title: "Our Mission",
       description:
         "At Nexlife International, our mission is clear: we aim to improve lives by providing affordable, high-quality pharmaceutical solutions to healthcare providers worldwide. We are committed to bridging the gap between pharmaceutical innovation and accessibility.",
       color: "from-primary-500 to-primary-600",
     },
     {
+      image: ourVisionImage,
       title: "Our Vision",
       description:
         "At Nexlife International, our vision is to enhance global access to high-quality, affordable pharmaceutical products. We envision a world where quality healthcare is accessible to everyone, regardless of geographical boundaries.",
       color: "from-secondary-500 to-secondary-600",
     },
     {
+      image: ourGoalImage,
       title: "Our Goal",
       description:
         "At Nexlife International, our overarching goal is to lead the pharmaceutical export industry through innovation, reliability, and customer-centric approaches. We strive to become the most trusted partner in global pharmaceutical trade.",
@@ -636,8 +654,8 @@ const Home = () => {
 
               <div className="relative z-10">
                 {/* Icon */}
-                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 rounded-xl flex items-center justify-center mb-3 shadow-md group-hover:shadow-blue-500/40 transition-all duration-300 group-hover:scale-105 group-hover:rotate-2">
-                  <Pill className="w-6 h-6 text-white" />
+                <div className="w-12 h-12 mb-3 transition-all duration-300 group-hover:scale-105 group-hover:rotate-2">
+                  <img src={pillsImage} alt="Tablets & Capsules" className="w-full h-full object-contain" />
                 </div>
 
                 <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
@@ -697,8 +715,8 @@ const Home = () => {
 
               <div className="relative z-10">
                 {/* Icon */}
-                <div className="w-12 h-12 bg-gradient-to-r from-green-500 via-green-600 to-green-700 rounded-xl flex items-center justify-center mb-3 shadow-md group-hover:shadow-green-500/40 transition-all duration-300 group-hover:scale-105 group-hover:-rotate-2">
-                  <TestTube className="w-6 h-6 text-white" />
+                <div className="w-12 h-12 mb-3 transition-all duration-300 group-hover:scale-105 group-hover:-rotate-2">
+                  <img src={syrupImage} alt="Dry Syrup & Suspensions" className="w-full h-full object-contain" />
                 </div>
 
                 <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors duration-300">
@@ -759,8 +777,8 @@ const Home = () => {
 
               <div className="relative z-10">
                 {/* Icon */}
-                <div className="w-12 h-12 bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 rounded-xl flex items-center justify-center mb-3 shadow-md group-hover:shadow-purple-500/40 transition-all duration-300 group-hover:scale-105 group-hover:rotate-2">
-                  <Shield className="w-6 h-6 text-white" />
+                <div className="w-12 h-12 mb-3 transition-all duration-300 group-hover:scale-105 group-hover:rotate-2">
+                  <img src={surgeryImage} alt="Surgical & Medical Devices" className="w-full h-full object-contain" />
                 </div>
 
                 <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-300">
@@ -821,8 +839,8 @@ const Home = () => {
 
               <div className="relative z-10">
                 {/* Icon */}
-                <div className="w-12 h-12 bg-gradient-to-r from-orange-500 via-orange-600 to-orange-700 rounded-xl flex items-center justify-center mb-3 shadow-md group-hover:shadow-orange-500/40 transition-all duration-300 group-hover:scale-105 group-hover:-rotate-2">
-                  <TestTube className="w-6 h-6 text-white" />
+                <div className="w-12 h-12 mb-3 transition-all duration-300 group-hover:scale-105 group-hover:-rotate-2">
+                  <img src={medicalEquipmentImage} alt="Injectables & Parenterals" className="w-full h-full object-contain" />
                 </div>
 
                 <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors duration-300">
@@ -1167,9 +1185,9 @@ const Home = () => {
                   <motion.div
                     whileHover={{ y: -6, scale: 1.08 }}
                     transition={{ duration: 0.25, ease: "easeOut" }}
-                    className={`w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-r ${feature.color} flex items-center justify-center shadow-lg`}
+                    className="w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center"
                   >
-                    <feature.icon className="w-10 h-10 text-white" />
+                    <img src={feature.image} alt={feature.title} className="w-full h-full object-contain" />
                   </motion.div>
                   <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 text-center">
                     {feature.title}
@@ -1231,9 +1249,9 @@ const Home = () => {
                   <motion.div
                     whileHover={{ y: -6, scale: 1.08 }}
                     transition={{ duration: 0.25, ease: "easeOut" }}
-                    className={`w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-r ${pillar.color} flex items-center justify-center shadow-lg`}
+                    className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center"
                   >
-                    <pillar.icon className="w-8 h-8 text-white" />
+                    <img src={pillar.image} alt={pillar.title} className="w-full h-full object-contain" />
                   </motion.div>
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 text-center">
                     {pillar.title}
@@ -1304,9 +1322,9 @@ const Home = () => {
                     <motion.div
                       whileHover={{ y: -6, scale: 1.08 }}
                       transition={{ duration: 0.25, ease: "easeOut" }}
-                      className={`w-16 h-16 mb-6 rounded-2xl bg-gradient-to-r ${info.color} flex items-center justify-center shadow-lg`}
+                      className="w-16 h-16 mb-6 rounded-2xl flex items-center justify-center"
                     >
-                      <Shield className="w-8 h-8 text-white" />
+                      <img src={info.image} alt={info.title} className="w-full h-full object-contain" />
                     </motion.div>
                     <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
                       {info.title}
@@ -2241,11 +2259,12 @@ const Home = () => {
             href="tel:+919664843790"
             whileHover={{ scale: 1.1, x: -5 }}
             whileTap={{ scale: 0.95 }}
-            className="flex items-center gap-3 bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 group"
+            className="relative flex items-center gap-3 bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 group overflow-hidden"
           >
-            <Phone className="w-5 h-5" />
-            <span className="text-sm font-medium">Call Now</span>
-            <div className="w-2 h-2 bg-blue-300 rounded-full animate-pulse"></div>
+            <div className="absolute inset-0 bg-gradient-to-l from-pink-500 via-purple-500 to-indigo-600 rounded-full opacity-25 blur-lg" style={{ transform: "scale(1.13716) rotate(337.703deg)" }}></div>
+            <img src={callNowImage} alt="Call Now" className="w-5 h-5 relative z-10" />
+            <span className="text-sm font-medium relative z-10">Call Now</span>
+            <div className="w-2 h-2 bg-blue-300 rounded-full animate-pulse relative z-10"></div>
           </motion.a>
 
           {/* Email Button */}
@@ -2266,25 +2285,18 @@ const Home = () => {
           onClick={() => setIsFloatingOpen(!isFloatingOpen)}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
-          className="relative w-14 h-14 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center group"
+          className="relative w-14 h-14 bg-transparent text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center group"
         >
           <motion.div
             animate={{ rotate: isFloatingOpen ? 45 : 0 }}
             transition={{ duration: 0.3 }}
           >
             {isFloatingOpen ? (
-              <X className="w-6 h-6" />
+              <X className="w-6 h-6 text-gray-900 dark:text-white" />
             ) : (
-              <MessageCircle className="w-6 h-6" />
+              <img src={callNowImage} alt="Contact Us" className="w-14 h-14" />
             )}
           </motion.div>
-
-          {/* Pulse Animation */}
-          <motion.div
-            animate={{ scale: [1, 1.2, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full opacity-30"
-          />
         </motion.button>
       </div>
     </div>

@@ -49,6 +49,8 @@ import ProductGallery from "./pages/ProductGallery";
 import Certifications from "./pages/Certifications";
 import GlobalPresence from "./pages/GlobalPresence";
 import Contact from "./pages/Contact";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
 import NotFound from "./pages/NotFound";
 import ErrorBoundary from "./components/ErrorBoundary";
 import "./i18n";
@@ -213,6 +215,8 @@ function AppContent() {
             <Route path="/certifications" element={<Certifications />} />
             <Route path="/global-presence" element={<GlobalPresence />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
             {/* 404 Route - Must be last */}
             <Route path="*" element={<NotFound />} />
           </Routes>

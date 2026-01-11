@@ -236,7 +236,9 @@
 #google_translate_element_mobile {
   display: inline-flex !important;
   align-items: center !important;
-  height: 32px !important;
+  height: auto !important;
+  position: relative !important;
+  z-index: 9999 !important;
 }
 
 /* Hide desktop on mobile, hide mobile on desktop */
@@ -245,7 +247,11 @@
     display: none !important;
   }
   #google_translate_element_mobile {
-    display: inline-flex !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: auto !important;
+    max-width: none !important;
   }
 }
 
@@ -255,6 +261,8 @@
   }
   #google_translate_element {
     display: inline-flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 }
 
@@ -265,26 +273,47 @@
   background-color: rgba(255, 255, 255, 0.15) !important;
   border: 1px solid rgba(255, 255, 255, 0.3) !important;
   border-radius: 6px !important;
-  padding: 4px 8px !important;
+  padding: 3px 6px !important;
   color: white !important;
-  font-size: 12px !important;
+  font-size: 11px !important;
   cursor: pointer !important;
   outline: none !important;
-  height: 28px !important;
-  min-width: 85px !important;
-  max-width: 100px !important;
+  height: auto !important;
+  line-height: 1.2 !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: block !important;
+  width: auto !important;
 }
 
 /* Mobile specific styling - smaller and compact */
 #google_translate_element_mobile {
-  height: 28px !important;
+  height: auto !important;
+  min-height: 22px !important;
 }
 
 #google_translate_element_mobile select {
-  min-width: 90px !important;
-  padding: 4px 6px !important;
-  font-size: 11px !important;
-  height: 26px !important;
+  padding: 2px 3px !important;
+  font-size: 9px !important;
+  height: auto !important;
+  min-height: 22px !important;
+  width: 60px !important;
+  max-width: 60px !important;
+}
+
+/* Extra small screens (below 428px) - ultra compact */
+@media (max-width: 428px) {
+  #google_translate_element_mobile {
+    min-height: 20px !important;
+  }
+  
+  #google_translate_element_mobile select {
+    width: 55px !important;
+    max-width: 55px !important;
+    padding: 1px 2px !important;
+    font-size: 8px !important;
+    min-height: 20px !important;
+  }
 }
 
 #google_translate_element select:hover,

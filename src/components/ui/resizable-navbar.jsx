@@ -125,18 +125,18 @@ export const Navbar = ({ children }) => {
               <ThemeToggle />
             </div>
             {/* Mobile-only compact socials and controls */}
-            <div className="w-full sm:hidden flex items-center justify-between gap-2 pt-1 px-1">
-              <div className="flex items-center gap-2">
+            <div className="w-full sm:hidden flex items-center justify-between pt-0.5 px-0.5">
+              <div className="flex items-center gap-0.5 min-w-0 overflow-hidden">
                 <motion.a
                   href="https://www.facebook.com/profile.php?id=61574990395658"
                   target="_blank"
                   rel="noopener noreferrer"
                   whileHover={{ y: -1, scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="p-1 rounded bg-white/10 text-white"
+                  className="p-0.5 rounded bg-white/10 text-white flex-shrink-0"
                   aria-label="Facebook"
                 >
-                  <Facebook className="w-3.5 h-3.5" />
+                  <Facebook className="w-3 h-3" />
                 </motion.a>
                 <motion.a
                   href="https://x.com/Nexlife_?t=87n-aaHiSqDu8mEqj5SHMw&s=09"
@@ -144,10 +144,10 @@ export const Navbar = ({ children }) => {
                   rel="noopener noreferrer"
                   whileHover={{ y: -1, scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="p-1 rounded bg-white/10 text-white"
+                  className="p-0.5 rounded bg-white/10 text-white flex-shrink-0"
                   aria-label="X (Twitter)"
                 >
-                  <Twitter className="w-3.5 h-3.5" />
+                  <Twitter className="w-3 h-3" />
                 </motion.a>
                 <motion.a
                   href="https://www.linkedin.com/in/nexlife-international-02a04235a?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
@@ -155,10 +155,10 @@ export const Navbar = ({ children }) => {
                   rel="noopener noreferrer"
                   whileHover={{ y: -1, scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="p-1 rounded bg-white/10 text-white"
+                  className="p-0.5 rounded bg-white/10 text-white flex-shrink-0"
                   aria-label="LinkedIn"
                 >
-                  <Linkedin className="w-3.5 h-3.5" />
+                  <Linkedin className="w-3 h-3" />
                 </motion.a>
                 <motion.a
                   href="https://www.instagram.com/nexlife_international?igsh=MWwwaWc0NXFtZDBleg=="
@@ -166,17 +166,26 @@ export const Navbar = ({ children }) => {
                   rel="noopener noreferrer"
                   whileHover={{ y: -1, scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="p-1 rounded bg-white/10 text-white"
+                  className="p-0.5 rounded bg-white/10 text-white flex-shrink-0"
                   aria-label="Instagram"
                 >
-                  <Instagram className="w-3.5 h-3.5" />
+                  <Instagram className="w-3 h-3" />
                 </motion.a>
               </div>
-              <div className="flex items-center gap-2">
-                {/* Google Translate - Mobile */}
-                <div id="google_translate_element_mobile"></div>
+              <div className="flex items-center gap-0.5 flex-shrink-0">
+                {/* Google Translate - Mobile - Ultra compact for small screens */}
+                <div 
+                  id="google_translate_element_mobile" 
+                  className="block"
+                  style={{ 
+                    display: 'block !important', 
+                    visibility: 'visible !important',
+                    minWidth: '55px',
+                    maxWidth: '60px'
+                  }}
+                ></div>
                 
-                <div className="p-1 rounded bg-white/10 text-white">
+                <div className="scale-75 origin-right flex-shrink-0 -mr-1">
                   <ThemeToggle />
                 </div>
               </div>
@@ -214,11 +223,13 @@ export const NavbarLogo = ({ src, alt = "Nexlife International" }) => {
   return (
     <Link to="/" className="relative flex items-center gap-2 flex-shrink-0">
       {src ? (
-        <img
-          src={src}
-          alt={alt}
-          className="h-8 lg:h-10 w-auto drop-shadow-[0_2px_8px_rgba(59,130,246,0.35)]"
-        />
+        <div className="bg-white dark:bg-white rounded-xl p-2 border border-blue-200 dark:border-blue-300 shadow-md">
+          <img
+            src={src}
+            alt={alt}
+            className="h-6 lg:h-8 w-auto drop-shadow-[0_2px_8px_rgba(59,130,246,0.35)]"
+          />
+        </div>
       ) : (
         <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 shadow-[0_6px_20px_rgba(59,130,246,0.45)]" />
       )}
