@@ -12,6 +12,9 @@ import {
   Twitter,
   Facebook,
   X,
+  Globe,
+  Award,
+  Shield,
 } from "lucide-react";
 import ContactForm from "../components/ContactForm";
 import logo from "../assets/images/nexlife-logo.png";
@@ -46,6 +49,7 @@ const Contact = () => {
   const contactInfo = [
     {
       icon: Phone,
+      image: "/ICONS/phone-call.png",
       title: "Phone",
       value: "+91 96648 43790",
       description: "Primary contact number",
@@ -53,6 +57,7 @@ const Contact = () => {
     },
     {
       icon: Mail,
+      image: "/ICONS/message.png",
       title: "Email",
       value: "Info@nexlifeinternational.com",
       description: "Official support mailbox",
@@ -60,6 +65,7 @@ const Contact = () => {
     },
     {
       icon: MapPin,
+      image: "/ICONS/map.png",
       title: "Address",
       value:
         "S-223, Angel Business Center – 2, Near ABC Circle, Mota Varachha, Surat - 394101 (Gujarat)",
@@ -68,6 +74,7 @@ const Contact = () => {
     },
     {
       icon: Clock,
+      image: "/ICONS/working-time.png",
       title: "Business Hours",
       value: "Mon - Sat: 9:00 AM - 6:00 PM",
       description: "IST (UTC +5:30)",
@@ -244,14 +251,20 @@ const Contact = () => {
               <motion.div
                 key={info.title}
                 variants={itemVariants}
-                whileHover={{ y: -10 }}
+                whileHover={{ y: -10, scale: 1.02 }}
                 className="text-center group"
               >
-                <div
-                  className={`w-16 h-16 mx-auto mb-4 rounded-xl bg-gradient-to-r ${info.color} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
+                <motion.div
+                  className="w-16 h-16 mx-auto mb-4 rounded-xl flex items-center justify-center overflow-hidden"
+                  whileHover={{ rotate: [0, -10, 10, -10, 0], scale: 1.1 }}
+                  transition={{ duration: 0.5 }}
                 >
-                  <info.icon className="w-8 h-8 text-white" />
-                </div>
+                  <img 
+                    src={info.image} 
+                    alt={info.title}
+                    className="w-full h-full object-contain"
+                  />
+                </motion.div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                   {info.title}
                 </h3>
@@ -476,6 +489,17 @@ const Contact = () => {
             transition={{ duration: 0.8 }}
             className="text-center mb-12 sm:mb-16"
           >
+            <motion.div 
+              className="inline-block mb-4 w-16 h-16 mx-auto rounded-2xl flex items-center justify-center p-3 shadow-lg"
+              whileHover={{ scale: 1.2 }}
+              transition={{ duration: 0.3 }}
+            >
+              <img 
+                src="/ICONS/faq.png" 
+                alt="FAQ"
+                className="w-full h-full object-contain"
+              />
+            </motion.div>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">
               Frequently Asked Questions
             </h2>
@@ -489,42 +513,83 @@ const Contact = () => {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto"
+            className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-5xl mx-auto"
           >
             {[
               {
+                icon: "/ICONS/save-time.png",
                 question: "How quickly can you process orders?",
-                answer:
-                  "Standard orders are processed within 24-48 hours. Express orders can be processed within 12 hours for urgent requirements.",
+                answer: "Standard orders are processed within 24-48 hours. Express orders can be processed within 12 hours for urgent requirements.",
+                highlights: ["24-48 hours standard", "12 hours express option"],
               },
               {
+                icon: "/ICONS/transportation.png",
                 question: "Do you ship internationally?",
-                answer:
-                  "Yes, we ship to over 50 countries worldwide with temperature-controlled packaging and real-time tracking.",
+                answer: "Yes, we ship to over 50 countries worldwide with temperature-controlled packaging and real-time tracking.",
+                highlights: ["50+ countries", "Temperature-controlled", "Real-time tracking"],
               },
               {
+                icon: "/ICONS/certificate.png",
                 question: "What quality certifications do you have?",
-                answer:
-                  "We are ISO 9001:2015 certified, FDA registered, and comply with WHO GMP guidelines for pharmaceutical products.",
+                answer: "We maintain the highest industry standards with comprehensive certifications.",
+                highlights: ["ISO 9001:2015 certified", "FDA registered", "WHO GMP compliant"],
               },
               {
+                icon: "/ICONS/best-product.png",
                 question: "How do you ensure product quality?",
-                answer:
-                  "All products undergo rigorous quality control testing, third-party verification, and compliance with international standards.",
+                answer: "Our multi-layered quality assurance process ensures pharmaceutical excellence.",
+                highlights: ["Rigorous quality control testing", "Third-party verification", "International compliance"],
               },
             ].map((faq, index) => (
               <motion.div
                 key={index}
                 variants={itemVariants}
-                whileHover={{ y: -5 }}
-                className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 hover:shadow-lg transition-shadow duration-300"
+                whileHover={{ y: -8, scale: 1.02 }}
+                className="bg-white dark:bg-gray-800 rounded-2xl p-6 border-2 border-gray-200 dark:border-gray-700 hover:border-primary-500 dark:hover:border-primary-400 hover:shadow-2xl transition-all duration-300 relative overflow-hidden group"
               >
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                {/* Gradient accent bar */}
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-500 to-secondary-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+                
+                {/* Icon without gradient background */}
+                <motion.div 
+                  className="w-16 h-16 mb-4 rounded-xl flex items-center justify-center shadow-lg p-3"
+                  whileHover={{ scale: 1.2 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <img 
+                    src={faq.icon} 
+                    alt={faq.question}
+                    className="w-full h-full object-contain"
+                  />
+                </motion.div>
+                
+                {/* Question */}
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-300">
                   {faq.question}
                 </h3>
-                <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+                
+                {/* Answer */}
+                <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed mb-4">
                   {faq.answer}
                 </p>
+                
+                {/* Highlights */}
+                <div className="space-y-2">
+                  {faq.highlights.map((highlight, hIndex) => (
+                    <motion.div 
+                      key={hIndex} 
+                      className="flex items-center space-x-2"
+                      initial={{ opacity: 0, x: -10 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      transition={{ delay: hIndex * 0.1 }}
+                    >
+                      <div className="w-1.5 h-1.5 bg-primary-500 rounded-full" />
+                      <span className="text-xs font-medium text-primary-600 dark:text-primary-400">
+                        {highlight}
+                      </span>
+                    </motion.div>
+                  ))}
+                </div>
               </motion.div>
             ))}
           </motion.div>

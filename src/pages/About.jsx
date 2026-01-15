@@ -20,6 +20,7 @@ const About = () => {
   const values = [
     {
       icon: Target,
+      image: "/ICONS/ABOUT US - QUALITY.png",
       title: "Quality",
       description:
         "We maintain the highest standards in all our products and services.",
@@ -27,6 +28,7 @@ const About = () => {
     },
     {
       icon: Heart,
+      image: "/ICONS/ABOUT US - INTEGRITY.png",
       title: "Integrity",
       description:
         "We conduct business with honesty, transparency, and ethical practices.",
@@ -34,6 +36,7 @@ const About = () => {
     },
     {
       icon: Users,
+      image: "/ICONS/ABOUT US - INOVATION.png",
       title: "Innovation",
       description:
         "We continuously innovate to improve healthcare solutions worldwide.",
@@ -41,6 +44,7 @@ const About = () => {
     },
     {
       icon: Globe,
+      image: "/ICONS/ABOUT US -GLOBAL PARTNER.png",
       title: "Global Partnership",
       description:
         "We build lasting relationships with partners across the globe.",
@@ -326,10 +330,12 @@ const About = () => {
                 whileHover={{ y: -10 }}
                 className="text-center group border-2 border-gray-200 dark:border-gray-700 rounded-xl p-6 hover:border-primary-500 dark:hover:border-primary-400 transition-colors duration-300"
               >
-                <div
-                  className={`w-16 h-16 mx-auto mb-4 rounded-xl bg-gradient-to-r ${value.color} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
-                >
-                  <value.icon className="w-8 h-8 text-white" />
+                <div className="w-16 h-16 mx-auto mb-4 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 overflow-hidden">
+                  <img 
+                    src={value.image} 
+                    alt={value.title}
+                    className="w-full h-full object-contain"
+                  />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
                   {value.title}

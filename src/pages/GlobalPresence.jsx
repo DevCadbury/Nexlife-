@@ -46,10 +46,12 @@ const RegionCard = memo(({ region, variants }) => (
     className="card p-6 group border-2 border-gray-200 dark:border-gray-700 rounded-xl hover:border-primary-500 dark:hover:border-primary-400 transition-colors duration-300"
   >
     <div className="flex flex-col items-center text-center">
-      <div
-        className={`w-16 h-16 mb-4 rounded-xl bg-gradient-to-r ${region.color} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
-      >
-        <MapPin className="w-8 h-8 text-white" />
+      <div className="w-16 h-16 mb-4 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 overflow-hidden">
+        <img 
+          src={region.image} 
+          alt={region.name}
+          className="w-full h-full object-contain"
+        />
       </div>
       <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
         {region.name}
@@ -79,12 +81,23 @@ const FeatureItem = memo(({ feature, index }) => (
     whileInView={{ opacity: 1, x: 0 }}
     viewport={{ once: true }}
     transition={{ duration: 0.5, delay: index * 0.1 }}
-    className="space-y-2"
+    className="bg-white dark:bg-gray-800 rounded-xl p-6 border-2 border-gray-200 dark:border-gray-700 hover:border-primary-500 dark:hover:border-primary-400 transition-all duration-300 hover:shadow-lg"
   >
-    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 flex items-center">
+      <div className="w-2 h-2 bg-primary-500 rounded-full mr-3" />
       {feature.title}
     </h3>
-    <p className="text-gray-600 dark:text-gray-300">{feature.description}</p>
+    <p className="text-gray-600 dark:text-gray-300 mb-4">{feature.description}</p>
+    {feature.bullets && (
+      <ul className="space-y-2">
+        {feature.bullets.map((bullet, bIndex) => (
+          <li key={bIndex} className="flex items-start space-x-2">
+            <div className="w-1.5 h-1.5 bg-primary-500 rounded-full mt-1.5 flex-shrink-0" />
+            <span className="text-sm text-gray-600 dark:text-gray-300">{bullet}</span>
+          </li>
+        ))}
+      </ul>
+    )}
   </motion.div>
 ));
 
@@ -194,12 +207,14 @@ const GlobalPresence = memo(() => {
     () => [
       {
         name: "North America",
+        image: "/ICONS/GLOBAL PRESENCE - NORTH AMERICA.png",
         countries: ["United States", "Canada", "Mexico"],
         count: 3,
         color: "from-blue-500 to-blue-600",
       },
       {
         name: "Europe",
+        image: "/ICONS/GLOBAL PRESENCE - EUROPE.png",
         countries: [
           "United Kingdom",
           "Germany",
@@ -215,6 +230,7 @@ const GlobalPresence = memo(() => {
       },
       {
         name: "Asia Pacific",
+        image: "/ICONS/GLOBAL PRESENCE - ASIA.png",
         countries: [
           "India",
           "China",
@@ -230,18 +246,21 @@ const GlobalPresence = memo(() => {
       },
       {
         name: "Middle East",
+        image: "/ICONS/GLOBAL PRESENCE -middle-east.png",
         countries: ["UAE", "Saudi Arabia", "Israel", "Turkey", "Egypt"],
         count: 5,
         color: "from-orange-500 to-orange-600",
       },
       {
         name: "Latin America",
+        image: "/ICONS/GLOBAL PRESENCE - LATIN AMERICA.png",
         countries: ["Brazil", "Argentina", "Chile", "Colombia", "Peru"],
         count: 5,
         color: "from-red-500 to-red-600",
       },
       {
         name: "Africa",
+        image: "/ICONS/GLOBAL - SOUTH AFRICA.png",
         countries: ["South Africa", "Nigeria", "Kenya", "Ghana", "Morocco"],
         count: 5,
         color: "from-yellow-500 to-yellow-600",
@@ -368,21 +387,45 @@ const GlobalPresence = memo(() => {
         title: "Strategic Distribution Centers",
         description:
           "25+ strategically located distribution centers ensuring fast and reliable delivery worldwide.",
+        bullets: [
+          "Global warehouse network",
+          "Same-day dispatch capability",
+          "Climate-controlled facilities",
+          "Real-time inventory tracking"
+        ]
       },
       {
         title: "Local Partnerships",
         description:
           "Strong partnerships with local pharmaceutical companies and healthcare providers in each region.",
+        bullets: [
+          "1000+ healthcare partners",
+          "Regional distribution networks",
+          "Local regulatory support",
+          "Market-specific solutions"
+        ]
       },
       {
         title: "Regulatory Expertise",
         description:
           "Deep understanding of local regulations and compliance requirements across all markets.",
+        bullets: [
+          "FDA, EMA, WHO compliance",
+          "Country-specific certifications",
+          "Documentation support",
+          "Regulatory consulting services"
+        ]
       },
       {
         title: "24/7 Support",
         description:
           "Round-the-clock customer support and technical assistance in multiple languages.",
+        bullets: [
+          "Multi-language support team",
+          "Dedicated account managers",
+          "Emergency hotline available",
+          "Technical consultation 24/7"
+        ]
       },
     ],
     []

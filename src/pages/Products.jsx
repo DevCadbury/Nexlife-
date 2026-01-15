@@ -336,25 +336,66 @@ const Products = () => {
     return results;
   }, [searchTerm]);
 
-  const tabletIcons = {
-    Analgesic: Activity,
-    Anthelmintic: AlertTriangle,
-    "Anti Allergic": Shield,
-    "Anti Diabetic": Gauge,
-    "Anti Malarial": Thermometer,
-    "Anti Protozoal": Microscope,
-    "Anti Spasmodic": Zap,
-    "Anti biotics General": Beaker,
-    "Anti-Convulsant": Brain,
-    "Anti-Emetic": AlertTriangle,
-    "Anti-Fungal": Flame,
-    "Anti-Ulserative": Heart,
-    "Anti-Viral": Target,
-    Cardiovascular: Heart,
-    "Erectile Dysfunction": Activity,
-    "Lipid Lowering": Battery,
-    "Platelet Aggregation": Cpu,
-    "Steroidal Drugs": Sparkles,
+  // Product images mapping
+  const getProductImage = (categoryId, subcategory) => {
+    const imageMap = {
+      tablets: {
+        "Analgesic": "/PRODUCTS/T - ANALGESIC.png",
+        "Anthelmintic": "/PRODUCTS/T - Anthelmintic.png",
+        "Anti Allergic": "/PRODUCTS/T - allergic.png",
+        "Anti Diabetic": "/PRODUCTS/T - Anti DIABETICS.png",
+        "Anti Malarial": "/PRODUCTS/T - ANTI MALARIA.png",
+        "Anti Protozoal": "/PRODUCTS/T - ANTIPROTOZOLE.png",
+        "Anti Spasmodic": "/PRODUCTS/T - Spasmodic.png",
+        "Anti biotics General": "/PRODUCTS/T - antibiotic.png",
+        "Anti-Convulsant": "/PRODUCTS/T - Convulsant.png",
+        "Anti-Emetic": "/PRODUCTS/T - Emetic.png",
+        "Anti-Fungal": "/PRODUCTS/T - ANTI FUNGAL.png",
+        "Anti-Ulserative": "/PRODUCTS/T - Ulserative.png",
+        "Anti-Viral": "/PRODUCTS/T - Viral.png",
+        "Cardiovascular": "/PRODUCTS/T - Cardiovascular.png",
+        "Erectile Dysfunction": "/PRODUCTS/T - erectile-dysfunction.png",
+        "Lipid Lowering": "/PRODUCTS/T - Lipid Lowering.png",
+        "Platelet Aggregation": "/PRODUCTS/T - Platelet Aggregation.png",
+        "Steroidal Drugs": "/PRODUCTS/T - Steroidal Drugs.png",
+      },
+      capsules: {
+        "Analgesic": "/PRODUCTS/C - ANALGESIC.png",
+        "Anti-Convulsant": "/PRODUCTS/C - Anti-Convulsant.png",
+        "Anti-Depressant": "/PRODUCTS/C - Anti-Depressant.png",
+        "Anti-Epileptic": "/PRODUCTS/C - Epileptic.png",
+        "Anti-Fungal": "/PRODUCTS/C - Anti-Fungal.png",
+        "Anti-Malarial": "/PRODUCTS/C -Anti-Malarial.png",
+        "Anti-Migraine": "/PRODUCTS/C - migraine.png",
+        "Anti-Protozoal": "/PRODUCTS/C - ANTIPROTOZOLE.png",
+        "Anti-Tubercular": "/PRODUCTS/C - Tubercular.png",
+        "Anti-Ulcerative": "/PRODUCTS/C - Ulcerative.png",
+        "Cardiovascular": "/PRODUCTS/C - Cardiovascular.png",
+        "General Antibiotics": "/PRODUCTS/C -  antibiotic.png",
+        "Multi Vitamins": "/PRODUCTS/C - MULTIVITAMINS.png",
+      },
+      "dry-syrups": {
+        "All Dry Syrups": "/PRODUCTS/all syrups.png",
+      },
+      ayurvedic: {
+        "All Ayurvedic": "/PRODUCTS/AYURVEDA.png",
+      }
+    };
+    
+    return imageMap[categoryId]?.[subcategory] || null;
+  };
+
+  // Category header images mapping
+  const getCategoryHeaderImage = (categoryId) => {
+    const headerImages = {
+      "all": "/PRODUCTS/medicine.png",
+      "tablets": "/PRODUCTS/drug.png",
+      "capsules": "/PRODUCTS/capsule.png",
+      "dry-syrups": "/PRODUCTS/syrup.png",
+      "ayurvedic": "/PRODUCTS/drug (1).png",
+      "surgical": "/PRODUCTS/medicine.png",
+    };
+    return headerImages[categoryId] || "/PRODUCTS/medicine.png";
   };
 
   // Surgical category images
@@ -600,15 +641,12 @@ const Products = () => {
                               </p>
                             </div>
                             <div className="hidden sm:block ml-4">
-                              <div className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 bg-white/20 rounded-full flex items-center justify-center border-2 border-white/30 backdrop-blur-sm">
-                                {React.createElement(
-                                  categories.find((c) => c.id === categoryId)
-                                    ?.icon || Pill,
-                                  {
-                                    className:
-                                      "w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 text-white",
-                                  }
-                                )}
+                              <div className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 bg-white/20 rounded-full flex items-center justify-center border-2 border-white/30 backdrop-blur-sm overflow-hidden p-2 sm:p-3">
+                                <img 
+                                  src={getCategoryHeaderImage(categoryId)} 
+                                  alt={categories.find((c) => c.id === categoryId)?.name}
+                                  className="w-full h-full object-contain"
+                                />
                               </div>
                             </div>
                           </div>
@@ -622,8 +660,7 @@ const Products = () => {
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                               {categoryData.subcategories.map(
                                 (subcategory, index) => {
-                                  const IconComponent =
-                                    tabletIcons[subcategory] || Pill;
+                                  const productImage = getProductImage(categoryId, subcategory);
                                   return (
                                     <motion.div
                                       key={index}
@@ -666,9 +703,19 @@ const Products = () => {
                                       <div className="absolute top-0 right-0 w-0 h-0 border-l-[20px] border-l-transparent border-t-[20px] border-t-blue-800 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
                                       <div className="flex items-center space-x-3 mb-4">
-                                        <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center border border-white/20 shadow-lg group-hover:scale-110 transition-transform duration-300">
-                                          <IconComponent className="w-6 h-6 text-white" />
-                                        </div>
+                                        {productImage ? (
+                                          <div className="w-12 h-12 rounded-lg flex items-center justify-center overflow-hidden shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                            <img 
+                                              src={productImage} 
+                                              alt={subcategory}
+                                              className="w-full h-full object-contain"
+                                            />
+                                          </div>
+                                        ) : (
+                                          <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center border border-white/20 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                            <Pill className="w-6 h-6 text-white" />
+                                          </div>
+                                        )}
                                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
                                           {subcategory}
                                         </h3>
@@ -782,7 +829,7 @@ const Products = () => {
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                               {categoryData.subcategories.map(
                                 (subcategory, index) => {
-                                  const IconComponent = Pill;
+                                  const productImage = getProductImage(categoryId, subcategory);
                                   return (
                                     <motion.div
                                       key={index}
@@ -824,9 +871,19 @@ const Products = () => {
                                       <div className="absolute top-0 right-0 w-0 h-0 border-l-[20px] border-l-transparent border-t-[20px] border-t-blue-800 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
                                       <div className="flex items-center space-x-3 mb-4">
-                                        <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center border border-white/20 shadow-lg group-hover:scale-110 transition-transform duration-300">
-                                          <IconComponent className="w-6 h-6 text-white" />
-                                        </div>
+                                        {productImage ? (
+                                          <div className="w-12 h-12 rounded-lg flex items-center justify-center overflow-hidden shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                            <img 
+                                              src={productImage} 
+                                              alt={subcategory}
+                                              className="w-full h-full object-contain"
+                                            />
+                                          </div>
+                                        ) : (
+                                          <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center border border-white/20 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                            <Pill className="w-6 h-6 text-white" />
+                                          </div>
+                                        )}
                                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
                                           {subcategory}
                                         </h3>

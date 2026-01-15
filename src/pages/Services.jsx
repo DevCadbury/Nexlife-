@@ -44,6 +44,7 @@ const Services = () => {
   const services = [
     {
       icon: Ship,
+      image: "/ICONS/SERVICE - IMPORT.png",
       title: t("importServices"),
       description:
         "Comprehensive import solutions for pharmaceutical products from global manufacturers.",
@@ -58,6 +59,7 @@ const Services = () => {
     },
     {
       icon: Plane,
+      image: "/ICONS/SERVICE - EXPORT.png",
       title: t("exportServices"),
       description:
         "Efficient export services to deliver pharmaceutical products worldwide.",
@@ -72,6 +74,7 @@ const Services = () => {
     },
     {
       icon: Shield,
+      image: "/ICONS/SERVICE - REGULATORY COMPLIENCE.png",
       title: t("compliance"),
       description:
         "Expert regulatory compliance services for international pharmaceutical trade.",
@@ -86,6 +89,7 @@ const Services = () => {
     },
     {
       icon: Truck,
+      image: "/ICONS/SERVICE - LOGISTIC AND DELIVERY.png",
       title: t("logistics"),
       description:
         "End-to-end logistics solutions for pharmaceutical supply chain management.",
@@ -107,6 +111,7 @@ const Services = () => {
       description:
         "Initial consultation to understand your requirements and develop a customized solution.",
       icon: Users,
+      image: "/ICONS/customer-service.png",
     },
     {
       step: "02",
@@ -114,6 +119,7 @@ const Services = () => {
       description:
         "Ensure all products meet international regulatory standards and requirements.",
       icon: Shield,
+      image: "/ICONS/regulatory.png",
     },
     {
       step: "03",
@@ -121,6 +127,7 @@ const Services = () => {
       description:
         "Rigorous quality control and testing procedures for all pharmaceutical products.",
       icon: FileText,
+      image: "/ICONS/quality-assurance.png",
     },
     {
       step: "04",
@@ -128,6 +135,7 @@ const Services = () => {
       description:
         "Efficient transportation and delivery to your specified location worldwide.",
       icon: Truck,
+      image: "/ICONS/container.png",
     },
   ];
 
@@ -201,10 +209,12 @@ const Services = () => {
                 whileHover={{ y: -10 }}
                 className="card p-8 group border-2 border-gray-200 dark:border-gray-700 rounded-2xl hover:border-primary-500 dark:hover:border-primary-400 transition-colors duration-300"
               >
-                <div
-                  className={`w-16 h-16 mb-6 rounded-xl bg-gradient-to-r ${service.color} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
-                >
-                  <service.icon className="w-8 h-8 text-white" />
+                <div className="w-16 h-16 mb-6 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 overflow-hidden">
+                  <img 
+                    src={service.image} 
+                    alt={service.title}
+                    className="w-full h-full object-contain"
+                  />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
                   {service.title}
@@ -260,21 +270,29 @@ const Services = () => {
               <motion.div
                 key={step.step}
                 variants={itemVariants}
-                whileHover={{ y: -10 }}
-                className="text-center group"
+                whileHover={{ y: -10, scale: 1.05 }}
+                className="text-center group bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-gray-200 dark:border-gray-700 hover:border-primary-500 dark:hover:border-primary-400"
               >
-                <div className="relative mb-6">
-                  <div className="w-20 h-20 mx-auto bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                    {step.step}
-                  </div>
-                  <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center shadow-lg">
-                    <step.icon className="w-8 h-8 text-primary-500" />
-                  </div>
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+                {/* Icon Image */}
+                <motion.div 
+                  className="w-24 h-24 mx-auto mb-5 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center overflow-hidden p-4 shadow-inner"
+                  whileHover={{ scale: 1.2 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <img 
+                    src={step.image} 
+                    alt=""
+                    className="w-full h-full object-contain"
+                  />
+                </motion.div>
+
+                {/* Title */}
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-300">
                   {step.title}
                 </h3>
-                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+
+                {/* Description */}
+                <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
                   {step.description}
                 </p>
               </motion.div>
@@ -300,24 +318,28 @@ const Services = () => {
                 {[
                   {
                     icon: Globe,
+                    image: "/ICONS/internet.png",
                     title: "Global Expertise",
                     description:
                       "Over 15 years of experience in international pharmaceutical trade across 50+ countries.",
                   },
                   {
                     icon: Clock,
+                    image: "/ICONS/future.png",
                     title: "Fast Turnaround",
                     description:
                       "Efficient processes and dedicated teams ensure quick delivery and response times.",
                   },
                   {
                     icon: Shield,
+                    image: "/ICONS/high Quality.png",
                     title: "Quality Guarantee",
                     description:
                       "100% quality assurance with comprehensive testing and compliance verification.",
                   },
                   {
                     icon: Users,
+                    image: "/ICONS/dedicated.png",
                     title: "Dedicated Support",
                     description:
                       "24/7 customer support and dedicated account managers for personalized service.",
@@ -329,11 +351,20 @@ const Services = () => {
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.5, delay: index * 0.1 }}
+                    whileHover={{ x: 5, scale: 1.02 }}
                     className="flex items-start space-x-4"
                   >
-                    <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <feature.icon className="w-6 h-6 text-primary-500" />
-                    </div>
+                    <motion.div 
+                      className="w-12 h-12 bg-primary-100 dark:bg-primary-900/20 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden p-2"
+                      whileHover={{ rotate: [0, -10, 10, -10, 0], scale: 1.1 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <img 
+                        src={feature.image} 
+                        alt={feature.title}
+                        className="w-full h-full object-contain"
+                      />
+                    </motion.div>
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                         {feature.title}
