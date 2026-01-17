@@ -560,6 +560,25 @@ const Products = () => {
             ))}
           </motion.div>
 
+          {/* Product Gallery Button */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.4, delay: 0.05, ease: "easeOut" }}
+            className="flex justify-center mb-6"
+          >
+            <button
+              onClick={() => window.open('https://www.nexlifeinternational.com/product-gallery', '_blank')}
+              className="group cursor-pointer flex items-center justify-center gap-2.5 text-sm bg-gradient-to-b from-[#3470fa] to-[#313ed7] text-white border-2 border-[#0618db] h-[50px] px-5 rounded-[5px] font-semibold transform scale-90 relative hover:from-[#313ed7] hover:to-[#3470fa] active:from-[#313ed7] active:to-[#3470fa]"
+            >
+              <div className="relative flex items-center justify-center">
+                <Sparkles className="w-5 h-5 border-2 border-transparent group-hover:border-[rgba(255,0,170,0.692)] transition-all duration-200" />
+              </div>
+              <span className="title">Product Gallery</span>
+            </button>
+          </motion.div>
+
           {/* Enhanced Search Bar */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
