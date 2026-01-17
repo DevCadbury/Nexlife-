@@ -388,8 +388,12 @@ const MissionCard = ({ expandedSection, setExpandedSection }) => {
     >
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
-            <Target className="w-8 h-8 text-white" />
+          <div className="w-16 h-16 rounded-full flex items-center justify-center overflow-hidden">
+            <img 
+              src="/ICONS/goal.png" 
+              alt="Mission"
+              className="w-full h-full object-contain"
+            />
           </div>
           <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
             Mission
@@ -466,8 +470,12 @@ const VisionCard = ({ expandedSection, setExpandedSection }) => {
     >
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center">
-            <Eye className="w-8 h-8 text-white" />
+          <div className="w-16 h-16 rounded-full flex items-center justify-center overflow-hidden">
+            <img 
+              src="/ICONS/focus.png" 
+              alt="Vision"
+              className="w-full h-full object-contain"
+            />
           </div>
           <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
             Vision
