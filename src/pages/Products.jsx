@@ -345,7 +345,7 @@ const Products = () => {
         "Anti Allergic": "/PRODUCTS/T - allergic.png",
         "Anti Diabetic": "/PRODUCTS/T - Anti DIABETICS.png",
         "Anti Malarial": "/PRODUCTS/T - ANTI MALARIA.png",
-        "Anti Protozoal": "/PRODUCTS/C - Protozoal.png",
+        "Anti Protozoal": "/PRODUCTS/T - ANTIPROTOZOLE.png",
         "Anti Spasmodic": "/PRODUCTS/T - Spasmodic.png",
         "Anti biotics General": "/PRODUCTS/T - antibiotic.png",
         "Anti-Convulsant": "/PRODUCTS/T - Convulsant.png",
