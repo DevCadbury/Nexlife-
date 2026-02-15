@@ -3,7 +3,7 @@
 ## ✅ What I Fixed Locally
 
 1. **Corrected Password** in all config files:
-   - Changed from `Nexlife@2025` → `S223@nexlife`
+   - Changed from `Nexlife@2025` → `Nex@@life#123`
    
 2. **Normalized Email Addresses**:
    - Changed from `Info@` → `info@` (lowercase)
@@ -27,21 +27,21 @@
 
 ```env
 SMTP_USER=info@nexlifeinternational.com
-SMTP_PASS=S223@nexlife
+SMTP_PASS=Nex@@life#123
 
 IMAP_USER=info@nexlifeinternational.com
-IMAP_PASS=S223@nexlife
+IMAP_PASS=Nex@@life#123
 
 CONTACT_TO=info@nexlifeinternational.com
 
-DASH_PASSWORD=S223@nexlife
+DASH_PASSWORD=Nex@@life#123
 SUPERADMIN_EMAIL=info@nexlifeinternational.com
-SUPERADMIN_PASSWORD=S223@nexlife
+SUPERADMIN_PASSWORD=Nex@@life#123
 ```
 
 **CRITICAL POINTS:**
 - ✅ Email must be lowercase: `info@` NOT `Info@`
-- ✅ Password must be: `S223@nexlife` NOT `Nexlife@2025`
+- ✅ Password must be: `Nex@@life#123` NOT `Nexlife@2025`
 - ✅ Check "Production" environment
 - ✅ Click "Save" for each variable
 - ✅ NO trailing spaces!
@@ -84,7 +84,7 @@ Or use the automated script:
 
 - [ ] Updated 8 environment variables in Vercel dashboard
 - [ ] All emails are lowercase (`info@` not `Info@`)
-- [ ] All passwords are `S223@nexlife` (not `Nexlife@2025`)
+- [ ] All passwords are `Nex@@life#123` (not `Nexlife@2025`)
 - [ ] Checked "Production" environment
 - [ ] Clicked "Save" for each variable
 - [ ] Redeployed to Vercel (`vercel --prod`)
@@ -111,7 +111,7 @@ This means Vercel was reading a placeholder comment instead of the actual passwo
 ### Before Fix ❌
 ```
 Vercel: Authentication failed (535 error)
-Reason: Wrong password (Nexlife@2025 instead of S223@nexlife)
+Reason: Wrong password (Nexlife@2025 instead of Nex@@life#123)
 Status: ❌ FAILING
 ```
 
@@ -161,7 +161,7 @@ If you have issues updating Vercel:
    - Create new ones if missing
 
 3. **Still getting 535 error?**
-   - Double-check password: `S223@nexlife` (case-sensitive!)
+   - Double-check password: `Nex@@life#123` (case-sensitive!)
    - Verify email: `info@nexlifeinternational.com` (lowercase!)
    - Wait 2-3 minutes after saving before redeploying
 

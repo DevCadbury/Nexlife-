@@ -5,12 +5,12 @@
 The authentication is failing because **the password in Vercel is different from your actual Hostinger password!**
 
 ### What's Happening:
-- **Local `.env`**: Uses password `S223@nexlife` ✅
+- **Local `.env`**: Uses password `Nex@@life#123` ✅
 - **Vercel Environment**: Was using password `Nexlife@2025` ❌
 - **Result**: Authentication fails on Vercel (Error 535)
 
 ### The Fix:
-All passwords have been updated to `S223@nexlife` in the configuration files.
+All passwords have been updated to `Nex@@life#123` in the configuration files.
 
 ---
 
@@ -28,16 +28,16 @@ All passwords have been updated to `S223@nexlife` in the configuration files.
 ```bash
 # UPDATE THESE (use lowercase email + correct password!)
 SMTP_USER=info@nexlifeinternational.com
-SMTP_PASS=S223@nexlife
+SMTP_PASS=Nex@@life#123
 
 IMAP_USER=info@nexlifeinternational.com
-IMAP_PASS=S223@nexlife
+IMAP_PASS=Nex@@life#123
 
 SUPERADMIN_EMAIL=info@nexlifeinternational.com
-SUPERADMIN_PASSWORD=S223@nexlife
+SUPERADMIN_PASSWORD=Nex@@life#123
 
 CONTACT_TO=info@nexlifeinternational.com
-DASH_PASSWORD=S223@nexlife
+DASH_PASSWORD=Nex@@life#123
 ```
 
 3. **Apply to Production Environment**
@@ -64,22 +64,22 @@ SMTP_HOST=smtpout.secureserver.net
 SMTP_PORT=587
 SMTP_SECURE=false
 SMTP_USER=info@nexlifeinternational.com
-SMTP_PASS=S223@nexlife
+SMTP_PASS=Nex@@life#123
 
 # IMAP Configuration
 IMAP_HOST=imap.secureserver.net
 IMAP_PORT=993
 IMAP_SECURE=true
 IMAP_USER=info@nexlifeinternational.com
-IMAP_PASS=S223@nexlife
+IMAP_PASS=Nex@@life#123
 
 # Email Configuration
 CONTACT_TO=info@nexlifeinternational.com
 
 # Authentication
-DASH_PASSWORD=S223@nexlife
+DASH_PASSWORD=Nex@@life#123
 SUPERADMIN_EMAIL=info@nexlifeinternational.com
-SUPERADMIN_PASSWORD=S223@nexlife
+SUPERADMIN_PASSWORD=Nex@@life#123
 JWT_SECRET=9cb50b98caa56aaef6c1a0408510f7539be5a1e2d33989ae52f2b14646551a65
 
 # Database
@@ -134,7 +134,7 @@ Instead of:
 ## 🔍 Why This Happened
 
 1. Initial documentation used a placeholder password `Nexlife@2025`
-2. Your actual Hostinger password is `S223@nexlife`
+2. Your actual Hostinger password is `Nex@@life#123`
 3. Local development worked because `.env` had correct password
 4. Vercel failed because it was using the wrong password
 5. The base64 encoded auth showed `/* secret */` placeholder in logs
@@ -143,7 +143,7 @@ Instead of:
 
 ## 📌 Critical Points
 
-1. **Password MUST be:** `S223@nexlife` (case-sensitive!)
+1. **Password MUST be:** `Nex@@life#123` (case-sensitive!)
 2. **Email MUST be lowercase:** `info@` not `Info@`
 3. **Update ALL instances** in Vercel (SMTP, IMAP, SUPERADMIN, DASH)
 4. **Redeploy after updating** environment variables
@@ -157,7 +157,7 @@ Instead of:
 1. Log into Hostinger control panel
 2. Go to Emails section
 3. Verify the password for `info@nexlifeinternational.com`
-4. If needed, reset it to `S223@nexlife`
+4. If needed, reset it to `Nex@@life#123`
 5. Update Vercel and redeploy
 
 ### Test Command
