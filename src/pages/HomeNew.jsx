@@ -120,7 +120,7 @@ const SectionHeading = ({ title, subtitle }) => {
   return (
     <div
       ref={ref}
-      className={`text-center mb-12 md:mb-16 transition-all duration-700 ${
+      className={`text-center mb-12 md:mb-16 transition-[opacity,transform] duration-700 ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
       }`}
     >
@@ -320,6 +320,19 @@ const HomeNew = () => {
 
   /* ── Floating contacts ── */
   const [isFloatingOpen, setIsFloatingOpen] = useState(false);
+  const [isNearFooter, setIsNearFooter] = useState(false);
+
+  /* Hide floating button when footer is visible to prevent overlap */
+  useEffect(() => {
+    const footer = document.querySelector("footer");
+    if (!footer) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsNearFooter(entry.isIntersecting),
+      { threshold: 0.1 }
+    );
+    observer.observe(footer);
+    return () => observer.disconnect();
+  }, []);
 
   /* ── Download handler ── */
   const handleDownload = () => {
@@ -1048,10 +1061,16 @@ const HomeNew = () => {
       <DebugInfo />
 
       {/* ═══════════════ FLOATING CONTACT BUTTONS ═══════════════ */}
-      <div className="fixed right-4 md:right-6 bottom-4 md:bottom-6 z-50">
+      <div
+        className={`fixed right-2 md:right-4 z-50 transition-[bottom,opacity] duration-300 ${
+          isNearFooter
+            ? "bottom-24 md:bottom-28 opacity-80"
+            : "bottom-4 md:bottom-6 opacity-100"
+        }`}
+      >
         {/* Expanded options */}
         <div
-          className={`mb-3 space-y-2.5 transition-all duration-300 ${
+          className={`mb-3 space-y-2.5 transition-[opacity,transform] duration-300 ${
             isFloatingOpen
               ? "opacity-100 translate-y-0 pointer-events-auto"
               : "opacity-0 translate-y-4 pointer-events-none"
@@ -1086,12 +1105,12 @@ const HomeNew = () => {
         <button
           onClick={() => setIsFloatingOpen((v) => !v)}
           aria-label="Toggle contact options"
-          className="w-14 h-14 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center"
+          className="w-14 h-14 rounded-full bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition-[box-shadow,transform,background-color] duration-300 hover:scale-105 flex items-center justify-center"
         >
           {isFloatingOpen ? (
             <X className="w-6 h-6 text-gray-900 dark:text-white" />
           ) : (
-            <img src={callNowImage} alt="Contact Us" className="w-14 h-14" />
+            <img src={callNowImage} alt="Contact Us" className="w-14 h-14 rounded-full" />
           )}
         </button>
       </div>
@@ -1105,7 +1124,7 @@ function FadeInCard({ children, delay = 0 }) {
   return (
     <div
       ref={ref}
-      className={`transition-all duration-600 ${
+      className={`transition-[opacity,transform] duration-600 ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
       }`}
       style={{ transitionDelay: isVisible ? `${delay}ms` : "0ms" }}
@@ -1121,7 +1140,7 @@ function CTAFadeIn({ children }) {
   return (
     <div
       ref={ref}
-      className={`transition-all duration-700 ${
+      className={`transition-[opacity,transform] duration-700 ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
       }`}
     >

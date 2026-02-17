@@ -83,7 +83,7 @@ const FadeIn = ({ children, className = "", delay = 0 }) => {
   return (
     <div
       ref={ref}
-      className={`transition-all duration-700 ${
+      className={`transition-[opacity,transform] duration-700 ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
       } ${className}`}
       style={{ transitionDelay: `${delay}ms` }}
@@ -512,7 +512,7 @@ const Products = () => {
   return (
     <div className="min-h-screen">
       {/* ── Hero Section ── */}
-      <section className="relative py-14 sm:py-18 lg:py-24">
+      <section className="relative py-14 sm:py-18 lg:py-24 overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img
             src="/our-product-bg.png"
@@ -804,10 +804,10 @@ const Products = () => {
         </div>
       </section>
 
-      {/* Scroll to Top */}
+      {/* Scroll to Top — positioned right side for easy thumb access */}
       <button
         onClick={scrollToTop}
-        className={`fixed bottom-5 right-5 z-50 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:shadow-xl hover:bg-blue-700 hover:-translate-y-0.5 active:scale-95 transition-all duration-200 ${
+        className={`fixed bottom-5 right-5 z-40 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:shadow-xl hover:bg-blue-700 hover:-translate-y-0.5 active:scale-95 transition-all duration-200 ${
           showScrollToTop
             ? "opacity-100 scale-100"
             : "opacity-0 scale-75 pointer-events-none"

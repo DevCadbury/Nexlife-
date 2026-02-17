@@ -148,21 +148,20 @@
   }
 
   .btn-outline {
-    @apply border-2 border-primary-500 text-primary-500 hover:bg-primary-500 hover:text-white font-medium py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105;
+    @apply border-2 border-primary-500 text-primary-500 hover:bg-primary-500 hover:text-white font-medium py-3 px-6 rounded-lg transition-[color,background-color,border-color,box-shadow,transform] duration-300 transform hover:scale-105;
   }
 
   .card {
-    @apply bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2;
+    @apply bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-[box-shadow,transform] duration-300 transform hover:-translate-y-2;
   }
 
   .section-padding {
     @apply py-16 px-4 sm:px-6 lg:px-8;
   }
 
-  /* Prevent layout shift and clipping during initial animations */
-  section {
-    contain: layout style;
-  }
+  /* Note: removed CSS containment (was `contain: layout style`) to prevent
+     stacking-context / clipping issues on mobile. Transforms used by FadeIn
+     animations do not cause layout shift so containment is unnecessary. */
 
   .container-custom {
     @apply max-w-7xl mx-auto;

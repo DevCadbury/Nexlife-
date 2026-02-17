@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import useSWR from "swr";
 import { api, fetcher } from "@/lib/api";
@@ -26,6 +26,8 @@ import {
   Award,
   Menu,
   X,
+  PanelLeftClose,
+  PanelLeft,
 } from "lucide-react";
 
 const tabs = [
@@ -51,29 +53,24 @@ export default function AdminLayout({
 }) {
   const path = usePathname();
   const router = useRouter();
-  const [open, setOpen] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-  const [hoverOpen, setHoverOpen] = useState(false);
-  const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
-  const [isHoveringCard, setIsHoveringCard] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [isAuthChecking, setIsAuthChecking] = useState(true);
-  const [notificationTab, setNotificationTab] = useState<
-    "inquiries" | "replies"
-  >("inquiries");
-  const popRef = useRef<HTMLDivElement | null>(null);
-  const btnRef = useRef<HTMLButtonElement | null>(null);
+  const [authState, setAuthState] = useState<"checking" | "valid" | "invalid">("checking");
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  const [notificationTab, setNotificationTab] = useState<"inquiries" | "replies">("inquiries");
+  const notifRef = useRef<HTMLDivElement | null>(null);
+  const notifBtnRef = useRef<HTMLButtonElement | null>(null);
   const profileRef = useRef<HTMLDivElement | null>(null);
 
-  // Poll counts every 15s
+  // Poll counts
   const { data: notif } = useSWR(
     () => `/inquiries/new/count?ts=${Math.floor(Date.now() / 15000)}`,
     fetcher,
     { refreshInterval: 15000 }
   );
 
-  // Poll for new replies every 10s
   const { data: replyNotif } = useSWR(
     () => `/inquiries/replies/count?ts=${Math.floor(Date.now() / 10000)}`,
     fetcher,
@@ -81,12 +78,12 @@ export default function AdminLayout({
   );
 
   const { data: latest, mutate } = useSWR(
-    open ? "/inquiries?status=new&limit=20" : null,
+    notificationOpen ? "/inquiries?status=new&limit=20" : null,
     fetcher
   );
 
   const { data: latestReplies, mutate: mutateReplies } = useSWR(
-    open ? "/inquiries/replies/recent?limit=10" : null,
+    notificationOpen ? "/inquiries/replies/recent?limit=10" : null,
     fetcher
   );
 
@@ -100,55 +97,42 @@ export default function AdminLayout({
     },
   });
 
-  // Immediate client-side authentication check
+  // Non-blocking auth check — renders layout shell immediately while validating
   useEffect(() => {
-    const checkAuth = () => {
-      setIsAuthChecking(true);
+    let token = localStorage.getItem("token");
+    if (!token) {
+      const cookies = document.cookie.split(";").reduce((acc: Record<string, string>, cookie) => {
+        const [key, value] = cookie.split("=");
+        if (key && value) acc[key.trim()] = decodeURIComponent(value);
+        return acc;
+      }, {});
+      token = cookies["nxl_jwt"];
+    }
 
-      // Check if token exists in localStorage or cookies
-      let token = localStorage.getItem("token");
-      if (!token) {
-        const cookies = document.cookie
-          .split(";")
-          .reduce((acc: Record<string, string>, cookie) => {
-            const [key, value] = cookie.split("=");
-            if (key && value) acc[key.trim()] = decodeURIComponent(value);
-            return acc;
-          }, {});
-        token = cookies["nxl_jwt"];
-      }
+    if (!token) {
+      router.push("/login");
+      setAuthState("invalid");
+      return;
+    }
 
-      if (!token) {
-        // No token found, redirect immediately
-        router.push("/login");
-        return;
-      }
-
-      // Validate token format and expiration
-      try {
-        const payload = JSON.parse(atob(token.split(".")[1]));
-        const currentTime = Math.floor(Date.now() / 1000);
-
-        if (payload.exp && payload.exp < currentTime) {
-          // Token expired, redirect to login
-          localStorage.removeItem("token");
-          document.cookie = "nxl_jwt=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0";
-          router.push("/login");
-          return;
-        }
-      } catch (error) {
-        // Invalid token format, redirect to login
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) {
         localStorage.removeItem("token");
         document.cookie = "nxl_jwt=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0";
         router.push("/login");
+        setAuthState("invalid");
         return;
       }
+    } catch {
+      localStorage.removeItem("token");
+      document.cookie = "nxl_jwt=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0";
+      router.push("/login");
+      setAuthState("invalid");
+      return;
+    }
 
-      // Token is valid, allow access
-      setIsAuthChecking(false);
-    };
-
-    checkAuth();
+    setAuthState("valid");
   }, [router]);
 
   const items = latest?.items || [];
@@ -161,9 +145,7 @@ export default function AdminLayout({
   }
 
   async function markAllRead() {
-    const emails = Array.from(
-      new Set(items.map((i: any) => i.email).filter(Boolean))
-    );
+    const emails = Array.from(new Set(items.map((i: any) => i.email).filter(Boolean)));
     await Promise.all(
       (emails as string[]).map((email) =>
         api.patch(`/inquiries/threads/mark-read-all`, { email })
@@ -175,615 +157,414 @@ export default function AdminLayout({
   async function markReplyRead(replyId: string) {
     try {
       await api.patch(`/inquiries/replies/${replyId}/mark-read`, {});
-      // Refresh both replies and notification count
       mutateReplies();
       mutate();
-    } catch (error) {
-
-    }
+    } catch {}
   }
 
   async function markAllRepliesRead() {
     try {
       await api.patch(`/inquiries/replies/mark-all-read`, {});
-      // Refresh both replies and notification count
       mutateReplies();
       mutate();
-    } catch (error) {
-
-    }
+    } catch {}
   }
 
-  const handleProfileMouseEnter = () => {
-    if (hoverTimeout) {
-      clearTimeout(hoverTimeout);
-      setHoverTimeout(null);
-    }
-    setHoverOpen(true);
-    setProfileOpen(false); // Close dropdown if open
-  };
-
-  const handleProfileMouseLeave = () => {
-    const timeout = setTimeout(() => {
-      if (!isHoveringCard) {
-        setHoverOpen(false);
-      }
-    }, 150);
-    setHoverTimeout(timeout);
-  };
-
-  const handleCardMouseEnter = () => {
-    setIsHoveringCard(true);
-    if (hoverTimeout) {
-      clearTimeout(hoverTimeout);
-      setHoverTimeout(null);
-    }
-  };
-
-  const handleCardMouseLeave = () => {
-    setIsHoveringCard(false);
-    const timeout = setTimeout(() => {
-      setHoverOpen(false);
-    }, 150);
-    setHoverTimeout(timeout);
-  };
-
-  // Function to get last login time from JWT token
-  const getLastLoginTime = () => {
-    if (typeof window === "undefined") return null;
-    try {
-      let token = localStorage.getItem("token");
-
-      // Fallback: check cookie if no token in localStorage
-      if (!token) {
-        const cookies = document.cookie
-          .split(";")
-          .reduce((acc: Record<string, string>, cookie) => {
-            const [key, value] = cookie.trim().split("=");
-            if (key && value) acc[key] = decodeURIComponent(value);
-            return acc;
-          }, {});
-        token = cookies["nxl_jwt"];
-      }
-
-      if (!token) return null;
-
-      const payload = JSON.parse(atob(token.split(".")[1]));
-      const iat = payload.iat; // Issued at time from JWT
-
-      if (iat) {
-        return new Date(iat * 1000); // Convert from seconds to milliseconds
-      }
-
-      return null;
-    } catch (error) {
-
-      return null;
-    }
-  };
+  const handleLogout = useCallback(() => {
+    localStorage.clear();
+    sessionStorage.clear();
+    document.cookie = "nxl_jwt=; Path=/; Max-Age=0";
+    router.push("/login");
+  }, [router]);
 
   useEffect(() => {
     setMounted(true);
-    // Load sidebar state from localStorage
-    const savedState = localStorage.getItem('sidebarCollapsed');
-    if (savedState !== null) {
-      setSidebarCollapsed(savedState === 'true');
-    }
-    function onDoc(e: MouseEvent) {
-      if (!open && !profileOpen) return;
+    const savedState = localStorage.getItem("sidebarCollapsed");
+    if (savedState === "true") setSidebarOpen(false);
+
+    function handleClick(e: MouseEvent) {
       const t = e.target as Node;
-
-      if (
-        open &&
-        popRef.current &&
-        !popRef.current.contains(t) &&
-        btnRef.current &&
-        !btnRef.current.contains(t)
-      ) {
-        setOpen(false);
+      if (notificationOpen && notifRef.current && !notifRef.current.contains(t) && notifBtnRef.current && !notifBtnRef.current.contains(t)) {
+        setNotificationOpen(false);
       }
-
-      if (
-        profileOpen &&
-        profileRef.current &&
-        !profileRef.current.contains(t)
-      ) {
+      if (profileOpen && profileRef.current && !profileRef.current.contains(t)) {
         setProfileOpen(false);
       }
     }
 
-    document.addEventListener("mousedown", onDoc);
-    return () => {
-      document.removeEventListener("mousedown", onDoc);
-      if (hoverTimeout) {
-        clearTimeout(hoverTimeout);
-      }
-    };
-  }, [open, profileOpen, hoverTimeout]);
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [notificationOpen, profileOpen]);
 
-  if (isAuthChecking) {
-    return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-10 h-10 border-3 border-blue-500 border-t-transparent rounded-full mx-auto mb-4 animate-spin" />
-          <h2 className="text-base font-medium text-slate-700 dark:text-slate-300 mb-1">
-            Verifying Access
-          </h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            Checking authentication...
-          </p>
-        </div>
-      </div>
-    );
-  }
+  // Don't render anything while redirecting to login
+  if (authState === "invalid") return null;
+
+  const userRole = profile?.user?.role;
+  const filteredTabs = tabs.filter((t) => {
+    if (t.roles.includes("all")) return true;
+    if (userRole && t.roles.includes(userRole)) return true;
+    return false;
+  });
 
   return (
-    <div suppressHydrationWarning={true} className="min-h-screen bg-slate-50 dark:bg-slate-950">
+    <div suppressHydrationWarning className="min-h-screen bg-slate-50 dark:bg-[#0c0f1a]">
       {/* Mobile Overlay */}
-      {!sidebarCollapsed && (
+      {mobileOpen && (
         <div
-          onClick={() => {
-            setSidebarCollapsed(true);
-            localStorage.setItem('sidebarCollapsed', 'true');
-          }}
-          className="fixed inset-0 bg-black/40 z-20 lg:hidden transition-opacity duration-200"
+          onClick={() => setMobileOpen(false)}
+          className="fixed inset-0 bg-black/30 z-40 lg:hidden"
         />
       )}
 
+      {/* Sidebar */}
       <aside
-        suppressHydrationWarning={true}
-        className={`fixed left-0 top-0 h-screen w-[260px] border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 z-30 overflow-y-auto transition-transform duration-200 ease-out ${
-          sidebarCollapsed ? '-translate-x-full' : 'translate-x-0'
-        }`}
+        suppressHydrationWarning
+        className={`fixed left-0 top-0 h-screen bg-white dark:bg-[#111827] border-r border-slate-200 dark:border-slate-800 z-50 flex flex-col
+          ${sidebarOpen ? "w-[240px]" : "w-[64px]"}
+          ${mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+          transition-[width] duration-200 ease-out lg:transition-[width]
+        `}
+        style={{ transitionProperty: "width, transform" }}
       >
-        {/* Close Button (Mobile) */}
+        {/* Mobile Close */}
         <button
-          onClick={() => {
-            setSidebarCollapsed(true);
-            localStorage.setItem('sidebarCollapsed', 'true');
-          }}
-          className="absolute top-4 right-4 lg:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors z-10"
+          onClick={() => setMobileOpen(false)}
+          className="absolute top-3 right-3 lg:hidden p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 z-10"
         >
-          <X className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+          <X className="w-4 h-4 text-slate-500" />
         </button>
-        <div className="p-5 border-b border-slate-200 dark:border-slate-800">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="h-9 w-9 rounded-lg bg-white dark:bg-slate-800 shadow-sm flex items-center justify-center p-1.5 border border-slate-200 dark:border-slate-700">
-              <img src="/nexlife_logo.png" alt="Nexlife" className="w-full h-full object-contain" />
-            </div>
-            <h1 className="text-base font-bold text-slate-900 dark:text-white">
-              Nexlife <span className="text-blue-600 dark:text-blue-400">CRM</span>
-            </h1>
-          </div>
-          {profile?.user?.name && (
-            <div className="space-y-1">
-              <div className="text-xs text-slate-500 dark:text-slate-400">Welcome back</div>
-              <div className="bg-slate-50 dark:bg-slate-800 rounded-lg px-3 py-2">
-                <div className="text-sm font-medium text-slate-900 dark:text-white">
-                  {profile.user.name}
-                </div>
-                {profile.user.email && (
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(profile.user.email);
-                    }}
-                    className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 transition-colors group mt-0.5"
-                    title="Click to copy email"
-                  >
-                    <span className="truncate max-w-[170px]">{profile.user.email}</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 opacity-50 group-hover:opacity-100">
-                      <rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect>
-                      <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path>
-                    </svg>
-                  </button>
-                )}
+
+        {/* Logo */}
+        <div className={`h-[57px] flex items-center border-b border-slate-200 dark:border-slate-800 flex-shrink-0 ${sidebarOpen ? "px-5" : "px-0 justify-center"}`}>
+          {sidebarOpen ? (
+            <div className="flex items-center gap-2.5">
+              <div className="h-8 w-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center p-1.5">
+                <img src="/nexlife_logo.png" alt="Nexlife" className="w-full h-full object-contain" />
               </div>
+              <h1 className="text-sm font-semibold text-slate-900 dark:text-white leading-tight">Nexlife CRM</h1>
+            </div>
+          ) : (
+            <div className="h-8 w-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center p-1.5">
+              <img src="/nexlife_logo.png" alt="NL" className="w-full h-full object-contain" />
             </div>
           )}
         </div>
-        <nav className="p-3 space-y-1">
-          {tabs
-            .filter((t) => {
-              const userRole = profile?.user?.role;
-              
-              if (t.roles && t.roles.includes("all")) {
-                return true;
-              }
-              
-              if (t.roles && userRole) {
-                return t.roles.includes(userRole);
-              }
-              
-              return false;
-            })
-            .map((t) => {
+
+        {/* User Card */}
+        {sidebarOpen && profile?.user?.name && (
+          <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
+            <p className="text-xs text-slate-400 dark:text-slate-500 mb-0.5">Welcome back</p>
+            <p className="text-sm font-medium text-slate-900 dark:text-white truncate">{profile.user.name}</p>
+            {profile.user.email && (
+              <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{profile.user.email}</p>
+            )}
+          </div>
+        )}
+
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto py-2 px-2 custom-scrollbar">
+          <div className="space-y-0.5">
+            {filteredTabs.map((t) => {
               const Icon = t.icon;
               const isActive = path === t.href;
               return (
                 <Link
                   key={t.href}
                   href={t.href}
-                  onClick={() => {
-                    // Close sidebar on mobile after navigation
-                    if (window.innerWidth < 1024) {
-                      setSidebarCollapsed(true);
-                      localStorage.setItem('sidebarCollapsed', 'true');
-                    }
-                  }}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors duration-150 ${
-                    isActive
-                      ? "bg-blue-600 text-white"
+                  onClick={() => mobileOpen && setMobileOpen(false)}
+                  title={!sidebarOpen ? t.label : undefined}
+                  className={`flex items-center gap-2.5 rounded-md text-[13px] font-medium
+                    ${sidebarOpen ? "px-3 py-2" : "px-0 py-2 justify-center"}
+                    ${isActive
+                      ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900"
                       : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
-                  }`}
+                    }`}
                 >
-                  <Icon className={`w-4 h-4 flex-shrink-0 ${
-                    isActive ? "text-white" : "text-slate-500 dark:text-slate-500"
-                  }`} />
-                  <span className="font-medium">{t.label}</span>
-                  {isActive && (
-                    <div className="ml-auto w-1.5 h-1.5 bg-white rounded-full" />
-                  )}
+                  <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? "" : "text-slate-400 dark:text-slate-500"}`} />
+                  {sidebarOpen && <span>{t.label}</span>}
                 </Link>
               );
             })}
+          </div>
         </nav>
 
-        {/* Quick Stats */}
-        <div className="p-3 border-t border-slate-200 dark:border-slate-800">
-          <div className="text-xs font-medium text-slate-500 dark:text-slate-500 uppercase tracking-wider mb-2 px-1">
-            Quick Stats
-          </div>
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between text-sm px-1">
-              <span className="text-slate-600 dark:text-slate-400">New Inquiries</span>
-              <span className="font-semibold text-blue-600 dark:text-blue-400">
-                {notif?.count || 0}
-              </span>
+        {/* Sidebar Footer Stats */}
+        {sidebarOpen && (
+          <div className="border-t border-slate-200 dark:border-slate-800 p-3 flex-shrink-0">
+            <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 mb-1.5">
+              <span>Inquiries</span>
+              <span className="font-semibold text-slate-700 dark:text-slate-300">{notif?.count || 0}</span>
             </div>
-            <div className="flex items-center justify-between text-sm px-1">
-              <span className="text-slate-600 dark:text-slate-400">New Replies</span>
-              <span className="font-semibold text-green-600 dark:text-green-400">
-                {replyNotif?.count || 0}
-              </span>
-            </div>
-          </div>
-        </div>
-      </aside>
-
-      <main className={`transition-all duration-200 flex flex-col min-h-screen ${
-        sidebarCollapsed ? '' : 'lg:ml-[260px]'
-      }`}>
-        <header
-          className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-0 z-40"
-        >
-          <div className="flex items-center justify-between px-4 md:px-6 py-3">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => {
-                  setSidebarCollapsed(!sidebarCollapsed);
-                  localStorage.setItem('sidebarCollapsed', String(!sidebarCollapsed));
-                }}
-                className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-              >
-                <Menu className="w-5 h-5 text-slate-600 dark:text-slate-400" />
-              </button>
-              
-              <div className="flex items-center gap-2 px-2.5 py-1 bg-slate-50 dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700">
-                <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
-                <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
-                  Online
-                </span>
-              </div>
-              <span className="text-xs text-slate-400 dark:text-slate-500 hidden md:inline">
-                {new Date().toLocaleDateString('en-US', {
-                  weekday: 'short',
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric'
-                })}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              {/* Notifications */}
-              <button
-                className="relative p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                ref={btnRef}
-                onClick={() => setOpen((v) => !v)}
-              >
-                <Bell className="w-5 h-5 text-slate-600 dark:text-slate-400" />
-                {totalNew > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 w-4.5 h-4.5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center min-w-[18px] h-[18px]">
-                    {totalNew}
-                  </span>
-                )}
-              </button>
-
-              {/* Theme Toggle */}
-              <div className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                <ThemeToggle />
-              </div>
-
-              {/* User Menu */}
-              <div
-                className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer relative"
-                ref={profileRef}
-                onMouseEnter={handleProfileMouseEnter}
-                onMouseLeave={handleProfileMouseLeave}
-                onClick={() => {
-                  setProfileOpen(!profileOpen);
-                  setHoverOpen(false);
-                }}
-              >
-                <div className="h-7 w-7 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium text-xs">
-                  {profile?.user?.name?.[0]?.toUpperCase() || "U"}
-                </div>
-                <div className="hidden md:block">
-                  <div className="text-sm font-medium text-slate-900 dark:text-white leading-tight">
-                    {profile?.user?.name || "User"}
-                  </div>
-                  <div className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
-                    {profile?.user?.role || "Staff"}
-                  </div>
-                </div>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-              </div>
-
-              {/* Logout Button */}
-              <form
-                action="/api/logout"
-                method="post"
-                className="contents"
-              >
-                <button
-                  type="submit"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    localStorage.clear();
-                    sessionStorage.clear();
-                    document.cookie = 'nxl_jwt=; Path=/; Max-Age=0';
-                    router.push('/login');
-                  }}
-                  className="p-2 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
-                  title="Logout"
-                >
-                  <LogOut className="w-4.5 h-4.5" />
-                </button>
-              </form>
-            </div>
-
-              {hoverOpen && (
-                <div
-                  className="absolute right-0 mt-2 w-56 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-lg p-3 z-50 animate-in fade-in slide-in-from-top-1 duration-200"
-                  onMouseEnter={handleCardMouseEnter}
-                  onMouseLeave={handleCardMouseLeave}
-                >
-                  <div className="space-y-2.5">
-                    <div>
-                      <div className="font-medium text-sm text-slate-900 dark:text-slate-200">
-                        {profile?.user?.name || "User"}
-                      </div>
-                      {profile?.user?.email && (
-                        <div className="text-xs text-slate-500 dark:text-slate-400 truncate" title={profile.user.email}>
-                          {profile.user.email}
-                        </div>
-                      )}
-                      <div className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
-                        Role: <span className="capitalize text-slate-600 dark:text-slate-300">{profile?.user?.role || "Staff"}</span>
-                      </div>
-                    </div>
-
-                    <div className="border-t border-slate-100 dark:border-slate-800 pt-2 space-y-1">
-                      <Link
-                        href="/admin/settings"
-                        className="flex items-center gap-2 w-full px-2.5 py-1.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md transition-colors"
-                        onClick={() => setHoverOpen(false)}
-                      >
-                        <SettingsIcon className="w-3.5 h-3.5" />
-                        Settings
-                      </Link>
-                      <button
-                        onClick={() => {
-                          localStorage.clear();
-                          sessionStorage.clear();
-                          document.cookie = 'nxl_jwt=; Path=/; Max-Age=0';
-                          router.push('/login');
-                        }}
-                        className="flex items-center gap-2 w-full px-2.5 py-1.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-md transition-colors"
-                      >
-                        <LogOut className="w-3.5 h-3.5" />
-                        Logout
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-              {profileOpen && (
-                <div
-                  className="absolute right-0 mt-2 w-44 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-lg animate-in fade-in slide-in-from-top-1 duration-200"
-                >
-                  <div className="p-2.5 border-b border-slate-100 dark:border-slate-800">
-                    <div className="font-medium text-sm text-slate-900 dark:text-white">
-                      {profile?.user?.name || "User"}
-                    </div>
-                    <div className="text-xs text-slate-500 dark:text-slate-400">
-                      {profile?.user?.email}
-                    </div>
-                  </div>
-                </div>
-              )}
-          </div>
-        </header>        <section className="p-4 md:p-6 flex-1">{children}</section>
-      </main>
-
-        {open && (
-          <div
-            ref={popRef}
-            className="fixed right-6 top-16 z-50 w-[560px] max-w-[90vw] rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/95 backdrop-blur shadow-xl ring-1 ring-slate-200 dark:ring-indigo-500/10 animate-in fade-in zoom-in-95 duration-200"
-            style={{
-              boxShadow:
-                "0 10px 30px rgba(0,0,0,.1), 0 0 0 1px rgba(148,163,184,.1)",
-            }}
-          >
-            <div className="p-4">
-              <div className="flex items-center justify-between mb-3">
-                <div className="font-bold text-slate-900 dark:text-white">Notifications</div>
-                <div className="flex items-center gap-2">
-                  {(items.length > 0 || replyItems.length > 0) && (
-                    <button
-                      className="text-xs rounded-lg bg-slate-100 dark:bg-slate-800 px-3 py-1.5 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors duration-200 flex items-center gap-2"
-                      onClick={() => {
-                        if (notificationTab === "inquiries") {
-                          markAllRead();
-                        } else {
-                          markAllRepliesRead();
-                        }
-                      }}
-                    >
-                      <Check className="w-3 h-3" />
-                      Mark all read
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Tabs */}
-              <div className="flex gap-1 mb-4 bg-slate-100 dark:bg-slate-800/50 p-1 rounded-lg">
-                <button
-                  className={`flex-1 px-3 py-2 text-sm rounded-md transition-colors duration-200 ${
-                    notificationTab === "inquiries"
-                      ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm"
-                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                  }`}
-                  onClick={() => setNotificationTab("inquiries")}
-                >
-                  Inquiries ({notif?.count || 0})
-                </button>
-                <button
-                  className={`flex-1 px-3 py-2 text-sm rounded-md transition-colors duration-200 ${
-                    notificationTab === "replies"
-                      ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm"
-                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                  }`}
-                  onClick={() => setNotificationTab("replies")}
-                >
-                  Replies ({replyNotif?.count || 0})
-                </button>
-              </div>
-
-              <div className="max-h-[60vh] overflow-y-auto divide-y divide-slate-200 dark:divide-slate-800 rounded-lg">
-                {notificationTab === "inquiries" ? (
-                  <>
-                    {items.length === 0 && (
-                      <div className="text-sm text-slate-500 dark:text-slate-400 p-4 text-center">
-                        No new inquiries
-                      </div>
-                    )}
-                    {items.map((i: any, index: number) => (
-                      <div
-                        key={i._id || `inquiry-${index}-${i.createdAt}`}
-                        className="p-4 flex items-start justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors duration-200"
-                      >
-                        <div>
-                          <div className="font-semibold text-slate-900 dark:text-white">
-                            {i.name}{" "}
-                            <span className="text-blue-600 dark:text-cyan-400">• {i.email}</span>
-                          </div>
-                          {i.subject && (
-                            <div className="text-sm text-slate-700 dark:text-slate-300">
-                              {i.subject}
-                            </div>
-                          )}
-                          <div className="text-xs text-slate-500 dark:text-slate-500">
-                            {i.createdAt
-                              ? new Date(i.createdAt).toLocaleString()
-                              : ""}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <button
-                            className="text-xs rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 transition-colors duration-200"
-                            onClick={() => {
-                              setOpen(false);
-                              router.push(`/admin/inquiries`);
-                            }}
-                          >
-                            View
-                          </button>
-                          <button
-                            className="text-xs rounded-lg bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-3 py-1.5 transition-colors duration-200"
-                            onClick={() => markRead(i._id)}
-                          >
-                            Mark read
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </>
-                ) : (
-                  <>
-                    {replyItems.length === 0 && (
-                      <div className="text-sm text-slate-500 dark:text-slate-400 p-4 text-center">
-                        No new replies
-                      </div>
-                    )}
-                    {replyItems.map((reply: any, index: number) => (
-                      <div
-                        key={reply._id || `reply-${index}-${reply.createdAt}`}
-                        className="p-4 flex items-start justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors duration-200"
-                      >
-                        <div>
-                          <div className="font-semibold text-slate-900 dark:text-white">
-                            New reply from{" "}
-                            <span className="text-green-600 dark:text-green-400">
-                              {reply.fromName || reply.from}
-                            </span>
-                          </div>
-                          <div className="text-sm text-slate-700 dark:text-slate-300">
-                            {reply.subject}
-                          </div>
-                          <div className="text-xs text-slate-500 dark:text-slate-500">
-                            {reply.inquiryEmail && (
-                              <span className="text-blue-600 dark:text-cyan-400">
-                                • {reply.inquiryEmail}
-                              </span>
-                            )}
-                          </div>
-                          <div className="text-xs text-slate-500 dark:text-slate-500">
-                            {reply.createdAt
-                              ? new Date(reply.createdAt).toLocaleString()
-                              : ""}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <button
-                            className="text-xs rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 transition-colors duration-200"
-                            onClick={() => {
-                              setOpen(false);
-                              router.push(
-                                `/admin/inquiries?email=${encodeURIComponent(
-                                  reply.inquiryEmail
-                                )}`
-                              );
-                            }}
-                          >
-                            View Thread
-                          </button>
-                          <button
-                            className="text-xs rounded-lg bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-3 py-1.5 transition-colors duration-200"
-                            onClick={() => markReplyRead(reply._id)}
-                          >
-                            Mark read
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </>
-                )}
-              </div>
+            <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+              <span>Replies</span>
+              <span className="font-semibold text-slate-700 dark:text-slate-300">{replyNotif?.count || 0}</span>
             </div>
           </div>
         )}
+
+        {/* Collapse Toggle */}
+        <button
+          onClick={() => {
+            setSidebarOpen(!sidebarOpen);
+            localStorage.setItem("sidebarCollapsed", String(sidebarOpen));
+          }}
+          className="hidden lg:flex items-center justify-center h-10 border-t border-slate-200 dark:border-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 flex-shrink-0"
+        >
+          {sidebarOpen ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeft className="w-4 h-4" />}
+        </button>
+      </aside>
+
+      {/* Main Area */}
+      <main
+        className={`flex flex-col min-h-screen ${sidebarOpen ? "lg:ml-[240px]" : "lg:ml-[64px]"}`}
+        style={{ transitionProperty: "margin-left", transitionDuration: "200ms" }}
+      >
+        {/* Header */}
+        <header className="h-[57px] border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111827] sticky top-0 z-40 flex items-center justify-between px-4 md:px-5">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setMobileOpen(true)}
+              className="lg:hidden p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800"
+            >
+              <Menu className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+            </button>
+            <button
+              onClick={() => {
+                setSidebarOpen(!sidebarOpen);
+                localStorage.setItem("sidebarCollapsed", String(sidebarOpen));
+              }}
+              className="hidden lg:block p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800"
+            >
+              <Menu className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+            </button>
+            <span className="text-xs text-slate-400 dark:text-slate-500 hidden md:inline">
+              {new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-1">
+            {/* Notifications */}
+            <button
+              ref={notifBtnRef}
+              onClick={() => setNotificationOpen((v) => !v)}
+              className="relative p-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800"
+            >
+              <Bell className="w-[18px] h-[18px] text-slate-500 dark:text-slate-400" />
+              {totalNew > 0 && (
+                <span className="absolute top-1 right-1 min-w-[16px] h-4 bg-red-500 text-white text-[10px] font-semibold rounded-full flex items-center justify-center px-1">
+                  {totalNew}
+                </span>
+              )}
+            </button>
+
+            <div className="p-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800">
+              <ThemeToggle />
+            </div>
+
+            {/* User Menu */}
+            <div
+              ref={profileRef}
+              onClick={() => setProfileOpen(!profileOpen)}
+              className="flex items-center gap-2 p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer relative ml-1"
+            >
+              <div className="h-7 w-7 rounded-full bg-slate-900 dark:bg-slate-600 flex items-center justify-center text-white text-xs font-medium">
+                {profile?.user?.name?.[0]?.toUpperCase() || "U"}
+              </div>
+              <div className="hidden md:block">
+                <div className="text-sm font-medium text-slate-900 dark:text-white leading-tight">
+                  {profile?.user?.name || "User"}
+                </div>
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight capitalize">
+                  {profile?.user?.role || "Staff"}
+                </div>
+              </div>
+              <ChevronDown className="w-3 h-3 text-slate-400 hidden md:block" />
+
+              {profileOpen && (
+                <div className="absolute right-0 top-full mt-1 w-48 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-lg z-50 py-1">
+                  <div className="px-3 py-2 border-b border-slate-100 dark:border-slate-700">
+                    <p className="text-sm font-medium text-slate-900 dark:text-white">{profile?.user?.name || "User"}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{profile?.user?.email}</p>
+                  </div>
+                  <Link
+                    href="/admin/settings"
+                    onClick={() => setProfileOpen(false)}
+                    className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
+                  >
+                    <SettingsIcon className="w-3.5 h-3.5" />
+                    Settings
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={handleLogout}
+              className="p-2 rounded-md text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+              title="Logout"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
+        </header>
+
+        {/* Page Content — Shows skeleton during auth check instead of blocking */}
+        <section className="flex-1 p-4 md:p-6">
+          {authState === "checking" ? (
+            <div className="space-y-4 animate-pulse">
+              <div className="h-7 w-52 bg-slate-200 dark:bg-slate-800 rounded" />
+              <div className="h-4 w-36 bg-slate-200 dark:bg-slate-800 rounded" />
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mt-6">
+                {Array(5).fill(0).map((_, i) => (
+                  <div key={i} className="h-24 bg-slate-200 dark:bg-slate-800 rounded-lg" />
+                ))}
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
+                <div className="lg:col-span-2 h-72 bg-slate-200 dark:bg-slate-800 rounded-lg" />
+                <div className="h-72 bg-slate-200 dark:bg-slate-800 rounded-lg" />
+              </div>
+            </div>
+          ) : (
+            children
+          )}
+        </section>
+      </main>
+
+      {/* Notification Panel */}
+      {notificationOpen && (
+        <div
+          ref={notifRef}
+          className="fixed right-4 top-[65px] z-50 w-[480px] max-w-[90vw] rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#111827] shadow-xl"
+        >
+          <div className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-sm text-slate-900 dark:text-white">Notifications</h3>
+              <div className="flex items-center gap-2">
+                {(items.length > 0 || replyItems.length > 0) && (
+                  <button
+                    className="text-xs text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 flex items-center gap-1"
+                    onClick={() => {
+                      if (notificationTab === "inquiries") markAllRead();
+                      else markAllRepliesRead();
+                    }}
+                  >
+                    <Check className="w-3 h-3" />
+                    Mark all read
+                  </button>
+                )}
+                <button onClick={() => setNotificationOpen(false)} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded">
+                  <X className="w-3.5 h-3.5 text-slate-400" />
+                </button>
+              </div>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex gap-1 mb-3 bg-slate-100 dark:bg-slate-800 p-0.5 rounded-md">
+              <button
+                className={`flex-1 px-3 py-1.5 text-xs font-medium rounded ${
+                  notificationTab === "inquiries"
+                    ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm"
+                    : "text-slate-500 dark:text-slate-400"
+                }`}
+                onClick={() => setNotificationTab("inquiries")}
+              >
+                Inquiries ({notif?.count || 0})
+              </button>
+              <button
+                className={`flex-1 px-3 py-1.5 text-xs font-medium rounded ${
+                  notificationTab === "replies"
+                    ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm"
+                    : "text-slate-500 dark:text-slate-400"
+                }`}
+                onClick={() => setNotificationTab("replies")}
+              >
+                Replies ({replyNotif?.count || 0})
+              </button>
+            </div>
+
+            <div className="max-h-[60vh] overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800 custom-scrollbar">
+              {notificationTab === "inquiries" ? (
+                <>
+                  {items.length === 0 && (
+                    <div className="text-sm text-slate-400 dark:text-slate-500 py-8 text-center">No new inquiries</div>
+                  )}
+                  {items.map((i: any, idx: number) => (
+                    <div key={i._id || `inq-${idx}`} className="py-3 flex items-start justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 px-1 rounded">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-slate-900 dark:text-white">
+                          {i.name} <span className="text-slate-400 font-normal">• {i.email}</span>
+                        </p>
+                        {i.subject && <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5 truncate">{i.subject}</p>}
+                        <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
+                          {i.createdAt ? new Date(i.createdAt).toLocaleString() : ""}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1.5 flex-shrink-0">
+                        <button
+                          className="text-xs bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-2.5 py-1 rounded font-medium hover:opacity-90"
+                          onClick={() => { setNotificationOpen(false); router.push("/admin/inquiries"); }}
+                        >
+                          View
+                        </button>
+                        <button
+                          className="text-xs text-slate-500 hover:text-slate-700 dark:text-slate-400 px-2 py-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800"
+                          onClick={() => markRead(i._id)}
+                        >
+                          Read
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              ) : (
+                <>
+                  {replyItems.length === 0 && (
+                    <div className="text-sm text-slate-400 dark:text-slate-500 py-8 text-center">No new replies</div>
+                  )}
+                  {replyItems.map((reply: any, idx: number) => (
+                    <div key={reply._id || `reply-${idx}`} className="py-3 flex items-start justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 px-1 rounded">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-slate-900 dark:text-white">
+                          Reply from <span className="text-slate-600 dark:text-slate-300">{reply.fromName || reply.from}</span>
+                        </p>
+                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5 truncate">{reply.subject}</p>
+                        {reply.inquiryEmail && <p className="text-[11px] text-slate-400 mt-0.5">{reply.inquiryEmail}</p>}
+                        <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
+                          {reply.createdAt ? new Date(reply.createdAt).toLocaleString() : ""}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1.5 flex-shrink-0">
+                        <button
+                          className="text-xs bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-2.5 py-1 rounded font-medium hover:opacity-90"
+                          onClick={() => {
+                            setNotificationOpen(false);
+                            router.push(`/admin/inquiries?email=${encodeURIComponent(reply.inquiryEmail)}`);
+                          }}
+                        >
+                          View
+                        </button>
+                        <button
+                          className="text-xs text-slate-500 hover:text-slate-700 dark:text-slate-400 px-2 py-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800"
+                          onClick={() => markReplyRead(reply._id)}
+                        >
+                          Read
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

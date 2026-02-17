@@ -42,7 +42,7 @@ const FadeIn = ({ children, className = "", delay = 0 }) => {
   return (
     <div
       ref={ref}
-      className={`transition-all duration-700 ${
+      className={`transition-[opacity,transform] duration-700 ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
       } ${className}`}
       style={{ transitionDelay: `${delay}ms` }}
@@ -83,17 +83,17 @@ const AnimatedCounter = memo(({ end, suffix = "", duration = 2000 }) => {
 const ExpandableCard = ({ icon, title, summary, children, isExpanded, onToggle, delay = 0 }) => {
   return (
     <FadeIn delay={delay}>
-      <div className="bg-white dark:bg-gray-900 rounded-xl p-8 shadow-lg border-2 border-gray-200 dark:border-gray-700 hover:border-primary-500 dark:hover:border-primary-400 transition-colors duration-300">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full flex items-center justify-center overflow-hidden">
+      <div className="bg-white dark:bg-gray-900 rounded-xl p-5 sm:p-8 shadow-lg border-2 border-gray-200 dark:border-gray-700 hover:border-primary-500 dark:hover:border-primary-400 transition-colors duration-300 overflow-hidden">
+        <div className="flex items-center justify-between mb-4 sm:mb-6 gap-3">
+          <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
               <img
                 src={icon}
                 alt={title}
                 className="w-full h-full object-contain"
               />
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+            <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
               {title}
             </h3>
           </div>
@@ -115,7 +115,7 @@ const ExpandableCard = ({ icon, title, summary, children, isExpanded, onToggle, 
           </p>
 
           <div
-            className={`overflow-hidden transition-all duration-500 ease-in-out ${
+            className={`overflow-hidden transition-[max-height,opacity] duration-500 ease-in-out ${
               isExpanded ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"
             }`}
           >
@@ -408,7 +408,7 @@ const About = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
             {values.map((value, i) => (
               <FadeIn key={value.title} delay={i * 100}>
-                <div className="text-center group bg-white dark:bg-gray-800 rounded-2xl p-6 sm:p-8 border border-gray-200 dark:border-gray-700 hover:border-primary-400 dark:hover:border-primary-500 hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
+                <div className="text-center group bg-white dark:bg-gray-800 rounded-2xl p-6 sm:p-8 border border-gray-200 dark:border-gray-700 hover:border-primary-400 dark:hover:border-primary-500 hover:-translate-y-1 hover:shadow-lg transition-[box-shadow,transform,border-color] duration-300">
                   <div className="w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-5 rounded-xl flex items-center justify-center overflow-hidden group-hover:scale-110 transition-transform duration-300">
                     <img
                       src={value.image}

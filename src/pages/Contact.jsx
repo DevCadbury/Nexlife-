@@ -48,7 +48,7 @@ const FadeIn = ({ children, className = "", delay = 0 }) => {
   return (
     <div
       ref={ref}
-      className={`transition-all duration-700 ${
+      className={`transition-[opacity,transform] duration-700 ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
       } ${className}`}
       style={{ transitionDelay: `${delay}ms` }}
@@ -258,7 +258,7 @@ const Contact = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
             {contactInfo.map((info, i) => (
               <FadeIn key={info.title} delay={i * 100}>
-                <div className="text-center group hover:-translate-y-1 transition-all duration-200">
+                <div className="text-center group bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 hover:border-primary-400 dark:hover:border-primary-500 hover:-translate-y-1 hover:shadow-md transition-all duration-200">
                   <div className="w-14 h-14 mx-auto mb-3 rounded-xl flex items-center justify-center overflow-hidden group-hover:scale-110 transition-transform duration-300">
                     <img
                       src={info.image}
@@ -315,7 +315,7 @@ const Contact = () => {
       </section>
 
       {/* ── Contact Form & Map ── */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-gray-50 dark:bg-gray-800">
+      <section className="py-12 sm:py-16 lg:py-20 bg-gray-50 dark:bg-gray-800 overflow-x-hidden">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
             {/* Contact Form */}
@@ -336,8 +336,8 @@ const Contact = () => {
             <FadeIn delay={150}>
               <div className="space-y-8">
                 {/* Company Info */}
-                <div className="bg-white dark:bg-gray-900 rounded-xl p-8 shadow-lg">
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+                <div className="bg-white dark:bg-gray-900 rounded-xl p-5 sm:p-8 shadow-lg border border-gray-200 dark:border-gray-700">
+                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">
                     Company Information
                   </h3>
                   <div className="space-y-4">
@@ -378,8 +378,8 @@ const Contact = () => {
                 </div>
 
                 {/* Google Maps Embed — FIXED: search-based URL */}
-                <div className="bg-white dark:bg-gray-900 rounded-xl p-8 shadow-lg">
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+                <div className="bg-white dark:bg-gray-900 rounded-xl p-5 sm:p-8 shadow-lg border border-gray-200 dark:border-gray-700">
+                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">
                     Our Location
                   </h3>
                   <div className="w-full h-64 rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700">
@@ -416,8 +416,8 @@ const Contact = () => {
                 </div>
 
                 {/* Additional Contact Details */}
-                <div className="bg-white dark:bg-gray-900 rounded-xl p-8 shadow-lg">
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+                <div className="bg-white dark:bg-gray-900 rounded-xl p-5 sm:p-8 shadow-lg border border-gray-200 dark:border-gray-700">
+                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">
                     Additional Ways to Connect
                   </h3>
                   <div className="space-y-4">
@@ -532,7 +532,7 @@ const Contact = () => {
               },
             ].map((faq, index) => (
               <FadeIn key={index} delay={index * 100}>
-                <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border-2 border-gray-200 dark:border-gray-700 hover:border-primary-500 dark:hover:border-primary-400 hover:shadow-2xl hover:-translate-y-2 hover:scale-[1.02] transition-all duration-300 relative overflow-hidden group">
+                <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border-2 border-gray-200 dark:border-gray-700 hover:border-primary-500 dark:hover:border-primary-400 hover:shadow-2xl hover:-translate-y-2 transition-[box-shadow,transform,border-color] duration-300 relative overflow-hidden group">
                   {/* Gradient accent bar */}
                   <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-500 to-secondary-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
 
