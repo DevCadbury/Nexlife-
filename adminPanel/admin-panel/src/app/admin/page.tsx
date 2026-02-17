@@ -203,56 +203,48 @@ export default function Dashboard() {
   ];
 
   return (
-    <div suppressHydrationWarning={true} className="min-h-screen bg-gradient-to-br from-slate-100 via-blue-100/50 to-indigo-100/60 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 p-4 md:p-6">
+    <div suppressHydrationWarning={true} className="min-h-screen bg-slate-50 dark:bg-slate-950 p-4 md:p-6">
       {/* Hero Section - Compact */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-6"
-      >
-        <Card className="bg-gradient-to-r from-white via-blue-100/60 to-indigo-100/60 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 border border-slate-200 dark:border-0 shadow-xl backdrop-blur-sm">
-          <CardContent className="p-4 md:p-6">
+      <div className="mb-6">
+        <Card className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+          <CardContent className="p-4 md:p-5">
             <div className="flex items-center justify-between">
-              <div className="space-y-2">
-                <CardDescription className="text-sm text-slate-700 dark:text-slate-400">
+              <div className="space-y-1">
+                <CardDescription className="text-sm text-slate-500 dark:text-slate-400">
                   Welcome back, {mounted && profile?.user?.name ? profile.user.name : "NEXLIFE"}
                 </CardDescription>
-                <CardTitle className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-slate-900 via-blue-800 to-indigo-800 dark:from-white dark:via-blue-200 dark:to-indigo-200 bg-clip-text text-transparent">
+                <CardTitle className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">
                   Dashboard Overview
                 </CardTitle>
-                <p className="text-slate-700 dark:text-slate-400 flex items-center gap-2 text-sm">
+                <p className="text-slate-500 dark:text-slate-400 flex items-center gap-2 text-sm">
                   <Activity className="w-4 h-4" />
                   Real-time analytics and insights
                 </p>
               </div>
               <div className="relative">
-                <Image src="/assests/dashboard.png" alt="Dashboard" width={64} height={64} className="h-14 w-14 md:h-16 md:w-16" />
-                <div className="absolute -top-1 -right-1 h-6 w-6 bg-green-500 rounded-full border-4 border-white dark:border-slate-900 flex items-center justify-center">
-                  <div className="h-2 w-2 bg-white rounded-full animate-pulse"></div>
+                <Image src="/assests/dashboard.png" alt="Dashboard" width={64} height={64} className="h-12 w-12 md:h-14 md:w-14" />
+                <div className="absolute -top-0.5 -right-0.5 h-4 w-4 bg-green-500 rounded-full border-2 border-white dark:border-slate-900">
+                  <div className="h-full w-full bg-green-500 rounded-full animate-pulse"></div>
                 </div>
               </div>
             </div>
           </CardContent>
         </Card>
-      </motion.div>
+      </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-        {stats.map(({ k, label, icon: Icon, color, bgColor, borderColor, textColor, iconBg, trend, trendUp }, index) => (
-          <motion.div
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+        {stats.map(({ k, label, icon: Icon, color, borderColor, textColor, iconBg, trend, trendUp }) => (
+          <div
             key={k}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-            whileHover={{ y: -2, scale: 1.01 }}
-            className={`bg-gradient-to-br ${bgColor} ${borderColor} border-2 rounded-xl p-4 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group`}
+            className={`${borderColor} border bg-white dark:bg-slate-900 rounded-xl p-4 hover:shadow-md transition-shadow duration-200 cursor-pointer`}
           >
             {loadingOv ? (
               <Skeleton className="h-16 w-full rounded-xl" />
             ) : (
               <>
-                <div className="flex items-center justify-between mb-3">
-                  <div className={`p-2 rounded-lg ${iconBg} group-hover:scale-110 transition-transform duration-300`}>
+                <div className="flex items-center justify-between mb-2">
+                  <div className={`p-1.5 rounded-lg ${iconBg}`}>
                     <Icon className={`h-4 w-4 ${textColor}`} />
                   </div>
                   <div className={`flex items-center gap-0.5 text-xs font-medium ${trendUp ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
@@ -260,37 +252,31 @@ export default function Dashboard() {
                     {trend}
                   </div>
                 </div>
-                <div className="space-y-1">
-                  <p className={`text-xs font-medium ${textColor} opacity-80`}>
-                    {label}
-                  </p>
+                <div className="space-y-0.5">
                   <p className="text-2xl font-bold text-slate-900 dark:text-white">
                     {ov?.[k]?.toLocaleString() ?? 0}
                   </p>
+                  <p className={`text-xs font-medium ${textColor} opacity-80`}>
+                    {label}
+                  </p>
                 </div>
-                <div className={`h-0.5 bg-gradient-to-r ${color} rounded-full mt-3 opacity-60 group-hover:opacity-100 transition-opacity duration-300`}></div>
               </>
             )}
-          </motion.div>
+          </div>
         ))}
       </div>
 
       {/* Top Section: Latest Customers + Status */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.2 }}
-          className="lg:col-span-2"
-        >
-          <Card className="bg-white/90 dark:bg-slate-900/60 border-slate-300 dark:border-slate-700 shadow-xl hover:shadow-2xl transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-slate-100 to-blue-100/70 dark:from-slate-800 dark:to-slate-700">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <div className="lg:col-span-2">
+          <Card className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm">
+            <CardHeader className="flex flex-row items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
               <div>
-                <CardTitle className="text-slate-900 dark:text-white flex items-center gap-2">
-                  <Users className="w-5 h-5 text-blue-600" />
+                <CardTitle className="text-slate-900 dark:text-white flex items-center gap-2 text-base">
+                  <Users className="w-4 h-4 text-blue-600" />
                   Latest Customers
                 </CardTitle>
-                <CardDescription className="text-slate-700 dark:text-slate-400">
+                <CardDescription className="text-slate-500 dark:text-slate-400 text-sm">
                   Recent enquiry submissions
                 </CardDescription>
               </div>
@@ -299,21 +285,21 @@ export default function Dashboard() {
                 size="sm"
                 onClick={handleRefresh}
                 disabled={isRefreshing}
-                className="gap-2 bg-white/80 dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700 transition-all duration-300 disabled:opacity-50"
+                className="gap-1.5 text-xs"
               >
-                <RefreshCcw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                <RefreshCcw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
                 {isRefreshing ? 'Refreshing...' : 'Refresh'}
               </Button>
             </CardHeader>
             <CardContent className="p-0">
               <ScrollArea className="h-[320px]">
                 <Table>
-                  <TableHeader className="bg-slate-100 dark:bg-slate-800/50">
-                    <TableRow className="border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800/30">
-                      <TableHead className="text-slate-900 dark:text-white font-semibold">Customer</TableHead>
-                      <TableHead className="text-slate-900 dark:text-white font-semibold">Subject</TableHead>
-                      <TableHead className="text-slate-900 dark:text-white font-semibold">Status</TableHead>
-                      <TableHead className="text-slate-900 dark:text-white font-semibold">Time</TableHead>
+                  <TableHeader className="bg-slate-50 dark:bg-slate-800/50">
+                    <TableRow className="border-slate-100 dark:border-slate-800">
+                      <TableHead className="text-slate-700 dark:text-slate-300 font-medium text-xs">Customer</TableHead>
+                      <TableHead className="text-slate-700 dark:text-slate-300 font-medium text-xs">Subject</TableHead>
+                      <TableHead className="text-slate-700 dark:text-slate-300 font-medium text-xs">Status</TableHead>
+                      <TableHead className="text-slate-700 dark:text-slate-300 font-medium text-xs">Time</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -323,91 +309,69 @@ export default function Dashboard() {
                           .map((_, i) => (
                             <TableRow key={i}>
                               <TableCell colSpan={4}>
-                                <Skeleton className="h-16 w-full rounded-lg" />
+                                <Skeleton className="h-14 w-full rounded-lg" />
                               </TableCell>
                             </TableRow>
                           ))
-                      : (customers?.items || []).map((r: any, index: number) => {
-                          const badgeVariant =
-                            r.status === "replied"
-                              ? "default"
-                              : r.status === "new"
-                              ? "destructive"
-                              : "secondary";
-
+                      : (customers?.items || []).map((r: any) => {
                           const statusColors = {
-                            replied: "bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300 border-green-200 dark:border-green-800",
-                            new: "bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300 border-red-200 dark:border-red-800",
-                            read: "bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 border-blue-200 dark:border-blue-800"
+                            replied: "bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800",
+                            new: "bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800",
+                            read: "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800"
                           };
 
                           return (
-                            <motion.tr
+                            <TableRow
                               key={r.id}
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ delay: index * 0.05 }}
-                              className="border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-all duration-200 cursor-pointer group"
+                              className="border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors cursor-pointer"
                               onClick={() => router.push(`/admin/inquiries?email=${encodeURIComponent(r.email)}`)}
                             >
-                              <TableCell className="py-4">
-                                <div className="flex items-center gap-3">
-                                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
+                              <TableCell className="py-3">
+                                <div className="flex items-center gap-2.5">
+                                  <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium text-xs flex-shrink-0">
                                     {r.name?.[0]?.toUpperCase() || "U"}
                                   </div>
-                                  <div>
-                                    <div className="font-semibold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                  <div className="min-w-0">
+                                    <div className="font-medium text-sm text-slate-900 dark:text-white truncate">
                                       {r.name}
                                     </div>
-                                    <div className="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-400">
-                                      <a
-                                        href={`mailto:${r.email}`}
-                                        className="flex items-center gap-1 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                                        onClick={(e) => e.stopPropagation()}
-                                      >
-                                        <Mail className="w-3 h-3" />
-                                        {r.email}
-                                      </a>
+                                    <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                                      <span className="truncate">{r.email}</span>
                                       {r.phone && (
                                         <a
                                           href={`https://wa.me/${r.phone.replace(/\D/g, '')}`}
                                           target="_blank"
                                           rel="noopener noreferrer"
-                                          className="flex items-center gap-1 text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 transition-colors"
+                                          className="text-green-600 hover:text-green-700 dark:text-green-400 flex-shrink-0"
                                           onClick={(e) => e.stopPropagation()}
                                         >
                                           <Phone className="w-3 h-3" />
-                                          {r.phone}
                                         </a>
                                       )}
                                     </div>
                                   </div>
                                 </div>
                               </TableCell>
-                              <TableCell className="py-4">
-                                <div className="max-w-[200px] truncate text-slate-700 dark:text-slate-300 font-medium">
+                              <TableCell className="py-3">
+                                <div className="max-w-[180px] truncate text-sm text-slate-600 dark:text-slate-300">
                                   {r.subject}
                                 </div>
                               </TableCell>
-                              <TableCell className="py-4">
+                              <TableCell className="py-3">
                                 <Badge
-                                  variant={badgeVariant}
-                                  className={`${statusColors[r.status as keyof typeof statusColors] || statusColors.new} border font-medium px-3 py-1`}
+                                  className={`${statusColors[r.status as keyof typeof statusColors] || statusColors.new} border text-xs px-2 py-0.5`}
                                 >
                                   {r.status}
                                 </Badge>
                               </TableCell>
-                              <TableCell className="py-4">
-                                <div className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-400">
-                                  <Clock className="w-4 h-4" />
-                                  <span className="font-medium">
-                                    {r.createdAt
-                                      ? new Date(r.createdAt).toLocaleDateString()
-                                      : ""}
-                                  </span>
-                                </div>
+                              <TableCell className="py-3">
+                                <span className="text-xs text-slate-500 dark:text-slate-400">
+                                  {r.createdAt
+                                    ? new Date(r.createdAt).toLocaleDateString()
+                                    : ""}
+                                </span>
                               </TableCell>
-                            </motion.tr>
+                            </TableRow>
                           );
                         })}
                   </TableBody>
@@ -415,39 +379,35 @@ export default function Dashboard() {
               </ScrollArea>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          <Card className="bg-white/90 dark:bg-slate-900/60 border-slate-300 dark:border-slate-700 shadow-xl hover:shadow-2xl transition-all duration-300">
-            <CardHeader className="border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-slate-100 to-green-100/70 dark:from-slate-800 dark:to-slate-700">
-              <CardTitle className="text-slate-900 dark:text-white flex items-center gap-2">
-                <BarChart3 className="w-5 h-5 text-green-600" />
+        <div>
+          <Card className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm">
+            <CardHeader className="border-b border-slate-100 dark:border-slate-800 pb-4">
+              <CardTitle className="text-slate-900 dark:text-white flex items-center gap-2 text-base">
+                <BarChart3 className="w-4 h-4 text-green-600" />
                 Status Distribution
               </CardTitle>
-              <CardDescription className="text-slate-700 dark:text-slate-400">
+              <CardDescription className="text-slate-500 dark:text-slate-400 text-sm">
                 Enquiry status breakdown
               </CardDescription>
             </CardHeader>
             {/* Status Summary */}
-            <div className="px-6 py-3 bg-slate-100 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
-              <div className="flex items-center gap-6 text-sm">
-                <div className="flex items-center gap-2">
+            <div className="px-6 py-2.5 bg-slate-50 dark:bg-slate-800/40 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-5 text-xs">
+                <div className="flex items-center gap-1.5">
                   <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                  <span className="text-slate-700 dark:text-slate-400">New:</span>
+                  <span className="text-slate-500 dark:text-slate-400">New:</span>
                   <span className="font-semibold text-red-600 dark:text-red-400">{status?.new || 0}</span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
                   <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <span className="text-slate-700 dark:text-slate-400">Read:</span>
+                  <span className="text-slate-500 dark:text-slate-400">Read:</span>
                   <span className="font-semibold text-blue-600 dark:text-blue-400">{status?.read || 0}</span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-slate-700 dark:text-slate-400">Replied:</span>
+                  <span className="text-slate-500 dark:text-slate-400">Replied:</span>
                   <span className="font-semibold text-green-600 dark:text-green-400">{status?.replied || 0}</span>
                 </div>
               </div>
@@ -516,7 +476,7 @@ export default function Dashboard() {
                         (status?.replied || 0)
                       ).toLocaleString()}
                     </div>
-                    <p className="text-sm text-slate-700 dark:text-slate-400 font-medium">
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
                       Total Enquiries
                     </p>
                   </div>
@@ -524,27 +484,22 @@ export default function Dashboard() {
               )}
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
       </div>
 
       {/* Bottom Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="lg:col-span-2"
-        >
-          <Card className="bg-white/90 dark:bg-slate-900/60 border-slate-300 dark:border-slate-700 shadow-xl hover:shadow-2xl transition-all duration-300">
-            <CardHeader className="border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-slate-100 to-purple-100/70 dark:from-slate-800 dark:to-slate-700">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <Card className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm">
+            <CardHeader className="border-b border-slate-100 dark:border-slate-800 pb-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-slate-900 dark:text-white flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-purple-600" />
+                  <CardTitle className="text-slate-900 dark:text-white flex items-center gap-2 text-base">
+                    <TrendingUp className="w-4 h-4 text-purple-600" />
                     Submissions Trend ({timespanLabel})
                   </CardTitle>
-                  <CardDescription className="text-slate-700 dark:text-slate-400">
-                    Interactive chart showing enquiry patterns over time
+                  <CardDescription className="text-slate-500 dark:text-slate-400 text-sm">
+                    Enquiry patterns over time
                   </CardDescription>
                 </div>
                 <div className="flex gap-1">
@@ -554,10 +509,10 @@ export default function Dashboard() {
                       variant={selectedTimespan === option.key ? "default" : "outline"}
                       size="sm"
                       onClick={() => setSelectedTimespan(option.key)}
-                      className={`px-3 py-1 text-xs font-medium transition-all duration-200 ${
+                      className={`px-2.5 py-1 text-xs font-medium ${
                         selectedTimespan === option.key
-                          ? 'bg-purple-600 hover:bg-purple-700 text-white shadow-md'
-                          : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
+                          ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                          : 'text-slate-600 dark:text-slate-300'
                       }`}
                     >
                       {option.label}
@@ -567,9 +522,9 @@ export default function Dashboard() {
               </div>
             </CardHeader>
             <CardContent className="p-4">
-              <div className="h-[450px] bg-gradient-to-br from-slate-100 to-blue-100/50 dark:from-slate-800 dark:to-slate-700 rounded-xl p-4 border border-slate-300 dark:border-slate-700">
+              <div className="h-[400px] bg-slate-50 dark:bg-slate-800/40 rounded-lg p-3 border border-slate-100 dark:border-slate-800">
                 {loadingSub ? (
-                  <Skeleton className="h-full w-full rounded-xl" />
+                  <Skeleton className="h-full w-full rounded-lg" />
                 ) : (
                   <ChartAreaInteractive 
                     series={series} 
@@ -581,20 +536,16 @@ export default function Dashboard() {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-        >
-          <Card className="bg-white/90 dark:bg-slate-900/60 border-slate-300 dark:border-slate-700 shadow-xl hover:shadow-2xl transition-all duration-300">
-            <CardHeader className="border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-slate-100 to-indigo-100/70 dark:from-slate-800 dark:to-slate-700">
-              <CardTitle className="text-slate-900 dark:text-white flex items-center gap-2">
-                <Eye className="w-5 h-5 text-indigo-600" />
+        <div>
+          <Card className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm">
+            <CardHeader className="border-b border-slate-100 dark:border-slate-800 pb-4">
+              <CardTitle className="text-slate-900 dark:text-white flex items-center gap-2 text-base">
+                <Eye className="w-4 h-4 text-indigo-600" />
                 Top Countries (30 days)
               </CardTitle>
-              <CardDescription className="text-slate-700 dark:text-slate-400">
+              <CardDescription className="text-slate-500 dark:text-slate-400 text-sm">
                 Visitor analytics by location
               </CardDescription>
             </CardHeader>
@@ -609,7 +560,7 @@ export default function Dashboard() {
                 </div>
               ) : (
                 <ScrollArea className="h-[400px] pr-4">
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {(geo?.series || []).map((row: any, index: number) => {
                       const percentage = Math.min(
                         100,
@@ -620,64 +571,52 @@ export default function Dashboard() {
                       );
 
                       const colors = [
-                        "from-blue-500 to-cyan-500",
-                        "from-green-500 to-emerald-500",
-                        "from-purple-500 to-violet-500",
-                        "from-orange-500 to-red-500",
-                        "from-pink-500 to-rose-500",
+                        "bg-blue-500",
+                        "bg-green-500",
+                        "bg-purple-500",
+                        "bg-orange-500",
+                        "bg-pink-500",
                       ];
 
                       return (
-                        <motion.div
+                        <div
                           key={row.country}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.1 }}
-                          className="group p-4 bg-gradient-to-r from-slate-100 to-white dark:from-slate-800 dark:to-slate-700 rounded-xl border border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500 transition-all duration-300 hover:shadow-md"
+                          className="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-lg border border-slate-100 dark:border-slate-800"
                         >
-                          <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center gap-3">
-                              <div className="flex-shrink-0">
-                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-400 to-slate-600 flex items-center justify-center text-white text-xs font-bold">
-                                  {index + 1}
-                                </div>
-                              </div>
-                              <div>
-                                <span className="font-semibold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                                  {row.country}
-                                </span>
-                                <div className="text-sm text-slate-700 dark:text-slate-400">
-                                  {row.count.toLocaleString()} visitors
-                                </div>
-                              </div>
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <span className="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[10px] font-bold text-slate-600 dark:text-slate-300">
+                                {index + 1}
+                              </span>
+                              <span className="font-medium text-sm text-slate-900 dark:text-white">
+                                {row.country}
+                              </span>
                             </div>
                             <div className="text-right">
-                              <div className="text-lg font-bold text-slate-900 dark:text-white">
+                              <span className="text-sm font-semibold text-slate-900 dark:text-white">
                                 {percentage}%
-                              </div>
+                              </span>
+                              <span className="text-xs text-slate-400 ml-1">
+                                ({row.count.toLocaleString()})
+                              </span>
                             </div>
                           </div>
-                          <div className="relative">
-                            <div className="h-3 bg-slate-200 dark:bg-slate-600 rounded-full overflow-hidden">
-                              <motion.div
-                                initial={{ width: 0 }}
-                                animate={{ width: `${percentage}%` }}
-                                transition={{ delay: index * 0.1 + 0.3, duration: 0.8 }}
-                                className={`h-full bg-gradient-to-r ${colors[index % colors.length]} rounded-full shadow-sm`}
-                              />
-                            </div>
-                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent rounded-full animate-pulse"></div>
+                          <div className="h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full ${colors[index % colors.length]} rounded-full transition-all duration-500`}
+                              style={{ width: `${percentage}%` }}
+                            />
                           </div>
-                        </motion.div>
+                        </div>
                       );
                     })}
                     {(!geo || (geo.series || []).length === 0) && (
                       <div className="text-center py-8">
-                        <Eye className="w-12 h-12 text-slate-400 mx-auto mb-3" />
-                        <h3 className="text-lg font-medium text-slate-700 dark:text-slate-400 mb-2">
+                        <Eye className="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
+                        <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
                           No visitor data
                         </h3>
-                        <p className="text-slate-500 dark:text-slate-500 text-sm">
+                        <p className="text-slate-400 dark:text-slate-500 text-xs">
                           Visitor analytics will appear here
                         </p>
                       </div>
@@ -687,7 +626,7 @@ export default function Dashboard() {
               )}
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

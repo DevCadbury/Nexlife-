@@ -303,52 +303,38 @@ export default function AdminLayout({
 
   if (isAuthChecking) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/20 to-indigo-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900 flex items-center justify-center">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="text-center"
-        >
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-            className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"
-          />
-          <h2 className="text-xl font-semibold text-slate-700 dark:text-slate-300 mb-2">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-10 h-10 border-3 border-blue-500 border-t-transparent rounded-full mx-auto mb-4 animate-spin" />
+          <h2 className="text-base font-medium text-slate-700 dark:text-slate-300 mb-1">
             Verifying Access
           </h2>
-          <p className="text-slate-500 dark:text-slate-400">
-            Please wait while we check your authentication...
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            Checking authentication...
           </p>
-        </motion.div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div suppressHydrationWarning={true} className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/20 to-indigo-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
+    <div suppressHydrationWarning={true} className="min-h-screen bg-slate-50 dark:bg-slate-950">
       {/* Mobile Overlay */}
-      <AnimatePresence>
-        {!sidebarCollapsed && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => {
-              setSidebarCollapsed(true);
-              localStorage.setItem('sidebarCollapsed', 'true');
-            }}
-            className="fixed inset-0 bg-black/50 z-20 lg:hidden"
-          />
-        )}
-      </AnimatePresence>
+      {!sidebarCollapsed && (
+        <div
+          onClick={() => {
+            setSidebarCollapsed(true);
+            localStorage.setItem('sidebarCollapsed', 'true');
+          }}
+          className="fixed inset-0 bg-black/40 z-20 lg:hidden transition-opacity duration-200"
+        />
+      )}
 
-      <motion.aside
-        initial={{ x: -280 }}
-        animate={{ x: sidebarCollapsed ? -280 : 0 }}
-        transition={{ type: "spring", stiffness: 100, damping: 20 }}
+      <aside
         suppressHydrationWarning={true}
-        className="fixed left-0 top-0 h-screen w-[280px] border-r border-slate-200/60 dark:border-slate-700/60 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-xl z-30 overflow-y-auto"
+        className={`fixed left-0 top-0 h-screen w-[260px] border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 z-30 overflow-y-auto transition-transform duration-200 ease-out ${
+          sidebarCollapsed ? '-translate-x-full' : 'translate-x-0'
+        }`}
       >
         {/* Close Button (Mobile) */}
         <button
@@ -360,33 +346,32 @@ export default function AdminLayout({
         >
           <X className="w-5 h-5 text-slate-600 dark:text-slate-400" />
         </button>
-        <div className="p-6 border-b border-slate-200/60 dark:border-slate-700/60">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="h-10 w-10 rounded-lg bg-white dark:bg-slate-800 shadow-md flex items-center justify-center p-2 border border-slate-200 dark:border-slate-700">
+        <div className="p-5 border-b border-slate-200 dark:border-slate-800">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="h-9 w-9 rounded-lg bg-white dark:bg-slate-800 shadow-sm flex items-center justify-center p-1.5 border border-slate-200 dark:border-slate-700">
               <img src="/nexlife_logo.png" alt="Nexlife" className="w-full h-full object-contain" />
             </div>
-            <h1 className="text-lg font-bold text-slate-900 dark:text-white">
+            <h1 className="text-base font-bold text-slate-900 dark:text-white">
               Nexlife <span className="text-blue-600 dark:text-blue-400">CRM</span>
             </h1>
           </div>
           {profile?.user?.name && (
-            <div className="space-y-2">
-              <div className="text-xs text-slate-500 dark:text-slate-400 mb-1">Welcome back!</div>
-              <div className="bg-slate-100 dark:bg-slate-800 rounded-full px-3 py-2">
-                <div className="text-sm font-medium text-slate-900 dark:text-white mb-1">
+            <div className="space-y-1">
+              <div className="text-xs text-slate-500 dark:text-slate-400">Welcome back</div>
+              <div className="bg-slate-50 dark:bg-slate-800 rounded-lg px-3 py-2">
+                <div className="text-sm font-medium text-slate-900 dark:text-white">
                   {profile.user.name}
                 </div>
                 {profile.user.email && (
                   <button
                     onClick={() => {
                       navigator.clipboard.writeText(profile.user.email);
-                      // Optional: show a toast notification
                     }}
-                    className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors group"
+                    className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 transition-colors group mt-0.5"
                     title="Click to copy email"
                   >
-                    <span className="truncate max-w-[180px]">{profile.user.email}</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 opacity-60 group-hover:opacity-100">
+                    <span className="truncate max-w-[170px]">{profile.user.email}</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 opacity-50 group-hover:opacity-100">
                       <rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect>
                       <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path>
                     </svg>
@@ -396,84 +381,66 @@ export default function AdminLayout({
             </div>
           )}
         </div>
-        <nav className="p-4 space-y-2">
+        <nav className="p-3 space-y-1">
           {tabs
             .filter((t) => {
               const userRole = profile?.user?.role;
               
-              // If roles is "all", show to everyone
               if (t.roles && t.roles.includes("all")) {
                 return true;
               }
               
-              // Check if user's role is in the allowed roles list
               if (t.roles && userRole) {
                 return t.roles.includes(userRole);
               }
               
-              // Default: hide if no role info
               return false;
             })
-            .map((t, index) => {
+            .map((t) => {
               const Icon = t.icon;
               const isActive = path === t.href;
               return (
-                <motion.div
+                <Link
                   key={t.href}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.05 }}
+                  href={t.href}
+                  onClick={() => {
+                    // Close sidebar on mobile after navigation
+                    if (window.innerWidth < 1024) {
+                      setSidebarCollapsed(true);
+                      localStorage.setItem('sidebarCollapsed', 'true');
+                    }
+                  }}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors duration-150 ${
+                    isActive
+                      ? "bg-blue-600 text-white"
+                      : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
+                  }`}
                 >
-                  <Link
-                    href={t.href}
-                    className={`group flex items-center gap-4 px-4 py-3 rounded-xl border border-transparent transition-all duration-300 ${
-                      isActive
-                        ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg border-blue-400/50"
-                        : "hover:bg-gradient-to-r hover:from-slate-100 hover:to-blue-50 dark:hover:from-slate-800 dark:hover:to-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:border-slate-200 dark:hover:border-slate-600"
-                    }`}
-                  >
-                    <div className={`p-2 rounded-lg transition-all duration-300 ${
-                      isActive
-                        ? "bg-white/20"
-                        : "bg-slate-100 dark:bg-slate-700 group-hover:bg-blue-100 dark:group-hover:bg-slate-600"
-                    }`}>
-                      <Icon className={`w-4 h-4 transition-colors duration-300 ${
-                        isActive
-                          ? "text-white"
-                          : "text-slate-600 dark:text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400"
-                      }`} />
-                    </div>
-                    <span className={`font-medium transition-all duration-300 ${
-                      isActive ? "text-white" : ""
-                    }`}>
-                      {t.label}
-                    </span>
-                    {isActive && (
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        className="ml-auto w-2 h-2 bg-white rounded-full"
-                      />
-                    )}
-                  </Link>
-                </motion.div>
+                  <Icon className={`w-4 h-4 flex-shrink-0 ${
+                    isActive ? "text-white" : "text-slate-500 dark:text-slate-500"
+                  }`} />
+                  <span className="font-medium">{t.label}</span>
+                  {isActive && (
+                    <div className="ml-auto w-1.5 h-1.5 bg-white rounded-full" />
+                  )}
+                </Link>
               );
             })}
         </nav>
 
         {/* Quick Stats */}
-        <div className="p-4 border-t border-slate-200/60 dark:border-slate-700/60">
-          <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">
+        <div className="p-3 border-t border-slate-200 dark:border-slate-800">
+          <div className="text-xs font-medium text-slate-500 dark:text-slate-500 uppercase tracking-wider mb-2 px-1">
             Quick Stats
           </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between text-sm px-1">
               <span className="text-slate-600 dark:text-slate-400">New Inquiries</span>
               <span className="font-semibold text-blue-600 dark:text-blue-400">
                 {notif?.count || 0}
               </span>
             </div>
-            <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center justify-between text-sm px-1">
               <span className="text-slate-600 dark:text-slate-400">New Replies</span>
               <span className="font-semibold text-green-600 dark:text-green-400">
                 {replyNotif?.count || 0}
@@ -481,23 +448,17 @@ export default function AdminLayout({
             </div>
           </div>
         </div>
-      </motion.aside>
+      </aside>
 
-      <main className={`transition-all duration-300 flex flex-col min-h-screen ${
-        sidebarCollapsed ? 'ml-0 mr-0 max-w-full' : 'ml-0 lg:ml-[280px] mr-0 lg:mr-[calc(20vw-280px)] max-w-full lg:max-w-[80vw]'
+      <main className={`transition-all duration-200 flex flex-col min-h-screen ${
+        sidebarCollapsed ? '' : 'lg:ml-[260px]'
       }`}>
-        <motion.header
-          initial={{ y: -20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="border-b border-slate-200/60 dark:border-slate-700/60 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-sm sticky top-0 z-40"
+        <header
+          className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-0 z-40"
         >
-          <div className="flex items-center justify-between px-6 py-4">
-            <div className="flex items-center gap-4">
-              {/* Hamburger Menu Button */}
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+          <div className="flex items-center justify-between px-4 md:px-6 py-3">
+            <div className="flex items-center gap-3">
+              <button
                 onClick={() => {
                   setSidebarCollapsed(!sidebarCollapsed);
                   localStorage.setItem('sidebarCollapsed', String(!sidebarCollapsed));
@@ -505,112 +466,90 @@ export default function AdminLayout({
                 className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               >
                 <Menu className="w-5 h-5 text-slate-600 dark:text-slate-400" />
-              </motion.button>
+              </button>
               
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-700 rounded-lg border border-slate-200/60 dark:border-slate-600/60"
-              >
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                  System Online
+              <div className="flex items-center gap-2 px-2.5 py-1 bg-slate-50 dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700">
+                <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                  Online
                 </span>
-              </motion.div>
-              <div className="text-sm text-slate-500 dark:text-slate-400">
-                {new Date().toLocaleDateString('en-US', {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })}
               </div>
+              <span className="text-xs text-slate-400 dark:text-slate-500 hidden md:inline">
+                {new Date().toLocaleDateString('en-US', {
+                  weekday: 'short',
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric'
+                })}
+              </span>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
               {/* Notifications */}
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+              <button
                 className="relative p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                 ref={btnRef}
                 onClick={() => setOpen((v) => !v)}
               >
                 <Bell className="w-5 h-5 text-slate-600 dark:text-slate-400" />
                 {totalNew > 0 && (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center"
-                  >
+                  <span className="absolute -top-0.5 -right-0.5 w-4.5 h-4.5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center min-w-[18px] h-[18px]">
                     {totalNew}
-                  </motion.div>
+                  </span>
                 )}
-              </motion.button>
+              </button>
 
               {/* Theme Toggle */}
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-              >
+              <div className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                 <ThemeToggle />
-              </motion.div>
+              </div>
 
               {/* User Menu */}
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer relative"
+              <div
+                className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer relative"
                 ref={profileRef}
                 onMouseEnter={handleProfileMouseEnter}
                 onMouseLeave={handleProfileMouseLeave}
                 onClick={() => {
                   setProfileOpen(!profileOpen);
-                  setHoverOpen(false); // Close hover card when clicking
+                  setHoverOpen(false);
                 }}
               >
-                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
+                <div className="h-7 w-7 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium text-xs">
                   {profile?.user?.name?.[0]?.toUpperCase() || "U"}
                 </div>
                 <div className="hidden md:block">
-                  <div className="text-sm font-medium text-slate-900 dark:text-white">
+                  <div className="text-sm font-medium text-slate-900 dark:text-white leading-tight">
                     {profile?.user?.name || "User"}
                   </div>
-                  <div className="text-xs text-slate-500 dark:text-slate-400">
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
                     {profile?.user?.role || "Staff"}
                   </div>
                 </div>
-                <ChevronDown className="w-4 h-4 text-slate-500 dark:text-slate-400" />
-              </motion.div>
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+              </div>
 
-              {/* Logout Button - Highlighted and at the end */}
-              <motion.form
+              {/* Logout Button */}
+              <form
                 action="/api/logout"
                 method="post"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="p-2 rounded-lg bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30 border border-red-200 dark:border-red-800 transition-colors"
+                className="contents"
               >
                 <button
                   type="submit"
-                  onClick={() => {
-                    // Clear all tokens from localStorage and sessionStorage
+                  onClick={(e) => {
+                    e.preventDefault();
                     localStorage.clear();
                     sessionStorage.clear();
-                    // Clear any cached authentication data
-                    if (typeof window !== 'undefined') {
-                      // Clear any cached profile data
-                      window.location.href = '/login';
-                    }
+                    document.cookie = 'nxl_jwt=; Path=/; Max-Age=0';
+                    router.push('/login');
                   }}
-                  className="flex items-center gap-2 text-red-700 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 transition-colors font-medium"
+                  className="p-2 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
                   title="Logout"
                 >
-                  <LogOut className="w-5 h-5" />
-                  <span className="hidden md:inline text-sm">Logout</span>
+                  <LogOut className="w-4.5 h-4.5" />
                 </button>
-              </motion.form>
+              </form>
             </div>
 
             <AnimatePresence>
@@ -620,69 +559,46 @@ export default function AdminLayout({
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 6 }}
-                  className="absolute right-0 mt-2 w-64 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/95 backdrop-blur shadow-xl ring-1 ring-slate-200 dark:ring-indigo-500/10 p-4 z-50"
+                  className="absolute right-0 mt-2 w-56 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-lg p-3 z-50"
                   onMouseEnter={handleCardMouseEnter}
                   onMouseLeave={handleCardMouseLeave}
                 >
-                  <div className="space-y-3">
+                  <div className="space-y-2.5">
                     <div>
-                      <div className="font-medium text-slate-900 dark:text-slate-200">
+                      <div className="font-medium text-sm text-slate-900 dark:text-slate-200">
                         {profile?.user?.name || "User"}
                       </div>
                       {profile?.user?.email && (
-                        <div
-                          className="text-sm text-slate-600 dark:text-slate-400 truncate"
-                          title={profile.user.email}
-                        >
+                        <div className="text-xs text-slate-500 dark:text-slate-400 truncate" title={profile.user.email}>
                           {profile.user.email}
                         </div>
                       )}
-                      <div className="text-xs text-slate-500 dark:text-slate-500 mt-1">
-                        Role: <span className="capitalize text-slate-700 dark:text-slate-300">{profile?.user?.role || "Staff"}</span>
-                      </div>
-                      <div className="text-xs text-slate-500 dark:text-slate-500 mt-1">
-                        Account ID: {profile?.user?.id?.slice(-8) || "N/A"}
+                      <div className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                        Role: <span className="capitalize text-slate-600 dark:text-slate-300">{profile?.user?.role || "Staff"}</span>
                       </div>
                     </div>
 
-                    <div className="border-t border-slate-200 dark:border-slate-700 pt-3">
-                      <div className="text-xs text-slate-500 dark:text-slate-500 mb-2">Last Login</div>
-                      <div className="text-sm text-slate-700 dark:text-slate-300">
-                        {getLastLoginTime()
-                          ? getLastLoginTime()?.toLocaleString()
-                          : "Today"
-                        }
-                      </div>
-                    </div>
-
-                    <div className="border-t border-slate-200 dark:border-slate-700 pt-3 space-y-2">
+                    <div className="border-t border-slate-100 dark:border-slate-800 pt-2 space-y-1">
                       <Link
                         href="/admin/settings"
-                        className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50 rounded-lg transition-colors duration-200"
+                        className="flex items-center gap-2 w-full px-2.5 py-1.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md transition-colors"
                         onClick={() => setHoverOpen(false)}
                       >
-                        <SettingsIcon className="w-4 h-4" />
+                        <SettingsIcon className="w-3.5 h-3.5" />
                         Settings
                       </Link>
-                      <form action="/api/logout" method="post" className="w-full">
-                        <button
-                          type="submit"
-                          onClick={() => {
-                            // Clear all tokens from localStorage and sessionStorage
-                            localStorage.clear();
-                            sessionStorage.clear();
-                            // Clear any cached authentication data
-                            if (typeof window !== 'undefined') {
-                              // Clear any cached profile data
-                              window.location.href = '/login';
-                            }
-                          }}
-                          className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors duration-200"
-                        >
-                          <LogOut className="w-4 h-4" />
-                          Logout
-                        </button>
-                      </form>
+                      <button
+                        onClick={() => {
+                          localStorage.clear();
+                          sessionStorage.clear();
+                          document.cookie = 'nxl_jwt=; Path=/; Max-Age=0';
+                          router.push('/login');
+                        }}
+                        className="flex items-center gap-2 w-full px-2.5 py-1.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-md transition-colors"
+                      >
+                        <LogOut className="w-3.5 h-3.5" />
+                        Logout
+                      </button>
                     </div>
                   </div>
                 </motion.div>
@@ -690,16 +606,16 @@ export default function AdminLayout({
               {profileOpen && (
                 <motion.div
                   key="profile-menu"
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  className="absolute right-0 mt-2 w-48 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/95 backdrop-blur shadow-xl ring-1 ring-slate-200 dark:ring-indigo-500/10"
+                  exit={{ opacity: 0, y: 6 }}
+                  className="absolute right-0 mt-2 w-44 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-lg"
                 >
-                  <div className="p-3 border-b border-slate-200 dark:border-slate-800">
-                    <div className="font-medium text-slate-900 dark:text-white">
+                  <div className="p-2.5 border-b border-slate-100 dark:border-slate-800">
+                    <div className="font-medium text-sm text-slate-900 dark:text-white">
                       {profile?.user?.name || "User"}
                     </div>
-                    <div className="text-sm text-slate-600 dark:text-slate-400">
+                    <div className="text-xs text-slate-500 dark:text-slate-400">
                       {profile?.user?.email}
                     </div>
                   </div>
@@ -707,7 +623,7 @@ export default function AdminLayout({
               )}
             </AnimatePresence>
           </div>
-        </motion.header>        <section className="p-6 flex-1">{children}</section>
+        </header>        <section className="p-4 md:p-6 flex-1">{children}</section>
       </main>
 
       <AnimatePresence>

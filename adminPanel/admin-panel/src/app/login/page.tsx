@@ -2,8 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
-import { motion, AnimatePresence } from "framer-motion";
-import { Eye, EyeOff, Mail, Lock, Loader2, Shield, Sparkles } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, Loader2 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function Login() {
@@ -70,10 +69,8 @@ export default function Login() {
           }
         } catch {}
 
-        // Add a small delay for animation
-        setTimeout(() => {
-          router.replace("/admin");
-        }, 800);
+        // Navigate immediately
+        router.replace("/admin");
       } else {
         if (!validateEmail(email)) {
           setErr("Enter a valid email");
@@ -153,111 +150,49 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+    <div className="min-h-screen relative overflow-hidden bg-slate-50 dark:bg-slate-950">
       {/* Theme Toggle - Top Right */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="absolute top-6 right-6 z-50"
-      >
-        <motion.div
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="p-3 rounded-xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200 dark:border-slate-800 shadow-lg hover:shadow-xl transition-all"
-        >
+      <div className="absolute top-5 right-5 z-50">
+        <div className="p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
           <ThemeToggle />
-        </motion.div>
-      </motion.div>
-
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/10 dark:bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-indigo-500/10 dark:bg-indigo-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-purple-500/5 dark:bg-purple-500/5 rounded-full blur-2xl animate-pulse delay-500" />
+        </div>
       </div>
 
-      {/* Floating Particles */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(20)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-1 h-1 bg-cyan-400/20 dark:bg-cyan-400/20 rounded-full"
-            initial={{
-              x: Math.random() * window.innerWidth,
-              y: Math.random() * window.innerHeight,
-              opacity: 0,
-            }}
-            animate={{
-              y: [null, -20, null],
-              opacity: [0, 1, 0],
-            }}
-            transition={{
-              duration: 3 + Math.random() * 2,
-              repeat: Infinity,
-              delay: Math.random() * 3,
-            }}
-            style={{
-              left: `${Math.random() * 100}%`,
-            }}
-          />
-        ))}
+      {/* Subtle background accents */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-50 dark:bg-blue-950/20 rounded-full -translate-y-1/2 translate-x-1/4" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-indigo-50 dark:bg-indigo-950/20 rounded-full translate-y-1/3 -translate-x-1/4" />
       </div>
 
       <div className="relative z-10 min-h-screen grid place-items-center p-4">
-        <motion.form
-          initial={{ opacity: 0, y: 20, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
+        <form
           onSubmit={submit}
-          className="w-full max-w-md border border-slate-200 dark:border-slate-800/60 rounded-3xl p-8 bg-white/80 dark:bg-slate-900/40 backdrop-blur-xl shadow-xl dark:shadow-[0_20px_80px_rgba(0,0,0,0.4)] transition-all duration-300 hover:shadow-2xl dark:hover:shadow-[0_25px_100px_rgba(0,0,0,0.6)] hover:border-slate-300 dark:hover:border-slate-700/60"
+          className="w-full max-w-sm border border-slate-200 dark:border-slate-800 rounded-2xl p-7 bg-white dark:bg-slate-900 shadow-lg"
         >
           {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-center mb-8"
-          >
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-white dark:bg-slate-800 shadow-xl ring-2 ring-slate-200 dark:ring-slate-700 mb-4 p-3"
-            >
+          <div className="text-center mb-7">
+            <div className="inline-flex items-center justify-center h-14 w-14 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 mb-3 p-2.5">
               <img src="/nexlife_logo.png" alt="Nexlife" className="w-full h-full object-contain" />
-            </motion.div>
-            <motion.h1
-              className="font-bold text-2xl text-slate-900 dark:text-white mb-1"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-            >
+            </div>
+            <h1 className="font-bold text-xl text-slate-900 dark:text-white mb-0.5">
               Nexlife International
-            </motion.h1>
-            <motion.div
-              className="text-sm text-slate-600 dark:text-slate-400"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
-            >
+            </h1>
+            <div className="text-sm text-slate-500 dark:text-slate-400">
               Customer Management System
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
 
           {/* Form Fields */}
-          <div className="space-y-6">
+          <div className="space-y-5">
             {/* Email Field */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.5 }}
-              className="relative"
-            >
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                 Email Address
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-500 dark:text-slate-400" />
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
-                  className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all duration-200 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400"
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all text-sm text-slate-900 dark:text-white placeholder-slate-400"
                   placeholder="admin@nexlife.com"
                   type="email"
                   value={email}
@@ -265,23 +200,18 @@ export default function Login() {
                   disabled={isLoading}
                 />
               </div>
-            </motion.div>
+            </div>
 
             {/* Password Field */}
             {mode === "login" && (
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.6 }}
-                className="relative"
-              >
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                   Password
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-500 dark:text-slate-400" />
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input
-                    className="w-full pl-12 pr-12 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all duration-200 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400"
+                    className="w-full pl-10 pr-10 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all text-sm text-slate-900 dark:text-white placeholder-slate-400"
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
                     value={password}
@@ -291,120 +221,71 @@ export default function Login() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                   >
-                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
-              </motion.div>
+              </div>
             )}
 
             {/* New Password Field for Reset */}
             {mode === "forgot" && otpVerified && (
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.6 }}
-                className="relative"
-              >
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                   New Password
                 </label>
                 <input
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all duration-200 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400"
+                  className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all text-sm text-slate-900 dark:text-white placeholder-slate-400"
                   type="password"
                   placeholder="Enter new password"
                   value={newPass}
                   onChange={(e) => setNewPass(e.target.value)}
                   disabled={isLoading}
                 />
-                <div className="text-[11px] text-slate-600 dark:text-slate-400 mt-2">
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5">
                   Must be 8+ chars with upper, lower, number and symbol.
                 </div>
-              </motion.div>
+              </div>
             )}
           </div>
 
           {/* Error/Success Messages */}
-          <AnimatePresence>
-            {err && (
-              <motion.div
-                initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                className="mt-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl"
-              >
-                <div className="text-red-400 text-sm font-medium">{err}</div>
-              </motion.div>
-            )}
-            {ok && (
-              <motion.div
-                initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                className="mt-6 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl"
-              >
-                <div className="text-emerald-400 text-sm font-medium">{ok}</div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {err && (
+            <div className="mt-4 p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-lg">
+              <div className="text-red-600 dark:text-red-400 text-sm">{err}</div>
+            </div>
+          )}
+          {ok && (
+            <div className="mt-4 p-3 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/50 rounded-lg">
+              <div className="text-emerald-600 dark:text-emerald-400 text-sm">{ok}</div>
+            </div>
+          )}
 
           {/* Login Button */}
-          <motion.button
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7 }}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+          <button
             disabled={isLoading}
-            className="w-full mt-8 bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-600 hover:from-cyan-400 hover:via-indigo-400 hover:to-purple-500 disabled:from-slate-600 disabled:to-slate-600 rounded-xl py-4 font-semibold shadow-lg ring-2 ring-indigo-500/20 transition-all duration-200 relative overflow-hidden group"
+            className="w-full mt-6 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 rounded-lg py-2.5 font-medium text-sm text-white transition-colors"
           >
-            <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-              initial={false}
-              animate={isLoading ? { x: ["0%", "100%"] } : { x: "0%" }}
-              transition={{ duration: 1.5, repeat: isLoading ? Infinity : 0 }}
-            />
-            <div className="relative flex items-center justify-center gap-3">
-              <AnimatePresence mode="wait">
-                {isLoading ? (
-                  <motion.div
-                    key="loading"
-                    initial={{ opacity: 0, rotate: -180 }}
-                    animate={{ opacity: 1, rotate: 0 }}
-                    exit={{ opacity: 0, rotate: 180 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="text"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    {mode === "login"
-                      ? "Sign In"
-                      : !code
-                      ? "Send OTP"
-                      : otpVerified
-                      ? "Reset Password"
-                      : "Verify OTP"}
-                  </motion.div>
-                )}
-              </AnimatePresence>
+            <div className="flex items-center justify-center gap-2">
+              {isLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <span>
+                  {mode === "login"
+                    ? "Sign In"
+                    : !code
+                    ? "Send OTP"
+                    : otpVerified
+                    ? "Reset Password"
+                    : "Verify OTP"}
+                </span>
+              )}
             </div>
-          </motion.button>
+          </button>
 
           {/* Mode Toggle */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.8 }}
-            className="text-center mt-6"
-          >
+          <div className="text-center mt-5">
             <button
               type="button"
               onClick={() => {
@@ -416,57 +297,42 @@ export default function Login() {
                 setNewPass("");
                 setShowOtp(false);
               }}
-              className="text-sm text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors underline underline-offset-2"
+              className="text-sm text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
             >
               {mode === "login" ? "Forgot password?" : "Back to login"}
             </button>
-          </motion.div>
-        </motion.form>
+          </div>
+        </form>
 
         {/* OTP Modal */}
-        <AnimatePresence>
-          {showOtp && !otpVerified && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 grid place-items-center bg-black/70 backdrop-blur-sm p-4"
-            >
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                className="w-full max-w-sm rounded-3xl border border-slate-200 dark:border-slate-800/60 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl p-6 shadow-2xl ring-1 ring-slate-200 dark:ring-indigo-500/20"
+        {showOtp && !otpVerified && (
+          <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4">
+            <div className="w-full max-w-sm rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-xl"
               >
-                <div className="mb-6 text-center">
-                  <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    className="mx-auto mb-4 h-12 w-12 rounded-xl bg-white dark:bg-slate-800 shadow-lg ring-2 ring-indigo-500/20 flex items-center justify-center p-2"
-                  >
+                <div className="mb-5 text-center">
+                  <div className="mx-auto mb-3 h-10 w-10 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center p-2">
                     <img src="/nexlife_logo.png" alt="Nexlife" className="w-full h-full object-contain" />
-                  </motion.div>
-                  <div className="font-bold text-lg text-slate-900 dark:text-white mb-2">Verify Code</div>
-                  <div className="text-sm text-slate-600 dark:text-slate-400">
+                  </div>
+                  <div className="font-bold text-base text-slate-900 dark:text-white mb-1">Verify Code</div>
+                  <div className="text-sm text-slate-500 dark:text-slate-400">
                     Enter the 6-digit OTP sent to your email
                   </div>
                 </div>
 
                 {/* Code Input */}
                 <div
-                  className="mb-6 grid grid-cols-6 gap-3 cursor-text"
+                  className="mb-5 grid grid-cols-6 gap-2 cursor-text"
                   onClick={() => codeRef.current?.focus()}
                 >
                   {Array.from({ length: 6 }).map((_, i) => (
-                    <motion.div
+                    <div
                       key={i}
-                      className="aspect-[1/1] rounded-xl border-2 border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800/50 text-center grid place-items-center text-xl font-bold tracking-widest text-slate-900 dark:text-white transition-all duration-200"
-                      animate={{
-                        borderColor: code[i] ? "#6366f1" : (document.documentElement.classList.contains('dark') ? "#374151" : "#cbd5e1"),
-                        backgroundColor: code[i] ? (document.documentElement.classList.contains('dark') ? "#1e1b4b" : "#e0e7ff") : (document.documentElement.classList.contains('dark') ? "#1f2937" : "#f1f5f9"),
-                      }}
+                      className={`aspect-square rounded-lg border-2 bg-slate-50 dark:bg-slate-800 text-center grid place-items-center text-lg font-bold text-slate-900 dark:text-white transition-colors ${
+                        code[i] ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/30' : 'border-slate-200 dark:border-slate-700'
+                      }`}
                     >
                       {code[i] || ""}
-                    </motion.div>
+                    </div>
                   ))}
                 </div>
 
@@ -490,14 +356,13 @@ export default function Login() {
                 )}
 
                 <div className="flex items-center justify-between gap-3">
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm font-medium transition-colors"
+                  <button
+                    className="px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 transition-colors"
                     onClick={() => setShowOtp(false)}
+                    type="button"
                   >
                     Cancel
-                  </motion.button>
+                  </button>
 
                   <div className="flex items-center gap-2">
                     <button
@@ -526,10 +391,8 @@ export default function Login() {
                       {remaining > 0 ? `Resend in ${remaining}s` : "Resend"}
                     </button>
 
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="px-6 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 rounded-lg text-sm font-semibold shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    <button
+                      className="px-5 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       onClick={async () => {
                         setErr("");
                         setOk("");
@@ -556,13 +419,12 @@ export default function Login() {
                       disabled={!code || code.length < 6}
                     >
                       Verify
-                    </motion.button>
+                    </button>
                   </div>
                 </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
