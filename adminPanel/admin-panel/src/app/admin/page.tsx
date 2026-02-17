@@ -44,7 +44,6 @@ import {
 } from "lucide-react";
 import { Chart as ChartJS, ArcElement, Legend, Tooltip } from "chart.js";
 import { ChartAreaInteractive } from "@/components/chart-area-interactive";
-import { motion } from "framer-motion";
 
 ChartJS.register(ArcElement, Legend, Tooltip);
 

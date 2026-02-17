@@ -6,7 +6,7 @@ import SEOHead from "./components/SEOHead";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ScrollToTop from "./components/ScrollToTop";
-import Home from "./pages/Home";
+import Home from "./pages/HomeNew";
 import About from "./pages/About";
 import Products from "./pages/Products";
 import AnalgesicProducts from "./pages/AnalgesicProducts";

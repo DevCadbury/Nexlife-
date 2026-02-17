@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import useSWR from "swr";
 import { api, fetcher } from "@/lib/api";
-import { motion, AnimatePresence } from "framer-motion";
+
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
   LayoutDashboard,
@@ -552,14 +552,9 @@ export default function AdminLayout({
               </form>
             </div>
 
-            <AnimatePresence>
               {hoverOpen && (
-                <motion.div
-                  key="hover-card"
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 6 }}
-                  className="absolute right-0 mt-2 w-56 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-lg p-3 z-50"
+                <div
+                  className="absolute right-0 mt-2 w-56 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-lg p-3 z-50 animate-in fade-in slide-in-from-top-1 duration-200"
                   onMouseEnter={handleCardMouseEnter}
                   onMouseLeave={handleCardMouseLeave}
                 >
@@ -601,15 +596,11 @@ export default function AdminLayout({
                       </button>
                     </div>
                   </div>
-                </motion.div>
+                </div>
               )}
               {profileOpen && (
-                <motion.div
-                  key="profile-menu"
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 6 }}
-                  className="absolute right-0 mt-2 w-44 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-lg"
+                <div
+                  className="absolute right-0 mt-2 w-44 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-lg animate-in fade-in slide-in-from-top-1 duration-200"
                 >
                   <div className="p-2.5 border-b border-slate-100 dark:border-slate-800">
                     <div className="font-medium text-sm text-slate-900 dark:text-white">
@@ -619,21 +610,16 @@ export default function AdminLayout({
                       {profile?.user?.email}
                     </div>
                   </div>
-                </motion.div>
+                </div>
               )}
-            </AnimatePresence>
           </div>
         </header>        <section className="p-4 md:p-6 flex-1">{children}</section>
       </main>
 
-      <AnimatePresence>
         {open && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
+          <div
             ref={popRef}
-            className="fixed right-6 top-16 z-50 w-[560px] max-w-[90vw] rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/95 backdrop-blur shadow-xl ring-1 ring-slate-200 dark:ring-indigo-500/10"
+            className="fixed right-6 top-16 z-50 w-[560px] max-w-[90vw] rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/95 backdrop-blur shadow-xl ring-1 ring-slate-200 dark:ring-indigo-500/10 animate-in fade-in zoom-in-95 duration-200"
             style={{
               boxShadow:
                 "0 10px 30px rgba(0,0,0,.1), 0 0 0 1px rgba(148,163,184,.1)",
@@ -694,9 +680,7 @@ export default function AdminLayout({
                       </div>
                     )}
                     {items.map((i: any, index: number) => (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
+                      <div
                         key={i._id || `inquiry-${index}-${i.createdAt}`}
                         className="p-4 flex items-start justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors duration-200"
                       >
@@ -733,7 +717,7 @@ export default function AdminLayout({
                             Mark read
                           </button>
                         </div>
-                      </motion.div>
+                      </div>
                     ))}
                   </>
                 ) : (
@@ -744,9 +728,7 @@ export default function AdminLayout({
                       </div>
                     )}
                     {replyItems.map((reply: any, index: number) => (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
+                      <div
                         key={reply._id || `reply-${index}-${reply.createdAt}`}
                         className="p-4 flex items-start justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors duration-200"
                       >
@@ -794,15 +776,14 @@ export default function AdminLayout({
                             Mark read
                           </button>
                         </div>
-                      </motion.div>
+                      </div>
                     ))}
                   </>
                 )}
               </div>
             </div>
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
     </div>
   );
 }
