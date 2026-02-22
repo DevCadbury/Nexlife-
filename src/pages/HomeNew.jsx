@@ -513,6 +513,7 @@ const HomeNew = () => {
      RENDER
      ───────────────────────────────────────────────────────────────── */
   return (
+    <>
     <div className="min-h-screen w-full overflow-x-hidden">
 
       {/* ═══════════════ HERO SECTION ═══════════════ */}
@@ -1059,62 +1060,64 @@ const HomeNew = () => {
 
       {/* ═══════════════ DEBUG (dev only) ═══════════════ */}
       <DebugInfo />
+    </div>
 
-      {/* ═══════════════ FLOATING CONTACT BUTTONS ═══════════════ */}
+    {/* ═══════════════ FLOATING CONTACT BUTTONS ═══════════════ */}
+    {/* Placed outside overflow-x-hidden wrapper so position:fixed works correctly on mobile */}
+    <div
+      className={`fixed right-0 md:right-4 z-50 flex flex-col items-end transition-[bottom,opacity] duration-300 ${
+        isNearFooter
+          ? "bottom-20 md:bottom-28 opacity-80"
+          : "bottom-0 md:bottom-6 opacity-100"
+      }`}
+    >
+      {/* Expanded options */}
       <div
-        className={`fixed right-2 md:right-4 z-50 transition-[bottom,opacity] duration-300 ${
-          isNearFooter
-            ? "bottom-24 md:bottom-28 opacity-80"
-            : "bottom-4 md:bottom-6 opacity-100"
+        className={`mb-3 space-y-2.5 transition-[opacity,transform] duration-300 ${
+          isFloatingOpen
+            ? "opacity-100 translate-y-0 pointer-events-auto"
+            : "opacity-0 translate-y-4 pointer-events-none"
         }`}
       >
-        {/* Expanded options */}
-        <div
-          className={`mb-3 space-y-2.5 transition-[opacity,transform] duration-300 ${
-            isFloatingOpen
-              ? "opacity-100 translate-y-0 pointer-events-auto"
-              : "opacity-0 translate-y-4 pointer-events-none"
-          }`}
+        <a
+          href="https://wa.me/919664843790"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2.5 bg-green-500 hover:bg-green-600 text-white px-4 py-2.5 rounded-full shadow-lg transition-all duration-200 hover:scale-105"
         >
-          <a
-            href="https://wa.me/919664843790"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2.5 bg-green-500 hover:bg-green-600 text-white px-4 py-2.5 rounded-full shadow-lg transition-all duration-200 hover:scale-105"
-          >
-            <MessageCircle className="w-5 h-5" />
-            <span className="text-sm font-medium">WhatsApp</span>
-          </a>
-          <a
-            href="tel:+919664843790"
-            className="flex items-center gap-2.5 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2.5 rounded-full shadow-lg transition-all duration-200 hover:scale-105"
-          >
-            <img src={callNowImage} alt="Call" className="w-5 h-5" />
-            <span className="text-sm font-medium">Call Now</span>
-          </a>
-          <a
-            href="mailto:info@nexlifeinternational.com"
-            className="flex items-center gap-2.5 bg-purple-500 hover:bg-purple-600 text-white px-4 py-2.5 rounded-full shadow-lg transition-all duration-200 hover:scale-105"
-          >
-            <Mail className="w-5 h-5" />
-            <span className="text-sm font-medium">Email Us</span>
-          </a>
-        </div>
-
-        {/* Toggle button */}
-        <button
-          onClick={() => setIsFloatingOpen((v) => !v)}
-          aria-label="Toggle contact options"
-          className="w-14 h-14 rounded-full bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition-[box-shadow,transform,background-color] duration-300 hover:scale-105 flex items-center justify-center"
+          <MessageCircle className="w-5 h-5" />
+          <span className="text-sm font-medium">WhatsApp</span>
+        </a>
+        <a
+          href="tel:+919664843790"
+          className="flex items-center gap-2.5 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2.5 rounded-full shadow-lg transition-all duration-200 hover:scale-105"
         >
-          {isFloatingOpen ? (
-            <X className="w-6 h-6 text-gray-900 dark:text-white" />
-          ) : (
-            <img src={callNowImage} alt="Contact Us" className="w-14 h-14 rounded-full" />
-          )}
-        </button>
+          <img src={callNowImage} alt="Call" className="w-5 h-5" />
+          <span className="text-sm font-medium">Call Now</span>
+        </a>
+        <a
+          href="mailto:info@nexlifeinternational.com"
+          className="flex items-center gap-2.5 bg-purple-500 hover:bg-purple-600 text-white px-4 py-2.5 rounded-full shadow-lg transition-all duration-200 hover:scale-105"
+        >
+          <Mail className="w-5 h-5" />
+          <span className="text-sm font-medium">Email Us</span>
+        </a>
       </div>
+
+      {/* Toggle button */}
+      <button
+        onClick={() => setIsFloatingOpen((v) => !v)}
+        aria-label="Toggle contact options"
+        className="w-14 h-14 m-0 p-0 rounded-full bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition-[box-shadow,transform,background-color] duration-300 hover:scale-105 flex items-center justify-center"
+      >
+        {isFloatingOpen ? (
+          <X className="w-6 h-6 text-gray-900 dark:text-white" />
+        ) : (
+          <img src={callNowImage} alt="Contact Us" className="w-14 h-14 rounded-full" />
+        )}
+      </button>
     </div>
+    </>
   );
 };
 
