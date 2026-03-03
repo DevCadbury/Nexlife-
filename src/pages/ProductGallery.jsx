@@ -21,6 +21,10 @@ import CustomVideoPlayer from "../components/CustomVideoPlayer";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001/api";
 
+const INITIAL_BATCH = 12; // show instantly
+const BATCH_SIZE   = 20; // size of each subsequent auto-batch
+const BATCH_DELAY  = 300; // ms between auto-batches
+
 const ProductGallery = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -33,6 +37,9 @@ const ProductGallery = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [imageZoom, setImageZoom] = useState(1); // For modal image zoom
+  const [visibleCount, setVisibleCount] = useState(INITIAL_BATCH);
+  const sentinelRef = useRef(null);    // scroll-to-bottom sentinel
+  const batchTimerRef = useRef(null);  // auto-batch interval ref
 
   // Fetch categories with ordering
   useEffect(() => {
@@ -128,6 +135,53 @@ const ProductGallery = () => {
       product.components?.some((comp) => comp.toLowerCase().includes(searchTerm.toLowerCase()));
     return matchesSearch;
   });
+
+  // Reset pagination when filters change
+  useEffect(() => {
+    setVisibleCount(INITIAL_BATCH);
+  }, [selectedCategory, searchTerm]);
+
+  // Auto-progressive batch loader: once data is ready, auto-advance
+  // visibleCount every BATCH_DELAY ms until all products are visible.
+  useEffect(() => {
+    if (loading || filteredProducts.length === 0) return;
+    // Clear any previous timer
+    if (batchTimerRef.current) clearInterval(batchTimerRef.current);
+
+    batchTimerRef.current = setInterval(() => {
+      setVisibleCount((prev) => {
+        if (prev >= filteredProducts.length) {
+          clearInterval(batchTimerRef.current);
+          return prev;
+        }
+        return prev + BATCH_SIZE;
+      });
+    }, BATCH_DELAY);
+
+    return () => clearInterval(batchTimerRef.current);
+  }, [loading, filteredProducts.length]);
+
+  // Scroll sentinel: immediately jump ahead if user scrolls to bottom
+  // before the auto-timer reaches that point.
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount((prev) =>
+            Math.min(prev + BATCH_SIZE * 3, filteredProducts.length)
+          );
+        }
+      },
+      { rootMargin: "200px", threshold: 0 }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [filteredProducts.length]);
+
+  const visibleProducts = filteredProducts.slice(0, visibleCount);
+  const hasMore = visibleCount < filteredProducts.length;
 
   return (
     <>
@@ -235,7 +289,8 @@ const ProductGallery = () => {
               className="text-center mb-6"
             >
               <p className="text-slate-600 dark:text-slate-400">
-                Showing <span className="font-bold text-blue-600">{filteredProducts.length}</span> products
+                Showing <span className="font-bold text-blue-600">{visibleProducts.length}</span>
+                {" "}of <span className="font-bold text-fuchsia-500">{filteredProducts.length}</span> products
               </p>
             </motion.div>
           )}
@@ -248,7 +303,7 @@ const ProductGallery = () => {
               transition={{ delay: 0.2 }}
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
             >
-              {filteredProducts.map((product, index) => (
+              {visibleProducts.map((product, index) => (
                 <motion.div
                   key={product._id}
                   initial={{ opacity: 0, y: 20 }}
@@ -282,6 +337,8 @@ const ProductGallery = () => {
                             <img
                               src={media.url}
                               alt={product.name}
+                              loading="lazy"
+                              decoding="async"
                               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                               onError={(e) => {
                                 e.target.style.display = 'none';
@@ -347,6 +404,20 @@ const ProductGallery = () => {
               </motion.div>
               ))}
             </motion.div>
+          )}
+
+          {/* Lazy-load sentinel: triggers loading more products */}
+          {!loading && !error && hasMore && (
+            <div ref={sentinelRef} className="flex justify-center py-8">
+              <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+            </div>
+          )}
+
+          {/* End of results indicator */}
+          {!loading && !error && filteredProducts.length > 0 && !hasMore && (
+            <div className="text-center py-6 text-slate-400 dark:text-slate-600 text-sm font-medium tracking-widest uppercase">
+              — All {filteredProducts.length} products loaded —
+            </div>
           )}
 
           {/* No Results */}

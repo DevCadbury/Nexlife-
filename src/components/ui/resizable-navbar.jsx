@@ -267,7 +267,7 @@ const GlowNavItem = ({ to, children, dropdown }) => {
       <motion.div
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        className="relative group [transform-style:preserve-3d] z-50"
+        className="relative group z-50"
       >
         <button
           onClick={handleButtonClick}
@@ -334,9 +334,9 @@ const GlowNavItem = ({ to, children, dropdown }) => {
 
   return (
     <motion.div
-      whileHover={{ y: -3, scale: 1.02, rotateX: -2, rotateY: 2 }}
-      whileTap={{ scale: 0.98 }}
-      className="relative group [transform-style:preserve-3d]"
+      whileHover={{ y: -2 }}
+      whileTap={{ scale: 0.97 }}
+      className="relative group"
     >
       <Link
         to={to}
@@ -354,7 +354,7 @@ const GlowNavItem = ({ to, children, dropdown }) => {
 
 export const NavItems = ({ items = [] }) => {
   return (
-    <nav className="flex items-center gap-1 [perspective:1200px] overflow-visible">
+    <nav className="flex items-center gap-1 overflow-visible">
       {items.map((item, idx) => (
         <GlowNavItem key={`nav-item-${idx}`} to={item.link} dropdown={item.dropdown}>
           {item.name}

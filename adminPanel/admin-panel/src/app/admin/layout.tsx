@@ -28,6 +28,7 @@ import {
   X,
   PanelLeftClose,
   PanelLeft,
+  Home,
 } from "lucide-react";
 
 const tabs = [
@@ -38,6 +39,7 @@ const tabs = [
   { href: "/admin/subscribers", label: "Subscribers", icon: Users, roles: ["all"] },
   { href: "/admin/campaigns", label: "Campaigns", icon: Megaphone, roles: ["all"] },
   { href: "/admin/gallery", label: "Gallery", icon: ImageIcon, roles: ["superadmin", "dev"] },
+  { href: "/admin/home-products", label: "Home Products", icon: Home, roles: ["superadmin", "dev"] },
   { href: "/admin/products-gallery", label: "Products", icon: Package, roles: ["superadmin", "dev"] },
   { href: "/admin/certifications", label: "Certifications", icon: Award, roles: ["superadmin", "dev"] },
   { href: "/admin/staff", label: "Staff", icon: UserCog, roles: ["superadmin", "dev"] },

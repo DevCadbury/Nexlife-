@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect, Suspense, lazy } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ThemeProvider, useTheme } from "./contexts/ThemeContext";
 import { useMobileViewport } from "./hooks/useMobileViewport";
@@ -6,68 +6,84 @@ import SEOHead from "./components/SEOHead";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ScrollToTop from "./components/ScrollToTop";
-import Home from "./pages/HomeNew";
-import About from "./pages/About";
-import Products from "./pages/Products";
-import AnalgesicProducts from "./pages/AnalgesicProducts";
-import AnthelminticProducts from "./pages/AnthelminticProducts";
-import AntiAllergicProducts from "./pages/AntiAllergicProducts";
-import AntiDiabeticProducts from "./pages/AntiDiabeticProducts";
-import AntiMalarialProducts from "./pages/AntiMalarialProducts";
-import AntiProtozoalProducts from "./pages/AntiProtozoalProducts";
-import CardiovascularProducts from "./pages/CardiovascularProducts";
-import AntiFungalProducts from "./pages/AntiFungalProducts";
-import AntiSpasmodicProducts from "./pages/AntiSpasmodicProducts";
-import AntibioticsGeneralProducts from "./pages/AntibioticsGeneralProducts";
-import AntiConvulsantProducts from "./pages/AntiConvulsantProducts";
-import AntiEmeticProducts from "./pages/AntiEmeticProducts";
-import AntiUlcerativeProducts from "./pages/AntiUlcerativeProducts";
-import AntiViralProducts from "./pages/AntiViralProducts";
-import ErectileDysfunctionProducts from "./pages/ErectileDysfunctionProducts";
-import LipidLoweringProducts from "./pages/LipidLoweringProducts";
-import PlateletAggregationProducts from "./pages/PlateletAggregationProducts";
-import SteroidalDrugsProducts from "./pages/SteroidalDrugsProducts";
-import AyurvedicProducts from "./pages/ayurvedic";
-import AnalgesicCapsules from "./pages/capules/analgesic";
-import AntiDepressantCapsules from "./pages/capules/anti-depressant";
-import AntiEpilepticCapsules from "./pages/capules/anti-epileptic";
-import AntiFungalCapsules from "./pages/capules/anti-fungal";
-import AntiMalarialCapsules from "./pages/capules/anti-malarial";
-import AntiMigraineCapsules from "./pages/capules/anti-migraine";
-import AntiProtozoalCapsules from "./pages/capules/anti-protozoal";
-import AntiTubercularCapsules from "./pages/capules/anti-tubercular";
-import AntiUlcerativeCapsules from "./pages/capules/anti-ulcerative";
-import CardiovascularCapsules from "./pages/capules/cardiovascular";
-import GeneralAntibioticsCapsules from "./pages/capules/general-antibiotics";
-import MultiVitaminsCapsules from "./pages/capules/multi-vitamins";
-import DrySyrups from "./pages/dry-syrups";
-import AntiConvulsantCapsules from "./pages/capules/anti-convulsant";
-import SurgicalProducts from "./pages/surgical";
-import Services from "./pages/Services";
-import Gallery from "./pages/Gallery";
-import ProductGallery from "./pages/ProductGallery";
-import Certifications from "./pages/Certifications";
-import GlobalPresence from "./pages/GlobalPresence";
-import Contact from "./pages/Contact";
-import Privacy from "./pages/Privacy";
-import Terms from "./pages/Terms";
-import NotFound from "./pages/NotFound";
+import Preloader from "./components/Preloader";
+import PageLoader from "./components/PageLoader";
 import ErrorBoundary from "./components/ErrorBoundary";
 import "./i18n";
+
+// ----- Lazy-loaded page chunks (only fetched when route is visited) -----
+const Home                      = lazy(() => import("./pages/HomeNew"));
+const About                     = lazy(() => import("./pages/About"));
+const Products                  = lazy(() => import("./pages/Products"));
+const AnalgesicProducts         = lazy(() => import("./pages/AnalgesicProducts"));
+const AnthelminticProducts      = lazy(() => import("./pages/AnthelminticProducts"));
+const AntiAllergicProducts      = lazy(() => import("./pages/AntiAllergicProducts"));
+const AntiDiabeticProducts      = lazy(() => import("./pages/AntiDiabeticProducts"));
+const AntiMalarialProducts      = lazy(() => import("./pages/AntiMalarialProducts"));
+const AntiProtozoalProducts     = lazy(() => import("./pages/AntiProtozoalProducts"));
+const CardiovascularProducts    = lazy(() => import("./pages/CardiovascularProducts"));
+const AntiFungalProducts        = lazy(() => import("./pages/AntiFungalProducts"));
+const AntiSpasmodicProducts     = lazy(() => import("./pages/AntiSpasmodicProducts"));
+const AntibioticsGeneralProducts = lazy(() => import("./pages/AntibioticsGeneralProducts"));
+const AntiConvulsantProducts    = lazy(() => import("./pages/AntiConvulsantProducts"));
+const AntiEmeticProducts        = lazy(() => import("./pages/AntiEmeticProducts"));
+const AntiUlcerativeProducts    = lazy(() => import("./pages/AntiUlcerativeProducts"));
+const AntiViralProducts         = lazy(() => import("./pages/AntiViralProducts"));
+const ErectileDysfunctionProducts = lazy(() => import("./pages/ErectileDysfunctionProducts"));
+const LipidLoweringProducts     = lazy(() => import("./pages/LipidLoweringProducts"));
+const PlateletAggregationProducts = lazy(() => import("./pages/PlateletAggregationProducts"));
+const SteroidalDrugsProducts    = lazy(() => import("./pages/SteroidalDrugsProducts"));
+const AyurvedicProducts         = lazy(() => import("./pages/ayurvedic"));
+const AnalgesicCapsules         = lazy(() => import("./pages/capules/analgesic"));
+const AntiDepressantCapsules    = lazy(() => import("./pages/capules/anti-depressant"));
+const AntiEpilepticCapsules     = lazy(() => import("./pages/capules/anti-epileptic"));
+const AntiFungalCapsules        = lazy(() => import("./pages/capules/anti-fungal"));
+const AntiMalarialCapsules      = lazy(() => import("./pages/capules/anti-malarial"));
+const AntiMigraineCapsules      = lazy(() => import("./pages/capules/anti-migraine"));
+const AntiProtozoalCapsules     = lazy(() => import("./pages/capules/anti-protozoal"));
+const AntiTubercularCapsules    = lazy(() => import("./pages/capules/anti-tubercular"));
+const AntiUlcerativeCapsules    = lazy(() => import("./pages/capules/anti-ulcerative"));
+const CardiovascularCapsules    = lazy(() => import("./pages/capules/cardiovascular"));
+const GeneralAntibioticsCapsules = lazy(() => import("./pages/capules/general-antibiotics"));
+const MultiVitaminsCapsules     = lazy(() => import("./pages/capules/multi-vitamins"));
+const DrySyrups                 = lazy(() => import("./pages/dry-syrups"));
+const AntiConvulsantCapsules    = lazy(() => import("./pages/capules/anti-convulsant"));
+const SurgicalProducts          = lazy(() => import("./pages/surgical"));
+const Services                  = lazy(() => import("./pages/Services"));
+const Gallery                   = lazy(() => import("./pages/Gallery"));
+const ProductGallery            = lazy(() => import("./pages/ProductGallery"));
+const Certifications            = lazy(() => import("./pages/Certifications"));
+const GlobalPresence            = lazy(() => import("./pages/GlobalPresence"));
+const Contact                   = lazy(() => import("./pages/Contact"));
+const Privacy                   = lazy(() => import("./pages/Privacy"));
+const Terms                     = lazy(() => import("./pages/Terms"));
+const HomeProductDetail         = lazy(() => import("./pages/HomeProductDetail"));
+const NotFound                  = lazy(() => import("./pages/NotFound"));
 
 function AppContent() {
   // Initialize mobile viewport optimization
   useMobileViewport();
   const { theme } = useTheme();
+  const [isPreloading, setIsPreloading] = useState(true);
+
+  useEffect(() => {
+    if (isPreloading) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+  }, [isPreloading]);
 
   return (
     <Router>
       <SEOHead />
       <ScrollToTop />
+      {isPreloading && <Preloader onComplete={() => setIsPreloading(false)} />}
       <div className={`min-h-screen transition-colors duration-300 w-full ${theme.background} ${theme.text}`}>
         <Navbar />
         <main className="pt-36 w-full">
-          <Routes>
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
             <Route
               path="/"
               element={
@@ -76,6 +92,7 @@ function AppContent() {
                 </ErrorBoundary>
               }
             />
+            <Route path="/home-product/:id" element={<HomeProductDetail />} />
             <Route path="/about" element={<About />} />
             <Route path="/products" element={<Products />} />
             <Route
@@ -220,6 +237,7 @@ function AppContent() {
             {/* 404 Route - Must be last */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </Suspense>
         </main>
         <Footer />
       </div>

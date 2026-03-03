@@ -197,18 +197,11 @@
   }
 
   @keyframes edgeGlow {
-    0% {
-      background-position: 0% 50%;
-    }
-    50% {
-      background-position: 100% 50%;
-    }
-    100% {
-      background-position: 0% 50%;
-    }
+    0%, 100% { opacity: 0.35; }
+    50%       { opacity: 0.7; }
   }
   .animate-edgeGlow {
-    animation: edgeGlow 6s ease-in-out infinite;
+    animation: edgeGlow 4s ease-in-out infinite;
   }
 }
 
@@ -217,17 +210,9 @@
   perspective: 1000px;
 }
 
-/* Edge glow animation for navbar */
 @keyframes edgeGlow {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+  0%, 100% { opacity: 0.35; }
+  50%       { opacity: 0.7; }
 }
 
 /* Google Translate Widget - Clean dropdown only */
