@@ -127,7 +127,7 @@ const SectionHeading = ({ title, subtitle }) => {
       <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-3 inline-block">
         {title}
       </h2>
-      <div className="h-1 w-3/4 mx-auto mb-4 rounded-full bg-gradient-to-r from-transparent via-fuchsia-500 to-transparent" />
+      <div className="h-1 w-11/12 mx-auto mb-4 rounded-full bg-gradient-to-r from-black via-fuchsia-500 to-black" />
       {subtitle && (
         <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
           {subtitle}
@@ -379,12 +379,12 @@ const HomeNew = () => {
   ];
 
   const products = [
-    { img: product1, name: "Premium Antibiotic Formula", tag: "Antibiotics", tagColor: "bg-blue-500", desc: "Advanced broad-spectrum antibiotic for severe infections with enhanced efficacy and minimal side effects." },
-    { img: product2, name: "Advanced Pain Relief Formula", tag: "Pain Reliever", tagColor: "bg-red-500", desc: "Fast-acting pain relief medication for acute and chronic pain management with proven efficacy and safety." },
-    { img: product3, name: "Pain Relief Advanced", tag: "Pain Reliever", tagColor: "bg-orange-500", desc: "Advanced pain management solution with dual-action formula for effective relief from moderate to severe pain." },
-    { img: product4, name: "Cardiovascular Health Plus", tag: "Cardiovascular", tagColor: "bg-red-500", desc: "Comprehensive heart health supplement with natural ingredients for optimal cardiovascular function." },
-    { img: product5, name: "Multivitamins Complete", tag: "Multivitamins", tagColor: "bg-green-500", desc: "Comprehensive multivitamin formula with essential nutrients for overall health and wellness support." },
-    { img: product6, name: "Anti Allergic Formula", tag: "Anti Allergic", tagColor: "bg-purple-500", desc: "Advanced anti-allergic medication for effective relief from seasonal allergies and allergic reactions." },
+    { img: product1, name: "Premium Antibiotic Formula", tag: "Antibiotics", tagColor: "bg-blue-500", borderColor: "border-blue-300 dark:border-blue-500 hover:border-blue-400 dark:hover:border-blue-400", desc: "Advanced broad-spectrum antibiotic for severe infections with enhanced efficacy and minimal side effects." },
+    { img: product2, name: "Advanced Pain Relief Formula", tag: "Pain Reliever", tagColor: "bg-red-500", borderColor: "border-red-300 dark:border-red-500 hover:border-red-400 dark:hover:border-red-400", desc: "Fast-acting pain relief medication for acute and chronic pain management with proven efficacy and safety." },
+    { img: product3, name: "Pain Relief Advanced", tag: "Pain Reliever", tagColor: "bg-orange-500", borderColor: "border-orange-300 dark:border-orange-500 hover:border-orange-400 dark:hover:border-orange-400", desc: "Advanced pain management solution with dual-action formula for effective relief from moderate to severe pain." },
+    { img: product4, name: "Cardiovascular Health Plus", tag: "Cardiovascular", tagColor: "bg-red-500", borderColor: "border-red-300 dark:border-red-500 hover:border-red-400 dark:hover:border-red-400", desc: "Comprehensive heart health supplement with natural ingredients for optimal cardiovascular function." },
+    { img: product5, name: "Multivitamins Complete", tag: "Multivitamins", tagColor: "bg-green-500", borderColor: "border-green-300 dark:border-green-500 hover:border-green-400 dark:hover:border-green-400", desc: "Comprehensive multivitamin formula with essential nutrients for overall health and wellness support." },
+    { img: product6, name: "Anti Allergic Formula", tag: "Anti Allergic", tagColor: "bg-purple-500", borderColor: "border-purple-300 dark:border-purple-500 hover:border-purple-400 dark:hover:border-purple-400", desc: "Advanced anti-allergic medication for effective relief from seasonal allergies and allergic reactions." },
   ];
 
   const whyChooseUs = [
@@ -503,10 +503,42 @@ const HomeNew = () => {
   ];
 
   const accentMap = {
-    blue: { card: "hover:border-blue-300 dark:hover:border-blue-400", dot: "bg-blue-400", hover: "group-hover/item:text-blue-600 dark:group-hover/item:text-blue-400", title: "group-hover:text-blue-600 dark:group-hover:text-blue-400" },
-    green: { card: "hover:border-green-300 dark:hover:border-green-400", dot: "bg-green-400", hover: "group-hover/item:text-green-600 dark:group-hover/item:text-green-400", title: "group-hover:text-green-600 dark:group-hover:text-green-400" },
-    purple: { card: "hover:border-purple-300 dark:hover:border-purple-400", dot: "bg-purple-400", hover: "group-hover/item:text-purple-600 dark:group-hover/item:text-purple-400", title: "group-hover:text-purple-600 dark:group-hover:text-purple-400" },
-    orange: { card: "hover:border-orange-300 dark:hover:border-orange-400", dot: "bg-orange-400", hover: "group-hover/item:text-orange-600 dark:group-hover/item:text-orange-400", title: "group-hover:text-orange-600 dark:group-hover:text-orange-400" },
+    blue: {
+      card: "bg-gradient-to-br from-white via-blue-50 to-white dark:from-gray-800 dark:via-blue-900/20 dark:to-gray-800 shadow-md hover:shadow-blue-500/20 border border-transparent hover:border-blue-200 dark:hover:border-blue-400",
+      hoverBg: "bg-gradient-to-br from-blue-100/20 via-blue-200/15 to-blue-100/20 dark:from-blue-800/10 dark:via-blue-700/10 dark:to-blue-800/10",
+      dot: "bg-blue-400",
+      hover: "group-hover/item:text-blue-600 dark:group-hover/item:text-blue-400",
+      title: "group-hover:text-blue-600 dark:group-hover:text-blue-400",
+      particle: "bg-blue-400",
+      particleSub: "bg-blue-300",
+    },
+    green: {
+      card: "bg-gradient-to-br from-white via-green-50 to-white dark:from-gray-800 dark:via-green-900/20 dark:to-gray-800 shadow-md hover:shadow-green-500/20 border border-transparent hover:border-green-200 dark:hover:border-green-400",
+      hoverBg: "bg-gradient-to-br from-green-100/20 via-green-200/15 to-green-100/20 dark:from-green-800/10 dark:via-green-700/10 dark:to-green-800/10",
+      dot: "bg-green-400",
+      hover: "group-hover/item:text-green-600 dark:group-hover/item:text-green-400",
+      title: "group-hover:text-green-600 dark:group-hover:text-green-400",
+      particle: "bg-green-400",
+      particleSub: "bg-green-300",
+    },
+    purple: {
+      card: "bg-gradient-to-br from-white via-purple-50 to-white dark:from-gray-800 dark:via-purple-900/20 dark:to-gray-800 shadow-md hover:shadow-purple-500/20 border border-transparent hover:border-purple-200 dark:hover:border-purple-400",
+      hoverBg: "bg-gradient-to-br from-purple-100/20 via-purple-200/15 to-purple-100/20 dark:from-purple-800/10 dark:via-purple-700/10 dark:to-purple-800/10",
+      dot: "bg-purple-400",
+      hover: "group-hover/item:text-purple-600 dark:group-hover/item:text-purple-400",
+      title: "group-hover:text-purple-600 dark:group-hover:text-purple-400",
+      particle: "bg-purple-400",
+      particleSub: "bg-purple-300",
+    },
+    orange: {
+      card: "bg-gradient-to-br from-white via-orange-50 to-white dark:from-gray-800 dark:via-orange-900/20 dark:to-gray-800 shadow-md hover:shadow-orange-500/20 border border-transparent hover:border-orange-200 dark:hover:border-orange-400",
+      hoverBg: "bg-gradient-to-br from-orange-100/20 via-orange-200/15 to-orange-100/20 dark:from-orange-800/10 dark:via-orange-700/10 dark:to-orange-800/10",
+      dot: "bg-orange-400",
+      hover: "group-hover/item:text-orange-600 dark:group-hover/item:text-orange-400",
+      title: "group-hover:text-orange-600 dark:group-hover:text-orange-400",
+      particle: "bg-orange-400",
+      particleSub: "bg-orange-300",
+    },
   };
 
   /* ─────────────────────────────────────────────────────────────────
@@ -571,7 +603,7 @@ const HomeNew = () => {
             </div>
 
             {/* ── Right: carousel ── */}
-            <div className="relative w-full aspect-[4/3] md:h-96 rounded-2xl overflow-hidden border-2 border-black shadow-xl">
+            <div className="relative w-full aspect-[4/3] md:h-96 rounded-2xl overflow-hidden border-2 border-black shadow-[0_0_20px_rgba(0,0,0,0.8),inset_0_0_20px_rgba(0,0,0,0.3)]">
               {/* Slide track for infinite loop */}
               <div
                 ref={carouselRef}
@@ -595,15 +627,31 @@ const HomeNew = () => {
                 ))}
               </div>
 
+              {/* Navigation Buttons */}
+              <button
+                onClick={prevSlide}
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/40 hover:bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center text-white transition-all duration-200 hover:scale-110 z-20 border border-white/30 shadow-[0_0_10px_rgba(0,0,0,0.8)]"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+              <button
+                onClick={nextSlide}
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/40 hover:bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center text-white transition-all duration-200 hover:scale-110 z-20 border border-white/30 shadow-[0_0_10px_rgba(0,0,0,0.8)]"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
+
               {/* Indicators */}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2.5 z-10">
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-3 z-20">
                 {heroImages.map((_, i) => (
                   <button
                     key={i}
                     onClick={() => goToSlide(i)}
                     aria-label={`Go to slide ${i + 1}`}
-                    className={`w-3 h-3 rounded-full border border-white/60 transition-all duration-300 ${
-                      i === realSlideIndex ? "bg-white scale-125" : "bg-white/40"
+                    className={`w-4 h-4 rounded-full transition-all duration-200 border border-white/50 ${
+                      i === realSlideIndex
+                        ? "bg-white scale-125 shadow-[0_0_10px_rgba(255,255,255,0.8)]"
+                        : "bg-white/50 hover:bg-white/75"
                     }`}
                   />
                 ))}
@@ -625,36 +673,44 @@ const HomeNew = () => {
       </section>
 
       {/* ═══════════════ PHARMA CATEGORIES ═══════════════ */}
-      <section className="py-12 md:py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 to-white dark:from-gray-800 dark:to-gray-900 overflow-hidden">
+      <section className="py-12 md:py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 to-white dark:from-gray-800 dark:to-gray-900 relative" style={{ overflow: 'visible', zIndex: 10 }}>
         {/* Top gradient bar */}
-        <div className="max-w-7xl mx-auto">
-          <div className="h-1 rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-blue-600 mb-8" />
-
+        <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-r from-blue-500 via-purple-500 to-blue-600 z-0"></div>
+        <div className="max-w-7xl mx-auto relative z-10">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {pharmaCategories.map((cat, i) => {
               const a = accentMap[cat.accent];
               return (
                 <FadeInCard key={cat.name} delay={i * 100}>
                   <div
-                    className={`group h-full bg-white dark:bg-gray-800 p-5 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border-2 border-gray-200 dark:border-gray-700 ${a.card}`}
+                    className={`group h-full p-5 rounded-xl transition-all duration-300 overflow-hidden relative ${a.card}`}
                   >
-                    <div className="w-12 h-12 mb-3">
-                      <img src={cat.image} alt={cat.name} className="w-full h-full object-contain" loading="lazy" />
+                    {/* Background Pattern */}
+                    <div className={`absolute inset-0 ${a.hoverBg} opacity-0 group-hover:opacity-100 transition-all duration-300`} />
+
+                    <div className="relative z-10">
+                      <div className="w-12 h-12 mb-3 transition-all duration-300 group-hover:scale-105">
+                        <img src={cat.image} alt={cat.name} className="w-full h-full object-contain" loading="lazy" />
+                      </div>
+                      <h3 className={`text-lg md:text-xl font-bold text-gray-900 dark:text-white mb-2 transition-colors duration-300 ${a.title}`}>
+                        {cat.name}
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed mb-3">
+                        {cat.desc}
+                      </p>
+                      <ul className="space-y-1.5 text-sm text-gray-500 dark:text-gray-400">
+                        {cat.features.map((f) => (
+                          <li key={f} className="flex items-center group/item">
+                            <span className={`w-1.5 h-1.5 ${a.dot} rounded-full mr-2 flex-shrink-0`} />
+                            <span className={`transition-colors duration-200 ${a.hover}`}>{f}</span>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                    <h3 className={`text-lg md:text-xl font-bold text-gray-900 dark:text-white mb-2 transition-colors duration-300 ${a.title}`}>
-                      {cat.name}
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed mb-3">
-                      {cat.desc}
-                    </p>
-                    <ul className="space-y-1.5 text-sm text-gray-500 dark:text-gray-400">
-                      {cat.features.map((f) => (
-                        <li key={f} className="flex items-center group/item">
-                          <span className={`w-1.5 h-1.5 ${a.dot} rounded-full mr-2 flex-shrink-0`} />
-                          <span className={`transition-colors duration-200 ${a.hover}`}>{f}</span>
-                        </li>
-                      ))}
-                    </ul>
+
+                    {/* Particles Effect */}
+                    <div className={`absolute top-2 right-2 w-1.5 h-1.5 ${a.particle} rounded-full opacity-0 group-hover:opacity-100 animate-ping`}></div>
+                    <div className={`absolute bottom-2 left-2 w-1 h-1 ${a.particleSub} rounded-full opacity-0 group-hover:opacity-100 animate-pulse`}></div>
                   </div>
                 </FadeInCard>
               );
@@ -674,23 +730,29 @@ const HomeNew = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {products.map((product, i) => (
               <FadeInCard key={product.name} delay={i * 80}>
-                <div className="group h-full bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-gray-200 dark:border-gray-700 overflow-hidden">
+                <div
+                  className={`group h-full bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-2 ${product.borderColor} overflow-hidden relative`}
+                  style={{ boxShadow: '0 0 20px rgba(236, 72, 153, 0.12)' }}
+                >
+                  {/* Border Edge Lighting Effect */}
+                  <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-black/20 via-fuchsia-500/25 to-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+
                   <div className="relative overflow-hidden">
                     <img
                       src={product.img}
                       alt={product.name}
-                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500"
+                      className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500 border-2 border-gray-300 dark:border-gray-600 rounded-lg"
                       loading="lazy"
                     />
-                    <span className={`absolute top-3 left-3 ${product.tagColor} text-white px-2.5 py-1 rounded-full text-xs font-medium`}>
+                    <span className={`absolute top-4 left-4 ${product.tagColor} text-white px-2 py-1 rounded-full text-xs font-medium`}>
                       {product.tag}
                     </span>
                   </div>
-                  <div className="p-5">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                  <div className="p-6 relative z-10">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
                       {product.name}
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+                    <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
                       {product.desc}
                     </p>
                   </div>
@@ -730,8 +792,8 @@ const HomeNew = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
             {whyChooseUs.map((feature, i) => (
               <FadeInCard key={feature.title} delay={i * 120}>
-                <div className="group h-full bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-gray-200 dark:border-gray-700 p-8 text-center">
-                  <div className="w-20 h-20 mx-auto mb-6">
+                <div className="group relative overflow-hidden h-full bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-700 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 border-2 border-blue-200 dark:border-blue-500 hover:border-blue-400 dark:hover:border-blue-400 p-8 text-center">
+                  <div className="w-20 h-20 mx-auto mb-6 transition-transform duration-300 group-hover:scale-105 group-hover:-translate-y-1">
                     <img src={feature.image} alt={feature.title} className="w-full h-full object-contain" loading="lazy" />
                   </div>
                   <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-4">
@@ -740,6 +802,7 @@ const HomeNew = () => {
                   <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
                     {feature.description}
                   </p>
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 </div>
               </FadeInCard>
             ))}
@@ -758,8 +821,8 @@ const HomeNew = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
             {companyPillars.map((pillar, i) => (
               <FadeInCard key={pillar.title} delay={i * 100}>
-                <div className="group h-full bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-gray-200 dark:border-gray-700 p-5 md:p-6 text-center">
-                  <div className="w-14 h-14 md:w-16 md:h-16 mx-auto mb-4">
+                <div className="group relative overflow-hidden h-full bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-700 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 border-2 border-blue-200 dark:border-blue-500 hover:border-blue-400 dark:hover:border-blue-400 p-5 md:p-6 text-center">
+                  <div className="w-14 h-14 md:w-16 md:h-16 mx-auto mb-4 transition-transform duration-300 group-hover:scale-105 group-hover:-translate-y-1">
                     <img src={pillar.image} alt={pillar.title} className="w-full h-full object-contain" loading="lazy" />
                   </div>
                   <h3 className="text-base md:text-lg font-bold text-gray-900 dark:text-white mb-2">
@@ -768,6 +831,7 @@ const HomeNew = () => {
                   <p className="text-gray-600 dark:text-gray-300 text-xs md:text-sm leading-relaxed">
                     {pillar.description}
                   </p>
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 </div>
               </FadeInCard>
             ))}
@@ -783,20 +847,24 @@ const HomeNew = () => {
             subtitle="Understanding our mission, vision, and goals helps you know what drives us forward."
           />
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 items-stretch">
             {companyInfo.map((info, i) => (
               <FadeInCard key={info.title} delay={i * 120}>
-                <div className="group h-full bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-gray-200 dark:border-gray-700 hover:border-fuchsia-300 dark:hover:border-fuchsia-500 overflow-hidden">
-                  <div className="p-8">
-                    <div className="w-14 h-14 mb-5">
-                      <img src={info.image} alt={info.title} className="w-full h-full object-contain" loading="lazy" />
+                <div className="neon-rotate-border group h-full" style={{ borderRadius: '1rem' }}>
+                  <div className="neon-border-bg" />
+                  <div className="relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-700 h-full flex flex-col">
+                    <div className="p-8 relative z-10 flex-1 flex flex-col">
+                      <div className="w-14 h-14 mb-5 transition-transform duration-300 group-hover:scale-105 group-hover:-translate-y-1">
+                        <img src={info.image} alt={info.title} className="w-full h-full object-contain" loading="lazy" />
+                      </div>
+                      <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                        {info.title}
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-300 leading-relaxed flex-1">
+                        {info.description}
+                      </p>
                     </div>
-                    <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-4">
-                      {info.title}
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                      {info.description}
-                    </p>
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   </div>
                 </div>
               </FadeInCard>
@@ -911,7 +979,7 @@ const HomeNew = () => {
                     className="flex-shrink-0 px-3"
                     style={{ width: `${100 / itemsPerView}%` }}
                   >
-                    <div className={`h-full bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border-2 ${review.borderColor} p-6`}>
+                    <div className={`group relative h-full overflow-hidden bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-700 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 border-2 ${review.borderColor} p-6`}>
                       <StarRating count={review.stars} />
                       <p className="text-gray-700 dark:text-gray-300 mb-6 leading-relaxed italic text-sm">
                         "{review.text}"
@@ -929,6 +997,8 @@ const HomeNew = () => {
                           </p>
                         </div>
                       </div>
+                      {/* Hover Effect */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                     </div>
                   </div>
                 ))}
