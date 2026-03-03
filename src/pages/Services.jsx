@@ -193,43 +193,52 @@ const Services = () => {
       </section>
 
       {/* Services Grid */}
-      <section className="section-padding bg-white dark:bg-gray-900">
+      <section className="section-padding bg-slate-50 dark:bg-gray-900 -mt-20 relative z-10 pt-24">
         <div className="container-custom">
           <motion.div
             variants={containerVariants}
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true }}
+            viewport={{ once: true, margin: "-100px" }}
             className="grid grid-cols-1 md:grid-cols-2 gap-8"
           >
-            {services.map((service) => (
+            {services.map((service, index) => (
               <motion.div
                 key={service.title}
                 variants={itemVariants}
                 whileHover={{ y: -10 }}
-                className="card p-8 group border-2 border-gray-200 dark:border-gray-700 rounded-2xl hover:border-primary-500 dark:hover:border-primary-400 transition-colors duration-300"
+                className="bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-lg border border-slate-100 dark:border-gray-700 hover:shadow-2xl hover:shadow-primary-900/10 transition-all duration-300 group relative overflow-hidden"
               >
-                <div className="w-16 h-16 mb-6 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 overflow-hidden">
-                  <img 
-                    src={service.image} 
-                    alt={service.title}
-                    className="w-full h-full object-contain"
-                  />
+                <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${service.color} opacity-10 rounded-bl-[100px] transition-all duration-500 group-hover:scale-110`}></div>
+
+                <div className="flex items-start mb-6">
+                  <div className="w-16 h-16 rounded-2xl bg-slate-50 dark:bg-slate-700 flex items-center justify-center group-hover:bg-primary-50 transition-colors duration-300 mr-5 shadow-sm border border-slate-100">
+                    <img
+                      src={service.image}
+                      alt={service.title}
+                      className="w-10 h-10 object-contain"
+                    />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-primary-600 transition-colors">
+                      {service.title}
+                    </h3>
+                    <div className={`h-1 w-12 bg-gradient-to-r ${service.color} rounded-full`}></div>
+                  </div>
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-                  {service.title}
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+
+                <p className="text-gray-600 dark:text-gray-300 mb-8 leading-relaxed text-lg">
                   {service.description}
                 </p>
-                <ul className="space-y-3">
-                  {service.features.map((feature, index) => (
+
+                <ul className="space-y-4">
+                  {service.features.map((feature, featureIndex) => (
                     <li
-                      key={index}
-                      className="flex items-center space-x-3 text-gray-600 dark:text-gray-300"
+                      key={featureIndex}
+                      className="flex items-start space-x-3 text-gray-600 dark:text-gray-300"
                     >
-                      <div className="w-2 h-2 bg-primary-500 rounded-full"></div>
-                      <span className="text-sm">{feature}</span>
+                      <div className={`mt-1.5 w-1.5 h-1.5 rounded-full bg-gradient-to-r ${service.color} flex-shrink-0`}></div>
+                      <span className="text-base">{feature}</span>
                     </li>
                   ))}
                 </ul>
@@ -274,13 +283,13 @@ const Services = () => {
                 className="text-center group bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-gray-200 dark:border-gray-700 hover:border-primary-500 dark:hover:border-primary-400"
               >
                 {/* Icon Image */}
-                <motion.div 
+                <motion.div
                   className="w-24 h-24 mx-auto mb-5 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center overflow-hidden p-4 shadow-inner"
                   whileHover={{ scale: 1.2 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <img 
-                    src={step.image} 
+                  <img
+                    src={step.image}
                     alt=""
                     className="w-full h-full object-contain"
                   />
@@ -354,13 +363,13 @@ const Services = () => {
                     whileHover={{ x: 5, scale: 1.02 }}
                     className="flex items-start space-x-4"
                   >
-                    <motion.div 
+                    <motion.div
                       className="w-12 h-12 bg-primary-100 dark:bg-primary-900/20 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden p-2"
                       whileHover={{ rotate: [0, -10, 10, -10, 0], scale: 1.1 }}
                       transition={{ duration: 0.5 }}
                     >
-                      <img 
-                        src={feature.image} 
+                      <img
+                        src={feature.image}
                         alt={feature.title}
                         className="w-full h-full object-contain"
                       />

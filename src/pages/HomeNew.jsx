@@ -82,26 +82,28 @@ const useIntersectionObserver = (options = {}) => {
 };
 
 /* ─────────────────────────  CountUp  ───────────────────────── */
-const AnimatedCounter = memo(({ end, suffix = "", decimals = 0, duration = 2000 }) => {
+const AnimatedCounter = memo(({ end, suffix = "", decimals = 0, duration = 2000, startDelay = 0 }) => {
   const [ref, isVisible] = useIntersectionObserver();
   const [value, setValue] = useState(0);
 
   useEffect(() => {
     if (!isVisible) return;
     const start = 0;
-    const startTime = performance.now();
-
-    const animate = (now) => {
-      const elapsed = now - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      // ease-out quad
-      const eased = 1 - (1 - progress) * (1 - progress);
-      const current = start + (end - start) * eased;
-      setValue(decimals > 0 ? parseFloat(current.toFixed(decimals)) : Math.floor(current));
-      if (progress < 1) requestAnimationFrame(animate);
-    };
-    requestAnimationFrame(animate);
-  }, [isVisible, end, duration, decimals]);
+    const timer = setTimeout(() => {
+      const startTime = performance.now();
+      const animate = (now) => {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        // ease-out quad
+        const eased = 1 - (1 - progress) * (1 - progress);
+        const current = start + (end - start) * eased;
+        setValue(decimals > 0 ? parseFloat(current.toFixed(decimals)) : Math.floor(current));
+        if (progress < 1) requestAnimationFrame(animate);
+      };
+      requestAnimationFrame(animate);
+    }, startDelay);
+    return () => clearTimeout(timer);
+  }, [isVisible, end, duration, decimals, startDelay]);
 
   return (
     <span ref={ref}>
@@ -802,7 +804,7 @@ const HomeNew = () => {
                     }}
                   >
                     <span className="text-xl sm:text-2xl font-extrabold leading-none tabular-nums" style={{ color: accent }}>
-                      <AnimatedCounter end={end} suffix={suffix} duration={1800} />
+                      <AnimatedCounter end={end} suffix={suffix} duration={1800} startDelay={2700} />
                     </span>
                     <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium leading-snug">{label}</span>
                   </div>

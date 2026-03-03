@@ -3,7 +3,6 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Tag,
-  Eye,
   Calendar,
   ChevronRight,
   Loader2,
@@ -179,12 +178,6 @@ export default function HomeProductDetail() {
 
             {/* Meta row */}
             <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-              {product.views > 0 && (
-                <span className="inline-flex items-center gap-1.5">
-                  <Eye className="w-4 h-4" />
-                  {product.views.toLocaleString()} views
-                </span>
-              )}
               {product.createdAt && (
                 <span className="inline-flex items-center gap-1.5">
                   <Calendar className="w-4 h-4" />

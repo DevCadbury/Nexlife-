@@ -62,7 +62,7 @@ const Footer = () => {
         aria-hidden="true"
       >
         <img
-          src="/map.png"
+          src="/ICONS/map.png"
           alt=""
           className="w-full h-full object-cover opacity-[0.05]"
           loading="lazy"
