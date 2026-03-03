@@ -1044,7 +1044,7 @@ const HomeNew = () => {
                       style={{ width: cardW }}
                     >
                       {/* Card – full-image with hover overlay */}
-                      <div className="relative overflow-hidden rounded-2xl shadow-md transition-all duration-300 group-hover:-translate-y-1.5 group-hover:shadow-2xl group-hover:shadow-blue-500/25">
+                      <div className="relative overflow-hidden rounded-2xl shadow-md border-2 border-gray-200 dark:border-gray-700/60 transition-all duration-300 group-hover:-translate-y-1.5 group-hover:shadow-2xl group-hover:shadow-blue-500/25 group-hover:border-blue-400/60 dark:group-hover:border-blue-500/60">
 
                         {/* Square image */}
                         <div className="relative aspect-square bg-gray-100 dark:bg-gray-800 overflow-hidden">

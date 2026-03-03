@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Award, Users, Globe, TrendingUp } from 'lucide-react';
 import aboutImage from '../assets/images/about_us.png';
 import nexlifeVideo from '../assets/images/nexlife_video.mp4';
+import mapImg from '../assets/images/map.png';
 
 const StatCard = ({ icon: Icon, value, label, delay = 0 }) => (
   <motion.div
@@ -115,6 +116,69 @@ const About = () => {
 
       {/* Reuse Mission Vision Component */}
       <MissionVision />
+
+      {/* Global Presence */}
+      <section className="py-20 bg-slate-900 text-white relative overflow-hidden">
+        <div
+          className="absolute inset-0 bg-center bg-no-repeat bg-contain opacity-20"
+          style={{ backgroundImage: `url(${mapImg})` }}
+        />
+        <div className="container-custom relative z-10 text-center">
+          <div className="inline-flex items-center justify-center p-3 bg-white/10 rounded-full mb-6 backdrop-blur-sm">
+            <Globe className="w-6 h-6 text-blue-400 animate-pulse" />
+          </div>
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-4xl sm:text-5xl font-bold mb-6"
+          >
+            Global Footprint
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="text-xl text-slate-300 max-w-2xl mx-auto mb-12"
+          >
+            Delivering health across borders. Our products are trusted by healthcare professionals in over{' '}
+            <span className="text-white font-bold">50+ countries</span>.
+          </motion.p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 text-sm font-medium text-slate-400">
+            {['South East Asia', 'Africa', 'Latin America', 'CIS Countries', 'Middle East', 'Europe'].map((region, i) => (
+              <motion.div
+                key={region}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.07 }}
+                className="p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-blue-500/50 hover:text-white transition-all duration-300 cursor-default"
+              >
+                {region}
+              </motion.div>
+            ))}
+          </div>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3 }}
+            className="mt-16"
+          >
+            <div className="inline-block p-8 rounded-2xl bg-gradient-to-r from-blue-900/50 to-indigo-900/50 border border-white/10 backdrop-blur-md">
+              <h3 className="text-2xl font-bold mb-2">Interested in Importing?</h3>
+              <p className="text-slate-300 mb-6">Partner with us for reliable pharmaceutical supply.</p>
+              <a
+                href="/contact"
+                className="px-8 py-3 bg-blue-600 hover:bg-blue-500 rounded-lg font-bold transition-colors shadow-lg shadow-blue-900/50 inline-block"
+              >
+                Become a Partner
+              </a>
+            </div>
+          </motion.div>
+        </div>
+      </section>
 
       {/* Certifications (Visual Strip) */}
       <section className="py-24 bg-slate-50 border-t border-slate-200">
