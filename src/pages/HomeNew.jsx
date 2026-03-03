@@ -519,7 +519,7 @@ const HomeNew = () => {
       const containerW = hpContainerRef.current.offsetWidth;
       if (containerW === 0) return;
       const w = window.innerWidth;
-      const numVisible = w >= 1280 ? 5 : w >= 1024 ? 4 : w >= 640 ? 3 : 2;
+      const numVisible = w >= 1280 ? 5 : w >= 1024 ? 4 : w >= 640 ? 3 : 1;
       const cw = (containerW - (numVisible - 1) * HP_GAP) / numVisible;
       setHpCW(Math.max(cw, 80));
     };
@@ -1013,7 +1013,7 @@ const HomeNew = () => {
               {/* Viewport: clips the scrolling track */}
               <div
                 ref={hpContainerRef}
-                className="overflow-hidden mx-10 sm:mx-14"
+                className="overflow-hidden"
                 onTouchStart={hpTouchStart}
                 onTouchMove={hpTouchMove}
                 onTouchEnd={hpTouchEnd}
@@ -1031,7 +1031,7 @@ const HomeNew = () => {
                 >
                   {hpExt.map((item, i) => {
                     const w = window.innerWidth;
-                    const numVisible = w >= 1280 ? 5 : w >= 1024 ? 4 : w >= 640 ? 3 : 2;
+                    const numVisible = w >= 1280 ? 5 : w >= 1024 ? 4 : w >= 640 ? 3 : 1;
                     const cardW = hpCW > 0
                       ? hpCW
                       : `calc(${100 / numVisible}% - ${HP_GAP * (numVisible - 1) / numVisible}px)`;
@@ -1042,52 +1042,50 @@ const HomeNew = () => {
                       className="flex-shrink-0 group cursor-pointer"
                       style={{ width: cardW }}
                     >
-                      {/* Card */}
-                      <div className="relative h-full bg-white dark:bg-gray-800/80 rounded-2xl border-2 border-gray-100 dark:border-gray-700/60 overflow-hidden shadow-md transition-all duration-350 group-hover:shadow-2xl group-hover:shadow-blue-500/20 group-hover:border-blue-400/70 dark:group-hover:border-blue-500/60 group-hover:-translate-y-1.5">
+                      {/* Card – full-image with hover overlay */}
+                      <div className="relative overflow-hidden rounded-2xl shadow-md transition-all duration-300 group-hover:-translate-y-1.5 group-hover:shadow-2xl group-hover:shadow-blue-500/25">
 
-                        {/* Image area */}
-                        <div className="relative h-36 sm:h-40 bg-gradient-to-br from-slate-50 via-blue-50/20 to-indigo-50/30 dark:from-gray-900 dark:via-blue-950/20 dark:to-indigo-950/20 overflow-hidden flex items-center justify-center p-3">
+                        {/* Full-height image */}
+                        <div className="relative h-52 sm:h-60 lg:h-64 bg-gray-100 dark:bg-gray-800 overflow-hidden">
                           {item.image?.url ? (
                             <img
                               src={item.image.url}
                               alt={item.name}
                               loading="lazy"
                               decoding="async"
-                              className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110 drop-shadow-md"
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                             />
                           ) : (
-                            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 flex items-center justify-center">
-                              <span className="text-2xl">💊</span>
+                            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-700">
+                              <span className="text-5xl">💊</span>
                             </div>
                           )}
-                          {/* Top-right glow dot */}
-                          <div className="absolute top-3 right-3 w-2 h-2 rounded-full bg-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-[0_0_8px_rgba(96,165,250,0.8)]" />
-                        </div>
 
-                        {/* Info */}
-                        <div className="px-3 py-2.5">
-                          {item.category && (
-                            <span className="inline-block text-[10px] font-bold tracking-widest uppercase text-blue-600 dark:text-blue-400 mb-1.5 px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 rounded-full border border-blue-100 dark:border-blue-800/50">
-                              {item.category}
-                            </span>
-                          )}
-                          <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white line-clamp-2 leading-snug group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200">
-                            {item.name}
-                          </h3>
-                          {item.labels?.length > 0 && (
-                            <div className="flex flex-wrap gap-1 mt-2">
-                              {item.labels.slice(0, 3).map((l, li) => (
-                                <span
-                                  key={li}
-                                  className="text-[10px] px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full border border-gray-200 dark:border-gray-600"
-                                >
-                                  {l.value || l.key}
-                                </span>
-                              ))}
+                          {/* Hover overlay – details pane */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-end p-4">
+                            {item.category && (
+                              <span className="text-[10px] font-bold tracking-widest uppercase text-blue-300 mb-1">
+                                {item.category}
+                              </span>
+                            )}
+                            <h3 className="text-sm sm:text-base font-semibold text-white line-clamp-2 leading-snug">
+                              {item.name}
+                            </h3>
+                            {item.labels?.length > 0 && (
+                              <div className="flex flex-wrap gap-1 mt-1.5">
+                                {item.labels.slice(0, 3).map((l, li) => (
+                                  <span
+                                    key={li}
+                                    className="text-[10px] px-2 py-0.5 bg-white/20 text-white rounded-full"
+                                  >
+                                    {l.value || l.key}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                            <div className="mt-2.5 flex items-center text-xs font-medium text-blue-300">
+                              View Details <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
                             </div>
-                          )}
-                          <div className="mt-3 flex items-center text-xs font-medium text-blue-600 dark:text-blue-400 opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 transition-all duration-200">
-                            View Details <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
                           </div>
                         </div>
 
