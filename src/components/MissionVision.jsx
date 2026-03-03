@@ -26,7 +26,7 @@ const cards = [
 ];
 
 const MissionVision = () => (
-  <section className="py-20 bg-gradient-to-br from-gray-50 to-blue-50">
+  <section className="py-20 bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-900">
     <div className="container-custom">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -35,9 +35,9 @@ const MissionVision = () => (
         transition={{ duration: 0.6 }}
         className="text-center mb-14"
       >
-        <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-3">Our Core Values</h2>
+        <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-3">Our Core Values</h2>
         <div className="h-1.5 w-24 bg-primary-500 mx-auto rounded-full mb-6" />
-        <p className="text-slate-600 max-w-2xl mx-auto text-lg">
+        <p className="text-slate-600 dark:text-gray-400 max-w-2xl mx-auto text-lg">
           Understanding our mission, vision, and goals helps you know what drives us forward.
         </p>
       </motion.div>
@@ -50,13 +50,13 @@ const MissionVision = () => (
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: i * 0.12, duration: 0.6 }}
-            className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 hover:shadow-xl transition-shadow duration-300 flex flex-col"
+            className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-slate-100 dark:border-gray-700 p-8 hover:shadow-xl transition-shadow duration-300 flex flex-col"
           >
             <div className="w-14 h-14 mb-5">
               <img src={card.image} alt={card.title} className="w-full h-full object-contain" loading="lazy" />
             </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-3">{card.title}</h3>
-            <p className="text-slate-600 leading-relaxed flex-1">{card.description}</p>
+            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">{card.title}</h3>
+            <p className="text-slate-600 dark:text-gray-300 leading-relaxed flex-1">{card.description}</p>
           </motion.div>
         ))}
       </div>
