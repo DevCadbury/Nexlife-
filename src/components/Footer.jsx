@@ -14,7 +14,6 @@ import {
 } from "lucide-react";
 import logo from "../assets/images/nexlife-logo.png";
 import footerBg from "../assets/images/footer_background.jpg";
-import mapImg from "../assets/images/map.png";
 
 const Footer = () => {
   const { t } = useTranslation();
@@ -127,14 +126,14 @@ const Footer = () => {
             <div className="space-y-4">
               <a
                 href="mailto:Info@nexlifeinternational.com"
-                className="flex items-start gap-3 text-slate-400 hover:text-blue-400 text-sm transition-colors duration-200 group"
+                className="flex items-start gap-3 text-slate-200 hover:text-blue-400 text-sm transition-colors duration-200 group"
               >
                 <span className="w-8 h-8 rounded-lg bg-blue-600/20 border border-blue-500/30 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-600/40 transition-colors">
                   <Mail className="w-3.5 h-3.5 text-blue-400" />
                 </span>
                 <span className="break-all pt-1">Info@nexlifeinternational.com</span>
               </a>
-              <div className="flex items-start gap-3 text-slate-400 text-sm">
+              <div className="flex items-start gap-3 text-slate-200 text-sm">
                 <span className="w-8 h-8 rounded-lg bg-blue-600/20 border border-blue-500/30 flex items-center justify-center flex-shrink-0">
                   <Phone className="w-3.5 h-3.5 text-blue-400" />
                 </span>
@@ -147,7 +146,7 @@ const Footer = () => {
                 href="https://maps.google.com/?q=S-223+Angel+Business+Center+2+Near+ABC+Circle+Mota+Varachha+Surat+394101+Gujarat"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-start gap-3 text-slate-400 hover:text-blue-400 text-sm transition-colors duration-200 group"
+                className="flex items-start gap-3 text-slate-200 hover:text-blue-400 text-sm transition-colors duration-200 group"
               >
                 <span className="w-8 h-8 rounded-lg bg-blue-600/20 border border-blue-500/30 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-600/40 transition-colors">
                   <MapPin className="w-3.5 h-3.5 text-blue-400" />
