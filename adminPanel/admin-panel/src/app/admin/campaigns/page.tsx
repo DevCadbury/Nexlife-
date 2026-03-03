@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { api } from "@/lib/api";
 import { motion, AnimatePresence } from "framer-motion";
 import useSWR from "swr";
@@ -27,6 +27,11 @@ import {
   Search,
   FileSpreadsheet,
   UserPlus,
+  BookMarked,
+  Tag,
+  Users2,
+  Save,
+  Edit2,
 } from "lucide-react";
 
 // Email Templates
@@ -216,7 +221,7 @@ const emailTemplates = {
 
 export default function Campaigns() {
   // State Management
-  const [activeTab, setActiveTab] = useState<"create" | "history" | "templates">("create");
+  const [activeTab, setActiveTab] = useState<"create" | "history" | "templates" | "lists">("create");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [htmlContent, setHtmlContent] = useState("");
@@ -237,6 +242,23 @@ export default function Campaigns() {
   
   // Notification state
   const [notification, setNotification] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
+
+  // Custom dialog (replaces native alert / confirm)
+  const [dialog, setDialog] = useState<{
+    open: boolean;
+    type: "error" | "warning" | "confirm";
+    title: string;
+    message: string;
+    onConfirm?: () => void;
+  }>({ open: false, type: "error", title: "", message: "" });
+
+  const showAlert = (title: string, message: string, type: "error" | "warning" = "error") =>
+    setDialog({ open: true, type, title, message });
+
+  const showConfirm = (title: string, message: string, onConfirm: () => void) =>
+    setDialog({ open: true, type: "confirm", title, message, onConfirm });
+
+  const closeDialog = () => setDialog((d) => ({ ...d, open: false }));
   
   // Campaign detail expansion state
   const [expandedCampaigns, setExpandedCampaigns] = useState<Set<string>>(new Set());
@@ -248,7 +270,20 @@ export default function Campaigns() {
   const [searchQuery, setSearchQuery] = useState("");
   const [recipientMode, setRecipientMode] = useState<"all" | "selected">("all");
   const [showRecipientModal, setShowRecipientModal] = useState(false);
-  
+
+  // Subscriber Lists state
+  const [listName, setListName] = useState("");
+  const [listDescription, setListDescription] = useState("");
+  const [editingListId, setEditingListId] = useState<string | null>(null);
+  const [editingListEmails, setEditingListEmails] = useState<string[]>([]);
+  const [listSearchQuery, setListSearchQuery] = useState("");
+  const [showSaveListModal, setShowSaveListModal] = useState(false);
+  const [saveListName, setSaveListName] = useState("");
+
+  // Modal subscriber filters
+  const [subscriberFilter, setSubscriberFilter] = useState<"all" | "never" | "old" | "recent">("all");
+  const [domainFilter, setDomainFilter] = useState("");
+
   // File Upload
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -270,12 +305,47 @@ export default function Campaigns() {
     fetcher
   );
 
+  // Fetch subscriber lists
+  const { data: subscriberListsData, mutate: mutateSubscriberLists } = useSWR("/subscriber-lists", fetcher);
+
   const campaignHistory = campaignHistoryData?.items || [];
   const subscribers = subscribersData?.items || [];
   const customTemplates = templatesData?.items || [];
-  const filteredSubscribers = subscribers.filter((sub: any) =>
-    sub.email.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const subscriberLists = subscriberListsData?.items || [];
+
+  // Build last-sent map from campaign history (email -> most recent send date)
+  const lastSentMap = useMemo(() => {
+    const map: Record<string, Date> = {};
+    for (const c of campaignHistory) {
+      const date = new Date(c.createdAt);
+      for (const email of (c.sentTo || [])) {
+        if (!map[email] || date > map[email]) map[email] = date;
+      }
+    }
+    return map;
+  }, [campaignHistory]);
+
+  // Filtered subscribers for the selection modal, with all active filters applied
+  const filteredModalSubscribers = useMemo(() => {
+    let result = subscribers;
+    if (searchQuery)
+      result = result.filter((s: any) => s.email.toLowerCase().includes(searchQuery.toLowerCase()));
+    if (domainFilter)
+      result = result.filter((s: any) => s.email.toLowerCase().includes(domainFilter.toLowerCase()));
+    if (subscriberFilter === "never")
+      result = result.filter((s: any) => !lastSentMap[s.email]);
+    if (subscriberFilter === "old")
+      result = result.filter((s: any) => {
+        const d = lastSentMap[s.email];
+        return d && Date.now() - new Date(d).getTime() > 30 * 864e5;
+      });
+    if (subscriberFilter === "recent")
+      result = result.filter((s: any) => {
+        const d = lastSentMap[s.email];
+        return d && Date.now() - new Date(d).getTime() <= 30 * 864e5;
+      });
+    return result;
+  }, [subscribers, searchQuery, domainFilter, subscriberFilter, lastSentMap]);
 
   // Generate HTML from template
   const generateEmailHtml = () => {
@@ -347,6 +417,85 @@ export default function Campaigns() {
     setSelectedRecipients([]);
   };
 
+  // ── Subscriber List CRUD ──────────────────────────────────────────────
+  async function saveSubscriberList() {
+    if (!listName.trim() || loading) return;
+    setLoading(true);
+    try {
+      if (editingListId) {
+        await api.put(`/subscriber-lists/${editingListId}`, {
+          name: listName,
+          description: listDescription,
+          emails: editingListEmails,
+        });
+      } else {
+        await api.post("/subscriber-lists", {
+          name: listName,
+          description: listDescription,
+          emails: editingListEmails,
+        });
+      }
+      mutateSubscriberLists();
+      setListName(""); setListDescription("");
+      setEditingListId(null); setEditingListEmails([]);
+      setNotification({ type: "success", message: editingListId ? "List updated!" : "List saved!" });
+      setTimeout(() => setNotification(null), 3000);
+    } catch {
+      showAlert("Error", "Failed to save list");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function deleteSubscriberList(id: string) {
+    showConfirm("Delete List", "Are you sure you want to delete this list? This cannot be undone.", async () => {
+      try {
+        await api.delete(`/subscriber-lists/${id}`);
+        mutateSubscriberLists();
+        setNotification({ type: "success", message: "List deleted." });
+        setTimeout(() => setNotification(null), 3000);
+      } catch {
+        showAlert("Error", "Failed to delete list");
+      }
+    });
+  }
+
+  function loadListAsRecipients(list: any) {
+    setSelectedRecipients(list.emails || []);
+    setRecipientMode("selected");
+    setActiveTab("create");
+    setNotification({
+      type: "success",
+      message: `Loaded "${list.name}" — ${list.emails?.length || 0} recipients ready`,
+    });
+    setTimeout(() => setNotification(null), 3000);
+  }
+
+  async function saveSelectionAsList() {
+    if (!saveListName.trim() || selectedRecipients.length === 0) return;
+    setLoading(true);
+    try {
+      await api.post("/subscriber-lists", {
+        name: saveListName,
+        description: "",
+        emails: selectedRecipients,
+      });
+      mutateSubscriberLists();
+      setShowSaveListModal(false);
+      setSaveListName("");
+      setNotification({
+        type: "success",
+        message: `List "${saveListName}" saved with ${selectedRecipients.length} recipients!`,
+      });
+      setTimeout(() => setNotification(null), 3000);
+    } catch {
+      showAlert("Error", "Failed to save list");
+    } finally {
+      setLoading(false);
+    }
+  }
+  // ─────────────────────────────────────────────────────────────────────
+
   // Handle file upload
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -413,25 +562,24 @@ export default function Campaigns() {
       setEditingTemplateId(null);
     } catch (error) {
 
-      alert("Failed to save template");
+      showAlert("Error", "Failed to save template");
     } finally {
       setLoading(false);
     }
   }
 
   async function deleteTemplate(id: string) {
-    if (!confirm("Are you sure you want to delete this template?")) return;
-    
-    setLoading(true);
-    try {
-      await api.delete(`/templates/${id}`);
-      mutateTemplates();
-    } catch (error) {
-
-      alert("Failed to delete template");
-    } finally {
-      setLoading(false);
-    }
+    showConfirm("Delete Template", "Are you sure you want to delete this template? This cannot be undone.", async () => {
+      setLoading(true);
+      try {
+        await api.delete(`/templates/${id}`);
+        mutateTemplates();
+      } catch (error) {
+        showAlert("Error", "Failed to delete template");
+      } finally {
+        setLoading(false);
+      }
+    });
   }
 
   function loadTemplateForEditing(template: any) {
@@ -481,7 +629,7 @@ export default function Campaigns() {
     if (!subject.trim() || !contentToSend.trim() || loading) return;
     
     if (recipientMode === "selected" && selectedRecipients.length === 0) {
-      alert("Please select at least one recipient");
+      showAlert("No Recipients", "Please select at least one recipient before sending.", "warning");
       return;
     }
 
@@ -601,6 +749,30 @@ export default function Campaigns() {
               Templates ({customTemplates.length})
             </div>
             {activeTab === "templates" && (
+              <motion.div
+                layoutId="activeTab"
+                className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 dark:bg-blue-400"
+              />
+            )}
+          </button>
+          <button
+            onClick={() => setActiveTab("lists")}
+            className={`pb-3 px-4 font-medium transition-colors relative ${
+              activeTab === "lists"
+                ? "text-blue-600 dark:text-blue-400"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <BookMarked className="w-5 h-5" />
+              Subscriber Lists
+              {subscriberLists.length > 0 && (
+                <span className="bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-xs font-bold px-1.5 py-0.5 rounded-full">
+                  {subscriberLists.length}
+                </span>
+              )}
+            </div>
+            {activeTab === "lists" && (
               <motion.div
                 layoutId="activeTab"
                 className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 dark:bg-blue-400"
@@ -1245,6 +1417,195 @@ export default function Campaigns() {
               )}
             </motion.div>
           </div>
+        ) : activeTab === "lists" ? (
+          // Subscriber Lists Management Tab
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Create / Edit List Form */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700"
+            >
+              <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-5 flex items-center gap-2">
+                <BookMarked className="w-5 h-5 text-indigo-600" />
+                {editingListId ? "Edit List" : "Create Subscriber List"}
+              </h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">List Name *</label>
+                  <input
+                    type="text"
+                    value={listName}
+                    onChange={(e) => setListName(e.target.value)}
+                    placeholder="e.g. South East Asia Pharma"
+                    className="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg px-4 py-2 text-slate-900 dark:text-white placeholder-slate-500 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Description (optional)</label>
+                  <textarea
+                    value={listDescription}
+                    onChange={(e) => setListDescription(e.target.value)}
+                    rows={2}
+                    placeholder="Notes about this list..."
+                    className="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg px-4 py-2 text-slate-900 dark:text-white placeholder-slate-500 focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
+                  />
+                </div>
+
+                {/* Subscriber picker */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                      Select Subscribers
+                      <span className="ml-2 font-bold text-indigo-600 dark:text-indigo-400">{editingListEmails.length} selected</span>
+                    </label>
+                    <div className="flex gap-2 text-xs">
+                      <button onClick={() => setEditingListEmails(subscribers.map((s: any) => s.email))} className="text-blue-600 hover:text-blue-700">All</button>
+                      <span className="text-slate-400">|</span>
+                      <button onClick={() => setEditingListEmails([])} className="text-red-600 hover:text-red-700">Clear</button>
+                    </div>
+                  </div>
+                  <div className="relative mb-2">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <input
+                      type="text"
+                      placeholder="Search subscribers..."
+                      value={listSearchQuery}
+                      onChange={(e) => setListSearchQuery(e.target.value)}
+                      className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-sm text-slate-900 dark:text-white placeholder-slate-500 focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                  <div className="max-h-56 overflow-y-auto border border-slate-200 dark:border-slate-700 rounded-lg p-2 bg-slate-50 dark:bg-slate-900/40 space-y-1">
+                    {subscribers
+                      .filter((s: any) => s.email.toLowerCase().includes(listSearchQuery.toLowerCase()))
+                      .map((subscriber: any) => {
+                        const isSelected = editingListEmails.includes(subscriber.email);
+                        const lastSent = lastSentMap[subscriber.email];
+                        const daysAgo = lastSent ? Math.floor((Date.now() - new Date(lastSent).getTime()) / 864e5) : null;
+                        return (
+                          <div
+                            key={subscriber.email}
+                            onClick={() =>
+                              setEditingListEmails((prev) =>
+                                isSelected ? prev.filter((e) => e !== subscriber.email) : [...prev, subscriber.email]
+                              )
+                            }
+                            className={`flex items-center gap-2 p-2 rounded cursor-pointer transition-colors ${
+                              isSelected ? "bg-indigo-100 dark:bg-indigo-900/30" : "hover:bg-slate-100 dark:hover:bg-slate-800"
+                            }`}
+                          >
+                            <div className={`w-4 h-4 rounded border-2 flex-shrink-0 flex items-center justify-center ${
+                              isSelected ? "border-indigo-600 bg-indigo-600" : "border-slate-300 dark:border-slate-600"
+                            }`}>
+                              {isSelected && <CheckCircle2 className="w-3 h-3 text-white" />}
+                            </div>
+                            <span className="text-xs text-slate-900 dark:text-white truncate flex-1">{subscriber.email}</span>
+                            <span className="text-[10px] text-slate-400 flex-shrink-0">
+                              {daysAgo === null ? "never" : daysAgo === 0 ? "today" : `${daysAgo}d ago`}
+                            </span>
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={saveSubscriberList}
+                    disabled={loading || !listName.trim() || editingListEmails.length === 0}
+                    className="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-400 disabled:cursor-not-allowed text-white py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                  >
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                    {editingListId ? "Update List" : "Save List"}
+                  </button>
+                  {editingListId && (
+                    <button
+                      onClick={() => { setEditingListId(null); setListName(""); setListDescription(""); setEditingListEmails([]); }}
+                      className="px-4 bg-slate-600 hover:bg-slate-700 text-white py-2 rounded-lg font-medium transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Saved Lists */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700"
+            >
+              <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-5 flex items-center gap-2">
+                <Users2 className="w-5 h-5 text-blue-600" />
+                Saved Lists
+                <span className="text-sm font-normal text-slate-500 dark:text-slate-400">({subscriberLists.length})</span>
+              </h2>
+              {subscriberLists.length === 0 ? (
+                <div className="text-center py-16">
+                  <BookMarked className="w-14 h-14 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+                  <p className="text-slate-600 dark:text-slate-400 font-medium">No lists yet</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-500 mt-1">Create your first subscriber list using the form</p>
+                </div>
+              ) : (
+                <div className="space-y-3 max-h-[580px] overflow-y-auto">
+                  {subscriberLists.map((list: any) => (
+                    <div key={list._id} className="border border-slate-200 dark:border-slate-700 rounded-xl p-4 hover:shadow-md transition-shadow">
+                      <div className="mb-3">
+                        <h3 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                          <Tag className="w-4 h-4 text-indigo-500 flex-shrink-0" />
+                          {list.name}
+                        </h3>
+                        {list.description && (
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 ml-6">{list.description}</p>
+                        )}
+                        <div className="flex items-center gap-4 mt-2 ml-6 text-xs text-slate-500 dark:text-slate-400">
+                          <span className="flex items-center gap-1">
+                            <Users className="w-3 h-3" />
+                            {list.emails?.length || 0} subscribers
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {new Date(list.createdAt).toLocaleDateString()}
+                          </span>
+                          {list.createdByName && (
+                            <span>by {list.createdByName}</span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => loadListAsRecipients(list)}
+                          className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-1.5 px-3 rounded-lg text-xs font-medium transition-colors flex items-center justify-center gap-1.5"
+                        >
+                          <Send className="w-3 h-3" />
+                          Use as Recipients
+                        </button>
+                        <button
+                          onClick={() => {
+                            setEditingListId(list._id);
+                            setListName(list.name);
+                            setListDescription(list.description || "");
+                            setEditingListEmails(list.emails || []);
+                          }}
+                          className="bg-yellow-600 hover:bg-yellow-700 text-white py-1.5 px-3 rounded-lg text-xs font-medium transition-colors flex items-center gap-1"
+                        >
+                          <Edit2 className="w-3 h-3" />
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => deleteSubscriberList(list._id)}
+                          className="bg-red-600 hover:bg-red-700 text-white py-1.5 px-3 rounded-lg text-xs font-medium transition-colors"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          </div>
         ) : (
           // Campaign History Tab
           <motion.div
@@ -1429,96 +1790,172 @@ export default function Campaigns() {
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.95, opacity: 0 }}
                 onClick={(e) => e.stopPropagation()}
-                className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col"
+                className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col"
               >
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                    <Users className="w-5 h-5 text-blue-600" />
                     Select Subscribers
                   </h3>
-                  <button
-                    onClick={() => setShowRecipientModal(false)}
-                    className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
-                  >
+                  <button onClick={() => setShowRecipientModal(false)} className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
                     <X className="w-6 h-6" />
                   </button>
                 </div>
 
-                {/* Search */}
-                <div className="mb-4">
+                {/* Load from saved list */}
+                {subscriberLists.length > 0 && (
+                  <div className="mb-4 p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border border-indigo-200 dark:border-indigo-800">
+                    <p className="text-xs font-semibold text-indigo-700 dark:text-indigo-300 mb-2 flex items-center gap-1.5">
+                      <BookMarked className="w-3.5 h-3.5" />
+                      Load from Saved List
+                    </p>
+                    <select
+                      className="w-full bg-white dark:bg-slate-700 border border-indigo-300 dark:border-indigo-700 rounded-lg px-3 py-1.5 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                      defaultValue=""
+                      onChange={(e) => {
+                        if (!e.target.value) return;
+                        const list = subscriberLists.find((l: any) => l._id === e.target.value);
+                        if (list) {
+                          const merged = Array.from(new Set([...selectedRecipients, ...list.emails]));
+                          setSelectedRecipients(merged as string[]);
+                          setNotification({ type: "success", message: `"${list.name}" loaded — ${list.emails.length} emails added` });
+                          setTimeout(() => setNotification(null), 3000);
+                        }
+                        e.target.value = "";
+                      }}
+                    >
+                      <option value="">Choose a list to load...</option>
+                      {subscriberLists.map((list: any) => (
+                        <option key={list._id} value={list._id}>
+                          {list.name} ({list.emails?.length || 0} emails)
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {/* Search + domain filter */}
+                <div className="mb-3 space-y-2">
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     <input
                       type="text"
                       placeholder="Search subscribers..."
-                      className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-sm text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
                   </div>
+                  <input
+                    type="text"
+                    placeholder="Filter by domain (e.g. gmail.com, pharma.com)"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-sm text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    value={domainFilter}
+                    onChange={(e) => setDomainFilter(e.target.value)}
+                  />
                 </div>
 
-                {/* Action Buttons */}
-                <div className="flex gap-2 mb-4">
+                {/* Send-history filter chips */}
+                <div className="mb-3 flex flex-wrap items-center gap-2">
+                  {(["all", "never", "old", "recent"] as const).map((f) => (
+                    <button
+                      key={f}
+                      onClick={() => setSubscriberFilter(f)}
+                      className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                        subscriberFilter === f
+                          ? "bg-blue-600 text-white"
+                          : "bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-blue-100 dark:hover:bg-blue-900/30"
+                      }`}
+                    >
+                      {f === "all" && "All"}
+                      {f === "never" && "Never Emailed"}
+                      {f === "old" && "> 30 Days Ago"}
+                      {f === "recent" && "< 30 Days"}
+                    </button>
+                  ))}
+                  <span className="ml-auto text-xs text-slate-500 dark:text-slate-400">
+                    {filteredModalSubscribers.length} shown
+                  </span>
+                </div>
+
+                {/* Select All / Clear */}
+                <div className="flex gap-3 mb-3">
                   <button
-                    onClick={selectAllSubscribers}
+                    onClick={() => {
+                      const newEmails = filteredModalSubscribers.map((s: any) => s.email);
+                      setSelectedRecipients(Array.from(new Set([...selectedRecipients, ...newEmails])) as string[]);
+                    }}
                     className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
                   >
                     Select All
                   </button>
                   <span className="text-slate-400">|</span>
-                  <button
-                    onClick={clearAllRecipients}
-                    className="text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
-                  >
+                  <button onClick={clearAllRecipients} className="text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300">
                     Clear All
                   </button>
                 </div>
 
-                {/* Subscriber List */}
-                <div className="flex-1 overflow-y-auto space-y-2">
-                  {filteredSubscribers.length === 0 ? (
-                    <div className="text-center py-8 text-slate-500 dark:text-slate-400">
-                      No subscribers found
-                    </div>
+                {/* Subscriber list */}
+                <div className="flex-1 overflow-y-auto space-y-1.5">
+                  {filteredModalSubscribers.length === 0 ? (
+                    <div className="text-center py-8 text-slate-500 dark:text-slate-400">No subscribers found</div>
                   ) : (
-                    filteredSubscribers.map((subscriber: any) => (
-                      <div
-                        key={subscriber.email}
-                        onClick={() => toggleSubscriber(subscriber.email)}
-                        className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
-                          selectedRecipients.includes(subscriber.email)
-                            ? "border-blue-600 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20"
-                            : "border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500"
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
-                            selectedRecipients.includes(subscriber.email)
+                    filteredModalSubscribers.map((subscriber: any) => {
+                      const lastSent = lastSentMap[subscriber.email];
+                      const daysAgo = lastSent
+                        ? Math.floor((Date.now() - new Date(lastSent).getTime()) / 864e5)
+                        : null;
+                      const isSelected = selectedRecipients.includes(subscriber.email);
+                      return (
+                        <div
+                          key={subscriber.email}
+                          onClick={() => toggleSubscriber(subscriber.email)}
+                          className={`p-2.5 rounded-lg border-2 cursor-pointer transition-all flex items-center gap-3 ${
+                            isSelected
+                              ? "border-blue-600 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20"
+                              : "border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500"
+                          }`}
+                        >
+                          <div className={`w-5 h-5 rounded border-2 flex-shrink-0 flex items-center justify-center ${
+                            isSelected
                               ? "border-blue-600 dark:border-blue-400 bg-blue-600 dark:bg-blue-400"
                               : "border-slate-300 dark:border-slate-600"
                           }`}>
-                            {selectedRecipients.includes(subscriber.email) && (
-                              <CheckCircle2 className="w-4 h-4 text-white" />
-                            )}
+                            {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
                           </div>
-                          <div className="flex-1">
-                            <div className="font-medium text-slate-900 dark:text-white">
-                              {subscriber.email}
-                            </div>
-                            <div className="text-xs text-slate-500 dark:text-slate-400">
-                              Subscribed {new Date(subscriber.subscribedAt).toLocaleDateString()}
-                            </div>
-                          </div>
+                          <span className="flex-1 text-sm font-medium text-slate-900 dark:text-white truncate">
+                            {subscriber.email}
+                          </span>
+                          <span className={`flex-shrink-0 text-xs px-2 py-0.5 rounded-full ${
+                            daysAgo === null
+                              ? "bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400"
+                              : daysAgo <= 7
+                              ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
+                              : daysAgo <= 30
+                              ? "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400"
+                              : "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400"
+                          }`}>
+                            {daysAgo === null ? "Never sent" : daysAgo === 0 ? "Today" : `${daysAgo}d ago`}
+                          </span>
                         </div>
-                      </div>
-                    ))
+                      );
+                    })
                   )}
                 </div>
 
                 {/* Footer */}
                 <div className="mt-4 flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-700">
-                  <div className="text-sm text-slate-600 dark:text-slate-400">
-                    {selectedRecipients.length} selected
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm text-slate-600 dark:text-slate-400">{selectedRecipients.length} selected</span>
+                    {selectedRecipients.length > 0 && (
+                      <button
+                        onClick={() => { setSaveListName(""); setShowSaveListModal(true); }}
+                        className="flex items-center gap-1.5 text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 border border-indigo-300 dark:border-indigo-700 px-2.5 py-1 rounded-lg transition-colors"
+                      >
+                        <Save className="w-3 h-3" />
+                        Save as List
+                      </button>
+                    )}
                   </div>
                   <button
                     onClick={() => setShowRecipientModal(false)}
@@ -1526,6 +1963,136 @@ export default function Campaigns() {
                   >
                     Done
                   </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Save Selection as List Modal */}
+        <AnimatePresence>
+          {showSaveListModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4"
+              onClick={() => setShowSaveListModal(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-2xl w-full max-w-sm"
+              >
+                <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
+                  <BookMarked className="w-5 h-5 text-indigo-600" />
+                  Save as Subscriber List
+                </h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
+                  {selectedRecipients.length} recipients will be saved in this list.
+                </p>
+                <input
+                  type="text"
+                  autoFocus
+                  placeholder="List name (e.g. South Asia Pharma Partners)"
+                  value={saveListName}
+                  onChange={(e) => setSaveListName(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && saveSelectionAsList()}
+                  className="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg px-4 py-2.5 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent mb-4"
+                />
+                <div className="flex gap-2">
+                  <button
+                    onClick={saveSelectionAsList}
+                    disabled={!saveListName.trim() || loading}
+                    className="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-400 disabled:cursor-not-allowed text-white py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                  >
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                    Save List
+                  </button>
+                  <button onClick={() => setShowSaveListModal(false)} className="px-4 bg-slate-600 hover:bg-slate-700 text-white py-2 rounded-lg font-medium transition-colors">
+                    Cancel
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Custom Dialog Modal */}
+        <AnimatePresence>
+          {dialog.open && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[70] flex items-center justify-center p-4"
+              onClick={closeDialog}
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden"
+              >
+                {/* Coloured top strip */}
+                <div className={`h-1.5 w-full ${
+                  dialog.type === "confirm" ? "bg-amber-500" :
+                  dialog.type === "warning" ? "bg-yellow-500" :
+                  "bg-red-500"
+                }`} />
+                <div className="p-6">
+                  <div className="flex items-start gap-4 mb-4">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                      dialog.type === "confirm" ? "bg-amber-100 dark:bg-amber-900/30" :
+                      dialog.type === "warning" ? "bg-yellow-100 dark:bg-yellow-900/30" :
+                      "bg-red-100 dark:bg-red-900/30"
+                    }`}>
+                      {dialog.type === "confirm" ? (
+                        <Trash2 className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                      ) : dialog.type === "warning" ? (
+                        <AlertCircle className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+                      ) : (
+                        <XCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-slate-900 dark:text-white text-base">{dialog.title}</h3>
+                      <p className="text-slate-600 dark:text-slate-400 text-sm mt-1 leading-relaxed">{dialog.message}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 justify-end">
+                    {dialog.type === "confirm" ? (
+                      <>
+                        <button
+                          onClick={closeDialog}
+                          className="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={() => { closeDialog(); dialog.onConfirm?.(); }}
+                          className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-red-600 hover:bg-red-700 transition-colors"
+                        >
+                          Delete
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        onClick={closeDialog}
+                        className={`px-5 py-2 rounded-lg text-sm font-medium text-white transition-colors ${
+                          dialog.type === "warning"
+                            ? "bg-yellow-500 hover:bg-yellow-600"
+                            : "bg-red-600 hover:bg-red-700"
+                        }`}
+                      >
+                        OK
+                      </button>
+                    )}
+                  </div>
                 </div>
               </motion.div>
             </motion.div>

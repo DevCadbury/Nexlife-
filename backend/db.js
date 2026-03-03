@@ -57,6 +57,7 @@ export async function getCollections() {
     visitors: db.collection("visitors"),
     templates: db.collection("templates"),
     homeProducts: db.collection("homeProducts"),
+    subscriberLists: db.collection("subscriberLists"),
   };
 }
 
