@@ -118,7 +118,7 @@ const About = () => {
       <MissionVision />
 
       {/* Global Presence */}
-      <section className="py-20 bg-slate-900 text-white relative overflow-hidden">
+      <section className="py-20 bg-slate-900 text-white relative z-0 isolate overflow-hidden">
         <div
           className="absolute inset-0 bg-center bg-no-repeat bg-contain opacity-20"
           style={{ backgroundImage: `url(${mapImg})` }}

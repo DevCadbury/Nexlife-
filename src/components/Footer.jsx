@@ -13,7 +13,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import logo from "../assets/images/nexlife-logo.png";
-import footerBg from "../assets/images/footer_background.jpg";
+import mapImg from "../assets/images/map.png";
 
 const Footer = () => {
   const { t } = useTranslation();
@@ -56,12 +56,11 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="relative z-20 overflow-hidden text-slate-200">
+    <footer className="relative z-20 overflow-hidden text-slate-200 bg-slate-950">
       {/* ── Background layers ── */}
       <div className="absolute inset-0">
-        <img src={footerBg} alt="" className="w-full h-full object-cover" draggable={false} aria-hidden="true" />
-        {/* Dark overlay – lets background show through while keeping text readable */}
-        <div className="absolute inset-0 bg-slate-950/80" />
+        {/* Map overlay – imported so Vite hashes it correctly for production */}
+        <img src={mapImg} alt="" className="absolute inset-0 w-full h-full object-cover opacity-[0.12] mix-blend-screen pointer-events-none select-none" draggable={false} aria-hidden="true" />
         {/* Subtle top accent line */}
         <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600" />
       </div>
