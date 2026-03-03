@@ -763,8 +763,7 @@ const HomeNew = () => {
                       style={{ background: "linear-gradient(90deg,#3b82f6,#8b5cf6,#6366f1)" }}
                     />
                   </span>
-                  <br />
-                  Solutions
+                  <span className="block mt-3 sm:mt-2">Solutions</span>
                 </h1>
               </div>
 
