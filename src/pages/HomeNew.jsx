@@ -1045,8 +1045,8 @@ const HomeNew = () => {
                       {/* Card – full-image with hover overlay */}
                       <div className="relative overflow-hidden rounded-2xl shadow-md transition-all duration-300 group-hover:-translate-y-1.5 group-hover:shadow-2xl group-hover:shadow-blue-500/25">
 
-                        {/* Full-height image */}
-                        <div className="relative h-52 sm:h-60 lg:h-64 bg-gray-100 dark:bg-gray-800 overflow-hidden">
+                        {/* Square image */}
+                        <div className="relative aspect-square bg-gray-100 dark:bg-gray-800 overflow-hidden">
                           {item.image?.url ? (
                             <img
                               src={item.image.url}
