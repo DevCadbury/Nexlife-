@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import useSWR from "swr";
 import { api, fetcher } from "@/lib/api";
 import { useToast } from "@/components/ui/toast";
@@ -26,6 +26,16 @@ interface Label {
   key: string;
   value: string;
 }
+
+// LabelRow adds a stable _uid for drag-and-drop identity (stripped before saving)
+type LabelRow = Label & { _uid: string };
+
+let _uidCounter = 0;
+const newLabelRow = (key = "", value = ""): LabelRow => ({
+  key,
+  value,
+  _uid: `lbl-${++_uidCounter}`,
+});
 
 interface HomeProduct {
   _id: string;
@@ -53,20 +63,27 @@ function ProductModal({
   onClose,
   product,
   onSaved,
+  tagSuggestions = [],
+  removedSuggestions = [],
+  onRemoveSuggestion,
 }: {
   open: boolean;
   onClose: () => void;
   product: HomeProduct | null;
   onSaved: () => void;
+  tagSuggestions?: string[];
+  removedSuggestions?: string[];
+  onRemoveSuggestion?: (tag: string) => void;
 }) {
   const { toast } = useToast();
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
-  const [labels, setLabels] = useState<Label[]>([]);
+  const [labels, setLabels] = useState<LabelRow[]>([]);
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [confirmRemoveTag, setConfirmRemoveTag] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -74,21 +91,24 @@ function ProductModal({
     if (open) {
       setName(product?.name || "");
       setCategory(product?.category || "");
-      setLabels(product?.labels?.length ? [...product.labels] : [{ key: "", value: "" }]);
+      setLabels(
+        product?.labels?.length
+          ? product.labels.map((l) => newLabelRow(l.key, l.value))
+          : [newLabelRow()]
+      );
       setFile(null);
       setPreview(product?.image?.url || null);
       setProgress(0);
     }
   }, [open, product]);
 
-  const addLabel = () => setLabels((prev) => [...prev, { key: "", value: "" }]);
-  const removeLabel = (i: number) => setLabels((prev) => prev.filter((_, idx) => idx !== i));
-  const updateLabel = (i: number, field: "key" | "value", val: string) => {
-    setLabels((prev) => {
-      const copy = [...prev];
-      copy[i] = { ...copy[i], [field]: val };
-      return copy;
-    });
+  const addLabel = () => setLabels((prev) => [...prev, newLabelRow()]);
+  const removeLabel = (uid: string) =>
+    setLabels((prev) => prev.filter((l) => l._uid !== uid));
+  const updateLabel = (uid: string, field: "key" | "value", val: string) => {
+    setLabels((prev) =>
+      prev.map((l) => (l._uid === uid ? { ...l, [field]: val } : l))
+    );
   };
 
   const onFilePick = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -121,7 +141,12 @@ function ProductModal({
       fd.append("category", category.trim());
       fd.append(
         "labels",
-        JSON.stringify(labels.filter((l) => l.key.trim() || l.value.trim()))
+        JSON.stringify(
+          labels
+            .filter((l) => l.key.trim() || l.value.trim())
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            .map(({ _uid, ...l }) => l)
+        )
       );
       if (file) fd.append("image", file);
 
@@ -164,6 +189,7 @@ function ProductModal({
   if (!open) return null;
 
   return (
+    <>
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
       <motion.div
@@ -264,33 +290,78 @@ function ProductModal({
                 Add Label
               </button>
             </div>
-            <div className="space-y-2">
-              {labels.map((l, i) => (
-                <div key={i} className="flex items-center gap-2">
+
+            {/* Tag suggestions */}
+            {(() => {
+              const usedKeys = new Set(labels.map((l) => l.key).filter(Boolean));
+              const visible = tagSuggestions.filter(
+                (t) => !removedSuggestions.includes(t) && !usedKeys.has(t)
+              );
+              return visible.length > 0 ? (
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {visible.map((tag) => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center gap-1 pl-2.5 pr-1 py-0.5 rounded-full text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setLabels((prev) => [...prev, newLabelRow(tag, "")])}
+                        className="hover:underline"
+                      >
+                        {tag}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setConfirmRemoveTag(tag)}
+                        className="ml-0.5 rounded-full hover:bg-red-100 dark:hover:bg-red-900/40 p-0.5 text-blue-500 hover:text-red-500 dark:text-blue-400 dark:hover:text-red-400 transition"
+                        aria-label={`Remove ${tag} from suggestions`}
+                      >
+                        <X className="w-2.5 h-2.5" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              ) : null;
+            })()}
+
+            <Reorder.Group
+              axis="y"
+              values={labels}
+              onReorder={setLabels}
+              className="space-y-2"
+            >
+              {labels.map((l) => (
+                <Reorder.Item
+                  key={l._uid}
+                  value={l}
+                  className="flex items-center gap-2 touch-none"
+                >
+                  <GripVertical className="w-4 h-4 text-zinc-400 cursor-grab active:cursor-grabbing flex-shrink-0" />
                   <input
                     value={l.key}
-                    onChange={(e) => updateLabel(i, "key", e.target.value)}
+                    onChange={(e) => updateLabel(l._uid, "key", e.target.value)}
                     className="flex-1 px-3 py-1.5 rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 outline-none"
                     placeholder="Label (e.g. Ingredient)"
                   />
                   <input
                     value={l.value}
-                    onChange={(e) => updateLabel(i, "value", e.target.value)}
+                    onChange={(e) => updateLabel(l._uid, "value", e.target.value)}
                     className="flex-1 px-3 py-1.5 rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 outline-none"
                     placeholder="Value"
                   />
                   {labels.length > 1 && (
                     <button
                       type="button"
-                      onClick={() => removeLabel(i)}
-                      className="p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/30 text-red-500"
+                      onClick={() => removeLabel(l._uid)}
+                      className="p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/30 text-red-500 flex-shrink-0"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
                   )}
-                </div>
+                </Reorder.Item>
               ))}
-            </div>
+            </Reorder.Group>
           </div>
         </div>
 
@@ -326,6 +397,49 @@ function ProductModal({
         </div>
       </motion.div>
     </div>
+
+    {/* Confirm remove-from-suggestions dialog */}
+    <AnimatePresence>
+      {confirmRemoveTag && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setConfirmRemoveTag(null)}
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="relative z-10 w-full max-w-xs mx-4 bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl p-5"
+          >
+            <h3 className="text-sm font-semibold text-zinc-900 dark:text-white mb-1">
+              Remove suggestion?
+            </h3>
+            <p className="text-xs text-zinc-500 mb-4">
+              <span className="font-medium text-zinc-700 dark:text-zinc-300">
+                &ldquo;{confirmRemoveTag}&rdquo;
+              </span>{" "}
+              will be permanently removed from suggestions and won&apos;t appear again.
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setConfirmRemoveTag(null)}
+                className="px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => { onRemoveSuggestion?.(confirmRemoveTag); setConfirmRemoveTag(null); }}
+                className="px-3 py-1.5 rounded-lg text-xs font-medium bg-red-600 text-white hover:bg-red-700 transition"
+              >
+                Remove forever
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+    </>
   );
 }
 
@@ -343,6 +457,38 @@ export default function HomeProductsPage() {
   );
   const { data: me } = useSWR("/auth/me", fetcher);
 
+  // Removed tag suggestions: persisted in MongoDB, cached in localStorage (10-min TTL)
+  const [initialRemovedCache] = useState<{ removed: string[] }>(() => {
+    if (typeof window === "undefined") return { removed: [] };
+    try {
+      const c = JSON.parse(localStorage.getItem("hp-removed-tags-db") || "null");
+      if (c && Date.now() - c.ts < 10 * 60 * 1000) return { removed: c.removed };
+    } catch {}
+    return { removed: [] };
+  });
+  const { data: removedTagsData, mutate: mutateRemovedTags } = useSWR<{ removed: string[] }>(
+    "/home-products/admin/tag-suggestions",
+    fetcher,
+    { fallbackData: initialRemovedCache }
+  );
+  useEffect(() => {
+    if (removedTagsData?.removed) {
+      try {
+        localStorage.setItem("hp-removed-tags-db", JSON.stringify({ removed: removedTagsData.removed, ts: Date.now() }));
+      } catch {}
+    }
+  }, [removedTagsData]);
+  const removedSuggestions = removedTagsData?.removed ?? [];
+
+  const permanentlyRemoveTag = async (tag: string) => {
+    try {
+      await api.delete(`/home-products/admin/tag-suggestions/${encodeURIComponent(tag)}`);
+      mutateRemovedTags();
+    } catch (err: any) {
+      toast({ title: "Could not remove suggestion", description: err.message, variant: "error" as any });
+    }
+  };
+
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<HomeProduct | null>(null);
@@ -355,6 +501,15 @@ export default function HomeProductsPage() {
   useEffect(() => {
     if (data?.items) setItems(data.items);
   }, [data]);
+
+  // Derive unique label keys from all existing products for use as tag suggestions
+  const tagSuggestions = useMemo(() => {
+    if (!data?.items) return [];
+    const keys = data.items.flatMap((p) =>
+      (p.labels || []).map((l) => l.key).filter(Boolean)
+    );
+    return [...new Set(keys)];
+  }, [data?.items]);
 
   const filtered = search
     ? items.filter(
@@ -692,7 +847,10 @@ export default function HomeProductsPage() {
           setEditing(null);
         }}
         product={editing}
-        onSaved={() => mutate()}
+        onSaved={() => { mutate(); mutateRemovedTags(); }}
+        tagSuggestions={tagSuggestions}
+        removedSuggestions={removedSuggestions}
+        onRemoveSuggestion={permanentlyRemoveTag}
       />
     </div>
   );

@@ -19,6 +19,7 @@ import {
   FileText,
   Archive,
   UserPlus,
+  Search,
 } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -36,6 +37,7 @@ export default function Subscribers() {
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [activeTab, setActiveTab] = useState<"single" | "bulk" | "import">("single");
   const [staffFilter, setStaffFilter] = useState<string>("all");
+  const [subscriberSearch, setSubscriberSearch] = useState("");
   const [confirmDialog, setConfirmDialog] = useState<{
     open: boolean;
     title: string;
@@ -169,10 +171,18 @@ export default function Subscribers() {
   }
 
   function toggleSelectAll() {
-    if (selectedEmails.length === data?.items?.length) {
+    const visible = (data?.items || []).filter((s: any) => {
+      const matchStaff =
+        (userRole !== "superadmin" && userRole !== "dev") || staffFilter === "all"
+          ? true
+          : s.added_by === staffFilter;
+      const matchSearch = !subscriberSearch || s.email.toLowerCase().includes(subscriberSearch.toLowerCase());
+      return matchStaff && matchSearch;
+    });
+    if (selectedEmails.length === visible.length && visible.length > 0) {
       setSelectedEmails([]);
     } else {
-      setSelectedEmails(data?.items?.map((item: any) => item.email) || []);
+      setSelectedEmails(visible.map((item: any) => item.email));
     }
   }
 
@@ -466,7 +476,7 @@ export default function Subscribers() {
           className="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden"
         >
           <div className="p-6 border-b border-slate-200 dark:border-slate-700">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <h2 className="text-xl font-semibold text-slate-900 dark:text-white flex items-center gap-2">
                 <Mail className="w-5 h-5" />
                 Subscriber List
@@ -476,21 +486,40 @@ export default function Subscribers() {
                   </span>
                 )}
               </h2>
-              
-              {/* Select All for Superadmin and Dev */}
-              {(userRole === "superadmin" || userRole === "dev") && data?.items && data.items.length > 0 && (
-                <button
-                  onClick={toggleSelectAll}
-                  className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors"
-                >
-                  {selectedEmails.length === data.items.length ? (
-                    <CheckSquare className="w-4 h-4" />
-                  ) : (
-                    <Square className="w-4 h-4" />
-                  )}
-                  Select All
-                </button>
-              )}
+
+              <div className="flex items-center gap-3">
+                {/* Search */}
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  <input
+                    type="text"
+                    value={subscriberSearch}
+                    onChange={(e) => setSubscriberSearch(e.target.value)}
+                    placeholder="Search emails…"
+                    className="pl-9 pr-3 py-1.5 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 w-48"
+                  />
+                </div>
+
+                {/* Select All for Superadmin and Dev */}
+                {(userRole === "superadmin" || userRole === "dev") && data?.items && data.items.length > 0 && (
+                  <button
+                    onClick={toggleSelectAll}
+                    className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors"
+                  >
+                    {selectedEmails.length > 0 && selectedEmails.length ===
+                      (data?.items || []).filter((s: any) => {
+                        const ms = (userRole !== "superadmin" && userRole !== "dev") || staffFilter === "all" ? true : s.added_by === staffFilter;
+                        const mq = !subscriberSearch || s.email.toLowerCase().includes(subscriberSearch.toLowerCase());
+                        return ms && mq;
+                      }).length ? (
+                      <CheckSquare className="w-4 h-4" />
+                    ) : (
+                      <Square className="w-4 h-4" />
+                    )}
+                    Select All
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
@@ -533,8 +562,14 @@ export default function Subscribers() {
                 <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
                   {data.items
                     .filter((subscriber: any) => {
-                      if ((userRole !== "superadmin" && userRole !== "dev") || staffFilter === "all") return true;
-                      return subscriber.added_by === staffFilter;
+                      const matchStaff =
+                        (userRole !== "superadmin" && userRole !== "dev") || staffFilter === "all"
+                          ? true
+                          : subscriber.added_by === staffFilter;
+                      const matchSearch =
+                        !subscriberSearch ||
+                        subscriber.email.toLowerCase().includes(subscriberSearch.toLowerCase());
+                      return matchStaff && matchSearch;
                     })
                     .map((subscriber: any, index: number) => {
                     const canDeleteThis = canDelete(subscriber);

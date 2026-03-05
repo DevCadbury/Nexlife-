@@ -328,4 +328,39 @@ router.post(
   }
 );
 
+/* ─── Admin: get removed tag suggestions ─── */
+router.get(
+  "/admin/tag-suggestions",
+  requireAuth(["superadmin", "dev"]),
+  async (req, res) => {
+    try {
+      const { homeProductSettings } = await getCollections();
+      const doc = await homeProductSettings.findOne({ _id: "tag-suggestions" });
+      res.json({ removed: doc?.removed || [] });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  }
+);
+
+/* ─── Admin: permanently remove a tag suggestion ─── */
+router.delete(
+  "/admin/tag-suggestions/:tag",
+  requireAuth(["superadmin", "dev"]),
+  async (req, res) => {
+    try {
+      const tag = decodeURIComponent(req.params.tag);
+      const { homeProductSettings } = await getCollections();
+      await homeProductSettings.updateOne(
+        { _id: "tag-suggestions" },
+        { $addToSet: { removed: tag }, $set: { updatedAt: new Date() } },
+        { upsert: true }
+      );
+      res.json({ success: true });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  }
+);
+
 export default router;

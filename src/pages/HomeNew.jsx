@@ -553,6 +553,23 @@ const HomeNew = () => {
     return () => clearInterval(hpAutoRef.current);
   }, [hpN, hpStartAuto]);
 
+  // Pause when tab is hidden; reset to middle copy when tab becomes visible again
+  // Prevents hpIdx from drifting out of the tripled-array bounds in background tabs
+  useEffect(() => {
+    if (hpN === 0) return;
+    const handleVisibility = () => {
+      if (document.hidden) {
+        clearInterval(hpAutoRef.current);
+      } else {
+        setHpAnim(false);
+        setHpIdx(hpN);
+        hpStartAuto();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [hpN, hpStartAuto]);
+
   // Silent wrap-around after transition
   const hpOnTransitionEnd = useCallback(() => {
     if (hpN === 0) return;
@@ -1062,31 +1079,11 @@ const HomeNew = () => {
                             </div>
                           )}
 
-                          {/* Hover overlay – details pane */}
+                          {/* Hover overlay – name only */}
                           <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-end p-4">
-                            {item.category && (
-                              <span className="text-[10px] font-bold tracking-widest uppercase text-blue-300 mb-1">
-                                {item.category}
-                              </span>
-                            )}
                             <h3 className="text-sm sm:text-base font-semibold text-white line-clamp-2 leading-snug">
                               {item.name}
                             </h3>
-                            {item.labels?.length > 0 && (
-                              <div className="flex flex-wrap gap-1 mt-1.5">
-                                {item.labels.slice(0, 3).map((l, li) => (
-                                  <span
-                                    key={li}
-                                    className="text-[10px] px-2 py-0.5 bg-white/20 text-white rounded-full"
-                                  >
-                                    {l.value || l.key}
-                                  </span>
-                                ))}
-                              </div>
-                            )}
-                            <div className="mt-2.5 flex items-center text-xs font-medium text-blue-300">
-                              View Details <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
-                            </div>
                           </div>
                         </div>
 
