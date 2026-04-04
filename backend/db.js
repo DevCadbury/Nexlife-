@@ -57,6 +57,7 @@ export async function getCollections() {
     visitors: db.collection("visitors"),
     templates: db.collection("templates"),
     homeProducts: db.collection("homeProducts"),
+    homeProductFolders: db.collection("homeProductFolders"),
     subscriberLists: db.collection("subscriberLists"),
     homeProductSettings: db.collection("homeProductSettings"),
   };
@@ -137,6 +138,20 @@ async function ensureIndexes(db) {
       { key: { createdAt: -1 } },
       { key: { name: 1 } },
       { key: { createdBy: 1, createdAt: -1 } },
+    ]);
+  await db
+    .collection("homeProducts")
+    .createIndexes([
+      { key: { visible: 1, sequence: 1 } },
+      { key: { category: 1, sequence: 1 } },
+      { key: { updatedAt: -1 } },
+    ]);
+  await db
+    .collection("homeProductFolders")
+    .createIndexes([
+      { key: { name: 1 }, unique: true },
+      { key: { sequence: 1 } },
+      { key: { visible: 1, sequence: 1 } },
     ]);
 }
 

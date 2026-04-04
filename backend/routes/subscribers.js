@@ -9,6 +9,201 @@ import { Readable } from "stream";
 
 const router = express.Router();
 
+const MAX_NAME_LENGTH = 120;
+const MAX_PHONE_LENGTH = 40;
+const MAX_NOTE_LENGTH = 4000;
+
+const normalizeEmail = (value) => String(value || "").trim().toLowerCase();
+const normalizeName = (value) => String(value || "").trim().slice(0, MAX_NAME_LENGTH);
+const normalizePhone = (value) => String(value || "").trim().slice(0, MAX_PHONE_LENGTH);
+const normalizeInternalNote = (value) =>
+  String(value || "").trim().slice(0, MAX_NOTE_LENGTH);
+
+const getOptionalSubscriberFields = (input = {}) => {
+  const updates = {};
+
+  if (input.name !== undefined) {
+    updates.name = normalizeName(input.name);
+  }
+
+  if (input.phone !== undefined) {
+    updates.phone = normalizePhone(input.phone);
+  }
+
+  if (input.internalNote !== undefined) {
+    updates.internalNote = normalizeInternalNote(input.internalNote);
+  }
+
+  return updates;
+};
+
+const parseEmailInputs = (emails) => {
+  if (Array.isArray(emails)) {
+    return emails
+      .map((email) => normalizeEmail(email))
+      .filter(Boolean);
+  }
+
+  if (typeof emails === "string") {
+    return emails
+      .split(/[\n,\s]+/)
+      .map((email) => normalizeEmail(email))
+      .filter(Boolean);
+  }
+
+  return [];
+};
+
+const normalizeColumnKey = (key) =>
+  String(key || "")
+    .toLowerCase()
+    .replace(/[\s_\-]+/g, "")
+    .trim();
+
+const EMAIL_COLUMN_KEYS = new Set([
+  "email",
+  "emailaddress",
+  "mail",
+  "e-mail",
+].map((key) => normalizeColumnKey(key)));
+
+const NAME_COLUMN_KEYS = new Set([
+  "name",
+  "fullname",
+  "contactname",
+].map((key) => normalizeColumnKey(key)));
+
+const PHONE_COLUMN_KEYS = new Set([
+  "phone",
+  "phonenumber",
+  "mobile",
+  "mobilenumber",
+  "contact",
+  "contactnumber",
+  "whatsapp",
+  "whatsappnumber",
+].map((key) => normalizeColumnKey(key)));
+
+const NOTE_COLUMN_KEYS = new Set([
+  "internalnote",
+  "note",
+  "notes",
+  "remark",
+  "remarks",
+  "comment",
+  "comments",
+].map((key) => normalizeColumnKey(key)));
+
+const getStringCell = (value) => String(value ?? "").trim();
+
+const pickColumnValue = (row, keySet) => {
+  const entries = Object.entries(row || {});
+  for (const [key, value] of entries) {
+    if (keySet.has(normalizeColumnKey(key))) {
+      const cell = getStringCell(value);
+      if (cell) return cell;
+    }
+  }
+  return "";
+};
+
+const parseSubscriberRow = (row, rowIndex) => {
+  let emailRaw = pickColumnValue(row, EMAIL_COLUMN_KEYS);
+
+  if (!emailRaw) {
+    for (const value of Object.values(row || {})) {
+      const cell = getStringCell(value);
+      if (cell && validateEmail(cell)) {
+        emailRaw = cell;
+        break;
+      }
+    }
+  }
+
+  const email = normalizeEmail(emailRaw);
+  const name = normalizeName(pickColumnValue(row, NAME_COLUMN_KEYS));
+  const phone = normalizePhone(pickColumnValue(row, PHONE_COLUMN_KEYS));
+  const internalNote = normalizeInternalNote(pickColumnValue(row, NOTE_COLUMN_KEYS));
+
+  if (!email) {
+    return {
+      row: rowIndex,
+      email: "",
+      name,
+      phone,
+      internalNote,
+      status: "invalid",
+      reason: "missing_email",
+    };
+  }
+
+  if (!validateEmail(email)) {
+    return {
+      row: rowIndex,
+      email,
+      name,
+      phone,
+      internalNote,
+      status: "invalid",
+      reason: "invalid_email_format",
+    };
+  }
+
+  return {
+    row: rowIndex,
+    email,
+    name,
+    phone,
+    internalNote,
+    status: "valid",
+  };
+};
+
+const markDuplicateRows = (rows) => {
+  const seen = new Set();
+  return rows.map((row) => {
+    if (row.status !== "valid") return row;
+
+    if (seen.has(row.email)) {
+      return {
+        ...row,
+        status: "duplicate_in_file",
+        reason: "duplicate_email_in_file",
+      };
+    }
+
+    seen.add(row.email);
+    return row;
+  });
+};
+
+async function parseSubscriberRowsFromUpload(file) {
+  let sourceRows = [];
+
+  if (file.mimetype === "text/csv") {
+    const rows = [];
+    const stream = Readable.from(file.buffer.toString());
+
+    await new Promise((resolve, reject) => {
+      stream
+        .pipe(csv())
+        .on("data", (data) => rows.push(data))
+        .on("end", resolve)
+        .on("error", reject);
+    });
+
+    sourceRows = rows;
+  } else {
+    const workbook = xlsx.read(file.buffer, { type: "buffer" });
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    sourceRows = xlsx.utils.sheet_to_json(worksheet, { defval: "" });
+  }
+
+  const parsedRows = sourceRows.map((row, index) => parseSubscriberRow(row, index + 2));
+  return markDuplicateRows(parsedRows);
+}
+
 // Configure multer for file uploads
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -26,6 +221,98 @@ const upload = multer({
     } else {
       cb(new Error('Invalid file type. Only CSV and Excel files are allowed.'));
     }
+  }
+});
+
+// GET /api/subscribers/template - Download CSV template for import
+router.get("/template", requireAuth(), async (req, res) => {
+  try {
+    const template = [
+      "email,name,phone,internalNote",
+      "john.doe@example.com,John Doe,+1 555 0100,Priority distributor",
+      "jane.smith@example.com,Jane Smith,+91 9876543210,Follow up in Q2",
+    ].join("\n");
+
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader("Content-Disposition", "attachment; filename=subscribers-template.csv");
+    res.status(200).send(template);
+  } catch (err) {
+    console.error("Download subscribers template failed", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// POST /api/subscribers/import/preview - Parse file and return preview rows
+router.post("/import/preview", requireAuth(), upload.single("file"), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "File is required" });
+    }
+
+    const { subscribers } = await getCollections();
+    const rows = await parseSubscriberRowsFromUpload(req.file);
+
+    const candidateEmails = Array.from(
+      new Set(rows.filter((row) => row.status === "valid").map((row) => row.email))
+    );
+
+    const existingDocs = candidateEmails.length
+      ? await subscribers
+          .find(
+            { email: { $in: candidateEmails } },
+            {
+              projection: {
+                email: 1,
+                deleted_by_admin: 1,
+                deleted_by_super: 1,
+                is_locked: 1,
+              },
+            }
+          )
+          .toArray()
+      : [];
+
+    const existingByEmail = new Map(existingDocs.map((doc) => [doc.email, doc]));
+
+    const items = rows.map((row) => {
+      if (row.status !== "valid") return row;
+
+      const existing = existingByEmail.get(row.email);
+      if (!existing) {
+        return { ...row, status: "new", reason: "will_add" };
+      }
+
+      if (!existing.deleted_by_admin && !existing.deleted_by_super && !existing.is_locked) {
+        return { ...row, status: "already_exists", reason: "already_exists" };
+      }
+
+      return { ...row, status: "reactivate", reason: "will_reactivate" };
+    });
+
+    const valid = items.filter(
+      (row) => row.status === "new" || row.status === "reactivate" || row.status === "already_exists"
+    ).length;
+    const invalid = items.filter((row) => row.status === "invalid").length;
+    const duplicates = items.filter((row) => row.status === "duplicate_in_file").length;
+    const alreadyExists = items.filter((row) => row.status === "already_exists").length;
+    const importable = items.filter(
+      (row) => row.status === "new" || row.status === "reactivate"
+    ).length;
+
+    res.json({
+      success: true,
+      filename: req.file.originalname,
+      total: items.length,
+      valid,
+      invalid,
+      duplicates,
+      alreadyExists,
+      importable,
+      items: items.slice(0, 200),
+    });
+  } catch (err) {
+    console.error("Preview import subscribers failed", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -104,7 +391,16 @@ router.get("/", requireAuth(), async (req, res) => {
       {
         $lookup: {
           from: "staff",
-          let: { addedBy: { $toObjectId: "$added_by" } },
+          let: {
+            addedBy: {
+              $convert: {
+                input: "$added_by",
+                to: "objectId",
+                onError: null,
+                onNull: null,
+              },
+            },
+          },
           pipeline: [
             { $match: { $expr: { $eq: ["$_id", "$$addedBy"] } } },
             { $project: { name: 1, email: 1, role: 1 } }
@@ -123,6 +419,9 @@ router.get("/", requireAuth(), async (req, res) => {
         $project: {
           _id: 0,
           email: 1,
+          name: 1,
+          phone: 1,
+          internalNote: 1,
           createdAt: 1,
           added_at: 1,
           added_by: 1,
@@ -152,14 +451,15 @@ router.get("/", requireAuth(), async (req, res) => {
 // POST /api/subscribers - add subscriber
 router.post("/", requireAuth(), async (req, res) => {
   try {
-    const { email } = req.body || {};
-    if (!email || !validateEmail(email)) {
+    const payload = req.body || {};
+    const normalizedEmail = normalizeEmail(payload.email);
+    if (!normalizedEmail || !validateEmail(normalizedEmail)) {
       return res.status(400).json({ error: "Valid email required" });
     }
     
     const { subscribers } = await getCollections();
-    const { id: userId, role, name } = req.user;
-    const normalizedEmail = String(email).toLowerCase();
+    const { id: userId, name } = req.user;
+    const optionalFields = getOptionalSubscriberFields(payload);
     
     // Check if subscriber already exists
     const existing = await subscribers.findOne({ email: normalizedEmail });
@@ -175,21 +475,39 @@ router.post("/", requireAuth(), async (req, res) => {
               deleted_by_super: false,
               added_by: userId,
               added_at: new Date(),
-              is_locked: false
+              is_locked: false,
+              updatedAt: new Date(),
+              ...optionalFields,
             }
           }
         );
       } else {
-        // Subscriber is active
-        return res.status(400).json({ error: "Email already exists and is active" });
+        // Active subscriber: keep operation idempotent and allow metadata updates.
+        if (Object.keys(optionalFields).length > 0) {
+          await subscribers.updateOne(
+            { email: normalizedEmail },
+            {
+              $set: {
+                ...optionalFields,
+                updatedAt: new Date(),
+              },
+            }
+          );
+        }
+
+        return res.json({ success: true, alreadyExists: true });
       }
     } else {
       // Create new subscriber
       await subscribers.insertOne({
         email: normalizedEmail,
+        name: optionalFields.name || "",
+        phone: optionalFields.phone || "",
+        internalNote: optionalFields.internalNote || "",
         added_by: userId,
         added_at: new Date(),
         createdAt: new Date(),
+        updatedAt: new Date(),
         is_locked: false,
         deleted_by_admin: false,
         deleted_by_super: false
@@ -214,29 +532,32 @@ router.post("/", requireAuth(), async (req, res) => {
 router.post("/bulk", requireAuth(), async (req, res) => {
   try {
     const { emails } = req.body || {};
-    
-    if (!emails || typeof emails !== 'string') {
-      return res.status(400).json({ error: "Comma-separated emails string required" });
+    const parsedEmails = parseEmailInputs(emails);
+
+    if (parsedEmails.length === 0) {
+      return res.status(400).json({ error: "Email list required" });
     }
     
     const { subscribers } = await getCollections();
     const { id: userId, name } = req.user;
     
-    // Parse comma-separated emails
-    const emailList = emails
-      .split(',')
-      .map(email => email.trim().toLowerCase())
-      .filter(email => email && validateEmail(email));
-    
     // Remove duplicates
-    const uniqueEmails = [...new Set(emailList)];
+    const uniqueEmails = [...new Set(parsedEmails)];
     
     let added = 0;
+    let updated = 0;
     let skipped = 0;
+    let invalid = 0;
     const results = [];
     
     for (const email of uniqueEmails) {
       try {
+        if (!validateEmail(email)) {
+          invalid++;
+          results.push({ email, status: 'invalid', reason: 'invalid_format' });
+          continue;
+        }
+
         const existing = await subscribers.findOne({ email });
         
         if (existing && !existing.deleted_by_admin && !existing.deleted_by_super && !existing.is_locked) {
@@ -255,25 +576,32 @@ router.post("/bulk", requireAuth(), async (req, res) => {
                 deleted_by_super: false,
                 added_by: userId,
                 added_at: new Date(),
-                is_locked: false
+                is_locked: false,
+                updatedAt: new Date(),
               }
             }
           );
+          updated++;
+          results.push({ email, status: 'updated' });
         } else {
           // Create new subscriber
           await subscribers.insertOne({
             email,
+            name: "",
+            phone: "",
+            internalNote: "",
             added_by: userId,
             added_at: new Date(),
             createdAt: new Date(),
+            updatedAt: new Date(),
             is_locked: false,
             deleted_by_admin: false,
             deleted_by_super: false
           });
+
+          added++;
+          results.push({ email, status: 'added' });
         }
-        
-        added++;
-        results.push({ email, status: 'added' });
       } catch (error) {
         skipped++;
         results.push({ email, status: 'error', reason: error.message });
@@ -287,8 +615,10 @@ router.post("/bulk", requireAuth(), async (req, res) => {
       meta: { 
         total: uniqueEmails.length,
         added,
+        updated,
         skipped,
-        method: 'comma_separated'
+        invalid,
+        method: Array.isArray(emails) ? 'array' : 'comma_separated'
       }
     });
     
@@ -296,11 +626,118 @@ router.post("/bulk", requireAuth(), async (req, res) => {
       success: true, 
       total: uniqueEmails.length,
       added, 
+      updated,
       skipped,
+      invalid,
       results 
     });
   } catch (err) {
     console.error("Bulk add subscribers failed", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// POST /api/subscribers/bulk-emails - Compatibility endpoint for bulk email arrays
+router.post("/bulk-emails", requireAuth(), async (req, res) => {
+  try {
+    const { emails } = req.body || {};
+    const parsedEmails = parseEmailInputs(emails);
+
+    if (parsedEmails.length === 0) {
+      return res.status(400).json({ error: "Email list required" });
+    }
+
+    const { subscribers } = await getCollections();
+    const { id: userId, name } = req.user;
+
+    const uniqueEmails = [...new Set(parsedEmails)];
+
+    let added = 0;
+    let updated = 0;
+    let skipped = 0;
+    let invalid = 0;
+    const results = [];
+
+    for (const email of uniqueEmails) {
+      try {
+        if (!validateEmail(email)) {
+          invalid++;
+          results.push({ email, status: "invalid", reason: "invalid_format" });
+          continue;
+        }
+
+        const existing = await subscribers.findOne({ email });
+
+        if (existing && !existing.deleted_by_admin && !existing.deleted_by_super && !existing.is_locked) {
+          skipped++;
+          results.push({ email, status: "skipped", reason: "already_exists" });
+          continue;
+        }
+
+        if (existing) {
+          await subscribers.updateOne(
+            { email },
+            {
+              $set: {
+                deleted_by_admin: false,
+                deleted_by_super: false,
+                added_by: userId,
+                added_at: new Date(),
+                is_locked: false,
+                updatedAt: new Date(),
+              },
+            }
+          );
+          updated++;
+          results.push({ email, status: "updated" });
+        } else {
+          await subscribers.insertOne({
+            email,
+            name: "",
+            phone: "",
+            internalNote: "",
+            added_by: userId,
+            added_at: new Date(),
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            is_locked: false,
+            deleted_by_admin: false,
+            deleted_by_super: false,
+          });
+          added++;
+          results.push({ email, status: "added" });
+        }
+      } catch (error) {
+        skipped++;
+        results.push({ email, status: "error", reason: error.message });
+      }
+    }
+
+    await addLog({
+      type: "subscriber.bulk_added",
+      actorId: userId,
+      actorName: name,
+      meta: {
+        total: uniqueEmails.length,
+        added,
+        updated,
+        skipped,
+        invalid,
+        method: "bulk_emails",
+      },
+    });
+
+    res.json({
+      success: true,
+      total: uniqueEmails.length,
+      added,
+      updated,
+      skipped,
+      invalid,
+      results,
+    });
+  } catch (err) {
+    console.error("Bulk emails endpoint failed", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -311,113 +748,108 @@ router.post("/import", requireAuth(), upload.single('file'), async (req, res) =>
     if (!req.file) {
       return res.status(400).json({ error: "File is required" });
     }
-    
+
     const { subscribers } = await getCollections();
     const { id: userId, name } = req.user;
-    
-    let emails = [];
-    
-    // Parse file based on type
-    if (req.file.mimetype === 'text/csv') {
-      // Parse CSV
-      const results = [];
-      const stream = Readable.from(req.file.buffer.toString());
-      
-      await new Promise((resolve, reject) => {
-        stream
-          .pipe(csv())
-          .on('data', (data) => results.push(data))
-          .on('end', resolve)
-          .on('error', reject);
-      });
-      
-      // Extract emails from CSV (look for common column names)
-      emails = results.map(row => {
-        const email = row.email || row.Email || row.EMAIL || 
-                     row['Email Address'] || row['email address'] ||
-                     Object.values(row).find(value => 
-                       typeof value === 'string' && validateEmail(value.trim())
-                     );
-        return email ? email.trim().toLowerCase() : null;
-      }).filter(Boolean);
-      
-    } else {
-      // Parse Excel
-      const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
-      const sheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[sheetName];
-      const data = xlsx.utils.sheet_to_json(worksheet);
-      
-      // Extract emails from Excel
-      emails = data.map(row => {
-        const email = row.email || row.Email || row.EMAIL || 
-                     row['Email Address'] || row['email address'] ||
-                     Object.values(row).find(value => 
-                       typeof value === 'string' && validateEmail(value.trim())
-                     );
-        return email ? email.trim().toLowerCase() : null;
-      }).filter(Boolean);
-    }
-    
-    // Remove duplicates
-    const uniqueEmails = [...new Set(emails)];
-    
+
+    const rows = await parseSubscriberRowsFromUpload(req.file);
+
     let added = 0;
+    let updated = 0;
     let skipped = 0;
     let invalid = 0;
     const results = [];
-    
-    for (const email of uniqueEmails) {
+
+    for (const row of rows) {
       try {
-        if (!validateEmail(email)) {
+        if (row.status === "invalid") {
           invalid++;
-          results.push({ email, status: 'invalid', reason: 'invalid_format' });
+          results.push({
+            row: row.row,
+            email: row.email,
+            status: "invalid",
+            reason: row.reason || "invalid_format",
+          });
           continue;
         }
-        
-        const existing = await subscribers.findOne({ email });
-        
+
+        if (row.status === "duplicate_in_file") {
+          skipped++;
+          results.push({
+            row: row.row,
+            email: row.email,
+            status: "skipped",
+            reason: row.reason || "duplicate_email_in_file",
+          });
+          continue;
+        }
+
+        const existing = await subscribers.findOne({ email: row.email });
+
         if (existing && !existing.deleted_by_admin && !existing.deleted_by_super && !existing.is_locked) {
           skipped++;
-          results.push({ email, status: 'skipped', reason: 'already_exists' });
+          results.push({
+            row: row.row,
+            email: row.email,
+            status: "skipped",
+            reason: "already_exists",
+          });
           continue;
         }
-        
+
+        const metadataUpdates = {};
+        if (row.name) metadataUpdates.name = row.name;
+        if (row.phone) metadataUpdates.phone = row.phone;
+        if (row.internalNote) metadataUpdates.internalNote = row.internalNote;
+
         if (existing) {
           // Re-add previously deleted/locked subscriber
           await subscribers.updateOne(
-            { email },
+            { email: row.email },
             {
               $set: {
                 deleted_by_admin: false,
                 deleted_by_super: false,
                 added_by: userId,
                 added_at: new Date(),
-                is_locked: false
+                is_locked: false,
+                updatedAt: new Date(),
+                ...metadataUpdates,
               }
             }
           );
+          updated++;
+          results.push({ row: row.row, email: row.email, status: 'updated' });
         } else {
           // Create new subscriber
           await subscribers.insertOne({
-            email,
+            email: row.email,
+            name: row.name || "",
+            phone: row.phone || "",
+            internalNote: row.internalNote || "",
             added_by: userId,
             added_at: new Date(),
             createdAt: new Date(),
+            updatedAt: new Date(),
             is_locked: false,
             deleted_by_admin: false,
             deleted_by_super: false
           });
+
+          added++;
+          results.push({ row: row.row, email: row.email, status: 'added' });
         }
-        
-        added++;
-        results.push({ email, status: 'added' });
       } catch (error) {
         skipped++;
-        results.push({ email, status: 'error', reason: error.message });
+        results.push({
+          row: row.row,
+          email: row.email,
+          status: 'error',
+          reason: error.message,
+        });
       }
     }
-    
+
     await addLog({
       type: "subscriber.file_imported",
       actorId: userId,
@@ -425,17 +857,19 @@ router.post("/import", requireAuth(), upload.single('file'), async (req, res) =>
       meta: { 
         filename: req.file.originalname,
         fileType: req.file.mimetype,
-        total: uniqueEmails.length,
+        total: rows.length,
         added,
+        updated,
         skipped,
         invalid
       }
     });
-    
+
     res.json({ 
       success: true, 
-      total: uniqueEmails.length,
+      total: rows.length,
       added, 
+      updated,
       skipped,
       invalid,
       results: results.slice(0, 100) // Limit results to first 100 for performance
@@ -458,7 +892,9 @@ router.delete("/bulk", requireAuth(["superadmin", "dev"]), async (req, res) => {
     const { subscribers } = await getCollections();
     const { id: userId, name } = req.user;
     
-    const normalizedEmails = emails.map(email => String(email).toLowerCase());
+    const normalizedEmails = emails
+      .map((email) => normalizeEmail(email))
+      .filter(Boolean);
     
     const result = await subscribers.updateMany(
       { email: { $in: normalizedEmails } },
@@ -483,11 +919,72 @@ router.delete("/bulk", requireAuth(["superadmin", "dev"]), async (req, res) => {
   }
 });
 
+// PATCH /api/subscribers/:email - Edit subscriber (superadmin/dev only)
+router.patch("/:email", requireAuth(["superadmin", "dev"]), async (req, res) => {
+  try {
+    const currentEmail = normalizeEmail(decodeURIComponent(req.params.email || ""));
+    const payload = req.body || {};
+
+    if (!currentEmail || !validateEmail(currentEmail)) {
+      return res.status(400).json({ error: "Valid current email required" });
+    }
+
+    const nextEmail = payload.email !== undefined
+      ? normalizeEmail(payload.email)
+      : currentEmail;
+
+    if (!nextEmail || !validateEmail(nextEmail)) {
+      return res.status(400).json({ error: "Valid email required" });
+    }
+
+    const { subscribers } = await getCollections();
+    const { id: userId, name: actorName } = req.user;
+
+    const existing = await subscribers.findOne({ email: currentEmail });
+    if (!existing) {
+      return res.status(404).json({ error: "Subscriber not found" });
+    }
+
+    if (nextEmail !== currentEmail) {
+      const conflict = await subscribers.findOne({ email: nextEmail });
+      if (conflict) {
+        return res.status(400).json({ error: "Target email already exists" });
+      }
+    }
+
+    const updateFields = {
+      ...getOptionalSubscriberFields(payload),
+      updatedAt: new Date(),
+    };
+
+    if (nextEmail !== currentEmail) {
+      updateFields.email = nextEmail;
+    }
+
+    await subscribers.updateOne({ email: currentEmail }, { $set: updateFields });
+
+    await addLog({
+      type: "subscriber.updated",
+      actorId: userId,
+      actorName,
+      meta: {
+        previousEmail: currentEmail,
+        email: nextEmail,
+      },
+    });
+
+    res.json({ success: true, email: nextEmail });
+  } catch (err) {
+    console.error("Edit subscriber failed", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // DELETE /api/subscribers/:email
 router.delete("/:email", requireAuth(), async (req, res) => {
   try {
     const email = decodeURIComponent(req.params.email || "");
-    const normalizedEmail = email.toLowerCase();
+    const normalizedEmail = normalizeEmail(email);
     const { subscribers } = await getCollections();
     const { role, id: userId, name } = req.user;
     

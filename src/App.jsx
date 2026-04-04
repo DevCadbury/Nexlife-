@@ -92,7 +92,7 @@ function AppContent() {
                 </ErrorBoundary>
               }
             />
-            <Route path="/home-product/:id" element={<HomeProductDetail />} />
+            <Route path="/home-product/:slug" element={<HomeProductDetail />} />
             <Route path="/about" element={<About />} />
             <Route path="/products" element={<Products />} />
             <Route

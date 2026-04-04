@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import DownloadButton from "../components/DownloadButton";
 import DebugInfo from "../components/DebugInfo";
+import { buildProductSlugMap } from "../lib/homeProductSlug";
 
 // Images
 import backgroundImage from "../assets/images/background.png";
@@ -505,6 +506,10 @@ const HomeNew = () => {
     if (homeProducts.length === 0) return [];
     return [...homeProducts, ...homeProducts, ...homeProducts];
   }, [homeProducts]);
+  const homeProductSlugMap = useMemo(
+    () => buildProductSlugMap(homeProducts),
+    [homeProducts]
+  );
   const hpN = homeProducts.length;
 
   // When data loads, start at the middle copy
@@ -1056,12 +1061,15 @@ const HomeNew = () => {
                     return (
                     <div
                       key={`${item._id}-${i}`}
-                      onClick={() => navigate(`/home-product/${item._id}`)}
-                      className="flex-shrink-0 group cursor-pointer"
+                      onClick={() => {
+                        const slug = homeProductSlugMap.idToSlug.get(item._id) || item._id;
+                        navigate(`/home-product/${slug}`);
+                      }}
+                      className="flex-shrink-0 cursor-pointer"
                       style={{ width: cardW }}
                     >
-                      {/* Card – full-image with hover overlay */}
-                      <div className="relative overflow-hidden rounded-2xl shadow-md border-2 border-gray-200 dark:border-gray-700/60 transition-all duration-300 group-hover:-translate-y-1.5 group-hover:shadow-2xl group-hover:shadow-blue-500/25 group-hover:border-blue-400/60 dark:group-hover:border-blue-500/60">
+                      {/* Card – title + CTA are always visible in bottom block */}
+                      <div className="relative overflow-hidden rounded-2xl shadow-md border-2 border-gray-200 dark:border-gray-700/60">
 
                         {/* Square image */}
                         <div className="relative aspect-square bg-gray-100 dark:bg-gray-800 overflow-hidden">
@@ -1071,49 +1079,29 @@ const HomeNew = () => {
                               alt={item.name}
                               loading="lazy"
                               decoding="async"
-                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                              className="w-full h-full object-cover"
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-700">
                               <span className="text-5xl">💊</span>
                             </div>
                           )}
-
-                          {/* Hover overlay – name only */}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-end p-4">
-                            <h3 className="text-sm sm:text-base font-semibold text-white line-clamp-2 leading-snug">
-                              {item.name}
-                            </h3>
-                          </div>
                         </div>
 
-                        {/* Bottom shimmer line */}
-                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        {/* Default bottom info */}
+                        <div className="px-3.5 py-3 bg-white dark:bg-gray-900">
+                          <h3 className="text-sm sm:text-[15px] font-semibold text-gray-900 dark:text-gray-100 line-clamp-1 leading-snug">
+                            {item.name}
+                          </h3>
+                          <p className="text-xs sm:text-sm text-blue-600 dark:text-blue-400 font-medium mt-0.5">
+                            View More Details
+                          </p>
+                        </div>
                       </div>
                     </div>
                     );
                   })}
                 </div>
-              </div>
-
-              {/* Dot indicators */}
-              <div className="flex items-center justify-center gap-1.5 mt-5">
-                {homeProducts.map((_, i) => {
-                  const realIdx = ((hpIdx % hpN) + hpN) % hpN;
-                  const active = i === realIdx;
-                  return (
-                    <button
-                      key={i}
-                      onClick={() => { clearInterval(hpAutoRef.current); setHpAnim(true); setHpIdx(hpN + i); hpStartAuto(); }}
-                      className={`rounded-full transition-all duration-300 ${
-                        active
-                          ? 'w-6 h-2 bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]'
-                          : 'w-2 h-2 bg-gray-300 dark:bg-gray-600 hover:bg-blue-400'
-                      }`}
-                      aria-label={`Go to product ${i + 1}`}
-                    />
-                  );
-                })}
               </div>
             </div>
             </div>

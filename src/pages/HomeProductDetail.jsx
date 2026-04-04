@@ -1,13 +1,13 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Tag,
-  Calendar,
   ChevronRight,
   Loader2,
   ExternalLink,
 } from "lucide-react";
+import { buildProductSlugMap, isMongoObjectId } from "../lib/homeProductSlug";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001/api";
 
@@ -41,23 +41,64 @@ const LazyImage = ({ src, alt, className = "" }) => {
 };
 
 export default function HomeProductDetail() {
-  const { id } = useParams();
+  const { slug } = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
+  const [allProducts, setAllProducts] = useState([]);
+  const [relatedVisibleCount, setRelatedVisibleCount] = useState(4);
+
+  const homeProductSlugMap = useMemo(
+    () => buildProductSlugMap(allProducts),
+    [allProducts]
+  );
+
+  useEffect(() => {
+    const setCountByViewport = () => {
+      if (window.innerWidth >= 1024) {
+        setRelatedVisibleCount(8);
+      } else if (window.innerWidth >= 640) {
+        setRelatedVisibleCount(6);
+      } else {
+        setRelatedVisibleCount(4);
+      }
+    };
+
+    setCountByViewport();
+    window.addEventListener("resize", setCountByViewport);
+    return () => window.removeEventListener("resize", setCountByViewport);
+  }, []);
 
   useEffect(() => {
     window.scrollTo(0, 0);
     let cancelled = false;
     setLoading(true);
     setError(null);
+    setProduct(null);
 
-    fetch(`${API_URL}/home-products/${id}`)
-      .then((r) => {
-        if (!r.ok) throw new Error("Product not found");
-        return r.json();
+    fetch(`${API_URL}/home-products`)
+      .then((listResponse) => {
+        if (!listResponse.ok) throw new Error("Failed to load products");
+        return listResponse.json();
+      })
+      .then((listData) => {
+        const items = listData?.items || [];
+        if (!cancelled) setAllProducts(items);
+
+        const normalizedSlug = decodeURIComponent(String(slug || "")).toLowerCase();
+        const { slugToId } = buildProductSlugMap(items);
+        const resolvedId = isMongoObjectId(normalizedSlug)
+          ? normalizedSlug
+          : slugToId.get(normalizedSlug);
+
+        if (!resolvedId) throw new Error("Product not found");
+        return fetch(`${API_URL}/home-products/${resolvedId}`);
+      })
+      .then((detailResponse) => {
+        if (!detailResponse.ok) throw new Error("Product not found");
+        return detailResponse.json();
       })
       .then((data) => {
         if (!cancelled) setProduct(data);
@@ -70,27 +111,20 @@ export default function HomeProductDetail() {
       });
 
     return () => { cancelled = true; };
-  }, [id]);
+  }, [slug]);
 
-  // Fetch related products
+  // Build related products from already-fetched list
   useEffect(() => {
-    if (!product) return;
-    let cancelled = false;
+    if (!product) {
+      setRelatedProducts([]);
+      return;
+    }
 
-    fetch(`${API_URL}/home-products`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (!cancelled) {
-          const related = (data.items || [])
-            .filter((p) => p._id !== product._id)
-            .slice(0, 4);
-          setRelatedProducts(related);
-        }
-      })
-      .catch(() => {});
-
-    return () => { cancelled = true; };
-  }, [product]);
+    const related = allProducts
+      .filter((p) => p._id !== product._id)
+      .slice(0, relatedVisibleCount);
+    setRelatedProducts(related);
+  }, [allProducts, product, relatedVisibleCount]);
 
   /* ── Loading ── */
   if (loading) {
@@ -176,25 +210,11 @@ export default function HomeProductDetail() {
               {product.name}
             </h1>
 
-            {/* Meta row */}
-            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-              {product.createdAt && (
-                <span className="inline-flex items-center gap-1.5">
-                  <Calendar className="w-4 h-4" />
-                  {new Date(product.createdAt).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </span>
-              )}
-            </div>
-
             {/* Divider */}
             <div className="border-t border-gray-200 dark:border-gray-800" />
 
             {/* Labels / Product Details */}
-            {product.labels?.length > 0 && (
+            {!product.hideLabels && product.labels?.length > 0 && (
               <div className="space-y-4">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                   Product Details
@@ -248,7 +268,10 @@ export default function HomeProductDetail() {
               {relatedProducts.map((item) => (
                 <div
                   key={item._id}
-                  onClick={() => navigate(`/home-product/${item._id}`)}
+                  onClick={() => {
+                    const itemSlug = homeProductSlugMap.idToSlug.get(item._id) || item._id;
+                    navigate(`/home-product/${itemSlug}`);
+                  }}
                   className="group bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden transition-all duration-300 cursor-pointer hover:-translate-y-1"
                 >
                   <div className="aspect-square bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center p-3">
