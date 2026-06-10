@@ -41,6 +41,51 @@ export async function getDb() {
   }
 }
 
+/**
+ * Unified Product Schema (products collection)
+ * ──────────────────────────────────────────────
+ * {
+ *   _id:          ObjectId,
+ *   name:         string,        // max 255 chars, required
+ *   category:     string,        // category name, required
+ *   siteContext:  'surgical' | 'general' | 'both',  // default: 'surgical'
+ *   images: [{                   // max 10 entries
+ *     secure_url: string,        // Cloudinary CDN URL
+ *     public_id:  string,        // Cloudinary public_id for deletion
+ *     format:     string,
+ *     bytes:      number,
+ *     width:      number,
+ *     height:     number,
+ *   }],
+ *   visible:      boolean,       // default: true
+ *   hidePrice:    boolean,       // default: false
+ *   price?:       string,        // optional
+ *   priceUnit?:   string,        // optional
+ *   fields: [{                   // admin-defined key/value pairs
+ *     key:    string,            // 1–100 chars
+ *     value:  string,            // 1–500 chars
+ *     hidden: boolean,           // default: false
+ *   }],
+ *   isFeatured:   boolean,       // default: false
+ *   isStarred:    boolean,       // default: false
+ *   sequence:     number,        // sort order within category
+ *   views?:       number,        // optional view counter
+ *   createdAt:    Date,
+ *   updatedAt:    Date,
+ * }
+ *
+ * Category Schema (categories collection)
+ * ─────────────────────────────────────────
+ * {
+ *   _id:         ObjectId,
+ *   name:        string,         // max 100 chars, unique per siteContext
+ *   siteContext: 'surgical' | 'general' | 'both',
+ *   visible:     boolean,        // default: true
+ *   sequence:    number,         // sort order
+ *   createdAt:   Date,
+ *   updatedAt:   Date,
+ * }
+ */
 export async function getCollections() {
   const db = await getDb();
   return {
@@ -60,6 +105,10 @@ export async function getCollections() {
     homeProductFolders: db.collection("homeProductFolders"),
     subscriberLists: db.collection("subscriberLists"),
     homeProductSettings: db.collection("homeProductSettings"),
+    // Unified collections (v2)
+    products: db.collection("products"),
+    categories: db.collection("categories"),
+    quotes: db.collection("quotes"),
   };
 }
 
@@ -152,6 +201,24 @@ async function ensureIndexes(db) {
       { key: { name: 1 }, unique: true },
       { key: { sequence: 1 } },
       { key: { visible: 1, sequence: 1 } },
+    ]);
+  // Unified products collection indexes
+  await db
+    .collection("products")
+    .createIndexes([
+      { key: { siteContext: 1 } },
+      { key: { category: 1 } },
+      { key: { visible: 1 } },
+      { key: { isStarred: 1, visible: 1, sequence: 1 } },
+      { key: { isFeatured: 1, visible: 1, sequence: 1 } },
+      { key: { siteContext: 1, category: 1, visible: 1, sequence: 1 } },
+    ]);
+  // Unified categories collection indexes
+  await db
+    .collection("categories")
+    .createIndexes([
+      { key: { name: 1, siteContext: 1 }, unique: true },
+      { key: { siteContext: 1, visible: 1, sequence: 1 } },
     ]);
 }
 

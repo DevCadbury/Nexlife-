@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Next.js build output — never commit
+.next/
+out/
+.turbo/
+
+# Env files with secrets
+.env
+.env.local
+!.env.production
+!.env.example
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# OS
+.DS_Store
+Thumbs.db
+*.pem

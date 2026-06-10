@@ -34,9 +34,9 @@ export function Dialog({
 export function DialogTrigger({ children }: { children: React.ReactNode }) {
   const ctx = React.useContext(DialogContext)!;
   return (
-    <button onClick={() => ctx.setOpen(true)} className="contents">
+    <div onClick={() => ctx.setOpen(true)} className="contents">
       {children}
-    </button>
+    </div>
   );
 }
 
@@ -89,8 +89,8 @@ export function DialogFooter({ children }: { children: React.ReactNode }) {
 export function DialogClose({ children }: { children: React.ReactNode }) {
   const ctx = React.useContext(DialogContext)!;
   return (
-    <button onClick={() => ctx.setOpen(false)} className="contents">
+    <div onClick={() => ctx.setOpen(false)} className="contents">
       {children}
-    </button>
+    </div>
   );
 }

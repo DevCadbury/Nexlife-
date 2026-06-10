@@ -9,6 +9,7 @@ import ScrollToTop from "./components/ScrollToTop";
 import Preloader from "./components/Preloader";
 import PageLoader from "./components/PageLoader";
 import ErrorBoundary from "./components/ErrorBoundary";
+import WelcomeDialog from "./components/WelcomeDialog";
 import "./i18n";
 
 // ----- Lazy-loaded page chunks (only fetched when route is visited) -----
@@ -80,6 +81,7 @@ function AppContent() {
       <ScrollToTop />
       {isPreloading && <Preloader onComplete={() => setIsPreloading(false)} />}
       <div className={`min-h-screen transition-colors duration-300 w-full ${theme.background} ${theme.text}`}>
+        <WelcomeDialog />
         <Navbar />
         <main className="pt-36 w-full">
           <Suspense fallback={<PageLoader />}>

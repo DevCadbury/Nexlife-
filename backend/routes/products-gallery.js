@@ -1,3 +1,9 @@
+// DEPRECATED — This route file is superseded by routes/products.js (v2 unified products API).
+// Kept for backwards compatibility during migration. After running migrate-products.js and
+// verifying all frontend/CRM traffic routes through /api/v2/products, this file should be removed
+// and its registration removed from server.js.
+// DO NOT add new features here. All product management now goes through /api/v2/products.
+
 import express from "express";
 import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";

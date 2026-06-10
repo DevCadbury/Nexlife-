@@ -36,6 +36,8 @@ const Navbar = () => {
     },
     { name: "Global Presence", link: "/global-presence" },
     { name: "Contact", link: "/contact" },
+    // Cross-site link — opens surgical site in new tab
+    { name: "🩺 Surgical ↗", link: "https://nexlifeinternational.in/", external: true },
   ];
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);

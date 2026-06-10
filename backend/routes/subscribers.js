@@ -12,27 +12,26 @@ const router = express.Router();
 const MAX_NAME_LENGTH = 120;
 const MAX_PHONE_LENGTH = 40;
 const MAX_NOTE_LENGTH = 4000;
+const MAX_COMPANY_LENGTH = 150;
+const MAX_WEBSITE_LENGTH = 300;
 
 const normalizeEmail = (value) => String(value || "").trim().toLowerCase();
 const normalizeName = (value) => String(value || "").trim().slice(0, MAX_NAME_LENGTH);
 const normalizePhone = (value) => String(value || "").trim().slice(0, MAX_PHONE_LENGTH);
 const normalizeInternalNote = (value) =>
   String(value || "").trim().slice(0, MAX_NOTE_LENGTH);
+const normalizeCompany = (value) => String(value || "").trim().slice(0, MAX_COMPANY_LENGTH);
+const normalizeWebsite = (value) => String(value || "").trim().slice(0, MAX_WEBSITE_LENGTH);
 
 const getOptionalSubscriberFields = (input = {}) => {
   const updates = {};
 
-  if (input.name !== undefined) {
-    updates.name = normalizeName(input.name);
-  }
-
-  if (input.phone !== undefined) {
-    updates.phone = normalizePhone(input.phone);
-  }
-
-  if (input.internalNote !== undefined) {
-    updates.internalNote = normalizeInternalNote(input.internalNote);
-  }
+  if (input.name !== undefined) updates.name = normalizeName(input.name);
+  if (input.phone !== undefined) updates.phone = normalizePhone(input.phone);
+  if (input.whatsapp !== undefined) updates.whatsapp = normalizePhone(input.whatsapp);
+  if (input.company !== undefined) updates.company = normalizeCompany(input.company);
+  if (input.website !== undefined) updates.website = normalizeWebsite(input.website);
+  if (input.internalNote !== undefined) updates.internalNote = normalizeInternalNote(input.internalNote);
 
   return updates;
 };
@@ -61,37 +60,32 @@ const normalizeColumnKey = (key) =>
     .trim();
 
 const EMAIL_COLUMN_KEYS = new Set([
-  "email",
-  "emailaddress",
-  "mail",
-  "e-mail",
+  "email", "emailaddress", "mail", "e-mail",
 ].map((key) => normalizeColumnKey(key)));
 
 const NAME_COLUMN_KEYS = new Set([
-  "name",
-  "fullname",
-  "contactname",
+  "name", "fullname", "contactname",
 ].map((key) => normalizeColumnKey(key)));
 
 const PHONE_COLUMN_KEYS = new Set([
-  "phone",
-  "phonenumber",
-  "mobile",
-  "mobilenumber",
-  "contact",
-  "contactnumber",
-  "whatsapp",
-  "whatsappnumber",
+  "phone", "phonenumber", "mobile", "mobilenumber",
+  "contact", "contactnumber",
+].map((key) => normalizeColumnKey(key)));
+
+const WHATSAPP_COLUMN_KEYS = new Set([
+  "whatsapp", "whatsappnumber", "wa", "wanumber",
+].map((key) => normalizeColumnKey(key)));
+
+const COMPANY_COLUMN_KEYS = new Set([
+  "company", "companyname", "organization", "org", "hospital",
+].map((key) => normalizeColumnKey(key)));
+
+const WEBSITE_COLUMN_KEYS = new Set([
+  "website", "url", "web", "site",
 ].map((key) => normalizeColumnKey(key)));
 
 const NOTE_COLUMN_KEYS = new Set([
-  "internalnote",
-  "note",
-  "notes",
-  "remark",
-  "remarks",
-  "comment",
-  "comments",
+  "internalnote", "note", "notes", "remark", "remarks", "comment", "comments",
 ].map((key) => normalizeColumnKey(key)));
 
 const getStringCell = (value) => String(value ?? "").trim();
@@ -123,40 +117,20 @@ const parseSubscriberRow = (row, rowIndex) => {
   const email = normalizeEmail(emailRaw);
   const name = normalizeName(pickColumnValue(row, NAME_COLUMN_KEYS));
   const phone = normalizePhone(pickColumnValue(row, PHONE_COLUMN_KEYS));
+  const whatsapp = normalizePhone(pickColumnValue(row, WHATSAPP_COLUMN_KEYS));
+  const company = normalizeCompany(pickColumnValue(row, COMPANY_COLUMN_KEYS));
+  const website = normalizeWebsite(pickColumnValue(row, WEBSITE_COLUMN_KEYS));
   const internalNote = normalizeInternalNote(pickColumnValue(row, NOTE_COLUMN_KEYS));
 
   if (!email) {
-    return {
-      row: rowIndex,
-      email: "",
-      name,
-      phone,
-      internalNote,
-      status: "invalid",
-      reason: "missing_email",
-    };
+    return { row: rowIndex, email: "", name, phone, whatsapp, company, website, internalNote, status: "invalid", reason: "missing_email" };
   }
 
   if (!validateEmail(email)) {
-    return {
-      row: rowIndex,
-      email,
-      name,
-      phone,
-      internalNote,
-      status: "invalid",
-      reason: "invalid_email_format",
-    };
+    return { row: rowIndex, email, name, phone, whatsapp, company, website, internalNote, status: "invalid", reason: "invalid_email_format" };
   }
 
-  return {
-    row: rowIndex,
-    email,
-    name,
-    phone,
-    internalNote,
-    status: "valid",
-  };
+  return { row: rowIndex, email, name, phone, whatsapp, company, website, internalNote, status: "valid" };
 };
 
 const markDuplicateRows = (rows) => {
@@ -228,9 +202,9 @@ const upload = multer({
 router.get("/template", requireAuth(), async (req, res) => {
   try {
     const template = [
-      "email,name,phone,internalNote",
-      "john.doe@example.com,John Doe,+1 555 0100,Priority distributor",
-      "jane.smith@example.com,Jane Smith,+91 9876543210,Follow up in Q2",
+      "email,name,phone,whatsapp,company,website,internalNote",
+      "john.doe@example.com,John Doe,+1 555 0100,+1 555 0100,Acme Hospital,https://acme.com,Priority distributor",
+      "jane.smith@example.com,Jane Smith,+91 9876543210,+91 9876543210,MedTech Corp,https://medtech.com,Follow up in Q2",
     ].join("\n");
 
     res.setHeader("Content-Type", "text/csv; charset=utf-8");
@@ -313,6 +287,86 @@ router.post("/import/preview", requireAuth(), upload.single("file"), async (req,
   } catch (err) {
     console.error("Preview import subscribers failed", err);
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// GET /api/subscribers/profile/:email — full subscriber profile with quotes + activity
+// Must come BEFORE /:email wildcard route
+router.get("/profile/:email", requireAuth(), async (req, res) => {
+  try {
+    const { ObjectId } = await import("mongodb");
+    const email = normalizeEmail(decodeURIComponent(req.params.email || ""));
+    if (!email) return res.status(400).json({ error: "Email required" });
+
+    const { subscribers, quotes, campaigns, logs } = await getCollections();
+
+    const subscriber = await subscribers.findOne({ email });
+    if (!subscriber) return res.status(404).json({ error: "Subscriber not found" });
+
+    // All quotes tied to this email
+    const subscriberQuotes = await quotes
+      .find({ email })
+      .sort({ createdAt: -1 })
+      .limit(50)
+      .toArray();
+
+    // Campaigns that included this email in their recipient list
+    // We store sent recipients on the campaign or check logs
+    const sentCampaigns = await campaigns
+      .find({ "sentTo": email })
+      .sort({ sentAt: -1 })
+      .limit(20)
+      .toArray()
+      .catch(() => []);
+
+    // Fall back to activity logs if sentTo not indexed
+    const activityLogs = await logs
+      .find({
+        $or: [
+          { "meta.email": email },
+          { "meta.emails": email },
+          { "meta.recipient": email },
+        ],
+        type: { $in: ["campaign.sent", "subscriber.added", "subscriber.updated", "subscriber.removed"] }
+      })
+      .sort({ createdAt: -1 })
+      .limit(50)
+      .toArray()
+      .catch(() => []);
+
+    return res.json({
+      success: true,
+      subscriber: {
+        ...subscriber,
+        _id: undefined,
+      },
+      quotes: subscriberQuotes.map((q) => ({
+        _id: String(q._id),
+        referenceId: q.referenceId,
+        productName: q.productName,
+        source: q.source,
+        status: q.status,
+        createdAt: q.createdAt,
+        message: q.message,
+      })),
+      campaigns: sentCampaigns.map((c) => ({
+        _id: String(c._id),
+        name: c.name,
+        subject: c.subject,
+        sentAt: c.sentAt || c.updatedAt,
+        status: c.status,
+      })),
+      activityLogs: activityLogs.map((l) => ({
+        _id: String(l._id),
+        type: l.type,
+        actorName: l.actorName,
+        createdAt: l.createdAt,
+        meta: l.meta,
+      })),
+    });
+  } catch (err) {
+    console.error("Subscriber profile failed", err);
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -421,10 +475,14 @@ router.get("/", requireAuth(), async (req, res) => {
           email: 1,
           name: 1,
           phone: 1,
+          whatsapp: 1,
+          company: 1,
+          website: 1,
           internalNote: 1,
           createdAt: 1,
           added_at: 1,
           added_by: 1,
+          source: 1,
           staff_name: 1,
           staff_email: 1,
           staff_role: 1,
@@ -503,6 +561,9 @@ router.post("/", requireAuth(), async (req, res) => {
         email: normalizedEmail,
         name: optionalFields.name || "",
         phone: optionalFields.phone || "",
+        whatsapp: optionalFields.whatsapp || "",
+        company: optionalFields.company || "",
+        website: optionalFields.website || "",
         internalNote: optionalFields.internalNote || "",
         added_by: userId,
         added_at: new Date(),
@@ -800,6 +861,9 @@ router.post("/import", requireAuth(), upload.single('file'), async (req, res) =>
         const metadataUpdates = {};
         if (row.name) metadataUpdates.name = row.name;
         if (row.phone) metadataUpdates.phone = row.phone;
+        if (row.whatsapp) metadataUpdates.whatsapp = row.whatsapp;
+        if (row.company) metadataUpdates.company = row.company;
+        if (row.website) metadataUpdates.website = row.website;
         if (row.internalNote) metadataUpdates.internalNote = row.internalNote;
 
         if (existing) {
@@ -826,6 +890,9 @@ router.post("/import", requireAuth(), upload.single('file'), async (req, res) =>
             email: row.email,
             name: row.name || "",
             phone: row.phone || "",
+            whatsapp: row.whatsapp || "",
+            company: row.company || "",
+            website: row.website || "",
             internalNote: row.internalNote || "",
             added_by: userId,
             added_at: new Date(),
@@ -961,22 +1028,105 @@ router.patch("/:email", requireAuth(["superadmin", "dev"]), async (req, res) => 
       updateFields.email = nextEmail;
     }
 
+    // Handle structured notes array
+    if (payload.notes !== undefined && Array.isArray(payload.notes)) {
+      updateFields.notes = payload.notes.map((n) => ({
+        id: n.id || String(Date.now() + Math.random()),
+        text: String(n.text || "").trim().slice(0, 4000),
+        createdAt: n.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }));
+    }
+
     await subscribers.updateOne({ email: currentEmail }, { $set: updateFields });
 
     await addLog({
       type: "subscriber.updated",
       actorId: userId,
       actorName,
-      meta: {
-        previousEmail: currentEmail,
-        email: nextEmail,
-      },
+      meta: { previousEmail: currentEmail, email: nextEmail },
     });
 
     res.json({ success: true, email: nextEmail });
   } catch (err) {
     console.error("Edit subscriber failed", err);
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// POST /api/subscribers/:email/notes — add a note
+router.post("/:email/notes", requireAuth(["superadmin", "dev"]), async (req, res) => {
+  try {
+    const email = normalizeEmail(decodeURIComponent(req.params.email || ""));
+    const { text } = req.body || {};
+    if (!text || !text.trim()) return res.status(400).json({ error: "Note text required" });
+
+    const { subscribers } = await getCollections();
+    const existing = await subscribers.findOne({ email });
+    if (!existing) return res.status(404).json({ error: "Subscriber not found" });
+
+    const note = {
+      id: `note-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      text: String(text).trim().slice(0, 4000),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    await subscribers.updateOne(
+      { email },
+      { $push: { notes: note }, $set: { updatedAt: new Date() } }
+    );
+
+    return res.json({ success: true, note });
+  } catch (err) {
+    console.error("Add note failed", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// PATCH /api/subscribers/:email/notes/:noteId — edit a note
+router.patch("/:email/notes/:noteId", requireAuth(["superadmin", "dev"]), async (req, res) => {
+  try {
+    const email = normalizeEmail(decodeURIComponent(req.params.email || ""));
+    const { noteId } = req.params;
+    const { text } = req.body || {};
+    if (!text || !text.trim()) return res.status(400).json({ error: "Note text required" });
+
+    const { subscribers } = await getCollections();
+    await subscribers.updateOne(
+      { email, "notes.id": noteId },
+      {
+        $set: {
+          "notes.$.text": String(text).trim().slice(0, 4000),
+          "notes.$.updatedAt": new Date().toISOString(),
+          updatedAt: new Date(),
+        },
+      }
+    );
+
+    return res.json({ success: true });
+  } catch (err) {
+    console.error("Edit note failed", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// DELETE /api/subscribers/:email/notes/:noteId — delete a note
+router.delete("/:email/notes/:noteId", requireAuth(["superadmin", "dev"]), async (req, res) => {
+  try {
+    const email = normalizeEmail(decodeURIComponent(req.params.email || ""));
+    const { noteId } = req.params;
+
+    const { subscribers } = await getCollections();
+    await subscribers.updateOne(
+      { email },
+      { $pull: { notes: { id: noteId } }, $set: { updatedAt: new Date() } }
+    );
+
+    return res.json({ success: true });
+  } catch (err) {
+    console.error("Delete note failed", err);
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
 

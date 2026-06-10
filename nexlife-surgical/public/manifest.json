@@ -1,0 +1,61 @@
+{
+  "name": "Nexlife International - Pharmaceutical Import & Export",
+  "short_name": "Nexlife International",
+  "description": "Premier pharmaceutical import and export company specializing in high-quality medicines, tablets, capsules, and healthcare products with global presence.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["pharmaceutical", "healthcare", "medicine", "business"],
+  "icons": [
+    {
+      "src": "/src/assets/images/02.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/src/assets/images/02.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/src/assets/images/nexlife-logo.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Products",
+      "short_name": "Products",
+      "description": "View our pharmaceutical products",
+      "url": "/products",
+      "icons": [
+        {
+          "src": "/src/assets/images/02.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Contact",
+      "short_name": "Contact",
+      "description": "Contact us for inquiries",
+      "url": "/contact",
+      "icons": [
+        {
+          "src": "/src/assets/images/02.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ]
+}

@@ -1,30 +1,41 @@
 "use client";
 import React from "react";
 
+type ButtonVariant = "default" | "outline" | "ghost" | "danger" | "secondary";
+type ButtonSize = "sm" | "md" | "lg";
+
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: "default" | "outline";
-  size?: "sm" | "md" | "lg";
+  variant?: ButtonVariant;
+  size?: ButtonSize;
 };
 
 export const Button: React.FC<ButtonProps> = ({
   variant = "default",
   size = "md",
-  className,
+  className = "",
   ...props
 }) => {
-  const base = "rounded px-3 py-2 font-semibold transition";
-  const v =
-    variant === "outline"
-      ? "border border-slate-800 hover:border-indigo-500/40 bg-transparent"
-      : "bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 ring-1 ring-indigo-500/30";
-  const s =
-    size === "sm"
-      ? "text-sm px-2 py-1"
-      : size === "lg"
-      ? "text-base px-4 py-2"
-      : "text-sm";
+  const base = "crm-btn";
+
+  const variantClass = {
+    default:   "crm-btn-primary",
+    secondary: "crm-btn-secondary",
+    outline:   "crm-btn-secondary",
+    ghost:     "crm-btn-ghost",
+    danger:    "crm-btn-danger",
+  }[variant];
+
+  const sizeClass = {
+    sm: "crm-btn-sm",
+    md: "",
+    lg: "crm-btn-lg",
+  }[size];
+
   return (
-    <button className={`${base} ${v} ${s} ${className || ""}`} {...props} />
+    <button
+      className={[base, variantClass, sizeClass, className].filter(Boolean).join(" ")}
+      {...props}
+    />
   );
 };
 

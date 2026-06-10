@@ -20,4 +20,21 @@ if (typeof window !== "undefined") {
     } catch {}
     return config;
   });
+
+  // On 401 during an active session: clear JWT and redirect to login
+  api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error?.response?.status === 401) {
+        try {
+          window.localStorage.removeItem("token");
+          document.cookie = "nxl_jwt=; Path=/; Max-Age=0";
+        } catch {}
+        if (!window.location.pathname.startsWith("/login")) {
+          window.location.href = "/login";
+        }
+      }
+      return Promise.reject(error);
+    }
+  );
 }

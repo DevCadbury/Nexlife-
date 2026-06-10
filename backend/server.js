@@ -18,6 +18,9 @@ import logsRouter from "./routes/logs.js";
 import templatesRouter from "./routes/templates.js";
 import homeProductsRouter from "./routes/home-products.js";
 import subscriberListsRouter from "./routes/subscriber-lists.js";
+import categoriesRouter from "./routes/categories.js";
+import productsV2Router from "./routes/products.js";
+import quotesRouter from "./routes/quotes.js";
 import { startInboundImapPoller } from "./inbound-imap.js";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -29,23 +32,12 @@ import { sendEmail, validateEmail, emailTemplates } from "./config/email.js";
 
 dotenv.config();
 
-// Configure Cloudinary
-if (process.env.CLOUDINARY_URL) {
-  // Use CLOUDINARY_URL if available (recommended)
-  cloudinary.config({
-    cloud_name: "dqnhpmoej",
-    api_key: "159867665417568",
-    api_secret: "UjVH-Wj-XwiiKyYdeewjRxnDIzA",
-  });
-} else {
-  // Fallback to individual environment variables
-  cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME || "dqnhpmoej",
-    api_key: process.env.CLOUDINARY_API_KEY || "159867665417568",
-    api_secret:
-      process.env.CLOUDINARY_API_SECRET || "UjVH-Wj-XwiiKyYdeewjRxnDIzA",
-  });
-}
+// Configure Cloudinary — all credentials from environment variables only
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'dqnhpmoej',
+  api_key: process.env.CLOUDINARY_API_KEY || '',
+  api_secret: process.env.CLOUDINARY_API_SECRET || '',
+});
 
 console.log(
   "Cloudinary configured with cloud_name:",
@@ -63,10 +55,17 @@ app.use(
         'https://nexlife-admin.vercel.app',
         'https://www.nexlifeinternational.com',
         'https://nexlifeinternational.com',
+        // Surgical site domains
+        'https://nexlifeinternational.in',
+        'https://www.nexlifeinternational.in',
+        'http://nexlifeinternational.in',
+        'http://www.nexlifeinternational.in',
+        'https://nexlife-surgical.vercel.app',
         'https://nexlife.vercel.app',
         'https://nexlife-api.vercel.app', // Backend API itself
         'http://localhost:3000', // For local development
         'http://localhost:3001', // For local development
+        'http://localhost:3002', // For local development
         'http://localhost:4000', // For local development
         'http://localhost:4001', // For local development
         'http://localhost:5173', // Vite dev server
@@ -792,6 +791,11 @@ app.use("/api/templates", templatesRouter);
 app.use("/api/subscriber-lists", subscriberListsRouter);
 app.use("/api/home-products", homeProductsRouter);
 
+// V2 unified routes
+app.use("/api/v2/categories", categoriesRouter);
+app.use("/api/v2/products", productsV2Router);
+app.use("/api/v2/quotes", quotesRouter);
+
 // Start IMAP poller if IMAP_* env vars provided
 startInboundImapPoller().catch((e) => console.error("IMAP poller failed", e));
 
@@ -799,6 +803,13 @@ startInboundImapPoller().catch((e) => console.error("IMAP poller failed", e));
 app.get("/api/health", (req, res) => {
   const db = getConnectionStatus();
   res.json({ ok: true, db });
+});
+
+// Global error handler — must be last middleware
+app.use((err, req, res, next) => {
+  console.error('[Error]', err.message);
+  const status = err.status || err.statusCode || 500;
+  res.status(status).json({ error: err.message || 'Internal server error' });
 });
 
 const port = process.env.PORT || 4000;

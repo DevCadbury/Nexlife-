@@ -11,16 +11,18 @@ export function ThemeToggle() {
     setMounted(true);
     const stored =
       typeof window !== "undefined" ? localStorage.getItem("theme") : null;
+    // Default is LIGHT — only go dark if explicitly stored or OS prefers dark
     const initial = stored
       ? stored
-      : document.documentElement.classList.contains("dark")
-      ? "dark"
-      : window.matchMedia &&
-        window.matchMedia("(prefers-color-scheme: dark)").matches
+      : window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches
       ? "dark"
       : "light";
     setTheme(initial);
     document.documentElement.classList.toggle("dark", initial === "dark");
+    // If no stored preference, save "light" as default so it persists
+    if (!stored) {
+      try { localStorage.setItem("theme", initial); } catch {}
+    }
   }, []);
 
   if (!mounted) return null;

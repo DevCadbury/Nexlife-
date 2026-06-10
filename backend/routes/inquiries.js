@@ -232,13 +232,19 @@ router.post("/", async (req, res) => {
     });
 
     // Send admin notification using existing template
-    const toAddress = process.env.CONTACT_TO || process.env.SMTP_USER;
-    await sendEmail(toAddress, "contact", {
-      name: doc.name,
-      email: doc.email,
-      subject: doc.subject || `New inquiry from ${doc.name}`,
-      message: doc.message,
-    });
+    // Req 11.4: IF notification email fails, still return 201 and log the failure
+    try {
+      const toAddress = process.env.CONTACT_TO || process.env.SMTP_USER;
+      await sendEmail(toAddress, "contact", {
+        name: doc.name,
+        email: doc.email,
+        subject: doc.subject || `New inquiry from ${doc.name}`,
+        message: doc.message,
+      });
+    } catch (notifyError) {
+      console.error("Failed to send admin notification email:", notifyError);
+      // Continue — do not abort inquiry creation
+    }
 
     // Send confirmation email to customer with catalogue attachment
     try {
@@ -274,7 +280,7 @@ router.post("/", async (req, res) => {
       // Don't fail the inquiry creation if confirmation email fails
     }
 
-    return res.json({ success: true, id: insert.insertedId });
+    return res.status(201).json({ success: true, id: insert.insertedId });
   } catch (err) {
     console.error("Create inquiry failed", err);
     return res.status(500).json({ error: "Internal server error" });

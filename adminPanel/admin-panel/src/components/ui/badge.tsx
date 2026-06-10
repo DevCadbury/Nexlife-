@@ -1,25 +1,14 @@
 "use client";
 import React from "react";
 
-type BadgeVariant =
-  | "default"
-  | "secondary"
-  | "success"
-  | "warning"
-  | "destructive";
+type BadgeVariant = "default" | "secondary" | "success" | "warning" | "destructive";
 
-function classNames(...arr: Array<string | false | null | undefined>) {
-  return arr.filter(Boolean).join(" ");
-}
-
-const base =
-  "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium border";
-const variants: Record<BadgeVariant, string> = {
-  default: "bg-slate-800/60 text-slate-200 border-slate-700",
-  secondary: "bg-slate-700/40 text-slate-200 border-slate-600",
-  success: "bg-emerald-500/20 text-emerald-300 border-emerald-700/40",
-  warning: "bg-amber-500/20 text-amber-300 border-amber-700/40",
-  destructive: "bg-red-500/20 text-red-300 border-red-700/40",
+const variantStyles: Record<BadgeVariant, React.CSSProperties> = {
+  default:     { background: "var(--brand-soft)", color: "var(--brand)",  border: "1px solid var(--brand-ring)" },
+  secondary:   { background: "var(--bg-inset)",   color: "var(--text-3)", border: "1px solid var(--border)" },
+  success:     { background: "var(--ok-bg)",       color: "var(--ok-t)",   border: "1px solid var(--ok-b)" },
+  warning:     { background: "var(--warn-bg)",     color: "var(--warn-t)", border: "1px solid var(--warn-b)" },
+  destructive: { background: "var(--err-bg)",      color: "var(--err-t)",  border: "1px solid var(--err-b)" },
 };
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
@@ -28,15 +17,18 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
 
 export const Badge: React.FC<BadgeProps> = ({
   variant = "default",
-  className,
+  className = "",
+  style,
   children,
   ...props
-}) => {
-  return (
-    <span className={classNames(base, variants[variant], className)} {...props}>
-      {children}
-    </span>
-  );
-};
+}) => (
+  <span
+    className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${className}`}
+    style={{ ...variantStyles[variant], ...style }}
+    {...props}
+  >
+    {children}
+  </span>
+);
 
 export default Badge;

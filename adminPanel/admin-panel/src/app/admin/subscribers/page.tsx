@@ -2,1223 +2,1049 @@
 
 import useSWR from "swr";
 import { fetcher, api } from "@/lib/api";
-import { useMemo, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { useMemo, useRef, useState, useEffect } from "react";
 import {
-  Mail,
-  Plus,
-  Download,
-  Users,
-  Calendar,
-  Trash2,
-  Shield,
-  Clock,
-  CheckSquare,
-  Square,
-  AlertCircle,
-  Upload,
-  UserPlus,
-  Search,
-  Pencil,
-  Phone,
-  MessageCircle,
-  X,
-  StickyNote,
-  FileSpreadsheet,
-  Loader2,
+  Mail, Phone, Globe, MessageCircle, Building2,
+  Search, Plus, Download, Upload, Users, Calendar,
+  Trash2, CheckSquare, Square, FileSpreadsheet,
+  Loader2, X, Pencil, StickyNote,
+  FileText, Send, ChevronRight, RefreshCw, Star,
+  UserPlus, ArrowRight, Check,
 } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
-import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import { BulkEmailInput } from "@/components/ui/bulk-email-input";
+
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface Subscriber {
   email: string;
   name?: string;
   phone?: string;
+  whatsapp?: string;
+  company?: string;
+  website?: string;
   internalNote?: string;
   createdAt?: string;
   added_at?: string;
   added_by?: string;
+  source?: string;
   staff_name?: string;
-  staff_email?: string;
-  staff_role?: string;
   is_locked?: boolean;
   deleted_by_admin?: boolean;
   deleted_by_super?: boolean;
 }
 
-interface SubscriberListResponse {
-  total: number;
-  items: Subscriber[];
+interface SubscriberProfile {
+  subscriber: Subscriber & { notes?: Note[] };
+  quotes: { _id: string; referenceId: string; productName?: string; source: string; status: string; createdAt: string; message?: string }[];
+  campaigns: { _id: string; name: string; subject: string; sentAt: string; status: string }[];
+  activityLogs: { _id: string; type: string; actorName?: string; createdAt: string; meta?: any }[];
 }
 
-interface SubscriberStats {
-  total: number;
-  active: number;
-  locked?: number;
-  adminDeleted?: number;
+interface Note {
+  id: string;
+  text: string;
+  createdAt: string;
+  updatedAt?: string;
 }
 
-interface AuthProfile {
-  user?: {
-    role?: string;
-  };
+interface SubscriberListResponse { total: number; items: Subscriber[]; }
+interface SubscriberStats { total: number; active: number; locked?: number; adminDeleted?: number; }
+
+const emptyForm = { email: "", name: "", phone: "", whatsapp: "", company: "", website: "", internalNote: "" };
+type SubscriberForm = typeof emptyForm;
+
+function fmtDate(iso?: string) {
+  if (!iso) return "—";
+  try { return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(iso)); }
+  catch { return iso; }
 }
 
-interface StaffListResponse {
-  items: Array<{ _id: string; name: string; role: string }>;
+function fmtDateShort(iso?: string) {
+  if (!iso) return "—";
+  try { return new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(new Date(iso)); }
+  catch { return iso; }
 }
 
-interface SubscriberForm {
-  email: string;
-  name: string;
-  phone: string;
-  internalNote: string;
+// ─── Contact Action Buttons ───────────────────────────────────────────────────
+
+function ContactActions({ subscriber }: { subscriber: Subscriber }) {
+  const phone = subscriber.phone?.replace(/\D/g, "");
+  const wa = (subscriber.whatsapp || subscriber.phone || "").replace(/\D/g, "");
+  return (
+    <div className="flex items-center gap-1.5 flex-wrap">
+      <a href={`mailto:${subscriber.email}`} title="Send email"
+        className="flex items-center gap-1 px-2.5 py-1.5 rounded-md text-[11px] font-semibold transition-all hover:shadow-sm"
+        style={{ background: "var(--brand-soft)", color: "var(--brand)", border: "1px solid var(--brand)" }}>
+        <Mail className="w-3.5 h-3.5" />Email
+      </a>
+      {phone && (
+        <a href={`tel:${subscriber.phone}`} title="Call"
+          className="flex items-center gap-1 px-2.5 py-1.5 rounded-md text-[11px] font-semibold transition-all hover:shadow-sm"
+          style={{ background: "var(--bg-inset)", color: "var(--text-2)", border: "1px solid var(--border)" }}>
+          <Phone className="w-3.5 h-3.5" />Call
+        </a>
+      )}
+      {wa && (
+        <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer" title="WhatsApp"
+          className="flex items-center gap-1 px-2.5 py-1.5 rounded-md text-[11px] font-semibold transition-all hover:shadow-sm"
+          style={{ background: "#dcfce7", color: "#16a34a", border: "1px solid #86efac" }}>
+          <MessageCircle className="w-3.5 h-3.5" />WhatsApp
+        </a>
+      )}
+      {subscriber.website && (
+        <a href={subscriber.website.startsWith("http") ? subscriber.website : `https://${subscriber.website}`}
+          target="_blank" rel="noopener noreferrer" title="Website"
+          className="flex items-center gap-1 px-2.5 py-1.5 rounded-md text-[11px] font-semibold transition-all hover:shadow-sm"
+          style={{ background: "var(--bg-inset)", color: "var(--text-2)", border: "1px solid var(--border)" }}>
+          <Globe className="w-3.5 h-3.5" />Website
+        </a>
+      )}
+    </div>
+  );
 }
 
-interface ImportPreviewItem {
-  row: number;
-  email: string;
-  name?: string;
-  phone?: string;
-  internalNote?: string;
-  status: string;
-  reason?: string;
-}
+// ─── Notes Panel ──────────────────────────────────────────────────────────────
 
-interface ImportPreviewResponse {
-  success: boolean;
-  filename: string;
-  total: number;
-  valid: number;
-  invalid: number;
-  duplicates: number;
-  alreadyExists?: number;
-  importable: number;
-  items: ImportPreviewItem[];
-}
+function NotesPanel({ email, notes, onUpdate }: { email: string; notes: Note[]; onUpdate: () => void }) {
+  const { success: toastOk, error: toastErr } = useToast();
+  const [newText, setNewText] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editText, setEditText] = useState("");
 
-const emptyForm: SubscriberForm = {
-  email: "",
-  name: "",
-  phone: "",
-  internalNote: "",
-};
-
-const normalizePhoneForLinks = (phone?: string) => String(phone || "").replace(/[^\d+]/g, "");
-const normalizeWhatsAppDigits = (phone?: string) => String(phone || "").replace(/\D/g, "");
-
-type ApiErrorLike = {
-  response?: {
-    data?: {
-      error?: string;
-    };
-  };
-  message?: string;
-};
-
-function toApiError(error: unknown): ApiErrorLike {
-  if (typeof error === "object" && error !== null) {
-    return error as ApiErrorLike;
+  async function addNote() {
+    if (!newText.trim() || saving) return;
+    setSaving(true);
+    try {
+      await api.post(`/subscribers/${encodeURIComponent(email)}/notes`, { text: newText.trim() });
+      setNewText("");
+      onUpdate();
+      toastOk("Note added");
+    } catch (e: any) {
+      toastErr(e?.response?.data?.error || "Failed to add note");
+    } finally { setSaving(false); }
   }
-  return {};
+
+  async function saveEdit(noteId: string) {
+    if (!editText.trim()) return;
+    try {
+      await api.patch(`/subscribers/${encodeURIComponent(email)}/notes/${noteId}`, { text: editText.trim() });
+      setEditingId(null);
+      onUpdate();
+      toastOk("Note updated");
+    } catch (e: any) {
+      toastErr(e?.response?.data?.error || "Failed to update note");
+    }
+  }
+
+  async function deleteNote(noteId: string) {
+    if (!confirm("Delete this note?")) return;
+    try {
+      await api.delete(`/subscribers/${encodeURIComponent(email)}/notes/${noteId}`);
+      onUpdate();
+      toastOk("Note deleted");
+    } catch (e: any) {
+      toastErr(e?.response?.data?.error || "Failed to delete note");
+    }
+  }
+
+  return (
+    <div className="space-y-3">
+      {/* Add note */}
+      <div className="space-y-2">
+        <textarea
+          className="crm-input resize-none w-full"
+          rows={3}
+          value={newText}
+          onChange={(e) => setNewText(e.target.value)}
+          placeholder="Add a new internal note…"
+          onKeyDown={(e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) addNote(); }}
+        />
+        <button onClick={addNote} disabled={saving || !newText.trim()} className="crm-btn crm-btn-primary crm-btn-sm flex items-center gap-1.5">
+          {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
+          Add Note
+        </button>
+      </div>
+
+      {/* Notes list */}
+      {notes.length === 0 ? (
+        <div className="py-6 text-center text-[12px]" style={{ color: "var(--text-muted)" }}>No notes yet</div>
+      ) : [...notes].reverse().map((note) => (
+        <div key={note.id} className="rounded-lg p-3 text-[12px]"
+          style={{ background: "var(--bg-inset)", border: "1px solid var(--border)" }}>
+          {editingId === note.id ? (
+            <div className="space-y-2">
+              <textarea
+                className="crm-input resize-none w-full"
+                rows={3}
+                value={editText}
+                onChange={(e) => setEditText(e.target.value)}
+                autoFocus
+              />
+              <div className="flex gap-2">
+                <button onClick={() => saveEdit(note.id)} className="crm-btn crm-btn-primary crm-btn-sm">Save</button>
+                <button onClick={() => setEditingId(null)} className="crm-btn crm-btn-secondary crm-btn-sm">Cancel</button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <p className="whitespace-pre-wrap leading-relaxed" style={{ color: "var(--text-2)" }}>{note.text}</p>
+              <div className="flex items-center justify-between mt-2">
+                <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>
+                  {fmtDate(note.updatedAt || note.createdAt)}
+                </span>
+                <div className="flex items-center gap-1">
+                  <button onClick={() => { setEditingId(note.id); setEditText(note.text); }} className="crm-icon-btn">
+                    <Pencil className="w-3 h-3" />
+                  </button>
+                  <button onClick={() => deleteNote(note.id)} className="crm-icon-btn"
+                    onMouseEnter={(e) => (e.currentTarget.style.color = "var(--err-t)")}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = "")}>
+                    <Trash2 className="w-3 h-3" />
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      ))}
+    </div>
+  );
 }
 
-function getApiErrorMessage(error: unknown, fallback = "An error occurred") {
-  const apiError = toApiError(error);
-  return apiError.response?.data?.error || apiError.message || fallback;
+// ─── Profile Drawer ───────────────────────────────────────────────────────────
+
+function ProfileDrawer({
+  email, onClose, canEdit, onRefresh,
+}: {
+  email: string; onClose: () => void; canEdit: boolean; onRefresh: () => void;
+}) {
+  const { data, mutate, isLoading } = useSWR<SubscriberProfile>(
+    `/subscribers/profile/${encodeURIComponent(email)}`, fetcher,
+    { revalidateOnFocus: false }
+  );
+  const { success: toastOk, error: toastErr } = useToast();
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState<SubscriberForm>(emptyForm);
+  const [activeSection, setActiveSection] = useState<"overview" | "quotes" | "campaigns" | "activity" | "notes">("overview");
+
+  useEffect(() => {
+    if (data?.subscriber) {
+      setForm({
+        email: data.subscriber.email || "",
+        name: data.subscriber.name || "",
+        phone: data.subscriber.phone || "",
+        whatsapp: data.subscriber.whatsapp || "",
+        company: data.subscriber.company || "",
+        website: data.subscriber.website || "",
+        internalNote: data.subscriber.internalNote || "",
+      });
+    }
+  }, [data?.subscriber]);
+
+  async function handleSave() {
+    if (saving) return;
+    setSaving(true);
+    try {
+      await api.patch(`/subscribers/${encodeURIComponent(email)}`, form);
+      await mutate();
+      onRefresh();
+      setEditing(false);
+      toastOk("Profile updated");
+    } catch (e: any) {
+      toastErr(e?.response?.data?.error || "Failed to save");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const sub = data?.subscriber;
+  const initial = (sub?.name || sub?.email || "?")[0].toUpperCase();
+
+  const sourceLabel: Record<string, string> = {
+    "quote_download": "PDF Download",
+    "pdf-download": "PDF Download",
+    "surgical-cart": "Cart Quote",
+    "surgical": "Quote Form",
+    "manual": "Manual",
+    "import": "CSV Import",
+    "system": "System",
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex"
+      style={{ background: "rgba(0,0,0,0.35)" }}
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      {/* Drawer */}
+      <div
+        className="ml-auto h-full flex flex-col overflow-hidden"
+        style={{
+          width: "min(560px, 100vw)",
+          background: "var(--bg-surface)",
+          borderLeft: "1px solid var(--border)",
+          boxShadow: "-4px 0 24px rgba(0,0,0,0.12)",
+        }}
+      >
+        {/* Header */}
+        <div className="flex items-center gap-3 px-5 py-4 flex-shrink-0" style={{ borderBottom: "1px solid var(--border)" }}>
+          <button onClick={onClose} className="crm-icon-btn flex-shrink-0"><X className="w-4 h-4" /></button>
+          {isLoading ? (
+            <div className="h-4 w-40 rounded animate-pulse" style={{ background: "var(--border)" }} />
+          ) : (
+            <>
+              <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-[15px] font-bold flex-shrink-0"
+                style={{ background: "var(--brand)" }}>{initial}</div>
+              <div className="min-w-0 flex-1">
+                <div className="text-[14px] font-bold truncate" style={{ color: "var(--text)" }}>{sub?.name || sub?.email}</div>
+                {sub?.name && <div className="text-[11px] truncate" style={{ color: "var(--text-3)" }}>{sub.email}</div>}
+              </div>
+              {canEdit && !editing && (
+                <button onClick={() => setEditing(true)} className="crm-btn crm-btn-secondary crm-btn-sm flex items-center gap-1.5">
+                  <Pencil className="w-3.5 h-3.5" />Edit
+                </button>
+              )}
+            </>
+          )}
+        </div>
+
+        {isLoading ? (
+          <div className="p-5 space-y-3 flex-1">
+            {[...Array(6)].map((_, i) => <div key={i} className="h-8 rounded animate-pulse" style={{ background: "var(--bg-inset)" }} />)}
+          </div>
+        ) : !sub ? (
+          <div className="flex-1 flex items-center justify-center p-10 text-center" style={{ color: "var(--text-muted)" }}>
+            <p>Profile not found</p>
+          </div>
+        ) : (
+          <>
+            {/* Edit form */}
+            {editing ? (
+              <div className="flex-1 overflow-y-auto custom-scrollbar p-5 space-y-3">
+                <p className="text-[12px] font-semibold" style={{ color: "var(--text-3)" }}>EDIT PROFILE</p>
+                {([
+                  { key: "email", label: "Email *", type: "email" },
+                  { key: "name", label: "Full Name", type: "text" },
+                  { key: "phone", label: "Phone", type: "tel" },
+                  { key: "whatsapp", label: "WhatsApp Number", type: "tel" },
+                  { key: "company", label: "Company / Hospital", type: "text" },
+                  { key: "website", label: "Website URL", type: "url" },
+                ] as { key: keyof SubscriberForm; label: string; type: string }[]).map(({ key, label, type }) => (
+                  <div key={key}>
+                    <label className="crm-label">{label}</label>
+                    <input
+                      type={type}
+                      className="crm-input"
+                      value={form[key]}
+                      onChange={(e) => setForm((p) => ({ ...p, [key]: e.target.value }))}
+                    />
+                  </div>
+                ))}
+                <div>
+                  <label className="crm-label">Internal Notes</label>
+                  <textarea
+                    className="crm-input resize-none"
+                    rows={4}
+                    value={form.internalNote}
+                    onChange={(e) => setForm((p) => ({ ...p, internalNote: e.target.value }))}
+                    placeholder="Notes visible only to your team…"
+                  />
+                </div>
+                <div className="flex gap-2 pt-2">
+                  <button onClick={handleSave} disabled={saving} className="crm-btn crm-btn-primary flex items-center gap-1.5">
+                    {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                    Save Changes
+                  </button>
+                  <button onClick={() => setEditing(false)} className="crm-btn crm-btn-secondary">Cancel</button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex-1 overflow-y-auto custom-scrollbar">
+                {/* Contact + meta block */}
+                <div className="p-5" style={{ borderBottom: "1px solid var(--border)" }}>
+                  <ContactActions subscriber={sub} />
+
+                  <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 text-[12px]">
+                    {sub.company && (
+                      <div className="flex items-start gap-2">
+                        <Building2 className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" style={{ color: "var(--text-muted)" }} />
+                        <div>
+                          <div style={{ color: "var(--text-3)" }}>Company</div>
+                          <div className="font-medium" style={{ color: "var(--text)" }}>{sub.company}</div>
+                        </div>
+                      </div>
+                    )}
+                    {sub.phone && (
+                      <div className="flex items-start gap-2">
+                        <Phone className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" style={{ color: "var(--text-muted)" }} />
+                        <div>
+                          <div style={{ color: "var(--text-3)" }}>Phone</div>
+                          <div className="font-medium" style={{ color: "var(--text)" }}>{sub.phone}</div>
+                        </div>
+                      </div>
+                    )}
+                    {sub.whatsapp && (
+                      <div className="flex items-start gap-2">
+                        <MessageCircle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" style={{ color: "var(--text-muted)" }} />
+                        <div>
+                          <div style={{ color: "var(--text-3)" }}>WhatsApp</div>
+                          <div className="font-medium" style={{ color: "var(--text)" }}>{sub.whatsapp}</div>
+                        </div>
+                      </div>
+                    )}
+                    {sub.website && (
+                      <div className="flex items-start gap-2">
+                        <Globe className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" style={{ color: "var(--text-muted)" }} />
+                        <div>
+                          <div style={{ color: "var(--text-3)" }}>Website</div>
+                          <a href={sub.website.startsWith("http") ? sub.website : `https://${sub.website}`}
+                            target="_blank" rel="noopener noreferrer"
+                            className="font-medium truncate block max-w-[160px]"
+                            style={{ color: "var(--brand)" }}>
+                            {sub.website.replace(/^https?:\/\//, "")}
+                          </a>
+                        </div>
+                      </div>
+                    )}
+                    <div className="flex items-start gap-2">
+                      <Calendar className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" style={{ color: "var(--text-muted)" }} />
+                      <div>
+                        <div style={{ color: "var(--text-3)" }}>Subscribed</div>
+                        <div className="font-medium" style={{ color: "var(--text)" }}>{fmtDateShort(sub.added_at || sub.createdAt)}</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <Star className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" style={{ color: "var(--text-muted)" }} />
+                      <div>
+                        <div style={{ color: "var(--text-3)" }}>Source</div>
+                        <div className="font-medium" style={{ color: "var(--text)" }}>
+                          {sourceLabel[sub.source || ""] || sub.source || "Manual"}
+                        </div>
+                      </div>
+                    </div>
+                    {sub.staff_name && (
+                      <div className="flex items-start gap-2 col-span-2">
+                        <UserPlus className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" style={{ color: "var(--text-muted)" }} />
+                        <div>
+                          <div style={{ color: "var(--text-3)" }}>Added by</div>
+                          <div className="font-medium" style={{ color: "var(--text)" }}>{sub.staff_name}</div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {sub.internalNote && (
+                    <div className="mt-4 rounded-lg p-3 text-[12px] leading-relaxed"
+                      style={{ background: "var(--bg-inset)", border: "1px solid var(--border)", color: "var(--text-2)" }}>
+                      <div className="flex items-center gap-1.5 mb-1.5">
+                        <StickyNote className="w-3 h-3" style={{ color: "var(--text-muted)" }} />
+                        <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--text-3)" }}>Internal Note</span>
+                      </div>
+                      <p className="whitespace-pre-wrap">{sub.internalNote}</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Section tabs */}
+                <div className="flex items-center gap-0.5 px-4 py-2 overflow-x-auto" style={{ borderBottom: "1px solid var(--border)" }}>
+                  {([
+                    { id: "overview", label: "Overview" },
+                    { id: "quotes", label: `Quotes${data?.quotes.length ? ` (${data.quotes.length})` : ""}` },
+                    { id: "campaigns", label: `Campaigns${data?.campaigns.length ? ` (${data.campaigns.length})` : ""}` },
+                    { id: "notes", label: `Notes${(sub as any).notes?.length ? ` (${(sub as any).notes.length})` : ""}` },
+                    { id: "activity", label: "Activity" },
+                  ] as { id: typeof activeSection; label: string }[]).map(({ id, label }) => (
+                    <button key={id} onClick={() => setActiveSection(id)}
+                      className="px-3 py-1.5 rounded-md text-[12px] font-semibold whitespace-nowrap transition-all"
+                      style={{
+                        background: activeSection === id ? "var(--brand-soft)" : "transparent",
+                        color: activeSection === id ? "var(--brand)" : "var(--text-3)",
+                      }}>
+                      {label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Section content */}
+                <div className="p-5">
+                  {activeSection === "overview" && (
+                    <div className="space-y-4">
+                      {/* Quick stats */}
+                      <div className="grid grid-cols-3 gap-3">
+                        {[
+                          { label: "Quotes", value: data?.quotes.length ?? 0, icon: FileText, color: "var(--brand)" },
+                          { label: "Campaigns", value: data?.campaigns.length ?? 0, icon: Send, color: "#8b5cf6" },
+                          { label: "Notes", value: (sub as any).notes?.length ?? 0, icon: StickyNote, color: "#f59e0b" },
+                        ].map(({ label, value, icon: Icon, color }) => (
+                          <div key={label} className="rounded-lg p-3 text-center"
+                            style={{ background: "var(--bg-inset)", border: "1px solid var(--border)" }}>
+                            <Icon className="w-4 h-4 mx-auto mb-1.5" style={{ color }} />
+                            <div className="text-[18px] font-bold" style={{ color: "var(--text)" }}>{value}</div>
+                            <div className="text-[10px]" style={{ color: "var(--text-3)" }}>{label}</div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Latest quote */}
+                      {data?.quotes[0] && (
+                        <div>
+                          <div className="text-[11px] font-bold uppercase tracking-widest mb-2" style={{ color: "var(--text-3)" }}>Latest Quote</div>
+                          <div className="rounded-lg p-3" style={{ background: "var(--bg-inset)", border: "1px solid var(--border)" }}>
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-[12px] font-mono font-bold" style={{ color: "var(--brand)" }}>{data.quotes[0].referenceId}</span>
+                              <span className={`crm-badge text-[10px] ${data.quotes[0].status === "new" ? "crm-badge-red" : data.quotes[0].status === "replied" ? "crm-badge-green" : "crm-badge-gray"}`}>{data.quotes[0].status}</span>
+                            </div>
+                            {data.quotes[0].productName && (
+                              <div className="text-[12px] mt-1 truncate" style={{ color: "var(--text-2)" }}>{data.quotes[0].productName}</div>
+                            )}
+                            <div className="text-[10px] mt-1" style={{ color: "var(--text-muted)" }}>{fmtDate(data.quotes[0].createdAt)}</div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Latest note */}
+                      {((sub as any).notes as Note[] | undefined)?.[0] && (
+                        <div>
+                          <div className="text-[11px] font-bold uppercase tracking-widest mb-2" style={{ color: "var(--text-3)" }}>Latest Note</div>
+                          <div className="rounded-lg p-3 text-[12px] leading-relaxed"
+                            style={{ background: "var(--bg-inset)", border: "1px solid var(--border)", color: "var(--text-2)" }}>
+                            <p className="whitespace-pre-wrap line-clamp-4">{((sub as any).notes as Note[])[((sub as any).notes as Note[]).length - 1].text}</p>
+                            <div className="text-[10px] mt-2" style={{ color: "var(--text-muted)" }}>
+                              {fmtDate(((sub as any).notes as Note[])[((sub as any).notes as Note[]).length - 1].createdAt)}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {activeSection === "quotes" && (
+                    <div className="space-y-2">
+                      {data?.quotes.length === 0 ? (
+                        <div className="py-10 text-center" style={{ color: "var(--text-muted)" }}>
+                          <FileText className="w-8 h-8 mx-auto mb-2 opacity-40" />
+                          <p className="text-[13px]">No quotes yet</p>
+                        </div>
+                      ) : data?.quotes.map((q) => (
+                        <div key={q._id} className="rounded-lg p-3" style={{ background: "var(--bg-inset)", border: "1px solid var(--border)" }}>
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-[12px] font-mono font-bold" style={{ color: "var(--brand)" }}>{q.referenceId}</span>
+                                <span className={`crm-badge text-[10px] flex-shrink-0 ${q.status === "new" ? "crm-badge-red" : q.status === "replied" ? "crm-badge-green" : "crm-badge-gray"}`}>{q.status}</span>
+                              </div>
+                              {q.productName && <div className="text-[12px] truncate" style={{ color: "var(--text-2)" }}>{q.productName}</div>}
+                              <div className="text-[10px] mt-1 flex items-center gap-2" style={{ color: "var(--text-muted)" }}>
+                                <Calendar className="w-3 h-3" />{fmtDate(q.createdAt)}
+                                <span className="px-1.5 py-0.5 rounded text-[9px]" style={{ background: "var(--bg-surface)", border: "1px solid var(--border)" }}>{q.source}</span>
+                              </div>
+                              {q.message && (
+                                <details className="mt-2">
+                                  <summary className="text-[11px] cursor-pointer" style={{ color: "var(--brand)" }}>View message</summary>
+                                  <div className="mt-1.5 p-2 rounded text-[11px] whitespace-pre-wrap leading-relaxed"
+                                    style={{ background: "var(--bg-surface)", border: "1px solid var(--border)", color: "var(--text-3)" }}>
+                                    {q.message}
+                                  </div>
+                                </details>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {activeSection === "campaigns" && (
+                    <div className="space-y-2">
+                      {data?.campaigns.length === 0 ? (
+                        <div className="py-10 text-center" style={{ color: "var(--text-muted)" }}>
+                          <Send className="w-8 h-8 mx-auto mb-2 opacity-40" />
+                          <p className="text-[13px]">No campaigns sent to this subscriber yet</p>
+                        </div>
+                      ) : data?.campaigns.map((c) => (
+                        <div key={c._id} className="rounded-lg p-3" style={{ background: "var(--bg-inset)", border: "1px solid var(--border)" }}>
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0 flex-1">
+                              <div className="text-[12px] font-semibold" style={{ color: "var(--text)" }}>{c.subject || c.name}</div>
+                              <div className="text-[10px] mt-1 flex items-center gap-2" style={{ color: "var(--text-muted)" }}>
+                                <Calendar className="w-3 h-3" />
+                                Sent {fmtDate(c.sentAt)}
+                              </div>
+                            </div>
+                            <span className="crm-badge crm-badge-teal text-[10px] flex-shrink-0">{c.status}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {activeSection === "notes" && (
+                    <NotesPanel
+                      email={email}
+                      notes={((sub as any).notes as Note[] | undefined) ?? []}
+                      onUpdate={() => mutate()}
+                    />
+                  )}
+
+                  {activeSection === "activity" && (
+                    <div className="space-y-2">
+                      {data?.activityLogs.length === 0 ? (
+                        <div className="py-10 text-center" style={{ color: "var(--text-muted)" }}>
+                          <p className="text-[13px]">No activity recorded</p>
+                        </div>
+                      ) : data?.activityLogs.map((log) => (
+                        <div key={log._id} className="flex items-start gap-2.5 text-[12px]">
+                          <div className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style={{ background: "var(--brand)" }} />
+                          <div className="flex-1 min-w-0">
+                            <span style={{ color: "var(--text-2)" }}>
+                              {log.type.replace("subscriber.", "").replace(".", " ")}
+                            </span>
+                            {log.actorName && <span style={{ color: "var(--text-3)" }}> by {log.actorName}</span>}
+                            <div className="text-[10px] flex items-center gap-1 mt-0.5" style={{ color: "var(--text-muted)" }}>
+                              <Calendar className="w-3 h-3" />{fmtDate(log.createdAt)}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
 }
+
+// ─── Add / Edit Modal ─────────────────────────────────────────────────────────
+
+function SubscriberFormModal({
+  initialData, editingEmail, onClose, onSaved, canEdit,
+}: {
+  initialData?: Partial<SubscriberForm>;
+  editingEmail?: string;
+  onClose: () => void;
+  onSaved: () => void;
+  canEdit: boolean;
+}) {
+  const { success: toastOk, error: toastErr } = useToast();
+  const [form, setForm] = useState<SubscriberForm>({ ...emptyForm, ...initialData });
+  const [saving, setSaving] = useState(false);
+
+  async function handleSave() {
+    if (!form.email.trim() || saving) return;
+    setSaving(true);
+    try {
+      if (editingEmail) {
+        await api.patch(`/subscribers/${encodeURIComponent(editingEmail)}`, form);
+        toastOk("Subscriber updated");
+      } else {
+        const res = await api.post("/subscribers", form);
+        toastOk(res.data?.alreadyExists ? "Subscriber already exists — details updated" : "Subscriber added");
+      }
+      onSaved();
+      onClose();
+    } catch (e: any) {
+      toastErr(e?.response?.data?.error || "Failed to save");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const fields: { key: keyof SubscriberForm; label: string; type: string; required?: boolean }[] = [
+    { key: "email", label: "Email Address", type: "email", required: true },
+    { key: "name", label: "Full Name", type: "text" },
+    { key: "phone", label: "Phone Number", type: "tel" },
+    { key: "whatsapp", label: "WhatsApp Number", type: "tel" },
+    { key: "company", label: "Company / Hospital", type: "text" },
+    { key: "website", label: "Website URL", type: "url" },
+  ];
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.45)" }}>
+      <div className="w-full max-w-lg rounded-xl overflow-hidden flex flex-col max-h-[90vh]"
+        style={{ background: "var(--bg-surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-md)" }}>
+        <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: "1px solid var(--border)" }}>
+          <div className="text-[14px] font-bold" style={{ color: "var(--text)" }}>
+            {editingEmail ? "Edit Subscriber" : "Add Subscriber"}
+          </div>
+          <button onClick={onClose} className="crm-icon-btn"><X className="w-4 h-4" /></button>
+        </div>
+        <div className="overflow-y-auto custom-scrollbar flex-1 p-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {fields.map(({ key, label, type, required }) => (
+              <div key={key} className={key === "email" ? "sm:col-span-2" : ""}>
+                <label className="crm-label">{label}{required && " *"}</label>
+                <input
+                  type={type}
+                  className="crm-input"
+                  value={form[key]}
+                  onChange={(e) => setForm((p) => ({ ...p, [key]: e.target.value }))}
+                  placeholder={key === "email" ? "email@company.com" : ""}
+                  required={required}
+                  disabled={!canEdit && key === "email" && !!editingEmail}
+                />
+              </div>
+            ))}
+            <div className="sm:col-span-2">
+              <label className="crm-label">Internal Notes</label>
+              <textarea
+                className="crm-input resize-none"
+                rows={3}
+                value={form.internalNote}
+                onChange={(e) => setForm((p) => ({ ...p, internalNote: e.target.value }))}
+                placeholder="Notes visible only to your team…"
+              />
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center justify-end gap-2 px-5 py-4" style={{ borderTop: "1px solid var(--border)" }}>
+          <button onClick={onClose} className="crm-btn crm-btn-secondary">Cancel</button>
+          <button onClick={handleSave} disabled={saving || !form.email.trim()} className="crm-btn crm-btn-primary flex items-center gap-1.5">
+            {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+            {editingEmail ? "Save Changes" : "Add Subscriber"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function SubscribersPage() {
   const { data, mutate } = useSWR<SubscriberListResponse>("/subscribers", fetcher);
   const { data: statsData, mutate: mutateStats } = useSWR<SubscriberStats>("/subscribers/stats", fetcher);
-  const { data: profile } = useSWR<AuthProfile>("/auth/me", fetcher);
-  const { data: staffList } = useSWR<StaffListResponse>(
-    profile?.user?.role === "superadmin" || profile?.user?.role === "dev" ? "/staff" : null,
-    fetcher
-  );
+  const { data: profile } = useSWR("/auth/me", fetcher);
+  const { success: toastOk, error: toastErr } = useToast();
 
-  const { toast } = useToast();
   const role = profile?.user?.role;
   const canSuperManage = role === "superadmin" || role === "dev";
 
-  const [activeTab, setActiveTab] = useState<"single" | "bulk" | "import">("single");
-  const [subscriberSearch, setSubscriberSearch] = useState("");
-  const [staffFilter, setStaffFilter] = useState<string>("all");
-
-  const [addForm, setAddForm] = useState<SubscriberForm>(emptyForm);
-  const [submitting, setSubmitting] = useState(false);
-  const [bulkDeleting, setBulkDeleting] = useState(false);
-  const addNoteInputRef = useRef<HTMLInputElement | null>(null);
-
+  const [search, setSearch] = useState("");
   const [selectedEmails, setSelectedEmails] = useState<string[]>([]);
-  const [editModalOpen, setEditModalOpen] = useState(false);
-  const [editingOriginalEmail, setEditingOriginalEmail] = useState("");
-  const [editForm, setEditForm] = useState<SubscriberForm>(emptyForm);
-  const editNoteInputRef = useRef<HTMLTextAreaElement | null>(null);
-  const [noteViewer, setNoteViewer] = useState<{ email: string; note: string } | null>(null);
-
+  const [profileEmail, setProfileEmail] = useState<string | null>(null);
+  const [formModal, setFormModal] = useState<{ open: boolean; editing?: string; initial?: Partial<SubscriberForm> }>({ open: false });
   const [importFile, setImportFile] = useState<File | null>(null);
-  const [previewLoading, setPreviewLoading] = useState(false);
-  const [importPreview, setImportPreview] = useState<ImportPreviewResponse | null>(null);
-  const [previewModalOpen, setPreviewModalOpen] = useState(false);
-  const [importingFile, setImportingFile] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [showBulkInput, setShowBulkInput] = useState(false);
+  const [bulkText, setBulkText] = useState("");
+  const [bulkLoading, setBulkLoading] = useState(false);
 
-  const [confirmDialog, setConfirmDialog] = useState<{
-    open: boolean;
-    title: string;
-    message: string;
-    onConfirm: () => void;
-    variant?: "danger" | "warning" | "info";
-    loading?: boolean;
-  }>({
-    open: false,
-    title: "",
-    message: "",
-    onConfirm: () => {},
-  });
+  const refreshAll = () => Promise.all([mutate(), mutateStats()]);
 
-  const filteredSubscribers = useMemo(() => {
-    const search = subscriberSearch.trim().toLowerCase();
-
-    return (data?.items || []).filter((subscriber) => {
-      const matchStaff = !canSuperManage || staffFilter === "all"
-        ? true
-        : subscriber.added_by === staffFilter;
-
-      const matchSearch = !search
-        ? true
-        : [
-            subscriber.email,
-            subscriber.name || "",
-            subscriber.phone || "",
-            subscriber.internalNote || "",
-          ]
-            .join(" ")
-            .toLowerCase()
-            .includes(search);
-
-      return matchStaff && matchSearch;
-    });
-  }, [data?.items, subscriberSearch, canSuperManage, staffFilter]);
-
-  const selectedVisibleCount = filteredSubscribers.filter((s) => selectedEmails.includes(s.email)).length;
-
-  const refreshAll = async () => {
-    await Promise.all([mutate(), mutateStats()]);
-  };
-
-  const addSubscriber = async () => {
-    if (!addForm.email.trim() || submitting) return;
-
-    setSubmitting(true);
-    try {
-      const payload = {
-        email: addForm.email.trim(),
-        name: addForm.name.trim(),
-        phone: addForm.phone.trim(),
-        internalNote: String(addNoteInputRef.current?.value || "").trim(),
-      };
-
-      const response = await api.post("/subscribers", payload);
-      const alreadyExists = Boolean(response.data?.alreadyExists);
-
-      setAddForm(emptyForm);
-      if (addNoteInputRef.current) {
-        addNoteInputRef.current.value = "";
-      }
-      await refreshAll();
-
-      toast({
-        variant: "success",
-        title: alreadyExists ? "Subscriber already exists" : "Subscriber added",
-        description: alreadyExists
-          ? `${payload.email} already existed. Details were refreshed.`
-          : `${payload.email} has been added to newsletter list.`,
-      });
-    } catch (error: unknown) {
-      toast({
-        variant: "error",
-        title: "Failed to add subscriber",
-        description: getApiErrorMessage(error, "An error occurred while adding subscriber"),
-      });
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const canDelete = (subscriber: Subscriber) => {
-    if (canSuperManage) return true;
-    if (role !== "admin" && role !== "staff") return false;
-
-    const addedAt = new Date(subscriber.added_at || subscriber.createdAt || "");
-    const now = new Date();
-    const hoursDiff = (now.getTime() - addedAt.getTime()) / (1000 * 60 * 60);
-    return hoursDiff <= 24;
-  };
-
-  const getTimeRemaining = (subscriber: Subscriber) => {
-    if (canSuperManage || (role !== "admin" && role !== "staff")) return null;
-
-    const addedAt = new Date(subscriber.added_at || subscriber.createdAt || "");
-    const expiry = new Date(addedAt.getTime() + 24 * 60 * 60 * 1000);
-    const now = new Date();
-
-    if (now > expiry) return "Expired";
-
-    const diff = expiry.getTime() - now.getTime();
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    return `${hours}h ${minutes}m`;
-  };
-
-  const removeSubscriber = async (emailToRemove: string) => {
-    const subscriber = (data?.items || []).find((s) => s.email === emailToRemove);
-    if (!subscriber) return;
-
-    if (!canSuperManage && !canDelete(subscriber)) {
-      toast({
-        variant: "error",
-        title: "Cannot delete",
-        description: "Delete window expired. Contact superadmin/dev.",
-      });
-      return;
-    }
-
-    setConfirmDialog({
-      open: true,
-      title: "Remove Subscriber",
-      message: `Remove ${emailToRemove} from newsletter list?`,
-      variant: "danger",
-      onConfirm: async () => {
-        setConfirmDialog((prev) => ({ ...prev, loading: true }));
-        try {
-          await api.delete(`/subscribers/${encodeURIComponent(emailToRemove)}`);
-          setSelectedEmails((prev) => prev.filter((email) => email !== emailToRemove));
-          await refreshAll();
-          setConfirmDialog((prev) => ({ ...prev, open: false, loading: false }));
-          toast({ variant: "success", title: "Subscriber removed" });
-        } catch (error: unknown) {
-          setConfirmDialog((prev) => ({ ...prev, loading: false }));
-          toast({
-            variant: "error",
-            title: "Failed to remove subscriber",
-            description: getApiErrorMessage(error, "An error occurred while removing subscriber"),
-          });
-        }
-      },
-    });
-  };
-
-  const bulkDelete = async () => {
-    if (!selectedEmails.length || !canSuperManage) return;
-
-    setConfirmDialog({
-      open: true,
-      title: "Bulk Delete",
-      message: `Delete ${selectedEmails.length} selected subscribers?`,
-      variant: "danger",
-      onConfirm: async () => {
-        setConfirmDialog((prev) => ({ ...prev, loading: true }));
-        setBulkDeleting(true);
-        try {
-          await api.delete("/subscribers/bulk", { data: { emails: selectedEmails } });
-          setSelectedEmails([]);
-          await refreshAll();
-          setConfirmDialog((prev) => ({ ...prev, open: false, loading: false }));
-          toast({ variant: "success", title: "Subscribers deleted" });
-        } catch (error: unknown) {
-          setConfirmDialog((prev) => ({ ...prev, loading: false }));
-          toast({
-            variant: "error",
-            title: "Bulk delete failed",
-            description: getApiErrorMessage(error, "An error occurred while deleting"),
-          });
-        } finally {
-          setBulkDeleting(false);
-        }
-      },
-    });
-  };
-
-  const toggleSelect = (email: string) => {
-    setSelectedEmails((prev) =>
-      prev.includes(email) ? prev.filter((item) => item !== email) : [...prev, email]
+  const subscribers = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return (data?.items || []).filter((s) =>
+      !q || [s.email, s.name, s.phone, s.company, s.internalNote].join(" ").toLowerCase().includes(q)
     );
-  };
+  }, [data?.items, search]);
 
-  const toggleSelectAll = () => {
-    if (!canSuperManage || !filteredSubscribers.length) return;
+  const allSelected = subscribers.length > 0 && subscribers.every((s) => selectedEmails.includes(s.email));
 
-    if (selectedVisibleCount === filteredSubscribers.length) {
-      setSelectedEmails((prev) => prev.filter((email) => !filteredSubscribers.some((s) => s.email === email)));
-      return;
-    }
+  function toggleSelect(email: string) {
+    setSelectedEmails((prev) => prev.includes(email) ? prev.filter((e) => e !== email) : [...prev, email]);
+  }
 
-    const next = new Set(selectedEmails);
-    filteredSubscribers.forEach((s) => next.add(s.email));
-    setSelectedEmails(Array.from(next));
-  };
+  function toggleAll() {
+    if (allSelected) setSelectedEmails((prev) => prev.filter((e) => !subscribers.some((s) => s.email === e)));
+    else setSelectedEmails((prev) => [...new Set([...prev, ...subscribers.map((s) => s.email)])]);
+  }
 
-  const openEditModal = (subscriber: Subscriber) => {
-    if (!canSuperManage) return;
-
-    setEditingOriginalEmail(subscriber.email);
-    setEditForm({
-      email: subscriber.email || "",
-      name: subscriber.name || "",
-      phone: subscriber.phone || "",
-      internalNote: subscriber.internalNote || "",
-    });
-    setEditModalOpen(true);
-  };
-
-  const saveEdit = async () => {
-    if (!editingOriginalEmail || !editForm.email.trim() || submitting) return;
-
-    setSubmitting(true);
+  async function handleDelete(email: string) {
+    if (!confirm(`Remove ${email} from subscriber list?`)) return;
     try {
-      await api.patch(`/subscribers/${encodeURIComponent(editingOriginalEmail)}`, {
-        email: editForm.email.trim(),
-        name: editForm.name.trim(),
-        phone: editForm.phone.trim(),
-        internalNote: String(editNoteInputRef.current?.value || editForm.internalNote || "").trim(),
-      });
-
-      setEditModalOpen(false);
-      setEditingOriginalEmail("");
+      await api.delete(`/subscribers/${encodeURIComponent(email)}`);
       await refreshAll();
-      toast({ variant: "success", title: "Subscriber updated" });
-    } catch (error: unknown) {
-      toast({
-        variant: "error",
-        title: "Failed to update subscriber",
-        description: getApiErrorMessage(error, "Could not update subscriber"),
-      });
-    } finally {
-      setSubmitting(false);
+      toastOk("Subscriber removed");
+    } catch (e: any) {
+      toastErr(e?.response?.data?.error || "Failed to remove");
     }
-  };
+  }
 
-  const handleBulkEmails = async (emails: string[]) => {
-    const response = await api.post("/subscribers/bulk-emails", { emails });
-    await refreshAll();
-
-    const added = Number(response.data?.added || 0);
-    const updated = Number(response.data?.updated || 0);
-    const skipped = Number(response.data?.skipped || 0);
-
-    toast({
-      variant: "success",
-      title: "Bulk import completed",
-      description: `Added ${added}, updated ${updated}, skipped ${skipped}.`,
-    });
-  };
-
-  const downloadImportTemplate = async () => {
+  async function handleBulkDelete() {
+    if (!selectedEmails.length || !confirm(`Delete ${selectedEmails.length} subscribers?`)) return;
     try {
-      const response = await api.get("/subscribers/template", { responseType: "blob" });
-      const blob = new Blob([response.data], { type: "text/csv;charset=utf-8" });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = "subscribers-template.csv";
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-      toast({ variant: "success", title: "Template downloaded" });
-    } catch (error: unknown) {
-      toast({
-        variant: "error",
-        title: "Template download failed",
-        description: getApiErrorMessage(error, "Unable to download template"),
-      });
+      await api.delete("/subscribers/bulk", { data: { emails: selectedEmails } });
+      setSelectedEmails([]);
+      await refreshAll();
+      toastOk("Subscribers deleted");
+    } catch (e: any) {
+      toastErr(e?.response?.data?.error || "Failed to delete");
     }
-  };
+  }
 
-  const previewImportFile = async (file: File) => {
-    if (!file || previewLoading) return;
-
-    const extension = `.${file.name.split(".").pop()?.toLowerCase() || ""}`;
-    const allowed = [".csv", ".xlsx", ".xls"];
-    if (!allowed.includes(extension)) {
-      toast({
-        variant: "error",
-        title: "Invalid file type",
-        description: "Please upload CSV or Excel file (.csv, .xlsx, .xls)",
-      });
-      return;
-    }
-
-    const maxBytes = 5 * 1024 * 1024;
-    if (file.size > maxBytes) {
-      toast({
-        variant: "error",
-        title: "File too large",
-        description: "Maximum file size is 5MB",
-      });
-      return;
-    }
-
-    setImportFile(file);
-    setPreviewLoading(true);
+  async function handleBulkAdd() {
+    if (!bulkText.trim() || bulkLoading) return;
+    setBulkLoading(true);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const response = await api.post("/subscribers/import/preview", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      setImportPreview(response.data);
-      setPreviewModalOpen(true);
-    } catch (error: unknown) {
-      toast({
-        variant: "error",
-        title: "Preview failed",
-        description: getApiErrorMessage(error, "Could not parse import file"),
-      });
+      const res = await api.post("/subscribers/bulk-emails", { emails: bulkText });
+      await refreshAll();
+      toastOk(`Added ${res.data.added}, updated ${res.data.updated}, skipped ${res.data.skipped}`);
+      setBulkText("");
+      setShowBulkInput(false);
+    } catch (e: any) {
+      toastErr(e?.response?.data?.error || "Failed to add");
     } finally {
-      setPreviewLoading(false);
+      setBulkLoading(false);
     }
-  };
+  }
 
-  const confirmImportFromPreview = async () => {
-    if (!importFile || importingFile) return;
-
-    setImportingFile(true);
+  async function handleImport(file: File) {
+    setImporting(true);
     const formData = new FormData();
-    formData.append("file", importFile);
-
+    formData.append("file", file);
     try {
-      const response = await api.post("/subscribers/import", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
+      const res = await api.post("/subscribers/import", formData, { headers: { "Content-Type": "multipart/form-data" } });
       await refreshAll();
-
-      const added = Number(response.data?.added || 0);
-      const updated = Number(response.data?.updated || 0);
-      const skipped = Number(response.data?.skipped || 0);
-      const invalid = Number(response.data?.invalid || 0);
-
-      toast({
-        variant: "success",
-        title: "File import completed",
-        description: `Added ${added}, updated ${updated}, skipped ${skipped}, invalid ${invalid}.`,
-      });
-
-      setPreviewModalOpen(false);
-      setImportPreview(null);
-      setImportFile(null);
-    } catch (error: unknown) {
-      toast({
-        variant: "error",
-        title: "Import failed",
-        description: getApiErrorMessage(error, "Could not import subscribers"),
-      });
+      toastOk(`Imported: ${res.data.added} added, ${res.data.updated} updated, ${res.data.skipped} skipped`);
+    } catch (e: any) {
+      toastErr(e?.response?.data?.error || "Import failed");
     } finally {
-      setImportingFile(false);
+      setImporting(false);
+      setImportFile(null);
     }
+  }
+
+  async function downloadTemplate() {
+    try {
+      const res = await api.get("/subscribers/template", { responseType: "blob" });
+      const url = URL.createObjectURL(new Blob([res.data], { type: "text/csv" }));
+      const a = document.createElement("a"); a.href = url; a.download = "subscribers-template.csv";
+      document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    } catch { toastErr("Download failed"); }
+  }
+
+  const sourceTag: Record<string, { label: string; color: string; bg: string }> = {
+    "quote_download": { label: "PDF Download", color: "#f59e0b", bg: "#fef3c7" },
+    "pdf-download": { label: "PDF Download", color: "#f59e0b", bg: "#fef3c7" },
+    "surgical-cart": { label: "Cart Quote", color: "#0A8A78", bg: "rgba(10,138,120,0.1)" },
+    "surgical": { label: "Quote Form", color: "#0A8A78", bg: "rgba(10,138,120,0.1)" },
+    "import": { label: "Imported", color: "#6366f1", bg: "#eef2ff" },
+    "system": { label: "System", color: "#64748b", bg: "#f1f5f9" },
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-6">
-      <div className="max-w-7xl mx-auto">
-        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-          <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
-                <Users className="w-6 h-6 text-blue-600" />
-                Subscribers
-                {role === "superadmin" && (
-                  <span className="text-sm bg-purple-100 text-purple-800 px-2 py-1 rounded-full flex items-center gap-1">
-                    <Shield className="w-3 h-3" />
-                    Superadmin
-                  </span>
-                )}
-                {role === "dev" && (
-                  <span className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center gap-1">
-                    <Shield className="w-3 h-3" />
-                    Dev
-                  </span>
-                )}
-              </h1>
-              <p className="text-slate-600 dark:text-slate-400 mt-2">
-                Add, edit, and manage subscribers with contact metadata.
-              </p>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3">
-              {statsData && (
-                <div className="flex items-center gap-4 text-sm">
-                  <div className="text-slate-600 dark:text-slate-400">
-                    Active: <span className="font-semibold text-green-600">{statsData.active || 0}</span>
-                  </div>
-                  <div className="text-slate-600 dark:text-slate-400">
-                    Total: <span className="font-semibold">{statsData.total || 0}</span>
-                  </div>
-                </div>
-              )}
-
-              {canSuperManage && staffList?.items && (
-                <select
-                  value={staffFilter}
-                  onChange={(e) => setStaffFilter(e.target.value)}
-                  className="px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-sm text-slate-900 dark:text-white"
-                >
-                  <option value="all">All Staff</option>
-                  {staffList.items.map((staff) => (
-                    <option key={staff._id} value={staff._id}>
-                      {staff.name} ({staff.role})
-                    </option>
-                  ))}
-                </select>
-              )}
-
-              {canSuperManage && selectedEmails.length > 0 && (
-                <button
-                  onClick={bulkDelete}
-                  disabled={bulkDeleting}
-                  className="flex items-center gap-2 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  Delete Selected ({selectedEmails.length})
-                </button>
-              )}
-
-              <a
-                href="http://localhost:4000/api/export/contacts.csv"
-                className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-              >
-                <Download className="w-4 h-4" />
-                Export CSV
-              </a>
-            </div>
-          </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.08 }}
-          className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-200 dark:border-slate-700 mb-8"
-        >
-          <div className="mb-6">
-            <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-              <UserPlus className="w-5 h-5" />
-              Add Subscribers
-            </h2>
-
-            <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-700 p-1 rounded-lg max-w-xl">
-              {[
-                { id: "single", label: "Single", icon: Plus },
-                { id: "bulk", label: "Bulk Emails", icon: Mail },
-                { id: "import", label: "Import File", icon: Upload },
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id as "single" | "bulk" | "import")}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium transition-all duration-200 ${
-                    activeTab === tab.id
-                      ? "bg-white dark:bg-slate-600 text-blue-600 shadow-sm"
-                      : "text-slate-600 dark:text-slate-300"
-                  }`}
-                >
-                  <tab.icon className="w-4 h-4" />
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <motion.div key={activeTab} initial={{ opacity: 0, x: 14 }} animate={{ opacity: 1, x: 0 }}>
-            {activeTab === "single" && (
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium text-slate-900 dark:text-white">Add Single Subscriber</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <input
-                    type="email"
-                    className="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg px-4 py-2.5 text-slate-900 dark:text-white"
-                    placeholder="Email address *"
-                    value={addForm.email}
-                    onChange={(e) => setAddForm((prev) => ({ ...prev, email: e.target.value }))}
-                    onKeyDown={(e) => e.key === "Enter" && addSubscriber()}
-                  />
-                  <input
-                    type="text"
-                    className="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg px-4 py-2.5 text-slate-900 dark:text-white"
-                    placeholder="Contact name (optional)"
-                    value={addForm.name}
-                    onChange={(e) => setAddForm((prev) => ({ ...prev, name: e.target.value }))}
-                  />
-                  <input
-                    type="text"
-                    className="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg px-4 py-2.5 text-slate-900 dark:text-white"
-                    placeholder="Phone number (optional)"
-                    value={addForm.phone}
-                    onChange={(e) => setAddForm((prev) => ({ ...prev, phone: e.target.value }))}
-                  />
-                  <input
-                    type="text"
-                    className="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg px-4 py-2.5 text-slate-900 dark:text-white"
-                    placeholder="Internal note (optional)"
-                    defaultValue=""
-                    ref={addNoteInputRef}
-                  />
-                </div>
-
-                <button
-                  onClick={addSubscriber}
-                  disabled={submitting || !addForm.email.trim()}
-                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white px-6 py-2.5 rounded-lg font-medium transition-colors"
-                >
-                  <Plus className="w-4 h-4" />
-                  {submitting ? "Adding..." : "Add Subscriber"}
-                </button>
-              </div>
-            )}
-
-            {activeTab === "bulk" && (
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium text-slate-900 dark:text-white">Bulk Add from Email List</h3>
-                <BulkEmailInput onSubmit={handleBulkEmails} loading={submitting} />
-              </div>
-            )}
-
-            {activeTab === "import" && (
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium text-slate-900 dark:text-white">Import from CSV/Excel</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
-                  Download the template, fill in rows, then preview before import.
-                </p>
-
-                <div className="rounded-xl border border-slate-200 dark:border-slate-700 p-4 space-y-4 bg-slate-50 dark:bg-slate-900/40">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-medium text-slate-900 dark:text-white">Import template</p>
-                      <p className="text-xs text-slate-500">Columns: email, name, phone, internalNote</p>
-                    </div>
-                    <button
-                      onClick={downloadImportTemplate}
-                      className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium"
-                    >
-                      <Download className="w-4 h-4" />
-                      Download Template
-                    </button>
-                  </div>
-
-                  <div className="border border-dashed border-slate-300 dark:border-slate-600 rounded-xl p-4 bg-white dark:bg-slate-800/70">
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                      <div>
-                        <p className="text-sm font-medium text-slate-900 dark:text-white">Select file to preview</p>
-                        <p className="text-xs text-slate-500">Supported: .csv, .xlsx, .xls (max 5MB)</p>
-                        {importFile && (
-                          <p className="text-xs text-blue-600 dark:text-blue-300 mt-1">
-                            Selected: {importFile.name}
-                          </p>
-                        )}
-                      </div>
-                      <label className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium cursor-pointer">
-                        {previewLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileSpreadsheet className="w-4 h-4" />}
-                        {previewLoading ? "Preparing Preview..." : "Choose File"}
-                        <input
-                          type="file"
-                          accept=".csv,.xlsx,.xls"
-                          className="hidden"
-                          disabled={previewLoading}
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              void previewImportFile(file);
-                            }
-                            e.currentTarget.value = "";
-                          }}
-                        />
-                      </label>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </motion.div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.15 }}
-          className="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden"
-        >
-          <div className="p-5 border-b border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <h2 className="text-xl font-semibold text-slate-900 dark:text-white flex items-center gap-2">
-              <Mail className="w-5 h-5" />
-              Subscriber List
-            </h2>
-
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input
-                  type="text"
-                  value={subscriberSearch}
-                  onChange={(e) => setSubscriberSearch(e.target.value)}
-                  placeholder="Search email, name, phone..."
-                  className="pl-9 pr-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white w-60"
-                />
-              </div>
-
-              {canSuperManage && filteredSubscribers.length > 0 && (
-                <button
-                  onClick={toggleSelectAll}
-                  className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300"
-                >
-                  {selectedVisibleCount === filteredSubscribers.length ? (
-                    <CheckSquare className="w-4 h-4 text-blue-600" />
-                  ) : (
-                    <Square className="w-4 h-4" />
-                  )}
-                  Select All
-                </button>
-              )}
-            </div>
-          </div>
-
-          {!filteredSubscribers.length ? (
-            <div className="p-12 text-center">
-              <Users className="w-14 h-14 text-slate-400 mx-auto mb-3" />
-              <h3 className="text-lg font-medium text-slate-600 dark:text-slate-300">No subscribers found</h3>
-              <p className="text-slate-500 mt-1">Try changing filters or add a new subscriber.</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-slate-50 dark:bg-slate-700/40">
-                  <tr>
-                    {canSuperManage && (
-                      <th className="px-5 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Select</th>
-                    )}
-                    <th className="px-5 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Subscriber</th>
-                    <th className="px-5 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Contact</th>
-                    <th className="px-5 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Added</th>
-                    {!canSuperManage && (
-                      <th className="px-5 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Delete Window</th>
-                    )}
-                    <th className="px-5 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-                  {filteredSubscribers.map((subscriber, index) => {
-                    const canDeleteThis = canDelete(subscriber);
-                    const timeRemaining = getTimeRemaining(subscriber);
-                    const telHref = normalizePhoneForLinks(subscriber.phone);
-                    const whatsappDigits = normalizeWhatsAppDigits(subscriber.phone);
-
-                    return (
-                      <motion.tr
-                        key={subscriber.email}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.03 }}
-                        className="hover:bg-slate-50 dark:hover:bg-slate-700/20"
-                      >
-                        {canSuperManage && (
-                          <td className="px-5 py-4">
-                            <button onClick={() => toggleSelect(subscriber.email)}>
-                              {selectedEmails.includes(subscriber.email) ? (
-                                <CheckSquare className="w-4 h-4 text-blue-600" />
-                              ) : (
-                                <Square className="w-4 h-4 text-slate-400" />
-                              )}
-                            </button>
-                          </td>
-                        )}
-
-                        <td className="px-5 py-4 align-top">
-                          <div className="space-y-1">
-                            <p className="text-sm font-semibold text-slate-900 dark:text-white">{subscriber.email}</p>
-                            {subscriber.name && (
-                              <p className="text-xs text-slate-600 dark:text-slate-300">{subscriber.name}</p>
-                            )}
-                            {subscriber.internalNote && (
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setNoteViewer({
-                                    email: subscriber.email,
-                                    note: subscriber.internalNote || "",
-                                  })
-                                }
-                                className="inline-flex items-center gap-1.5 text-[11px] font-medium text-amber-800 dark:text-amber-200 hover:underline"
-                              >
-                                <StickyNote className="w-3.5 h-3.5" />
-                                Show note
-                              </button>
-                            )}
-                            {subscriber.staff_name && (
-                              <span className="inline-flex items-center gap-2 px-2 py-0.5 rounded-full text-xs bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200">
-                                <span className="text-[11px] font-medium">Added by</span>
-                                <span className="font-semibold">{subscriber.staff_name}</span>
-                              </span>
-                            )}
-                          </div>
-                        </td>
-
-                        <td className="px-5 py-4 align-top">
-                          <div className="flex items-center gap-2">
-                            <a
-                              href={`mailto:${subscriber.email}`}
-                              className="p-2 rounded-lg bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 text-blue-700 dark:text-blue-300"
-                              title="Email"
-                            >
-                              <Mail className="w-4 h-4" />
-                            </a>
-                            <a
-                              href={telHref ? `tel:${telHref}` : undefined}
-                              onClick={(e) => {
-                                if (!telHref) e.preventDefault();
-                              }}
-                              className={`p-2 rounded-lg ${
-                                telHref
-                                  ? "bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
-                                  : "bg-slate-100 dark:bg-slate-700 text-slate-400 cursor-not-allowed"
-                              }`}
-                              title={telHref ? "Call" : "No phone"}
-                            >
-                              <Phone className="w-4 h-4" />
-                            </a>
-                            <a
-                              href={whatsappDigits ? `https://wa.me/${whatsappDigits}` : undefined}
-                              target="_blank"
-                              rel="noreferrer"
-                              onClick={(e) => {
-                                if (!whatsappDigits) e.preventDefault();
-                              }}
-                              className={`p-2 rounded-lg ${
-                                whatsappDigits
-                                  ? "bg-green-50 hover:bg-green-100 dark:bg-green-900/20 dark:hover:bg-green-900/40 text-green-700 dark:text-green-300"
-                                  : "bg-slate-100 dark:bg-slate-700 text-slate-400 cursor-not-allowed"
-                              }`}
-                              title={whatsappDigits ? "WhatsApp" : "No phone"}
-                            >
-                              <MessageCircle className="w-4 h-4" />
-                            </a>
-                          </div>
-                          {subscriber.phone && (
-                            <p className="text-xs text-slate-500 mt-1">{subscriber.phone}</p>
-                          )}
-                        </td>
-
-                        <td className="px-5 py-4 align-top">
-                          <div className="flex items-center text-sm text-slate-600 dark:text-slate-300">
-                            <Calendar className="w-4 h-4 mr-2" />
-                            {(subscriber.added_at || subscriber.createdAt)
-                              ? new Date(subscriber.added_at || subscriber.createdAt || "").toLocaleDateString("en-US", {
-                                  year: "numeric",
-                                  month: "short",
-                                  day: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })
-                              : "Unknown"}
-                          </div>
-                        </td>
-
-                        {!canSuperManage && (
-                          <td className="px-5 py-4 align-top">
-                            {canDeleteThis ? (
-                              <div className="flex items-center gap-1 text-xs text-green-600">
-                                <Clock className="w-3 h-3" />
-                                {timeRemaining} left
-                              </div>
-                            ) : (
-                              <div className="flex items-center gap-1 text-xs text-red-600">
-                                <AlertCircle className="w-3 h-3" />
-                                Expired
-                              </div>
-                            )}
-                          </td>
-                        )}
-
-                        <td className="px-5 py-4 align-top">
-                          <div className="flex items-center gap-2">
-                            {canSuperManage && (
-                              <button
-                                onClick={() => openEditModal(subscriber)}
-                                className="p-2 rounded-lg bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/20 dark:hover:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300"
-                                title="Edit subscriber"
-                              >
-                                <Pencil className="w-4 h-4" />
-                              </button>
-                            )}
-
-                            <button
-                              onClick={() => removeSubscriber(subscriber.email)}
-                              disabled={!canSuperManage && !canDeleteThis}
-                              className={`p-2 rounded-lg ${
-                                canSuperManage || canDeleteThis
-                                  ? "bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 text-red-700 dark:text-red-300"
-                                  : "bg-slate-100 dark:bg-slate-700 text-slate-400 cursor-not-allowed"
-                              }`}
-                              title="Delete subscriber"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </motion.tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+    <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+      {/* Header */}
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-[17px] font-bold" style={{ color: "var(--text)" }}>Subscribers</h1>
+          <p className="text-[12px] mt-0.5" style={{ color: "var(--text-3)" }}>
+            {statsData?.active ?? 0} active · {statsData?.total ?? 0} total
+          </p>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          {selectedEmails.length > 0 && canSuperManage && (
+            <button onClick={handleBulkDelete} className="crm-btn crm-btn-sm flex items-center gap-1.5" style={{ background: "var(--err-bg)", color: "var(--err-t)", border: "1px solid var(--err-b)" }}>
+              <Trash2 className="w-3.5 h-3.5" />Delete ({selectedEmails.length})
+            </button>
           )}
-        </motion.div>
+          <button onClick={() => setShowBulkInput((v) => !v)} className="crm-btn crm-btn-secondary crm-btn-sm flex items-center gap-1.5">
+            <Mail className="w-3.5 h-3.5" />Bulk Add
+          </button>
+          <button onClick={downloadTemplate} className="crm-btn crm-btn-secondary crm-btn-sm flex items-center gap-1.5">
+            <Download className="w-3.5 h-3.5" />Template
+          </button>
+          <label className="crm-btn crm-btn-secondary crm-btn-sm flex items-center gap-1.5 cursor-pointer">
+            {importing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+            Import CSV
+            <input type="file" accept=".csv,.xlsx,.xls" className="hidden" disabled={importing}
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImport(f); e.target.value = ""; }} />
+          </label>
+          <a href={`${process.env.NEXT_PUBLIC_BACKEND_URL || ""}/api/export/contacts.csv`} className="crm-btn crm-btn-secondary crm-btn-sm flex items-center gap-1.5">
+            <FileSpreadsheet className="w-3.5 h-3.5" />Export CSV
+          </a>
+          <button onClick={() => setFormModal({ open: true })} className="crm-btn crm-btn-primary crm-btn-sm flex items-center gap-1.5">
+            <Plus className="w-3.5 h-3.5" />Add Subscriber
+          </button>
+        </div>
       </div>
 
-      <AnimatePresence>
-        {editModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-black/55" onClick={() => setEditModalOpen(false)} />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96, y: 12 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.97, y: 10 }}
-              className="relative z-10 w-full max-w-lg rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-2xl p-6"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Edit Subscriber</h3>
-                <button
-                  onClick={() => setEditModalOpen(false)}
-                  className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
-                >
-                  <X className="w-4 h-4 text-slate-500" />
-                </button>
-              </div>
-
-              <div className="space-y-3">
-                <input
-                  type="email"
-                  value={editForm.email}
-                  onChange={(e) => setEditForm((prev) => ({ ...prev, email: e.target.value }))}
-                  className="w-full px-3 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-                  placeholder="Email"
-                />
-                <input
-                  type="text"
-                  value={editForm.name}
-                  onChange={(e) => setEditForm((prev) => ({ ...prev, name: e.target.value }))}
-                  className="w-full px-3 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-                  placeholder="Name"
-                />
-                <input
-                  type="text"
-                  value={editForm.phone}
-                  onChange={(e) => setEditForm((prev) => ({ ...prev, phone: e.target.value }))}
-                  className="w-full px-3 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-                  placeholder="Phone"
-                />
-                <textarea
-                  key={editingOriginalEmail || "edit-note"}
-                  rows={3}
-                  ref={editNoteInputRef}
-                  defaultValue={editForm.internalNote}
-                  className="w-full px-3 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-                  placeholder="Internal note"
-                />
-              </div>
-
-              <div className="flex justify-end gap-3 mt-5">
-                <button
-                  onClick={() => setEditModalOpen(false)}
-                  className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={saveEdit}
-                  disabled={submitting || !editForm.email.trim()}
-                  className="px-4 py-2 rounded-lg text-sm font-medium bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-50"
-                >
-                  {submitting ? "Saving..." : "Save Changes"}
-                </button>
-              </div>
-            </motion.div>
+      {/* Bulk email input */}
+      {showBulkInput && (
+        <div className="rounded-xl p-4 space-y-3" style={{ background: "var(--bg-surface)", border: "1px solid var(--border)" }}>
+          <div className="flex items-center justify-between">
+            <p className="text-[13px] font-semibold" style={{ color: "var(--text)" }}>Bulk Add Emails</p>
+            <button onClick={() => setShowBulkInput(false)} className="crm-icon-btn"><X className="w-3.5 h-3.5" /></button>
           </div>
-        )}
-      </AnimatePresence>
+          <textarea
+            className="crm-input resize-none w-full"
+            rows={4}
+            placeholder="Paste emails separated by commas, spaces, or new lines…"
+            value={bulkText}
+            onChange={(e) => setBulkText(e.target.value)}
+          />
+          <button onClick={handleBulkAdd} disabled={bulkLoading || !bulkText.trim()} className="crm-btn crm-btn-primary crm-btn-sm flex items-center gap-1.5">
+            {bulkLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ArrowRight className="w-3.5 h-3.5" />}
+            Add Emails
+          </button>
+        </div>
+      )}
 
-      <AnimatePresence>
-        {noteViewer && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-black/55" onClick={() => setNoteViewer(null)} />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96, y: 12 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.97, y: 10 }}
-              className="relative z-10 w-full max-w-xl rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-2xl p-6"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Internal Note</h3>
-                <button
-                  onClick={() => setNoteViewer(null)}
-                  className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
-                >
-                  <X className="w-4 h-4 text-slate-500" />
-                </button>
-              </div>
+      {/* Search + stats */}
+      <div className="flex items-center gap-3 flex-wrap">
+        <div style={{ position: "relative", flex: 1, maxWidth: "360px" }}>
+          <Search style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", width: 14, height: 14, color: "var(--text-muted)", pointerEvents: "none" }} />
+          <input className="crm-input" style={{ paddingLeft: "32px" }} placeholder="Search email, name, company…"
+            value={search} onChange={(e) => setSearch(e.target.value)} />
+        </div>
+        <button className="crm-icon-btn" onClick={() => refreshAll()} title="Refresh"><RefreshCw className="w-4 h-4" /></button>
+        <span className="text-[12px]" style={{ color: "var(--text-3)" }}>{subscribers.length} subscribers</span>
+      </div>
 
-              <p className="text-xs text-slate-500 mb-3">Subscriber: {noteViewer.email}</p>
-              <div className="max-h-[50vh] overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-4">
-                <p className="text-sm whitespace-pre-wrap text-slate-800 dark:text-slate-200">{noteViewer.note}</p>
-              </div>
-
-              <div className="flex justify-end mt-4">
-                <button
-                  onClick={() => setNoteViewer(null)}
-                  className="px-4 py-2 rounded-lg text-sm font-medium bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-100"
-                >
-                  Close
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {previewModalOpen && importPreview && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-black/60" onClick={() => !importingFile && setPreviewModalOpen(false)} />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96, y: 12 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.97, y: 10 }}
-              className="relative z-10 w-full max-w-5xl rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-2xl p-6"
-            >
-              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
-                <div>
-                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Import Preview</h3>
-                  <p className="text-xs text-slate-500 mt-1">File: {importPreview.filename}</p>
-                </div>
-                <button
-                  onClick={() => !importingFile && setPreviewModalOpen(false)}
-                  className="self-end sm:self-auto p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
-                  disabled={importingFile}
-                >
-                  <X className="w-4 h-4 text-slate-500" />
-                </button>
-              </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
-                <div className="rounded-lg border border-slate-200 dark:border-slate-700 p-3">
-                  <p className="text-xs text-slate-500">Total Rows</p>
-                  <p className="text-lg font-semibold text-slate-900 dark:text-white">{importPreview.total}</p>
-                </div>
-                <div className="rounded-lg border border-emerald-200 dark:border-emerald-800 p-3 bg-emerald-50/60 dark:bg-emerald-900/20">
-                  <p className="text-xs text-emerald-700 dark:text-emerald-300">Importable</p>
-                  <p className="text-lg font-semibold text-emerald-800 dark:text-emerald-200">{importPreview.importable}</p>
-                </div>
-                <div className="rounded-lg border border-amber-200 dark:border-amber-800 p-3 bg-amber-50/60 dark:bg-amber-900/20">
-                  <p className="text-xs text-amber-700 dark:text-amber-300">Invalid</p>
-                  <p className="text-lg font-semibold text-amber-800 dark:text-amber-200">{importPreview.invalid}</p>
-                </div>
-                <div className="rounded-lg border border-orange-200 dark:border-orange-800 p-3 bg-orange-50/60 dark:bg-orange-900/20">
-                  <p className="text-xs text-orange-700 dark:text-orange-300">Duplicates</p>
-                  <p className="text-lg font-semibold text-orange-800 dark:text-orange-200">{importPreview.duplicates}</p>
-                </div>
-                <div className="rounded-lg border border-sky-200 dark:border-sky-800 p-3 bg-sky-50/60 dark:bg-sky-900/20">
-                  <p className="text-xs text-sky-700 dark:text-sky-300">Already Exists</p>
-                  <p className="text-lg font-semibold text-sky-800 dark:text-sky-200">{importPreview.alreadyExists || 0}</p>
-                </div>
-              </div>
-
-              <div className="max-h-[45vh] overflow-auto border border-slate-200 dark:border-slate-700 rounded-xl">
-                <table className="w-full text-sm">
-                  <thead className="bg-slate-50 dark:bg-slate-800/60 sticky top-0">
-                    <tr>
-                      <th className="px-3 py-2 text-left text-xs font-semibold text-slate-600 dark:text-slate-300">Row</th>
-                      <th className="px-3 py-2 text-left text-xs font-semibold text-slate-600 dark:text-slate-300">Email</th>
-                      <th className="px-3 py-2 text-left text-xs font-semibold text-slate-600 dark:text-slate-300">Name</th>
-                      <th className="px-3 py-2 text-left text-xs font-semibold text-slate-600 dark:text-slate-300">Phone</th>
-                      <th className="px-3 py-2 text-left text-xs font-semibold text-slate-600 dark:text-slate-300">Internal Note</th>
-                      <th className="px-3 py-2 text-left text-xs font-semibold text-slate-600 dark:text-slate-300">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-                    {importPreview.items.map((item) => {
-                      const statusTone =
-                        item.status === "new"
-                          ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200"
-                          : item.status === "reactivate"
-                            ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-200"
-                            : item.status === "already_exists"
-                              ? "bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-200"
-                          : item.status === "invalid"
-                            ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200"
-                            : "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-200";
-
-                      return (
-                        <tr key={`${item.row}-${item.email}-${item.status}`}>
-                          <td className="px-3 py-2 text-xs text-slate-500">{item.row}</td>
-                          <td className="px-3 py-2 text-xs text-slate-800 dark:text-slate-200">{item.email || "-"}</td>
-                          <td className="px-3 py-2 text-xs text-slate-700 dark:text-slate-300">{item.name || "-"}</td>
-                          <td className="px-3 py-2 text-xs text-slate-700 dark:text-slate-300">{item.phone || "-"}</td>
-                          <td className="px-3 py-2 text-xs text-slate-700 dark:text-slate-300 max-w-60">
-                            <span className="line-clamp-2">{item.internalNote || "-"}</span>
-                          </td>
-                          <td className="px-3 py-2 text-xs">
-                            <span className={`inline-flex px-2 py-1 rounded-full text-[11px] font-medium ${statusTone}`}>
-                              {item.status}
-                            </span>
-                            {item.reason && (
-                              <p className="text-[10px] text-slate-500 mt-1">{item.reason}</p>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 mt-5">
-                <p className="text-xs text-slate-500">
-                  Valid rows will be imported even if some rows are invalid.
-                </p>
-                <div className="flex items-center justify-end gap-2">
-                  <button
-                    onClick={() => setPreviewModalOpen(false)}
-                    disabled={importingFile}
-                    className="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50"
+      {/* Table */}
+      <div className="rounded-xl overflow-hidden" style={{ background: "var(--bg-surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)" }}>
+        {/* Table header */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-[12px]">
+            <thead>
+              <tr style={{ borderBottom: "1px solid var(--border)", background: "var(--bg-surface2)" }}>
+                <th className="px-4 py-3 text-left" style={{ color: "var(--text-3)", width: 40 }}>
+                  {canSuperManage && (
+                    <button onClick={toggleAll}>
+                      {allSelected ? <CheckSquare className="w-4 h-4" style={{ color: "var(--brand)" }} /> : <Square className="w-4 h-4" />}
+                    </button>
+                  )}
+                </th>
+                {["Subscriber", "Company", "Phone", "Source", "Added", ""].map((h) => (
+                  <th key={h} className="px-4 py-3 text-left font-semibold" style={{ color: "var(--text-3)", whiteSpace: "nowrap" }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {subscribers.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-4 py-20 text-center" style={{ color: "var(--text-muted)" }}>
+                    <Users className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                    <p className="text-[13px]">{search ? "No subscribers match your search" : "No subscribers yet"}</p>
+                  </td>
+                </tr>
+              ) : subscribers.map((sub) => {
+                const src = sourceTag[sub.source || ""] ?? { label: sub.source || "Manual", color: "var(--text-3)", bg: "var(--bg-inset)" };
+                return (
+                  <tr key={sub.email}
+                    className="cursor-pointer"
+                    style={{ borderBottom: "1px solid var(--border)", transition: "background 80ms" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-inset)")}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                    onClick={() => setProfileEmail(sub.email)}
                   >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={confirmImportFromPreview}
-                    disabled={importingFile || importPreview.importable === 0}
-                    className="px-4 py-2 rounded-lg text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 inline-flex items-center gap-2"
-                  >
-                    {importingFile && <Loader2 className="w-4 h-4 animate-spin" />}
-                    {importingFile ? "Importing..." : "Confirm Import"}
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+                    {/* Checkbox */}
+                    <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                      {canSuperManage && (
+                        <button onClick={() => toggleSelect(sub.email)}>
+                          {selectedEmails.includes(sub.email)
+                            ? <CheckSquare className="w-4 h-4" style={{ color: "var(--brand)" }} />
+                            : <Square className="w-4 h-4" style={{ color: "var(--text-muted)" }} />}
+                        </button>
+                      )}
+                    </td>
 
-      <ConfirmDialog
-        isOpen={confirmDialog.open}
-        onClose={() => setConfirmDialog((prev) => ({ ...prev, open: false }))}
-        onConfirm={confirmDialog.onConfirm}
-        title={confirmDialog.title}
-        message={confirmDialog.message}
-        variant={confirmDialog.variant}
-        loading={confirmDialog.loading}
-      />
+                    {/* Subscriber */}
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0"
+                          style={{ background: "var(--brand)" }}>
+                          {(sub.name || sub.email)[0].toUpperCase()}
+                        </div>
+                        <div className="min-w-0">
+                          {sub.name && <div className="font-semibold truncate max-w-[180px]" style={{ color: "var(--text)" }}>{sub.name}</div>}
+                          <div className="truncate max-w-[180px]" style={{ color: sub.name ? "var(--text-3)" : "var(--text)" }}>{sub.email}</div>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* Company */}
+                    <td className="px-4 py-3" style={{ color: "var(--text-2)", maxWidth: "140px" }}>
+                      {sub.company ? (
+                        <div className="flex items-center gap-1.5">
+                          <Building2 className="w-3 h-3 flex-shrink-0" style={{ color: "var(--text-muted)" }} />
+                          <span className="truncate">{sub.company}</span>
+                        </div>
+                      ) : "—"}
+                    </td>
+
+                    {/* Phone */}
+                    <td className="px-4 py-3" style={{ color: "var(--text-2)", whiteSpace: "nowrap" }}>
+                      {sub.phone || "—"}
+                    </td>
+
+                    {/* Source */}
+                    <td className="px-4 py-3">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold"
+                        style={{ background: src.bg, color: src.color }}>
+                        {src.label}
+                      </span>
+                    </td>
+
+                    {/* Added date */}
+                    <td className="px-4 py-3" style={{ color: "var(--text-muted)", whiteSpace: "nowrap" }}>
+                      {fmtDateShort(sub.added_at || sub.createdAt)}
+                    </td>
+
+                    {/* Actions */}
+                    <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center gap-1">
+                        <a href={`mailto:${sub.email}`} className="crm-icon-btn" title="Email" onClick={(e) => e.stopPropagation()}>
+                          <Mail className="w-3.5 h-3.5" />
+                        </a>
+                        {(sub.whatsapp || sub.phone) && (
+                          <a href={`https://wa.me/${(sub.whatsapp || sub.phone || "").replace(/\D/g, "")}`}
+                            target="_blank" rel="noopener noreferrer"
+                            className="crm-icon-btn" title="WhatsApp" onClick={(e) => e.stopPropagation()}>
+                            <MessageCircle className="w-3.5 h-3.5" />
+                          </a>
+                        )}
+                        {canSuperManage && (
+                          <button onClick={(e) => { e.stopPropagation(); setFormModal({ open: true, editing: sub.email, initial: sub as any }); }}
+                            className="crm-icon-btn" title="Edit">
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                        <button onClick={(e) => { e.stopPropagation(); handleDelete(sub.email); }}
+                          className="crm-icon-btn" title="Remove"
+                          onMouseEnter={(el) => (el.currentTarget.style.color = "var(--err-t)")}
+                          onMouseLeave={(el) => (el.currentTarget.style.color = "")}>
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button onClick={() => setProfileEmail(sub.email)} className="crm-icon-btn" title="View Profile">
+                          <ChevronRight className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Profile drawer */}
+      {profileEmail && (
+        <ProfileDrawer
+          email={profileEmail}
+          onClose={() => setProfileEmail(null)}
+          canEdit={canSuperManage}
+          onRefresh={refreshAll}
+        />
+      )}
+
+      {/* Add/Edit modal */}
+      {formModal.open && (
+        <SubscriberFormModal
+          initialData={formModal.initial}
+          editingEmail={formModal.editing}
+          onClose={() => setFormModal({ open: false })}
+          onSaved={refreshAll}
+          canEdit={canSuperManage}
+        />
+      )}
     </div>
   );
 }
