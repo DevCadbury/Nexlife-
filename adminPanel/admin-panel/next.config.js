@@ -5,11 +5,15 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  // Pin Turbopack's root to this project so it resolves node_modules here,
-  // not the parent monorepo folder (which has its own package.json/lockfile).
-  turbopack: {
-    root: path.resolve(__dirname),
-  },
+  // Only set turbopack.root in local dev — Vercel sets outputFileTracingRoot
+  // and the two cannot differ, which would cause a build warning/error.
+  ...(process.env.VERCEL
+    ? {}
+    : {
+        turbopack: {
+          root: path.resolve(__dirname),
+        },
+      }),
 };
 
 module.exports = nextConfig;

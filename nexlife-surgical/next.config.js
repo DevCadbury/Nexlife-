@@ -2,11 +2,16 @@
 const path = require("path");
 
 const nextConfig = {
-  // Pin Turbopack's root to this project so it resolves node_modules here,
-  // not the parent monorepo folder (which has its own package.json/lockfile).
-  turbopack: {
-    root: path.resolve(__dirname),
-  },
+  // On Vercel, outputFileTracingRoot is set automatically and must not conflict
+  // with turbopack.root. We only set turbopack.root in local dev to prevent
+  // the monorepo parent package.json from being picked up as the workspace root.
+  ...(process.env.VERCEL
+    ? {}
+    : {
+        turbopack: {
+          root: path.resolve(__dirname),
+        },
+      }),
   images: {
     remotePatterns: [
       {
