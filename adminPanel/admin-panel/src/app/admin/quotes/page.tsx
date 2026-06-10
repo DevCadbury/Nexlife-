@@ -301,7 +301,7 @@ function QuoteModal({
                         <tbody>
                           {parseCartItems(quote.message).map((item, i) => {
                             const nameSlug = item.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-                            const productUrl = `http://localhost:3001/product/${nameSlug}`;
+                            const productUrl = `https://nexlifeinternational.in/product/${nameSlug}`;
                             const imgUrl = productImageMap.get(item.name.toLowerCase()) ?? "";
                             return (
                               <tr key={i} style={{ borderBottom: "1px solid var(--border)" }}>

@@ -54,15 +54,19 @@ function parseCartItems(message) {
 
 function cartItemsTable(items, frontendUrl) {
   if (!items.length) return '';
-  const base = frontendUrl || 'https://nexlifeinternational.com';
-  const rows = items.map((item, i) => `
+  const base = frontendUrl || 'https://nexlifeinternational.in';
+  const rows = items.map((item, i) => {
+    const nameSlug = String(item.name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    const productUrl = `${base}/product/${nameSlug}`;
+    return `
     <tr>
       <td style="padding:10px 12px;border-bottom:1px solid #E8F0EE;font-size:13px;color:#0D2240">${i + 1}. ${item.name}</td>
       <td style="padding:10px 12px;border-bottom:1px solid #E8F0EE;font-size:13px;color:#64748B;text-align:center">${item.qty}</td>
       <td style="padding:10px 12px;border-bottom:1px solid #E8F0EE;font-size:13px;text-align:right">
-        <a href="${base}/products" style="color:#0A8A78;font-size:11px;font-weight:600;text-decoration:none">View ›</a>
+        <a href="${productUrl}" style="color:#0A8A78;font-size:11px;font-weight:600;text-decoration:none">View ›</a>
       </td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
 
   return `
     <div style="font-size:12px;font-weight:700;color:#0A8A78;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;margin-top:20px">Products Requested</div>
@@ -94,6 +98,8 @@ function customerConfirmationEmail(data) {
   } = data;
 
   const frontendUrl = process.env.FRONTEND_URL || 'https://nexlifeinternational.com';
+  // Cart quotes originate from the surgical site — use its domain for product links
+  const surgicalUrl = process.env.SURGICAL_URL || 'https://nexlifeinternational.in';
   const isCart = source === 'surgical-cart';
   const cartItems = isCart ? parseCartItems(message) : [];
 
@@ -186,7 +192,7 @@ function customerConfirmationEmail(data) {
             ${rows}
           </table>
 
-          ${isCart && cartItems.length > 0 ? cartItemsTable(cartItems, frontendUrl) : ''}
+          ${isCart && cartItems.length > 0 ? cartItemsTable(cartItems, surgicalUrl) : ''}
           ${additionalNotes ? `<div style="margin-top:16px;background:#F8FBFF;border:1px solid #D0E4F4;border-radius:6px;padding:14px 16px"><div style="font-size:11px;font-weight:700;color:#1A4A7A;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px">Additional Notes</div><div style="font-size:13px;color:#374151;line-height:1.6;white-space:pre-wrap">${additionalNotes}</div></div>` : ''}
 
           <!-- What's Next -->
