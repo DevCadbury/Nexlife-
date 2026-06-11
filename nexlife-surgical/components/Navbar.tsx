@@ -321,7 +321,7 @@ export function Navbar() {
               href={MAIN_SITE_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden lg:flex items-center gap-1 text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-all duration-150"
+              className="flex items-center gap-1 text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-all duration-150"
               style={{
                 color: "#0D2240",
                 borderColor: "#D0D7E0",

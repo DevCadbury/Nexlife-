@@ -755,72 +755,48 @@ export default function Home() {
 
       {/* ── Company showcase ── */}
       <section className="py-16 lg:py-20 bg-white overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-10 lg:gap-x-14 gap-y-6 items-start lg:items-center">
-            {/* Text — first on mobile, top-right on desktop */}
-            <div className="order-1 lg:col-start-2 lg:row-start-1">
-              <p className="text-xs text-[#0A8A78] mb-2" style={{ fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>
-                Who We Are
-              </p>
-              <h2
-                className="text-[#0D2240] mb-4"
-                style={{ fontSize: "clamp(1.5rem, 3vw, 2.25rem)", fontWeight: 800, letterSpacing: "-0.03em" }}
-              >
-                Your Trusted Partner in Surgical &amp; Medical Supplies
-              </h2>
-              <p className="text-slate-600 leading-relaxed mb-6" style={{ fontSize: "0.97rem" }}>
-                Nexlife International delivers FDA-registered, ISO 13485 certified surgical instruments
-                and medical disposables to healthcare providers across more than 40 countries. From bulk
-                procurement to dependable global logistics, we make quality healthcare accessible everywhere.
-              </p>
-              <div className="grid grid-cols-3 gap-4">
-                {[
-                  { src: "/ICONS/quality-assurance.png", label: "Quality Assured" },
-                  { src: "/ICONS/certificate.png", label: "Certified" },
-                  { src: "/ICONS/container.png", label: "Global Logistics" },
-                ].map((item) => (
-                  <div key={item.label} className="flex flex-col items-center text-center gap-2">
-                    <div
-                      className="w-12 h-12 rounded-xl flex items-center justify-center"
-                      style={{ backgroundColor: "rgba(10,138,120,0.12)" }}
-                    >
-                      <Image src={item.src} alt={item.label} width={26} height={26} className="w-[26px] h-[26px] object-contain" />
-                    </div>
-                    <span className="text-xs text-slate-600" style={{ fontWeight: 600 }}>{item.label}</span>
-                  </div>
-                ))}
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <p className="text-xs text-[#0A8A78] mb-2" style={{ fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>
+            Who We Are
+          </p>
+          <h2
+            className="text-[#0D2240] mb-4"
+            style={{ fontSize: "clamp(1.5rem, 3vw, 2.25rem)", fontWeight: 800, letterSpacing: "-0.03em" }}
+          >
+            Your Trusted Partner in Surgical &amp; Medical Supplies
+          </h2>
+          <p className="text-slate-600 leading-relaxed mb-8 max-w-2xl mx-auto" style={{ fontSize: "0.97rem" }}>
+            Nexlife International delivers FDA-registered, ISO 13485 certified surgical instruments
+            and medical disposables to healthcare providers across more than 40 countries. From bulk
+            procurement to dependable global logistics, we make quality healthcare accessible everywhere.
+          </p>
+          <div className="grid grid-cols-3 gap-4 max-w-md mx-auto mb-8">
+            {[
+              { src: "/ICONS/quality-assurance.png", label: "Quality Assured" },
+              { src: "/ICONS/certificate.png", label: "Certified" },
+              { src: "/ICONS/container.png", label: "Global Logistics" },
+            ].map((item) => (
+              <div key={item.label} className="flex flex-col items-center text-center gap-2">
+                <div
+                  className="w-12 h-12 rounded-xl flex items-center justify-center"
+                  style={{ backgroundColor: "rgba(10,138,120,0.12)" }}
+                >
+                  <Image src={item.src} alt={item.label} width={26} height={26} className="w-[26px] h-[26px] object-contain" />
+                </div>
+                <span className="text-xs text-slate-600" style={{ fontWeight: 600 }}>{item.label}</span>
               </div>
-            </div>
-
-            {/* Image — below text on mobile, left column on desktop */}
-            <div
-              className="order-2 relative rounded-2xl overflow-hidden border border-[#E2E8F0] lg:col-start-1 lg:row-start-1 lg:row-span-2 lg:self-center"
-              style={{ boxShadow: "0 8px 32px rgba(13,34,64,0.10)" }}
-            >
-              <Image
-                src="/images/image.png"
-                alt="Nexlife International — surgical & medical supplies"
-                width={900}
-                height={640}
-                className="w-full h-auto object-cover"
-                sizes="(max-width: 1024px) 100vw, 50vw"
-              />
-            </div>
-
-            {/* Button — last on mobile (below image), bottom-right on desktop */}
-            <div className="order-3 lg:col-start-2 lg:row-start-2">
-              <Link
-                href="/about"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded text-sm text-white transition-all duration-150 active:scale-95"
-                style={{ backgroundColor: "#0A8A78", fontWeight: 600, boxShadow: "0 2px 8px rgba(10,138,120,0.4)" }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#098872")}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#0A8A78")}
-              >
-                Learn More About Us
-                <ChevronRight size={18} />
-              </Link>
-            </div>
+            ))}
           </div>
+          <Link
+            href="/about"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded text-sm text-white transition-all duration-150 active:scale-95"
+            style={{ backgroundColor: "#0A8A78", fontWeight: 600, boxShadow: "0 2px 8px rgba(10,138,120,0.4)" }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#098872")}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#0A8A78")}
+          >
+            Learn More About Us
+            <ChevronRight size={18} />
+          </Link>
         </div>
       </section>
 
