@@ -73,6 +73,9 @@ type Inquiry = {
   message?: string;
   status: "new" | "read" | "replied" | string;
   createdAt?: string;
+  source?: string;
+  tags?: string[];
+  priority?: string;
   seenBy?: string[];
   replies?: {
     at: string;
@@ -673,6 +676,23 @@ function InquiriesContent() {
         }
       }
       setSeenBy(newSeenBy);
+
+      // Hydrate tags & priority from the stored inquiry records so labels
+      // (e.g. the "Surgical" source tag) are visible without manual editing.
+      const newTags: Record<string, string[]> = {};
+      const newPriority: Record<string, string> = {};
+      for (const item of fetchedItems) {
+        const key = item.email;
+        if (Array.isArray(item.tags) && item.tags.length) {
+          newTags[key] = item.tags;
+        } else if (item.source === "surgical" && !newTags[key]) {
+          newTags[key] = ["Surgical"];
+        }
+        if (item.priority) newPriority[key] = item.priority;
+      }
+      // Server values seed the maps; any unsaved local edits (prev) take precedence.
+      setTagsById((prev) => ({ ...newTags, ...prev }));
+      setPriorityById((prev) => ({ ...newPriority, ...prev }));
     } catch (e) {
 
     } finally {

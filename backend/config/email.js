@@ -201,110 +201,133 @@ Reply directly to this email to respond to ${data.name}.
     `,
   }),
 
-  contactConfirmation: (data) => ({
-    subject: `Thank you for contacting Nexlife International`,
+  contactConfirmation: (data) => {
+    const isSurgical = String(data.source || "").toLowerCase() === "surgical";
+    const accent = isSurgical ? "#0A8A78" : "#2563EB";
+    const navy = "#0D2240";
+    const siteLabel = isSurgical
+      ? "Surgical & Medical Supplies"
+      : "Pharmaceuticals & Healthcare";
+    const siteUrl = isSurgical
+      ? "https://nexlifeinternational.in"
+      : "https://www.nexlifeinternational.com";
+    const ref = data.referenceId ? String(data.referenceId) : "";
+    return {
+    subject: ref
+      ? `We've received your enquiry — Ref #${ref} | Nexlife International`
+      : `Thank you for contacting Nexlife International`,
     html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <div style="background: linear-gradient(135deg, #22d3ee, #6366f1); padding: 20px; text-align: center; color: white;">
-          <h1 style="margin: 0; font-size: 24px;">Thank You for Contacting Us!</h1>
+      <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background:#ffffff;">
+        <!-- Header -->
+        <div style="background:${navy}; padding: 28px 28px 24px;">
+          <div style="font-size:20px; font-weight:800; letter-spacing:-0.02em; color:#ffffff;">NEXLIFE INTERNATIONAL</div>
+          <div style="font-size:12px; letter-spacing:0.06em; text-transform:uppercase; color:${accent}; font-weight:700; margin-top:4px;">${siteLabel}</div>
         </div>
-        <div style="padding: 30px; background: #f8fafc;">
-          <h2 style="color: #1e293b; margin-top: 0;">Hello ${data.name}!</h2>
-          <p style="color: #475569; font-size: 16px; line-height: 1.6;">
-            Thank you for reaching out to Nexlife International. We have received your message and our team will get back to you within 24 hours.
+
+        <!-- Accent bar -->
+        <div style="height:4px; background:${accent};"></div>
+
+        <!-- Body -->
+        <div style="padding: 30px 28px;">
+          <h1 style="margin:0 0 6px; font-size:21px; color:${navy}; font-weight:800; letter-spacing:-0.02em;">Thank you, ${data.name}.</h1>
+          <p style="color:#475569; font-size:15px; line-height:1.65; margin:0 0 20px;">
+            We've received your enquiry and a member of our team will get back to you within <strong>24 business hours</strong>.
+            ${ref ? `Please keep your reference number handy for any follow-up.` : ""}
           </p>
 
-          <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #22c55e; margin: 20px 0;">
-            <h3 style="color: #1e293b; margin-top: 0;">Your Message Details</h3>
-            <table style="width: 100%; border-collapse: collapse;">
+          ${ref ? `
+          <div style="display:inline-block; background:${navy}; color:#ffffff; border-radius:8px; padding:10px 18px; margin-bottom:22px;">
+            <span style="font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:rgba(255,255,255,0.6);">Reference</span><br/>
+            <span style="font-size:18px; font-weight:800; letter-spacing:0.04em;">#${ref}</span>
+          </div>` : ""}
+
+          <!-- Details -->
+          <div style="border:1px solid #E5E7EB; border-radius:10px; overflow:hidden; margin-bottom:22px;">
+            <div style="background:#F8FAFC; padding:10px 16px; font-size:12px; font-weight:700; color:${navy}; text-transform:uppercase; letter-spacing:0.05em; border-bottom:1px solid #E5E7EB;">Your enquiry</div>
+            <table style="width:100%; border-collapse:collapse; font-size:14px;">
               <tr>
-                <td style="padding: 8px 0; font-weight: bold; color: #475569; width: 120px;">Name:</td>
-                <td style="padding: 8px 0; color: #1e293b;">${data.name}</td>
+                <td style="padding:10px 16px; color:#64748B; width:140px; border-bottom:1px solid #F1F5F9;">Name</td>
+                <td style="padding:10px 16px; color:${navy}; border-bottom:1px solid #F1F5F9;">${data.name}</td>
               </tr>
               <tr>
-                <td style="padding: 8px 0; font-weight: bold; color: #475569;">Email:</td>
-                <td style="padding: 8px 0; color: #1e293b;">${data.email}</td>
+                <td style="padding:10px 16px; color:#64748B; border-bottom:1px solid #F1F5F9;">Email</td>
+                <td style="padding:10px 16px; color:${navy}; border-bottom:1px solid #F1F5F9;">${data.email}</td>
               </tr>
               <tr>
-                <td style="padding: 8px 0; font-weight: bold; color: #475569;">Phone:</td>
-                <td style="padding: 8px 0; color: #1e293b;">${data.phone || 'Not provided'}</td>
+                <td style="padding:10px 16px; color:#64748B; border-bottom:1px solid #F1F5F9;">Phone</td>
+                <td style="padding:10px 16px; color:${navy}; border-bottom:1px solid #F1F5F9;">${data.phone || 'Not provided'}</td>
               </tr>
               <tr>
-                <td style="padding: 8px 0; font-weight: bold; color: #475569;">Subject:</td>
-                <td style="padding: 8px 0; color: #1e293b;">${data.subject || 'General Inquiry'}</td>
+                <td style="padding:10px 16px; color:#64748B; ${data.productName ? 'border-bottom:1px solid #F1F5F9;' : ''}">Subject</td>
+                <td style="padding:10px 16px; color:${navy}; ${data.productName ? 'border-bottom:1px solid #F1F5F9;' : ''}">${data.subject || 'General Inquiry'}</td>
               </tr>
               ${data.productName ? `
               <tr>
-                <td style="padding: 8px 0; font-weight: bold; color: #475569;">Product Interest:</td>
-                <td style="padding: 8px 0; color: #1e293b;">${data.productName}</td>
-              </tr>
-              ` : ''}
-              <tr>
-                <td style="padding: 8px 0; font-weight: bold; color: #475569;">Received:</td>
-                <td style="padding: 8px 0; color: #1e293b;">${new Date().toLocaleString()}</td>
-              </tr>
+                <td style="padding:10px 16px; color:#64748B;">Product interest</td>
+                <td style="padding:10px 16px; color:${navy};">${data.productName}</td>
+              </tr>` : ''}
             </table>
           </div>
 
-          <div style="background: #dbeafe; border: 1px solid #3b82f6; border-radius: 8px; padding: 15px; margin: 20px 0;">
-            <p style="margin: 0; color: #1e40af; font-weight: bold;">📋 What happens next?</p>
-            <ul style="margin: 10px 0 0 0; color: #1e40af; padding-left: 20px;">
-              <li>Our team will review your message within 24 hours</li>
-              <li>We'll send you a detailed response to your inquiry</li>
-              <li>For urgent matters, feel free to call us directly</li>
-            </ul>
+          <!-- Next steps -->
+          <div style="background:#F8FAFC; border-radius:10px; padding:16px 18px; margin-bottom:22px;">
+            <p style="margin:0 0 10px; font-weight:700; color:${navy}; font-size:14px;">What happens next</p>
+            <table style="width:100%; border-collapse:collapse; font-size:13.5px; color:#475569;">
+              <tr><td style="padding:3px 0; width:24px; color:${accent}; font-weight:800;">1.</td><td style="padding:3px 0;">Our team reviews your enquiry.</td></tr>
+              <tr><td style="padding:3px 0; color:${accent}; font-weight:800;">2.</td><td style="padding:3px 0;">A specialist responds with details and pricing.</td></tr>
+              <tr><td style="padding:3px 0; color:${accent}; font-weight:800;">3.</td><td style="padding:3px 0;">For urgent needs, call or WhatsApp us directly.</td></tr>
+            </table>
           </div>
 
-          <div style="background: #f0fdf4; border: 1px solid #22c55e; border-radius: 8px; padding: 15px; margin: 20px 0;">
-            <p style="margin: 0 0 8px 0; color: #166534; font-weight: bold;">📄 Product Catalogue Attached!</p>
-            <p style="margin: 0; color: #166534; font-size: 14px;">
-              We've attached our comprehensive product catalogue for your reference. Browse through our wide range of pharmaceutical products while you wait for our response.
-            </p>
-          </div>
+          <p style="font-size:13.5px; color:#475569; line-height:1.6; margin:0 0 4px;">
+            We've also attached our product catalogue for your reference. You can browse our full range any time at
+            <a href="${siteUrl}" style="color:${accent}; text-decoration:none; font-weight:600;">${siteUrl.replace('https://','')}</a>.
+          </p>
         </div>
-        <div style="background: #1e293b; padding: 20px; text-align: center; color: #94a3b8; font-size: 12px;">
-          <p><strong>Contact Information:</strong></p>
-          <p>📧 Email: Info@nexlifeinternational.com</p>
-          <p>📞 Phone: +91 96648 43790 | +91 84015 46910</p>
-          <p>💬 WhatsApp: <a href="https://wa.me/919664843790" style="color: #22d3ee;">+91 96648 43790</a></p>
-          <p>📍 Address: S-223, Angel Business Center – 2, Near ABC Circle, Mota Varachha, Surat - 394101 (Gujarat)</p>
-          <p style="margin-top: 15px;">This is an automated confirmation email. Please do not reply to this message.</p>
+
+        <!-- Footer -->
+        <div style="background:${navy}; padding: 22px 28px; color:#94A3B8; font-size:12.5px; line-height:1.9;">
+          <div style="color:#ffffff; font-weight:700; margin-bottom:6px;">Nexlife International</div>
+          📧 <a href="mailto:Info@nexlifeinternational.com" style="color:${accent}; text-decoration:none;">Info@nexlifeinternational.com</a><br/>
+          📞 <a href="tel:+919664843790" style="color:#94A3B8; text-decoration:none;">+91 96648 43790</a> &nbsp;·&nbsp; <a href="tel:+918401546910" style="color:#94A3B8; text-decoration:none;">+91 84015 46910</a><br/>
+          💬 <a href="https://wa.me/919664843790" style="color:${accent}; text-decoration:none;">WhatsApp us</a><br/>
+          📍 S-223, Angel Business Center – 2, Mota Varachha, Surat - 394101 (Gujarat, India)
+          <div style="margin-top:14px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.12); color:#64748B; font-size:11.5px;">
+            This is an automated confirmation. You can reply to this email to reach our team directly.
+          </div>
         </div>
       </div>
     `,
     text: `
-Thank you for contacting Nexlife International!
+Thank you, ${data.name}.
 
-Hello ${data.name}!
+We've received your enquiry and our team will get back to you within 24 business hours.
+${ref ? `Your reference number: #${ref}` : ""}
 
-Thank you for reaching out to Nexlife International. We have received your message and our team will get back to you within 24 hours.
-
-Your Message Details:
+Your enquiry:
 - Name: ${data.name}
 - Email: ${data.email}
 - Phone: ${data.phone || 'Not provided'}
 - Subject: ${data.subject || 'General Inquiry'}
-${data.productName ? `- Product Interest: ${data.productName}` : ''}
-- Received: ${new Date().toLocaleString()}
+${data.productName ? `- Product interest: ${data.productName}` : ''}
 
-What happens next?
-- Our team will review your message within 24 hours
-- We'll send you a detailed response to your inquiry
-- For urgent matters, feel free to call us directly
+What happens next:
+1. Our team reviews your enquiry.
+2. A specialist responds with details and pricing.
+3. For urgent needs, call or WhatsApp us directly.
 
-Product Catalogue Attached!
-We've attached our comprehensive product catalogue for your reference. Browse through our wide range of pharmaceutical products while you wait for our response.
+We've also attached our product catalogue for your reference. Browse our full range at ${siteUrl}.
 
-Contact Information:
+Nexlife International
 Email: Info@nexlifeinternational.com
 Phone: +91 96648 43790 | +91 84015 46910
 WhatsApp: https://wa.me/919664843790
-Address: S-223, Angel Business Center – 2, Near ABC Circle, Mota Varachha, Surat - 394101 (Gujarat)
+Address: S-223, Angel Business Center – 2, Mota Varachha, Surat - 394101 (Gujarat, India)
 
----
-This is an automated confirmation email. Please do not reply to this message.
+This is an automated confirmation. You can reply to this email to reach our team directly.
     `,
-  }),
+    };
+  },
 
   newsletter: (data) => ({
     subject: `[Nexlife Newsletter] New Subscription - ${data.email}`,

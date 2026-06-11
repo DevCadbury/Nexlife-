@@ -322,7 +322,7 @@ router.get('/:id', async (req, res) => {
 router.post(
   '/',
   requireAuth(['superadmin', 'dev']),
-  upload.single('image'),
+  upload.fields([{ name: 'images', maxCount: 12 }, { name: 'image', maxCount: 1 }]),
   async (req, res) => {
     try {
       const { name, category } = req.body || {};
@@ -359,12 +359,19 @@ router.post(
         }
       }
 
-      // Upload image if provided
+      // Upload images if provided (supports multiple; first = priority).
+      // Accepts the new 'images' field (array) and the legacy 'image' field.
+      const incomingFiles = [
+        ...((req.files && req.files.images) || []),
+        ...((req.files && req.files.image) || []),
+      ];
       let images = [];
-      if (req.file) {
+      if (incomingFiles.length) {
         try {
-          const imgData = await uploadImage(req.file.buffer, req.file.mimetype);
-          images = [imgData];
+          for (const file of incomingFiles) {
+            const imgData = await uploadImage(file.buffer, file.mimetype);
+            images.push(imgData);
+          }
         } catch (uploadErr) {
           console.error('[products] Cloudinary upload error:', uploadErr);
           return res.status(500).json({ error: 'Image upload failed.' });
@@ -496,7 +503,7 @@ router.patch(
 router.patch(
   '/:id',
   requireAuth(['superadmin', 'dev']),
-  upload.single('image'),
+  upload.fields([{ name: 'images', maxCount: 12 }, { name: 'image', maxCount: 1 }]),
   async (req, res) => {
     try {
       const _id = parseObjectId(req.params.id);
@@ -545,9 +552,72 @@ router.patch(
         }
       }
 
-      // Handle image replacement
-      if (req.file) {
-        const oldPublicId = existing.images?.[0]?.public_id;
+      // ── Multi-image handling ──────────────────────────────────────────────
+      // The client sends:
+      //   - 'images' (multipart files): newly added images, in order
+      //   - 'imageOrder' (JSON): the final ordered list, each entry is either
+      //       { type: 'existing', public_id } or { type: 'new' }
+      //     The Nth 'new' entry maps to the Nth uploaded file. Index 0 = priority.
+      // Any existing image NOT referenced in imageOrder is deleted from Cloudinary.
+      const newFiles = [
+        ...((req.files && req.files.images) || []),
+        ...((req.files && req.files.image) || []),
+      ];
+      const existingImages = Array.isArray(existing.images) ? existing.images : [];
+
+      if (body.imageOrder !== undefined) {
+        let order = [];
+        try {
+          order = typeof body.imageOrder === 'string' ? JSON.parse(body.imageOrder) : body.imageOrder;
+          if (!Array.isArray(order)) order = [];
+        } catch {
+          order = [];
+        }
+
+        // Upload new files in order
+        const uploadedNew = [];
+        try {
+          for (const file of newFiles) {
+            uploadedNew.push(await uploadImage(file.buffer, file.mimetype));
+          }
+        } catch (uploadErr) {
+          console.error('[products] Cloudinary upload error:', uploadErr);
+          return res.status(500).json({ error: 'Image upload failed.' });
+        }
+
+        // Rebuild the images array following the requested order
+        const finalImages = [];
+        let newIdx = 0;
+        for (const entry of order) {
+          if (entry && entry.type === 'existing') {
+            const found = existingImages.find((img) => img.public_id === entry.public_id);
+            if (found) finalImages.push(found);
+          } else if (entry && entry.type === 'new') {
+            if (uploadedNew[newIdx]) finalImages.push(uploadedNew[newIdx]);
+            newIdx++;
+          }
+        }
+        // Safety: append any uploaded new images not referenced by the order
+        while (newIdx < uploadedNew.length) {
+          finalImages.push(uploadedNew[newIdx]);
+          newIdx++;
+        }
+
+        // Delete existing images that were removed
+        const keptIds = new Set(finalImages.map((i) => i.public_id).filter(Boolean));
+        const toDelete = existingImages.filter((img) => img.public_id && !keptIds.has(img.public_id));
+        await Promise.allSettled(
+          toDelete.map((img) =>
+            deleteImage(img.public_id).catch((err) =>
+              console.warn('[products] PATCH Cloudinary cleanup failed:', err.message)
+            )
+          )
+        );
+
+        updates.images = finalImages;
+      } else if (newFiles.length) {
+        // Legacy fallback: no order spec — replace the priority image (index 0)
+        const oldPublicId = existingImages[0]?.public_id;
         if (oldPublicId) {
           try {
             await deleteImage(oldPublicId);
@@ -558,13 +628,11 @@ router.patch(
             });
           }
         }
-
         try {
-          const imgData = await uploadImage(req.file.buffer, req.file.mimetype);
-          // Build updated images array replacing index 0
-          const existingImages = Array.isArray(existing.images) ? [...existing.images] : [];
-          existingImages[0] = imgData;
-          updates.images = existingImages;
+          const imgData = await uploadImage(newFiles[0].buffer, newFiles[0].mimetype);
+          const merged = [...existingImages];
+          merged[0] = imgData;
+          updates.images = merged;
         } catch (uploadErr) {
           console.error('[products] Cloudinary upload error:', uploadErr);
           return res.status(500).json({ error: 'Image upload failed.' });

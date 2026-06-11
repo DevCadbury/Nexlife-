@@ -564,7 +564,7 @@ app.post("/api/likes/:id", async (req, res) => {
 
 // Enhanced contact endpoint with validation and better error handling
 app.post("/api/contact", async (req, res) => {
-  const { name, email, subject, message, phone, productName } = req.body || {};
+  const { name, email, subject, message, phone, productName, source } = req.body || {};
 
   // Validation
   if (!name || !email || !message) {
@@ -592,33 +592,82 @@ app.post("/api/contact", async (req, res) => {
 
   try {
     const toAddress = process.env.CONTACT_TO || process.env.SMTP_USER;
-    
+    const src = String(source || "").toLowerCase();
+    const isSurgical = src === "surgical";
+
+    // ── Persist the inquiry so it shows up in the CRM ──────────────────────
+    // Tag surgical-site submissions so staff can distinguish them at a glance.
+    let referenceId = "";
+    try {
+      const { inquiries, subscribers } = await getCollections();
+      const doc = {
+        name: String(name).trim().slice(0, 100),
+        email: String(email).trim().toLowerCase().slice(0, 200),
+        phone: String(phone || "").slice(0, 40),
+        company: "",
+        subject:
+          String(subject || "").slice(0, 200) ||
+          (isSurgical ? "Surgical Website Inquiry" : "Website Inquiry"),
+        productName: String(productName || "").slice(0, 200),
+        message: String(message).slice(0, 5000),
+        status: "new",
+        source: isSurgical ? "surgical" : src || "general",
+        tags: isSurgical ? ["Surgical"] : [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        replyCount: 0,
+        lastReplyAt: null,
+      };
+      const insert = await inquiries.insertOne(doc);
+      referenceId = insert.insertedId.toString().slice(-6).toUpperCase();
+
+      // Upsert subscriber so the email lands in the marketing list too
+      await subscribers.updateOne(
+        { email: doc.email },
+        {
+          $setOnInsert: { email: doc.email, createdAt: new Date() },
+          $set: { lastSeenAt: new Date() },
+        },
+        { upsert: true }
+      );
+    } catch (persistErr) {
+      console.error("[contact] Failed to persist inquiry:", persistErr);
+      // Continue — still send the emails even if persistence fails
+    }
+
     // Send notification email to admin
     const adminResult = await sendEmail(toAddress, "contact", {
       name,
       email,
-      subject: subject || "New Contact Form Submission",
+      subject:
+        subject ||
+        (isSurgical ? "New Surgical Website Inquiry" : "New Contact Form Submission"),
       message,
       phone,
       productName,
+      source: isSurgical ? "surgical" : src,
     });
 
     // Send confirmation email to customer with PDF attachment
     const __dirname = path.dirname(fileURLToPath(import.meta.url));
     const pdfPath = path.join(__dirname, 'public', 'admin', 'PRODUCT-CATALOGE.pdf');
-    
+
+    const confirmationData = {
+      name,
+      email,
+      subject: subject || "General Inquiry",
+      phone,
+      productName,
+      source: isSurgical ? "surgical" : src,
+      referenceId,
+    };
+
     let confirmationResult;
     try {
       confirmationResult = await sendEmail(
-        email, 
-        "contactConfirmation", 
-        {
-          name,
-          email,
-          subject: subject || "General Inquiry",
-          phone,
-          productName,
-        },
+        email,
+        "contactConfirmation",
+        confirmationData,
         {
           replyTo: toAddress,
           attachments: [
@@ -634,15 +683,9 @@ app.post("/api/contact", async (req, res) => {
       console.error("Error sending confirmation with PDF:", pdfError);
       // Still send confirmation without PDF if attachment fails
       confirmationResult = await sendEmail(
-        email, 
-        "contactConfirmation", 
-        {
-          name,
-          email,
-          subject: subject || "General Inquiry",
-          phone,
-          productName,
-        },
+        email,
+        "contactConfirmation",
+        confirmationData,
         {
           replyTo: toAddress,
         }

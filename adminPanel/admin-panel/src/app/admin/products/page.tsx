@@ -10,6 +10,7 @@ import { api } from "@/lib/api";
 import { useToast } from "@/components/ui/toast";
 import {
   ChevronDown,
+  ChevronLeft,
   ChevronRight,
   Eye,
   EyeOff,
@@ -82,6 +83,36 @@ function makeField(key = "", value = "", hidden = false): FieldRow {
   return { _uid: `f-${++fieldUidCounter}`, key, value, hidden };
 }
 
+// ─── Image manager state ──────────────────────────────────────────────────────
+// An image slot is either an already-uploaded image (existing) or a freshly
+// picked file (new). Order matters — index 0 is the priority / cover image.
+type ImageItem =
+  | { _uid: string; kind: "existing"; public_id: string; secure_url: string }
+  | { _uid: string; kind: "new"; file: File; preview: string };
+
+let imageUidCounter = 0;
+function makeImageUid(): string {
+  return `img-${++imageUidCounter}`;
+}
+
+// Small circular control button shown over each image thumbnail in the manager.
+function imgCtrlBtnStyle(disabled: boolean): React.CSSProperties {
+  return {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "22px",
+    height: "22px",
+    borderRadius: "6px",
+    border: "none",
+    background: "rgba(255,255,255,0.92)",
+    color: "#1F2937",
+    cursor: disabled ? "not-allowed" : "pointer",
+    opacity: disabled ? 0.4 : 1,
+    flexShrink: 0,
+  };
+}
+
 interface ModalState {
   name: string;
   category: string;
@@ -93,8 +124,7 @@ interface ModalState {
   isStarred: boolean;
   visible: boolean;
   fields: FieldRow[];
-  file: File | null;
-  preview: string | null;
+  images: ImageItem[];
 }
 
 function defaultModal(categories: Category[], defaultCat = "", defaultSite: "surgical" | "general" | "both" = "surgical"): ModalState {
@@ -109,8 +139,7 @@ function defaultModal(categories: Category[], defaultCat = "", defaultSite: "sur
     isStarred: false,
     visible: true,
     fields: [makeField()],
-    file: null,
-    preview: null,
+    images: [],
   };
 }
 
@@ -169,6 +198,55 @@ function ProductModal({
   const fileRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
+  // Reusable field-name (key) presets, persisted in localStorage so the same
+  // field names can be reused across products without retyping.
+  const FIELD_KEYS_STORAGE = "nxl_product_field_keys";
+  const [savedKeys, setSavedKeys] = useState<string[]>([]);
+  const [confirmDeleteKey, setConfirmDeleteKey] = useState<string | null>(null);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(FIELD_KEYS_STORAGE);
+      if (raw) {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr)) setSavedKeys(arr.filter((x) => typeof x === "string"));
+      }
+    } catch {}
+  }, []);
+
+  function rememberKey(rawKey: string) {
+    const k = rawKey.trim();
+    if (!k) return;
+    setSavedKeys((prev) => {
+      if (prev.some((x) => x.toLowerCase() === k.toLowerCase())) return prev;
+      const next = [...prev, k];
+      try { localStorage.setItem(FIELD_KEYS_STORAGE, JSON.stringify(next)); } catch {}
+      return next;
+    });
+  }
+
+  function deleteSavedKey(key: string) {
+    setSavedKeys((prev) => {
+      const next = prev.filter((x) => x !== key);
+      try { localStorage.setItem(FIELD_KEYS_STORAGE, JSON.stringify(next)); } catch {}
+      return next;
+    });
+    setConfirmDeleteKey(null);
+  }
+
+  function applySavedKey(key: string) {
+    setForm((prev) => {
+      const idx = prev.fields.findIndex((f) => !f.key.trim());
+      if (idx !== -1) {
+        return {
+          ...prev,
+          fields: prev.fields.map((f, i) => (i === idx ? { ...f, key } : f)),
+        };
+      }
+      return { ...prev, fields: [...prev.fields, makeField(key)] };
+    });
+  }
+
   // Reset form when modal opens
   useEffect(() => {
     if (!open) return;
@@ -186,8 +264,12 @@ function ProductModal({
         fields: editing.fields?.length
           ? editing.fields.map((f) => makeField(f.key, f.value, f.hidden))
           : [makeField()],
-        file: null,
-        preview: editing.images?.[0]?.secure_url ?? null,
+        images: (editing.images ?? []).map((img) => ({
+          _uid: makeImageUid(),
+          kind: "existing" as const,
+          public_id: img.public_id,
+          secure_url: img.secure_url,
+        })),
       });
     } else {
       setForm(defaultModal(categories, defaultCategory, defaultSite));
@@ -225,14 +307,54 @@ function ProductModal({
     }));
   }
 
-  // File pick
-  function onFilePick(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    set("file", file);
-    const reader = new FileReader();
-    reader.onload = () => set("preview", reader.result as string);
-    reader.readAsDataURL(file);
+  // ── Image management ────────────────────────────────────────────────────────
+  const dragImgUid = useRef<string | null>(null);
+
+  function onFilesPick(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
+    if (!files.length) return;
+    const newItems: ImageItem[] = files.map((file) => ({
+      _uid: makeImageUid(),
+      kind: "new" as const,
+      file,
+      preview: URL.createObjectURL(file),
+    }));
+    setForm((prev) => ({ ...prev, images: [...prev.images, ...newItems] }));
+    // reset input so picking the same file again still fires onChange
+    e.target.value = "";
+  }
+
+  function removeImage(uid: string) {
+    setForm((prev) => {
+      const target = prev.images.find((im) => im._uid === uid);
+      if (target && target.kind === "new") URL.revokeObjectURL(target.preview);
+      return { ...prev, images: prev.images.filter((im) => im._uid !== uid) };
+    });
+  }
+
+  function moveImage(uid: string, dir: -1 | 1) {
+    setForm((prev) => {
+      const idx = prev.images.findIndex((im) => im._uid === uid);
+      if (idx === -1) return prev;
+      const target = idx + dir;
+      if (target < 0 || target >= prev.images.length) return prev;
+      const next = [...prev.images];
+      [next[idx], next[target]] = [next[target], next[idx]];
+      return { ...prev, images: next };
+    });
+  }
+
+  function reorderImage(fromUid: string, toUid: string) {
+    if (fromUid === toUid) return;
+    setForm((prev) => {
+      const from = prev.images.findIndex((im) => im._uid === fromUid);
+      const to = prev.images.findIndex((im) => im._uid === toUid);
+      if (from === -1 || to === -1) return prev;
+      const next = [...prev.images];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      return { ...prev, images: next };
+    });
   }
 
   async function handleSave() {
@@ -240,8 +362,8 @@ function ProductModal({
       toastErrRef.current("Product name is required");
       return;
     }
-    if (!editing && !form.file) {
-      toastErrRef.current("Please upload an image");
+    if (form.images.length === 0) {
+      toastErrRef.current("Please add at least one image");
       return;
     }
 
@@ -269,7 +391,23 @@ function ProductModal({
             .filter((f) => f.key || f.value)
         )
       );
-      if (form.file) payload.append("image", form.file);
+
+      // Remember any field names used so they can be reused on other products
+      form.fields.forEach((f) => rememberKey(f.key));
+
+      // Images — append new files in order, and (for edits) describe the full order
+      // so the backend can rebuild the array (reorder + add + delete). Index 0 = priority.
+      const imageOrder = form.images.map((it) =>
+        it.kind === "existing"
+          ? { type: "existing", public_id: it.public_id }
+          : { type: "new" }
+      );
+      form.images.forEach((it) => {
+        if (it.kind === "new") payload.append("images", it.file);
+      });
+      if (editing) {
+        payload.append("imageOrder", JSON.stringify(imageOrder));
+      }
 
       if (editing) {
         await api.patch(`/v2/products/${editing._id}`, payload, {
@@ -366,61 +504,135 @@ function ProductModal({
           className="custom-scrollbar"
         >
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-            {/* Image Upload */}
+            {/* Image Manager */}
             <div>
-              <label className="crm-label">
-                Product Image {editing ? "" : "*"}
-              </label>
-              <div
-                onClick={() => fileRef.current?.click()}
-                style={{
-                  border: "2px dashed var(--border-2)",
-                  borderRadius: "8px",
-                  height: "140px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "pointer",
-                  overflow: "hidden",
-                  position: "relative",
-                  transition: "border-color 130ms",
-                }}
-                onMouseEnter={(e) =>
-                  ((e.currentTarget as HTMLDivElement).style.borderColor =
-                    "var(--brand)")
-                }
-                onMouseLeave={(e) =>
-                  ((e.currentTarget as HTMLDivElement).style.borderColor =
-                    "var(--border-2)")
-                }
-              >
-                {form.preview ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={form.preview}
-                    alt="preview"
-                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                  />
-                ) : (
-                  <div
-                    style={{
-                      textAlign: "center",
-                      color: "var(--text-muted)",
-                    }}
-                  >
-                    <Upload
-                      style={{ width: 28, height: 28, margin: "0 auto 6px" }}
-                    />
-                    <p style={{ fontSize: 12 }}>Click to upload (JPEG/PNG/WebP/GIF, max 10MB)</p>
-                  </div>
-                )}
+              <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: "8px" }}>
+                <label className="crm-label" style={{ margin: 0 }}>
+                  Product Images {editing ? "" : "*"}
+                </label>
+                <span style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                  Drag to reorder · first image is the cover
+                </span>
               </div>
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(104px, 1fr))",
+                  gap: "10px",
+                }}
+              >
+                {form.images.map((img, i) => {
+                  const src = img.kind === "new" ? img.preview : img.secure_url;
+                  return (
+                    <div
+                      key={img._uid}
+                      draggable
+                      onDragStart={() => { dragImgUid.current = img._uid; }}
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        if (dragImgUid.current) reorderImage(dragImgUid.current, img._uid);
+                        dragImgUid.current = null;
+                      }}
+                      style={{
+                        position: "relative",
+                        aspectRatio: "1",
+                        borderRadius: "8px",
+                        overflow: "hidden",
+                        border: i === 0 ? "2px solid var(--brand)" : "1px solid var(--border)",
+                        background: "var(--bg-inset)",
+                        cursor: "grab",
+                      }}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={src} alt={`Image ${i + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+
+                      {/* Priority badge */}
+                      {i === 0 && (
+                        <span
+                          style={{
+                            position: "absolute", top: "4px", left: "4px",
+                            display: "inline-flex", alignItems: "center", gap: "3px",
+                            padding: "2px 6px", borderRadius: "99px",
+                            background: "var(--brand)", color: "#fff",
+                            fontSize: "9px", fontWeight: 700, letterSpacing: "0.02em",
+                          }}
+                        >
+                          <Star style={{ width: 9, height: 9 }} fill="#fff" /> Cover
+                        </span>
+                      )}
+
+                      {/* Controls */}
+                      <div
+                        style={{
+                          position: "absolute", bottom: 0, left: 0, right: 0,
+                          display: "flex", alignItems: "center", justifyContent: "center", gap: "4px",
+                          padding: "4px",
+                          background: "linear-gradient(to top, rgba(0,0,0,0.62), transparent)",
+                        }}
+                      >
+                        <button
+                          type="button"
+                          title="Move left"
+                          disabled={i === 0}
+                          onClick={() => moveImage(img._uid, -1)}
+                          style={imgCtrlBtnStyle(i === 0)}
+                        >
+                          <ChevronLeft style={{ width: 13, height: 13 }} />
+                        </button>
+                        <button
+                          type="button"
+                          title="Move right"
+                          disabled={i === form.images.length - 1}
+                          onClick={() => moveImage(img._uid, 1)}
+                          style={imgCtrlBtnStyle(i === form.images.length - 1)}
+                        >
+                          <ChevronRight style={{ width: 13, height: 13 }} />
+                        </button>
+                        <button
+                          type="button"
+                          title="Remove image"
+                          onClick={() => removeImage(img._uid)}
+                          style={{ ...imgCtrlBtnStyle(false), background: "rgba(181,74,74,0.92)" }}
+                        >
+                          <Trash2 style={{ width: 13, height: 13 }} />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {/* Add tile */}
+                <button
+                  type="button"
+                  onClick={() => fileRef.current?.click()}
+                  style={{
+                    aspectRatio: "1",
+                    borderRadius: "8px",
+                    border: "2px dashed var(--border-2)",
+                    background: "transparent",
+                    color: "var(--text-muted)",
+                    display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "4px",
+                    cursor: "pointer", transition: "border-color 130ms, color 130ms",
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--brand)"; e.currentTarget.style.color = "var(--brand)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--border-2)"; e.currentTarget.style.color = "var(--text-muted)"; }}
+                >
+                  <Upload style={{ width: 20, height: 20 }} />
+                  <span style={{ fontSize: 11, fontWeight: 600 }}>Add</span>
+                </button>
+              </div>
+              <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: "6px" }}>
+                JPEG / PNG / WebP / GIF · max 10MB each · up to 12 images
+              </p>
               <input
                 ref={fileRef}
                 type="file"
                 accept="image/jpeg,image/png,image/webp,image/gif"
+                multiple
                 style={{ display: "none" }}
-                onChange={onFilePick}
+                onChange={onFilesPick}
               />
             </div>
 
@@ -562,6 +774,51 @@ function ProductModal({
                   Add Field
                 </button>
               </div>
+
+              {/* Saved field-name presets — click to reuse, tiny × to delete */}
+              {savedKeys.length > 0 && (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "10px" }}>
+                  {savedKeys.map((key) => (
+                    <span
+                      key={key}
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "4px",
+                        padding: "3px 4px 3px 9px",
+                        borderRadius: "99px",
+                        border: "1px solid var(--border)",
+                        background: "var(--bg-inset)",
+                        fontSize: "11px",
+                        fontWeight: 600,
+                        color: "var(--text-2)",
+                      }}
+                    >
+                      <button
+                        type="button"
+                        title={`Use "${key}" as a field name`}
+                        onClick={() => applySavedKey(key)}
+                        style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", font: "inherit", padding: 0 }}
+                      >
+                        {key}
+                      </button>
+                      <button
+                        type="button"
+                        title="Delete saved field name"
+                        onClick={() => setConfirmDeleteKey(key)}
+                        style={{
+                          display: "inline-flex", alignItems: "center", justifyContent: "center",
+                          width: "15px", height: "15px", borderRadius: "99px", border: "none",
+                          background: "var(--border)", color: "var(--text-3)", cursor: "pointer", flexShrink: 0,
+                        }}
+                      >
+                        <X style={{ width: 9, height: 9 }} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+
               <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                 {form.fields.map((f) => (
                   <div
@@ -577,6 +834,7 @@ function ProductModal({
                       className="crm-input"
                       value={f.key}
                       onChange={(e) => updateField(f._uid, "key", e.target.value)}
+                      onBlur={(e) => rememberKey(e.target.value)}
                       placeholder="Key"
                       style={{ flex: 1 }}
                     />
@@ -691,6 +949,42 @@ function ProductModal({
           </button>
         </div>
       </div>
+
+      {/* Confirm delete saved field name */}
+      {confirmDeleteKey !== null && (
+        <div
+          style={{ position: "absolute", inset: 0, zIndex: 60, display: "flex", alignItems: "center", justifyContent: "center", padding: "16px" }}
+        >
+          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.5)" }} onClick={() => setConfirmDeleteKey(null)} />
+          <div
+            style={{
+              position: "relative",
+              width: "100%",
+              maxWidth: "320px",
+              background: "var(--bg-surface)",
+              border: "1px solid var(--border)",
+              borderRadius: "12px",
+              boxShadow: "var(--shadow-md)",
+              padding: "18px",
+            }}
+          >
+            <h3 style={{ fontSize: "14px", fontWeight: 700, color: "var(--text)", marginBottom: "6px" }}>
+              Delete saved field name?
+            </h3>
+            <p style={{ fontSize: "12.5px", color: "var(--text-3)", marginBottom: "16px", lineHeight: 1.5 }}>
+              Remove <strong style={{ color: "var(--text)" }}>“{confirmDeleteKey}”</strong> from your saved field names. This won&apos;t affect fields already added to products.
+            </p>
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}>
+              <button type="button" className="crm-btn crm-btn-secondary crm-btn-sm" onClick={() => setConfirmDeleteKey(null)}>
+                Cancel
+              </button>
+              <button type="button" className="crm-btn crm-btn-danger crm-btn-sm" onClick={() => deleteSavedKey(confirmDeleteKey)}>
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

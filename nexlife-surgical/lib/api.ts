@@ -73,6 +73,7 @@ export async function submitInquiry(data: {
 }): Promise<{ success: boolean; message?: string }> {
   return apiFetch('/api/contact', {
     method: 'POST',
-    body: JSON.stringify(data),
+    // Tag every submission from this site as 'surgical' so the CRM can label it.
+    body: JSON.stringify({ ...data, source: 'surgical' }),
   });
 }

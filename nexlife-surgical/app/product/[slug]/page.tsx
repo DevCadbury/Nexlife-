@@ -242,7 +242,7 @@ export default function ProductPage() {
           <div>
             {/* Main image */}
             <div
-              className="rounded-lg overflow-hidden border border-[#E2E8F0] bg-[#F7F8FA] mb-3"
+              className="relative group rounded-lg overflow-hidden border border-[#E2E8F0] bg-[#F7F8FA] mb-3"
               style={{ aspectRatio: "4/3" }}
             >
               {mainImageUrl ? (
@@ -258,6 +258,32 @@ export default function ProductPage() {
                   <span style={{ fontSize: "0.85rem" }}>No image available</span>
                 </div>
               )}
+
+              {/* Prev / Next arrows + counter (only when multiple images) */}
+              {product.images.length > 1 && (
+                <>
+                  <button
+                    onClick={() => setSelectedImage((prev) => (prev - 1 + product.images.length) % product.images.length)}
+                    aria-label="Previous image"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center bg-white/85 text-[#0D2240] shadow-md transition-all duration-150 hover:bg-white hover:scale-105 opacity-0 group-hover:opacity-100 focus:opacity-100"
+                  >
+                    <ArrowLeft size={16} />
+                  </button>
+                  <button
+                    onClick={() => setSelectedImage((prev) => (prev + 1) % product.images.length)}
+                    aria-label="Next image"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center bg-white/85 text-[#0D2240] shadow-md transition-all duration-150 hover:bg-white hover:scale-105 opacity-0 group-hover:opacity-100 focus:opacity-100"
+                  >
+                    <ArrowLeft size={16} className="rotate-180" />
+                  </button>
+                  <div
+                    className="absolute bottom-3 right-3 px-2 py-0.5 rounded-full text-[11px] text-white"
+                    style={{ background: "rgba(13,34,64,0.7)", fontWeight: 600 }}
+                  >
+                    {selectedImage + 1} / {product.images.length}
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Thumbnails */}
@@ -267,6 +293,7 @@ export default function ProductPage() {
                   <button
                     key={img.public_id ?? i}
                     onClick={() => setSelectedImage(i)}
+                    aria-label={`View image ${i + 1}`}
                     className="relative overflow-hidden rounded border-2 transition-all duration-150 flex-shrink-0"
                     style={{
                       width: "72px",
