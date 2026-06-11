@@ -78,6 +78,7 @@ export default function AdminLayout({
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   // Active website context: 'surgical' or 'general'
   // Stored in localStorage so product pages can read it
@@ -211,6 +212,19 @@ export default function AdminLayout({
       setActiveSiteState(savedSite);
     }
   }, []); // runs once on mount
+
+  useEffect(() => {
+    // Track viewport so <main> margin and the mobile drawer behave correctly.
+    // Below 1024px the sidebar is an off-canvas overlay, so main must not reserve space.
+    const mq = window.matchMedia("(max-width: 1023px)");
+    const apply = () => {
+      setIsMobile(mq.matches);
+      if (!mq.matches) setMobileOpen(false); // closing drawer when growing to desktop
+    };
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
 
   useEffect(() => {
     // Outside-click handler — uses refs so it never needs state in dep array
@@ -416,7 +430,7 @@ export default function AdminLayout({
       <main
         className="flex flex-col min-h-screen"
         style={{
-          marginLeft: sidebarOpen ? "232px" : "56px",
+          marginLeft: isMobile ? 0 : sidebarOpen ? "232px" : "56px",
           transitionProperty: "margin-left",
           transitionDuration: "200ms",
         }}

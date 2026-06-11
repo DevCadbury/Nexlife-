@@ -335,6 +335,15 @@ html.dark [style*="background-color: white"] { background-color: var(--bg-surfac
 .crm-icon-btn:hover { background: var(--bg-inset); color: var(--text-2); }
 .crm-icon-btn.danger:hover { background: var(--err-bg); color: var(--err-t); }
 
+/* Fix: .crm-icon-btn (unlayered) overrides Tailwind's display utilities (in @layer utilities),
+   which made BOTH the mobile-drawer toggle (lg:hidden) and the desktop collapse toggle
+   (hidden lg:flex) show at once on mobile. Re-assert the responsive intent with !important. */
+.crm-icon-btn.hidden { display: none !important; }
+@media (min-width: 1024px) {
+  .crm-icon-btn.lg\:hidden { display: none !important; }
+  .crm-icon-btn.lg\:flex { display: inline-flex !important; }
+}
+
 /* Labels */
 .crm-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-3); margin-bottom: 5px; }
 
