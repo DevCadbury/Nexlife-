@@ -14,7 +14,7 @@ const resources = {
 
       // Topbar
       phone: "+91 96648 43790",
-      email: "info@nexlife.com",
+      email: "Info@nexlifeinternational.com",
       language: "Language",
       theme: "Theme",
 
@@ -96,7 +96,7 @@ const resources = {
 
       // Topbar
       phone: "+91 96648 43790",
-      email: "info@nexlife.com",
+      email: "Info@nexlifeinternational.com",
       language: "भाषा",
       theme: "थीम",
 
@@ -179,7 +179,7 @@ const resources = {
 
       // Topbar
       phone: "+91 96648 43790",
-      email: "info@nexlife.com",
+      email: "Info@nexlifeinternational.com",
       language: "Langue",
       theme: "Thème",
 

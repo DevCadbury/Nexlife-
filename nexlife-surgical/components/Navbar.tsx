@@ -66,14 +66,18 @@ export function Navbar() {
       {/* Top bar */}
       <div className="bg-[#0D2240] text-white text-sm hidden md:flex items-center justify-between px-8 py-2">
         <div className="flex items-center gap-6">
-          <span className="flex items-center gap-1.5 text-slate-300 text-xs">
+          <a href="tel:+919664843790" className="flex items-center gap-1.5 text-slate-300 hover:text-white text-xs transition-colors">
             <Phone size={12} />
-            +1 (800) 639-5433
-          </span>
-          <span className="flex items-center gap-1.5 text-slate-300 text-xs">
+            +91 96648 43790
+          </a>
+          <a href="tel:+918401546910" className="flex items-center gap-1.5 text-slate-300 hover:text-white text-xs transition-colors">
+            <Phone size={12} />
+            +91 84015 46910
+          </a>
+          <a href="mailto:Info@nexlifeinternational.com" className="flex items-center gap-1.5 text-slate-300 hover:text-white text-xs transition-colors">
             <Mail size={12} />
-            sales@nexlifeinternational.com
-          </span>
+            Info@nexlifeinternational.com
+          </a>
         </div>
         <div className="flex items-center gap-4 text-slate-300 text-xs">
           <span>ISO 13485 Certified</span>
@@ -492,13 +496,17 @@ export function Navbar() {
             Nexlife Pharma Site ↗
           </a>
           <div className="mt-4 space-y-2">
-            <a href="tel:+18006395433" className="flex items-center gap-2 text-sm text-slate-500 px-1 hover:text-[#0A8A78]">
+            <a href="tel:+919664843790" className="flex items-center gap-2 text-sm text-slate-500 px-1 hover:text-[#0A8A78]">
               <Phone size={14} className="text-[#0A8A78]" />
-              +1 (800) 639-5433
+              +91 96648 43790
             </a>
-            <a href="mailto:sales@nexlifeinternational.com" className="flex items-center gap-2 text-sm text-slate-500 px-1 hover:text-[#0A8A78]">
+            <a href="tel:+918401546910" className="flex items-center gap-2 text-sm text-slate-500 px-1 hover:text-[#0A8A78]">
+              <Phone size={14} className="text-[#0A8A78]" />
+              +91 84015 46910
+            </a>
+            <a href="mailto:Info@nexlifeinternational.com" className="flex items-center gap-2 text-sm text-slate-500 px-1 hover:text-[#0A8A78]">
               <Mail size={14} className="text-[#0A8A78]" />
-              sales@nexlifeinternational.com
+              Info@nexlifeinternational.com
             </a>
           </div>
         </div>

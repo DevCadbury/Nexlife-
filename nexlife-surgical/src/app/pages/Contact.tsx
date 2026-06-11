@@ -5,14 +5,14 @@ const contactDetails = [
   {
     icon: Phone,
     label: "Phone",
-    lines: ["+1 (800) 639-5433", "+1 (713) 842-1090"],
-    href: "tel:+18006395433",
+    lines: ["+91 96648 43790", "+91 84015 46910"],
+    href: "tel:+919664843790",
   },
   {
     icon: Mail,
     label: "Email",
-    lines: ["sales@nexlifeinternational.com", "support@nexlifeinternational.com"],
-    href: "mailto:sales@nexlifeinternational.com",
+    lines: ["Info@nexlifeinternational.com"],
+    href: "mailto:Info@nexlifeinternational.com",
   },
   {
     icon: MapPin,

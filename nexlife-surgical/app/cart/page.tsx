@@ -307,7 +307,7 @@ export default function CartPage() {
       setQuoteSubmitted(true);
     } catch {
       const emailBody = `Quote Request\n\nProducts: ${cart.map((item) => item.name).join(", ")}\n\nName: ${formData.name}\nEmail: ${formData.email}\nMessage: ${formData.message}`;
-      window.location.href = `mailto:sales@nexlifeinternational.com?subject=Quote Request&body=${encodeURIComponent(emailBody)}`;
+      window.location.href = `mailto:Info@nexlifeinternational.com?subject=Quote Request&body=${encodeURIComponent(emailBody)}`;
     }
   };
 

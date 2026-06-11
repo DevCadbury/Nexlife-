@@ -107,15 +107,21 @@ export function Footer() {
               </h4>
               <ul className="space-y-3 mb-6">
                 <li>
-                  <a href="tel:+18006395433" className="flex items-start gap-2.5 text-sm text-slate-400 hover:text-white transition-colors">
+                  <a href="tel:+919664843790" className="flex items-start gap-2.5 text-sm text-slate-400 hover:text-white transition-colors">
                     <Phone size={14} className="mt-0.5 flex-shrink-0 text-[#0A8A78]" />
-                    +1 (800) 639-5433
+                    +91 96648 43790
                   </a>
                 </li>
                 <li>
-                  <a href="mailto:sales@nexlifeinternational.com" className="flex items-start gap-2.5 text-sm text-slate-400 hover:text-white transition-colors">
+                  <a href="tel:+918401546910" className="flex items-start gap-2.5 text-sm text-slate-400 hover:text-white transition-colors">
+                    <Phone size={14} className="mt-0.5 flex-shrink-0 text-[#0A8A78]" />
+                    +91 84015 46910
+                  </a>
+                </li>
+                <li>
+                  <a href="mailto:Info@nexlifeinternational.com" className="flex items-start gap-2.5 text-sm text-slate-400 hover:text-white transition-colors">
                     <Mail size={14} className="mt-0.5 flex-shrink-0 text-[#0A8A78]" />
-                    sales@nexlifeinternational.com
+                    Info@nexlifeinternational.com
                   </a>
                 </li>
                 <li>
