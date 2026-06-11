@@ -97,11 +97,11 @@ interface ModalState {
   preview: string | null;
 }
 
-function defaultModal(categories: Category[], defaultCat = ""): ModalState {
+function defaultModal(categories: Category[], defaultCat = "", defaultSite: "surgical" | "general" | "both" = "surgical"): ModalState {
   return {
     name: "",
     category: defaultCat || (categories[0]?.name ?? ""),
-    siteContext: "surgical",
+    siteContext: defaultSite,
     price: "",
     priceUnit: "",
     showPrice: true,
@@ -144,6 +144,7 @@ function ProductModal({
   editing,
   categories,
   defaultCategory,
+  defaultSite,
   onSaved,
 }: {
   open: boolean;
@@ -151,6 +152,7 @@ function ProductModal({
   editing: Product | null;
   categories: Category[];
   defaultCategory: string;
+  defaultSite: "surgical" | "general";
   onSaved: () => void;
 }) {
   const { error: toastError, success } = useToast();
@@ -160,7 +162,7 @@ function ProductModal({
   useEffect(() => { toastOkRef.current = success; }, [success]);
 
   const [form, setForm] = useState<ModalState>(() =>
-    defaultModal(categories, defaultCategory)
+    defaultModal(categories, defaultCategory, defaultSite)
   );
   const [saving, setSaving] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -188,11 +190,11 @@ function ProductModal({
         preview: editing.images?.[0]?.secure_url ?? null,
       });
     } else {
-      setForm(defaultModal(categories, defaultCategory));
+      setForm(defaultModal(categories, defaultCategory, defaultSite));
     }
     setSaving(false);
     setProgress(0);
-  }, [open, editing, categories, defaultCategory]);
+  }, [open, editing, categories, defaultCategory, defaultSite]);
 
   function set<K extends keyof ModalState>(key: K, val: ModalState[K]) {
     setForm((prev) => ({ ...prev, [key]: val }));
@@ -707,7 +709,9 @@ export default function ProductsPage() {
   useEffect(() => { toastOkRef.current = success; }, [success]);
 
   // ── State ──────────────────────────────────────────────────────────────────
-  // No siteTab filter — admin sees all products
+  // Active site context — mirrors the sidebar website switcher (surgical / general).
+  // Products & categories are filtered to the active site so the CRM matches the site being managed.
+  const [activeSite, setActiveSite] = useState<"surgical" | "general">("surgical");
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
@@ -780,19 +784,45 @@ export default function ProductsPage() {
     fetchProducts();
   }, [fetchProducts]);
 
+  // ── Sync active site with the sidebar website switcher ─────────────────────
+  useEffect(() => {
+    const read = () => {
+      const s = localStorage.getItem("crmActiveSite");
+      if (s === "surgical" || s === "general") setActiveSite(s);
+    };
+    read();
+    const onSiteChange = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail === "surgical" || detail === "general") setActiveSite(detail);
+      else read();
+    };
+    window.addEventListener("crm-site-change", onSiteChange);
+    window.addEventListener("storage", read);
+    return () => {
+      window.removeEventListener("crm-site-change", onSiteChange);
+      window.removeEventListener("storage", read);
+    };
+  }, []);
+
   // ── Site tab change removed — admin sees all products ──────────────────────
 
   // ── Computed data ──────────────────────────────────────────────────────────
   const searchQuery = search.trim().toLowerCase();
 
+  // Products belonging to the active site (siteContext matches, or 'both')
+  const matchesSite = (sc: string) => sc === activeSite || sc === "both";
+  const siteProducts = products.filter((p) => matchesSite(p.siteContext));
+  // Categories belonging to the active site
+  const siteCategories = categories.filter((c) => matchesSite(c.siteContext));
+
   const filteredProducts = searchQuery
-    ? products.filter(
+    ? siteProducts.filter(
         (p) =>
           p.name.toLowerCase().includes(searchQuery) ||
           p.category.toLowerCase().includes(searchQuery) ||
           (p.price ?? "").toLowerCase().includes(searchQuery)
       )
-    : products;
+    : siteProducts;
 
   // Resolve a product's category field — may be stored as an ObjectId string for old products
   const resolveProductCategory = (rawCat: string): string => {
@@ -816,7 +846,7 @@ export default function ProductsPage() {
 
   // Starred virtual category — products with isStarred=true shown in a special CRM-only section
   const starredProducts = products
-    .filter((p) => p.isStarred)
+    .filter((p) => p.isStarred && matchesSite(p.siteContext))
     .map((p) => ({
       ...p,
       category: resolveProductCategory(p.category),
@@ -825,9 +855,9 @@ export default function ProductsPage() {
 
   // Category order: show ALL categories from API (even empty ones), then any ungrouped keys
   const allCategoryKeys = [
-    ...categories.map((c) => c.name),  // all categories, even empty
+    ...siteCategories.map((c) => c.name),  // all categories for this site, even empty
     ...Object.keys(grouped).filter(
-      (k) => !categories.find((c) => c.name === k)
+      (k) => !siteCategories.find((c) => c.name === k)
     ),
   ];
 
@@ -939,7 +969,7 @@ export default function ProductsPage() {
     if (!name) return;
     setCreatingCat(true);
     try {
-      await api.post("/v2/categories", { name, siteContext: "surgical" });
+      await api.post("/v2/categories", { name, siteContext: activeSite });
       setNewCatInput("");
       setShowNewCat(false);
       toastOkRef.current(`Category "${name}" created`);
@@ -1081,7 +1111,8 @@ export default function ProductsPage() {
             Product Manager
           </h1>
           <p style={{ fontSize: "13px", color: "var(--text-3)", marginTop: "2px" }}>
-            Manage products, categories, and visibility for your surgical catalogue
+            Manage products, categories, and visibility for your{" "}
+            {activeSite === "surgical" ? "surgical" : "general"} catalogue
           </p>
         </div>
         <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
@@ -1144,8 +1175,8 @@ export default function ProductsPage() {
           Collapse All
         </button>
         <span style={{ fontSize: "11px", color: "var(--text-muted)", marginLeft: "4px" }}>
-          {products.length} products · {categories.length} categories
-          {products.filter((p) => !p.visible).length > 0 && (
+          {siteProducts.length} products · {siteCategories.length} categories
+          {siteProducts.filter((p) => !p.visible).length > 0 && (
             <span
               style={{
                 marginLeft: "6px",
@@ -1158,7 +1189,7 @@ export default function ProductsPage() {
                 fontWeight: 700,
               }}
             >
-              {products.filter((p) => !p.visible).length} hidden
+              {siteProducts.filter((p) => !p.visible).length} hidden
             </span>
           )}
         </span>
@@ -1449,6 +1480,7 @@ export default function ProductsPage() {
         editing={editingProduct}
         categories={categories}
         defaultCategory={defaultModalCat}
+        defaultSite={activeSite}
         onSaved={() => fetchProducts()}
       />
     </div>

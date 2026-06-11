@@ -363,14 +363,42 @@ export function Navbar() {
             </Link>
           </div>
 
-          {/* Mobile hamburger */}
-          <button
-            className="md:hidden p-2 text-[#0D2240] hover:bg-[#F7F8FA] rounded transition-colors"
-            onClick={() => setDrawerOpen(true)}
-            aria-label="Open navigation menu"
-          >
-            <Menu size={22} />
-          </button>
+          {/* Mobile actions: pharma link + cart + hamburger */}
+          <div className="flex items-center gap-1 md:hidden">
+            <a
+              href={MAIN_SITE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-[10px] font-semibold px-2 py-1.5 rounded-full border"
+              style={{ color: "#0D2240", borderColor: "#D0D7E0", background: "#F7F8FA" }}
+              aria-label="Visit Nexlife Pharma site"
+            >
+              <Globe size={11} />
+              Pharma ↗
+            </a>
+            <Link
+              href="/cart"
+              className="relative p-2 rounded text-[#0D2240] hover:bg-[#F7F8FA] transition-colors"
+              aria-label="Shopping cart"
+            >
+              <ShoppingCart size={22} />
+              {cartCount > 0 && (
+                <span
+                  className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full text-white flex items-center justify-center"
+                  style={{ backgroundColor: "#0A8A78", fontWeight: 600, fontSize: "9px" }}
+                >
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+            <button
+              className="p-2 text-[#0D2240] hover:bg-[#F7F8FA] rounded transition-colors"
+              onClick={() => setDrawerOpen(true)}
+              aria-label="Open navigation menu"
+            >
+              <Menu size={22} />
+            </button>
+          </div>
         </nav>
       </header>
 

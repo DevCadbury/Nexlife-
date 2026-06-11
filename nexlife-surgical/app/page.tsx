@@ -5,20 +5,13 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   ArrowRight,
-  Shield,
   Globe,
-  Truck,
-  Award,
   ChevronLeft,
   ChevronRight,
-  Star,
   BadgeCheck,
   Users,
   Building2,
   Heart,
-  TrendingUp,
-  Target,
-  Eye,
 } from "lucide-react";
 import { ImageCarousel } from "@/components/ImageCarousel";
 import { useCategories } from "@/lib/hooks/useCategories";
@@ -72,22 +65,22 @@ const trustStats = [
 
 const trustFeatures = [
   {
-    icon: Shield,
+    iconSrc: "/ICONS/customer-service.png",
     title: "Client Satisfaction",
     description: "Your satisfaction is our top priority. We aim to exceed your expectations with every interaction and delivery.",
   },
   {
-    icon: Truck,
+    iconSrc: "/ICONS/transportation.png",
     title: "Supply Chain Reliability",
     description: "Timeliness is critical in the pharmaceutical industry. We ensure reliable and consistent supply chain management.",
   },
   {
-    icon: Award,
+    iconSrc: "/ICONS/best-product.png",
     title: "Competitive Pricing",
     description: "We offer competitive and affordable pricing without compromising on quality or service standards.",
   },
   {
-    icon: Globe,
+    iconSrc: "/ICONS/internet.png",
     title: "Global Reach",
     description: "Delivering quality healthcare products across borders to over 50+ countries worldwide.",
   },
@@ -122,17 +115,17 @@ const companyPillars = [
 
 const coreValues = [
   {
-    icon: Target,
+    iconSrc: "/ICONS/focus.png",
     title: "Our Mission",
     description: "At Nexlife International, our mission is clear: we aim to improve lives by providing affordable, high-quality pharmaceutical solutions to healthcare providers worldwide. We are committed to bridging the gap between pharmaceutical innovation and accessibility.",
   },
   {
-    icon: Eye,
+    iconSrc: "/ICONS/future.png",
     title: "Our Vision",
     description: "At Nexlife International, our vision is to enhance global access to high-quality, affordable pharmaceutical products. We envision a world where quality healthcare is accessible to everyone, regardless of geographical boundaries.",
   },
   {
-    icon: TrendingUp,
+    iconSrc: "/ICONS/goal.png",
     title: "Our Goal",
     description: "At Nexlife International, our overarching goal is to lead the pharmaceutical export industry through innovation, reliability, and customer-centric approaches. We strive to become the most trusted partner in global pharmaceutical trade.",
   },
@@ -569,7 +562,6 @@ export default function Home() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {trustFeatures.map((feat, idx) => {
-              const Icon = feat.icon;
               return (
                 <div
                   key={feat.title}
@@ -580,13 +572,18 @@ export default function Home() {
                   }}
                 >
                   <div
-                    className="w-14 h-14 rounded-xl flex items-center justify-center mb-4 transition-all duration-300 group-hover:scale-110 group-hover:rotate-6"
+                    className="w-14 h-14 rounded-xl flex items-center justify-center mb-4 transition-transform duration-300 group-hover:scale-110"
                     style={{
                       backgroundColor: "rgba(10,138,120,0.12)",
-                      boxShadow: "0 0 0 0 rgba(10,138,120,0.4)",
                     }}
                   >
-                    <Icon size={26} className="text-[#0A8A78] transition-transform duration-300 group-hover:scale-110" />
+                    <Image
+                      src={feat.iconSrc}
+                      alt={feat.title}
+                      width={30}
+                      height={30}
+                      className="w-[30px] h-[30px] object-contain"
+                    />
                   </div>
                   <h3
                     className="text-[#0D2240] mb-2 group-hover:text-[#0A8A78] transition-colors duration-300"
@@ -683,7 +680,6 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {coreValues.map((value, idx) => {
-              const Icon = value.icon;
               return (
                 <div
                   key={value.title}
@@ -694,13 +690,20 @@ export default function Home() {
                   }}
                 >
                   <div
-                    className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full flex items-center justify-center transition-all duration-500 group-hover:scale-125 group-hover:rotate-12"
+                    className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
                     style={{
-                      backgroundColor: "#0A8A78",
-                      boxShadow: "0 8px 24px rgba(10,138,120,0.25)",
+                      backgroundColor: "#ffffff",
+                      border: "1px solid rgba(10,138,120,0.30)",
+                      boxShadow: "0 8px 24px rgba(13,34,64,0.12)",
                     }}
                   >
-                    <Icon size={28} className="text-white transition-transform duration-500 group-hover:scale-110" />
+                    <Image
+                      src={value.iconSrc}
+                      alt={value.title}
+                      width={30}
+                      height={30}
+                      className="w-[30px] h-[30px] object-contain"
+                    />
                   </div>
                   <div className="mt-6">
                     <h3
@@ -745,6 +748,79 @@ export default function Home() {
           </div>
 
           <TestimonialCarousel testimonials={testimonials} />
+        </div>
+      </section>
+
+      <SectionDivider className="bg-white" />
+
+      {/* ── Company showcase ── */}
+      <section className="py-16 lg:py-20 bg-white overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-10 lg:gap-x-14 gap-y-6 items-start lg:items-center">
+            {/* Text — first on mobile, top-right on desktop */}
+            <div className="order-1 lg:col-start-2 lg:row-start-1">
+              <p className="text-xs text-[#0A8A78] mb-2" style={{ fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>
+                Who We Are
+              </p>
+              <h2
+                className="text-[#0D2240] mb-4"
+                style={{ fontSize: "clamp(1.5rem, 3vw, 2.25rem)", fontWeight: 800, letterSpacing: "-0.03em" }}
+              >
+                Your Trusted Partner in Surgical &amp; Medical Supplies
+              </h2>
+              <p className="text-slate-600 leading-relaxed mb-6" style={{ fontSize: "0.97rem" }}>
+                Nexlife International delivers FDA-registered, ISO 13485 certified surgical instruments
+                and medical disposables to healthcare providers across more than 40 countries. From bulk
+                procurement to dependable global logistics, we make quality healthcare accessible everywhere.
+              </p>
+              <div className="grid grid-cols-3 gap-4">
+                {[
+                  { src: "/ICONS/quality-assurance.png", label: "Quality Assured" },
+                  { src: "/ICONS/certificate.png", label: "Certified" },
+                  { src: "/ICONS/container.png", label: "Global Logistics" },
+                ].map((item) => (
+                  <div key={item.label} className="flex flex-col items-center text-center gap-2">
+                    <div
+                      className="w-12 h-12 rounded-xl flex items-center justify-center"
+                      style={{ backgroundColor: "rgba(10,138,120,0.12)" }}
+                    >
+                      <Image src={item.src} alt={item.label} width={26} height={26} className="w-[26px] h-[26px] object-contain" />
+                    </div>
+                    <span className="text-xs text-slate-600" style={{ fontWeight: 600 }}>{item.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Image — below text on mobile, left column on desktop */}
+            <div
+              className="order-2 relative rounded-2xl overflow-hidden border border-[#E2E8F0] lg:col-start-1 lg:row-start-1 lg:row-span-2 lg:self-center"
+              style={{ boxShadow: "0 8px 32px rgba(13,34,64,0.10)" }}
+            >
+              <Image
+                src="/images/image.png"
+                alt="Nexlife International — surgical & medical supplies"
+                width={900}
+                height={640}
+                className="w-full h-auto object-cover"
+                sizes="(max-width: 1024px) 100vw, 50vw"
+              />
+            </div>
+
+            {/* Button — last on mobile (below image), bottom-right on desktop */}
+            <div className="order-3 lg:col-start-2 lg:row-start-2">
+              <Link
+                href="/about"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded text-sm text-white transition-all duration-150 active:scale-95"
+                style={{ backgroundColor: "#0A8A78", fontWeight: 600, boxShadow: "0 2px 8px rgba(10,138,120,0.4)" }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#098872")}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#0A8A78")}
+              >
+                Learn More About Us
+                <ChevronRight size={18} />
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 

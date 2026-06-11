@@ -250,6 +250,8 @@ export default function AdminLayout({
   function setActiveSite(site: 'surgical' | 'general') {
     setActiveSiteState(site);
     localStorage.setItem("crmActiveSite", site);
+    // Notify same-tab listeners (e.g. Product Manager) — 'storage' doesn't fire in the same tab
+    window.dispatchEvent(new CustomEvent("crm-site-change", { detail: site }));
   }
 
   // Select tabs based on which website is being managed

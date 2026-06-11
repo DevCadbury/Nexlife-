@@ -79,6 +79,12 @@ export function WelcomeDialog() {
           {/* Header */}
           <div style={{ background: "#0D2240", padding: "20px 22px 18px", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "12px" }}>
             <div>
+              <div style={{ display: "flex", alignItems: "center", gap: "9px", marginBottom: "10px" }}>
+                <div style={{ width: "34px", height: "34px", borderRadius: "8px", background: "rgba(255,255,255,0.10)", display: "flex", alignItems: "center", justifyContent: "center", padding: "5px", flexShrink: 0 }}>
+                  <img src="/images/nexlife-logo.png" alt="Nexlife International" style={{ width: "100%", height: "100%", objectFit: "contain", filter: "brightness(0) invert(1)" }} />
+                </div>
+                <span style={{ fontSize: "13px", fontWeight: 700, color: "#fff", letterSpacing: "-0.01em" }}>Nexlife International</span>
+              </div>
               <p style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.50)", marginBottom: "4px" }}>
                 Also by Nexlife
               </p>
