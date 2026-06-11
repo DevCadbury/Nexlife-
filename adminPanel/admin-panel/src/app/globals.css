@@ -467,3 +467,100 @@ button[class*="bg-gradient"][class*="from-rose"] {
 [class*="bg-gradient"] .text-white\/60,
 [class*="bg-gradient"] .text-white\/70,
 [class*="bg-gradient"] .text-white\/80 { color: rgba(255,255,255,0.85) !important; }
+
+/* ═══════════════════════════════════════════════════════
+   RESPONSIVE — CRM mobile/tablet fixes
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Tables: allow horizontal scroll on small screens ── */
+@media (max-width: 768px) {
+  .overflow-x-auto { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+
+  /* Tighten page content padding */
+  section.flex-1 { padding: 12px 12px !important; }
+
+  /* Page header buttons — wrap & shrink */
+  .flex.flex-wrap { flex-wrap: wrap !important; }
+
+  /* CRM buttons — full width on very small screens inside modals */
+  .crm-btn-lg { width: 100%; justify-content: center; }
+
+  /* Product Manager: stack header controls */
+  [style*="justify-content: space-between"] > div {
+    flex-wrap: wrap;
+  }
+
+  /* Card/surface widths */
+  .rounded-xl, .rounded-lg { border-radius: 10px !important; }
+
+  /* Category accordion: shrink padding */
+  [style*="padding: 10px 14px"] { padding: 8px 10px !important; }
+
+  /* Modal: fill screen width */
+  .fixed.inset-0 > [style*="max-width"] {
+    max-width: calc(100vw - 24px) !important;
+    margin: 12px !important;
+    max-height: calc(100vh - 24px) !important;
+  }
+
+  /* Drawer (profile, etc.) */
+  [style*="min(560px"] {
+    width: 100vw !important;
+  }
+
+  /* Table columns: hide less-important ones */
+  th:nth-child(5), td:nth-child(5),
+  th:nth-child(6), td:nth-child(6) {
+    display: none;
+  }
+
+  /* Header: tighten */
+  .crm-header { padding: 0 10px !important; }
+}
+
+/* ── Tablet (768–1024px) ── */
+@media (max-width: 1024px) {
+  section.flex-1 { padding: 16px !important; }
+
+  /* Main area follows sidebar width change at collapsed */
+  main.flex.flex-col { transition: margin-left 200ms ease; }
+
+  /* Reduce stat card gaps */
+  .grid.grid-cols-4 { grid-template-columns: repeat(2, 1fr) !important; }
+  .grid.grid-cols-5 { grid-template-columns: repeat(2, 1fr) !important; }
+
+  /* Search bars — full width */
+  [style*="maxWidth: 380px"] { max-width: 100% !important; }
+  [style*="maxWidth: \"380px\""] { max-width: 100% !important; }
+}
+
+/* ── Prevent horizontal scroll on main container ── */
+body { overflow-x: hidden; }
+main { overflow-x: hidden; min-width: 0; }
+
+/* ── Sidebar collapses properly on mobile ── */
+@media (max-width: 1024px) {
+  .crm-sidebar { transform: translateX(-100%); }
+  .crm-sidebar.translate-x-0 { transform: translateX(0) !important; }
+}
+
+/* ── Notification panel: full width on mobile ── */
+@media (max-width: 480px) {
+  .fixed.right-4.top-\[60px\] {
+    right: 8px !important;
+    left: 8px !important;
+    width: auto !important;
+  }
+}
+
+/* ── Product manager page buttons wrap on mobile ── */
+@media (max-width: 640px) {
+  [style*="display: flex"][style*="gap: 8px"][style*="alignItems: center"] {
+    flex-wrap: wrap;
+  }
+  .crm-btn { font-size: 11px; padding: 5px 8px; }
+  .crm-btn-sm { font-size: 10px; padding: 3px 7px; }
+}
+
+/* ── Tables: sticky header, scroll body ── */
+.overflow-x-auto table { min-width: 600px; }

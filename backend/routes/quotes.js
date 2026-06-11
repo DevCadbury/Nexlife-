@@ -97,7 +97,7 @@ function customerConfirmationEmail(data) {
     source,
   } = data;
 
-  const frontendUrl = process.env.FRONTEND_URL || 'https://nexlifeinternational.com';
+  const frontendUrl = process.env.FRONTEND_URL || 'https://nexlifeinternational.in';
   // Cart quotes originate from the surgical site — use its domain for product links
   const surgicalUrl = process.env.SURGICAL_URL || 'https://nexlifeinternational.in';
   const isCart = source === 'surgical-cart';
@@ -540,7 +540,7 @@ router.post("/track-download", async (req, res) => {
       : "";
 
     const greeting = downloaderName ? `Dear ${downloaderName},` : "Hello,";
-    const frontendUrl = process.env.FRONTEND_URL || "https://nexlifeinternational.com";
+    const frontendUrl = process.env.SURGICAL_URL || process.env.FRONTEND_URL || "https://nexlifeinternational.in";
 
     const confirmHtml = `<!DOCTYPE html>
 <html lang="en">

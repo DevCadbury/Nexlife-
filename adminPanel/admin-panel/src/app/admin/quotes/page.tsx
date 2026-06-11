@@ -115,7 +115,7 @@ function printQuote(quote: Quote) {
 
   const cartRows = cartItems.map((item) => {
     const nameSlug = item.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-    const productUrl = `https://nexlifeinternational.com/product/${nameSlug}`;
+    const productUrl = `https://nexlifeinternational.in/product/${nameSlug}`;
     return `
     <tr>
       <td style="padding:10px 14px;border-bottom:1px solid #E2E8F0;font-size:12px">

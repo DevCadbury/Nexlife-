@@ -1164,12 +1164,54 @@ export default function ProductsPage() {
         </span>
       </div>
 
+      {/* ── New Category inline — shown at top when triggered from empty state ── */}
+      {showNewCat && allCategoryKeys.length === 0 && (
+        <div
+          style={{
+            background: "var(--bg-surface)",
+            border: "1px solid var(--border)",
+            borderRadius: "10px",
+            padding: "12px 16px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+          }}
+        >
+          <Folder style={{ width: 15, height: 15, color: "var(--text-muted)", flexShrink: 0 }} />
+          <input
+            className="crm-input"
+            style={{ flex: 1 }}
+            value={newCatInput}
+            onChange={(e) => setNewCatInput(e.target.value)}
+            placeholder="New category name…"
+            autoFocus
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleCreateCategory();
+              if (e.key === "Escape") { setShowNewCat(false); setNewCatInput(""); }
+            }}
+          />
+          <button
+            className="crm-btn crm-btn-primary crm-btn-sm"
+            disabled={creatingCat || !newCatInput.trim()}
+            onClick={handleCreateCategory}
+          >
+            {creatingCat ? <Loader2 className="animate-spin" style={{ width: 13, height: 13 }} /> : "Create"}
+          </button>
+          <button
+            className="crm-btn crm-btn-secondary crm-btn-sm"
+            onClick={() => { setShowNewCat(false); setNewCatInput(""); }}
+          >
+            Cancel
+          </button>
+        </div>
+      )}
+
       {/* ── Content ───────────────────────────────────────────────────────── */}
       {loading ? (
         <SkeletonList />
       ) : allCategoryKeys.length === 0 && !searchQuery ? (
-        // No categories at all
-        <EmptyCategories onAdd={() => setShowNewCat(true)} />
+        // No categories at all — show inline form if showNewCat, else empty state
+        showNewCat ? null : <EmptyCategories onAdd={() => setShowNewCat(true)} />
       ) : searchQuery && filteredProducts.length === 0 ? (
         // Search empty state
         <div
