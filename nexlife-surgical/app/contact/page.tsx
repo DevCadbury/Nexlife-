@@ -56,12 +56,13 @@ function ContactForm() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Partial<ContactFormState>>({});
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const validate = () => {
     const errs: Partial<ContactFormState> = {};
-    if (!form.name.trim()) errs.name = "Name is required";
+    if (!form.name.trim() || form.name.trim().length < 2) errs.name = "Name must be at least 2 characters";
     if (!form.email.trim() || !/\S+@\S+\.\S+/.test(form.email)) errs.email = "Valid email required";
-    if (!form.message.trim()) errs.message = "Please provide a message";
+    if (!form.message.trim() || form.message.trim().length < 10) errs.message = "Message must be at least 10 characters";
     return errs;
   };
 
@@ -70,10 +71,11 @@ function ContactForm() {
     const errs = validate();
     if (Object.keys(errs).length > 0) { setErrors(errs); return; }
     setErrors({});
+    setErrorMsg(null);
     setLoading(true);
     try {
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "";
-      await fetch(`${backendUrl}/api/contact`, {
+      const res = await fetch(`${backendUrl}/api/contact`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -83,11 +85,22 @@ function ContactForm() {
           phone: form.phone,
           subject: form.inquiry,
           message: form.message,
+          // Tag the submission so the CRM labels it as a Surgical-site inquiry
+          source: "surgical",
         }),
       });
-    } catch {}
-    setLoading(false);
-    setSubmitted(true);
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body?.error || "We couldn't send your message. Please try again.");
+      }
+      setSubmitted(true);
+    } catch (err: unknown) {
+      const msg =
+        err instanceof Error ? err.message : "Something went wrong. Please email us directly at Info@nexlifeinternational.com.";
+      setErrorMsg(msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleChange = (field: keyof ContactFormState) => (
@@ -176,6 +189,11 @@ function ContactForm() {
             />
             {errors.message && <p className="text-xs text-red-500 mt-1">{errors.message}</p>}
           </div>
+          {errorMsg && (
+            <div className="rounded border border-red-200 bg-red-50 px-3.5 py-2.5 text-sm text-red-600">
+              {errorMsg}
+            </div>
+          )}
           <button
             type="submit"
             disabled={loading}

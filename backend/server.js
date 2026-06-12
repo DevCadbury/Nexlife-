@@ -564,7 +564,7 @@ app.post("/api/likes/:id", async (req, res) => {
 
 // Enhanced contact endpoint with validation and better error handling
 app.post("/api/contact", async (req, res) => {
-  const { name, email, subject, message, phone, productName, source } = req.body || {};
+  const { name, email, subject, message, phone, productName, source, company } = req.body || {};
 
   // Validation
   if (!name || !email || !message) {
@@ -604,7 +604,7 @@ app.post("/api/contact", async (req, res) => {
         name: String(name).trim().slice(0, 100),
         email: String(email).trim().toLowerCase().slice(0, 200),
         phone: String(phone || "").slice(0, 40),
-        company: "",
+        company: String(company || "").slice(0, 200),
         subject:
           String(subject || "").slice(0, 200) ||
           (isSurgical ? "Surgical Website Inquiry" : "Website Inquiry"),
