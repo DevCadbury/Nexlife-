@@ -6,7 +6,7 @@
 
 **Before**:
 - Logo image (32x32px)
-- "NexLife International" text
+- "Nexlife International" text
 - "Medical & Surgical" subtitle
 
 **After**:

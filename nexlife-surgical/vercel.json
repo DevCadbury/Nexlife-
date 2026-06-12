@@ -6,7 +6,7 @@
   "env": {
     "NEXT_PUBLIC_BACKEND_URL": "https://nexlife-api.vercel.app",
     "NEXT_PUBLIC_SITE_NAME": "surgical",
-    "NEXT_PUBLIC_SITE_URL": "https://nexlifeinternational.in"
+    "NEXT_PUBLIC_SITE_URL": "https://www.nexlifeinternational.in"
   },
   "headers": [
     {

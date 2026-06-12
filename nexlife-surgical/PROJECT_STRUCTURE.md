@@ -1,4 +1,4 @@
-# 📐 NexLife International - Complete Project Structure
+# 📐 Nexlife International - Complete Project Structure
 
 ## 🗂️ Directory Tree
 

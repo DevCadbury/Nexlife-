@@ -109,7 +109,7 @@ export default function CartPage() {
   // ── PDF generation ──────────────────────────────────────────────────────────
 
   function buildAndPrintPDF(downloaderEmail?: string, downloaderName?: string) {
-    const frontendBase = typeof window !== "undefined" ? window.location.origin : "https://nexlifeinternational.in";
+    const frontendBase = typeof window !== "undefined" ? window.location.origin : "https://www.nexlifeinternational.in";
     const logoUrl = `${frontendBase}/images/nexlife-logo.png`;
 
     const customerName = downloaderName || formData.name || "";

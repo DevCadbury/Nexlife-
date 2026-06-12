@@ -209,7 +209,7 @@ Reply directly to this email to respond to ${data.name}.
       ? "Surgical & Medical Supplies"
       : "Pharmaceuticals & Healthcare";
     const siteUrl = isSurgical
-      ? "https://nexlifeinternational.in"
+      ? "https://www.nexlifeinternational.in"
       : "https://www.nexlifeinternational.com";
     const ref = data.referenceId ? String(data.referenceId) : "";
     return {
@@ -365,7 +365,7 @@ This email was sent from the Nexlife International website newsletter signup.
   subscriptionConfirmation: (data) => {
     const navy = "#0D2240";
     const accent = "#0A8A78";
-    const siteUrl = data.siteUrl || "https://nexlifeinternational.in";
+    const siteUrl = data.siteUrl || "https://www.nexlifeinternational.in";
     const unsubscribeUrl = data.unsubscribeUrl || "#";
     return {
       subject: "You're subscribed — Nexlife International",

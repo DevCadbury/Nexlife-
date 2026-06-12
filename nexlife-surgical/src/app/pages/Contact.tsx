@@ -86,7 +86,7 @@ export default function Contact() {
             className="text-[#0D2240] mb-4"
             style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 800, letterSpacing: "-0.03em" }}
           >
-            Contact NexLife International
+            Contact Nexlife International
           </h1>
           <p className="text-slate-500 max-w-xl mx-auto leading-relaxed" style={{ fontSize: "0.95rem" }}>
             Whether you're requesting a bulk quote, need compliance documentation, or have a general inquiry — our team typically responds within 4 business hours.
@@ -143,7 +143,7 @@ export default function Contact() {
               >
                 <img
                   src="https://images.unsplash.com/photo-1551601651-2a8555f1a136?w=700&q=80&fm=webp"
-                  alt="NexLife International headquarters facility"
+                  alt="Nexlife International headquarters facility"
                   className="w-full h-full object-cover opacity-60"
                   width={700}
                   height={300}
@@ -180,7 +180,7 @@ export default function Contact() {
                     Message Received
                   </h2>
                   <p className="text-slate-500 max-w-sm leading-relaxed text-sm">
-                    Thank you for reaching out. A NexLife specialist will respond to your inquiry within 4 business hours.
+                    Thank you for reaching out. A Nexlife specialist will respond to your inquiry within 4 business hours.
                   </p>
                   <button
                     onClick={() => { setSubmitted(false); setForm(initialForm); }}

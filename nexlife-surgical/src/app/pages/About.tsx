@@ -2,7 +2,7 @@ import { Link } from "react-router";
 import { CheckCircle2, ArrowRight, Award, Users, Globe, TrendingUp } from "lucide-react";
 
 const milestones = [
-  { year: "2004", title: "Founded in Houston, TX", desc: "NexLife International established with a mission to supply premium surgical disposables to emerging healthcare markets." },
+  { year: "2004", title: "Founded in Houston, TX", desc: "Nexlife International established with a mission to supply premium surgical disposables to emerging healthcare markets." },
   { year: "2008", title: "ISO 13485 Certification", desc: "Achieved ISO 13485 certification — our first major quality milestone confirming compliance with global medical device standards." },
   { year: "2012", title: "FDA Registration", desc: "Registered with the U.S. FDA as a medical device establishment, opening the path to supply U.S. hospitals and healthcare networks." },
   { year: "2016", title: "Global Expansion", desc: "Expanded distribution to 25 countries across Europe, Asia-Pacific, and the Middle East with dedicated regional account teams." },
@@ -52,7 +52,7 @@ export default function About() {
               Twenty Years of Medical Excellence
             </h1>
             <p className="text-slate-300 leading-relaxed max-w-xl" style={{ fontSize: "1rem" }}>
-              From a single Houston warehouse to a global network serving 40+ countries — NexLife International exists for one reason: to ensure every clinician has the safest, highest-quality disposable and surgical products possible.
+              From a single Houston warehouse to a global network serving 40+ countries — Nexlife International exists for one reason: to ensure every clinician has the safest, highest-quality disposable and surgical products possible.
             </p>
           </div>
         </div>
@@ -73,7 +73,7 @@ export default function About() {
                 Precision Supply for Critical Care
               </h2>
               <p className="text-slate-600 leading-relaxed mb-4" style={{ fontSize: "0.95rem" }}>
-                At NexLife International, we believe that the quality of medical supplies directly impacts patient safety. Our mission is to be the most trusted, efficient, and transparent supplier in the medical disposables and surgical instruments industry.
+                At Nexlife International, we believe that the quality of medical supplies directly impacts patient safety. Our mission is to be the most trusted, efficient, and transparent supplier in the medical disposables and surgical instruments industry.
               </p>
               <p className="text-slate-600 leading-relaxed mb-6" style={{ fontSize: "0.95rem" }}>
                 We achieve this by rigorously qualifying every manufacturing partner, maintaining our own quality management system, and building long-term relationships with the hospitals and distributors who rely on us.
@@ -97,7 +97,7 @@ export default function About() {
               <div className="rounded-xl overflow-hidden" style={{ aspectRatio: "4/3" }}>
                 <img
                   src="https://images.unsplash.com/photo-1768498993096-6db9950eeb1b?w=900&q=80&fm=webp"
-                  alt="NexLife supply facility"
+                  alt="Nexlife supply facility"
                   className="w-full h-full object-cover"
                   width={900}
                   height={675}
@@ -211,7 +211,7 @@ export default function About() {
                 Built on a Foundation of Certification
               </h2>
               <p className="text-slate-600 leading-relaxed mb-8" style={{ fontSize: "0.95rem" }}>
-                Our compliance framework meets the strictest international standards, giving procurement teams confidence that every NexLife product is fully validated and audit-ready.
+                Our compliance framework meets the strictest international standards, giving procurement teams confidence that every Nexlife product is fully validated and audit-ready.
               </p>
               <Link
                 to="/contact"
@@ -253,9 +253,9 @@ export default function About() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
-              { src: "https://images.unsplash.com/photo-1551601651-2a8555f1a136?w=700&q=80&fm=webp", alt: "NexLife Quality Team" },
-              { src: "https://images.unsplash.com/photo-1579684453423-f84349ef60b0?w=700&q=80&fm=webp", alt: "NexLife Lab Facility" },
-              { src: "https://images.unsplash.com/photo-1766297247072-93fd815afef3?w=700&q=80&fm=webp", alt: "NexLife Distribution Center" },
+              { src: "https://images.unsplash.com/photo-1551601651-2a8555f1a136?w=700&q=80&fm=webp", alt: "Nexlife Quality Team" },
+              { src: "https://images.unsplash.com/photo-1579684453423-f84349ef60b0?w=700&q=80&fm=webp", alt: "Nexlife Lab Facility" },
+              { src: "https://images.unsplash.com/photo-1766297247072-93fd815afef3?w=700&q=80&fm=webp", alt: "Nexlife Distribution Center" },
             ].map(({ src, alt }) => (
               <div key={alt} className="rounded-xl overflow-hidden" style={{ aspectRatio: "4/3" }}>
                 <img

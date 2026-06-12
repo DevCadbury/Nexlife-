@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { getProducts, getCategories } from "@/lib/api";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://nexlifeinternational.in";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.nexlifeinternational.in";
 
 export const revalidate = 3600; // regenerate at most once an hour
 

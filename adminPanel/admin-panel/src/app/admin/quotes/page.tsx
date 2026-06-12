@@ -115,7 +115,7 @@ function printQuote(quote: Quote) {
 
   const cartRows = cartItems.map((item) => {
     const nameSlug = item.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-    const productUrl = `https://nexlifeinternational.in/product/${nameSlug}`;
+    const productUrl = `https://www.nexlifeinternational.in/product/${nameSlug}`;
     return `
     <tr>
       <td style="padding:10px 14px;border-bottom:1px solid #E2E8F0;font-size:12px">
@@ -301,7 +301,7 @@ function QuoteModal({
                         <tbody>
                           {parseCartItems(quote.message).map((item, i) => {
                             const nameSlug = item.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-                            const productUrl = `https://nexlifeinternational.in/product/${nameSlug}`;
+                            const productUrl = `https://www.nexlifeinternational.in/product/${nameSlug}`;
                             const imgUrl = productImageMap.get(item.name.toLowerCase()) ?? "";
                             return (
                               <tr key={i} style={{ borderBottom: "1px solid var(--border)" }}>

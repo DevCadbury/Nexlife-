@@ -35,7 +35,7 @@ export function Footer() {
                   N
                 </div>
                 <span className="text-white" style={{ fontWeight: 700, fontSize: "15px" }}>
-                  NexLife International
+                  Nexlife International
                 </span>
               </div>
               <p className="text-slate-400 text-sm leading-relaxed mb-6">
@@ -169,7 +169,7 @@ export function Footer() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-xs text-slate-500">
-            © {new Date().getFullYear()} NexLife International, Inc.® All rights reserved.
+            © {new Date().getFullYear()} Nexlife International, Inc.® All rights reserved.
           </p>
           <div className="flex items-center gap-4 text-xs text-slate-500">
             <span className="flex items-center gap-1.5">

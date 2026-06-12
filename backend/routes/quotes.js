@@ -54,7 +54,7 @@ function parseCartItems(message) {
 
 function cartItemsTable(items, frontendUrl) {
   if (!items.length) return '';
-  const base = frontendUrl || 'https://nexlifeinternational.in';
+  const base = frontendUrl || 'https://www.nexlifeinternational.in';
   const rows = items.map((item, i) => {
     const nameSlug = String(item.name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
     const productUrl = `${base}/product/${nameSlug}`;
@@ -97,9 +97,9 @@ function customerConfirmationEmail(data) {
     source,
   } = data;
 
-  const frontendUrl = process.env.FRONTEND_URL || 'https://nexlifeinternational.in';
+  const frontendUrl = process.env.FRONTEND_URL || 'https://www.nexlifeinternational.in';
   // Cart quotes originate from the surgical site — use its domain for product links
-  const surgicalUrl = process.env.SURGICAL_URL || 'https://nexlifeinternational.in';
+  const surgicalUrl = process.env.SURGICAL_URL || 'https://www.nexlifeinternational.in';
   const isCart = source === 'surgical-cart';
   const cartItems = isCart ? parseCartItems(message) : [];
 
@@ -540,7 +540,7 @@ router.post("/track-download", async (req, res) => {
       : "";
 
     const greeting = downloaderName ? `Dear ${downloaderName},` : "Hello,";
-    const frontendUrl = process.env.SURGICAL_URL || process.env.FRONTEND_URL || "https://nexlifeinternational.in";
+    const frontendUrl = process.env.SURGICAL_URL || process.env.FRONTEND_URL || "https://www.nexlifeinternational.in";
 
     const confirmHtml = `<!DOCTYPE html>
 <html lang="en">

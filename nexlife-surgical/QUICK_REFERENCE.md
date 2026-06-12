@@ -1,4 +1,4 @@
-# ⚡ Quick Reference Card - NexLife Next.js
+# ⚡ Quick Reference Card - Nexlife Next.js
 
 ## 🚀 Getting Started (Copy & Paste)
 

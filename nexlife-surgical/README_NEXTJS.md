@@ -1,6 +1,6 @@
-# 🏥 NexLife International - Next.js Version
+# 🏥 Nexlife International - Next.js Version
 
-Welcome to the Next.js version of your NexLife International website! Your entire project has been successfully converted from React + Vite to Next.js 15 while maintaining **100% identical UI/UX**.
+Welcome to the Next.js version of your Nexlife International website! Your entire project has been successfully converted from React + Vite to Next.js 15 while maintaining **100% identical UI/UX**.
 
 ---
 
@@ -57,7 +57,7 @@ lib/data/
 
 public/
 ├── images/
-│   ├── nexlife-logo.png   ← Your NexLife logo
+│   ├── nexlife-logo.png   ← Your Nexlife logo
 │   └── logo.png           ← Alternative logo
 ├── ICONS/                  ← All icons
 ├── PRODUCTS/               ← Product images
@@ -205,7 +205,7 @@ import Image from 'next/image'
 
 <Image 
   src="/images/nexlife-logo.png" 
-  alt="NexLife" 
+  alt="Nexlife" 
   width={200} 
   height={50}
 />
@@ -213,7 +213,7 @@ import Image from 'next/image'
 // Or use the alternative logo
 <Image 
   src="/images/logo.png" 
-  alt="NexLife" 
+  alt="Nexlife" 
   width={200} 
   height={50}
 />
@@ -338,7 +338,7 @@ Now that you have Next.js set up, you can:
 
 ## 🎊 Congratulations!
 
-Your NexLife International website is now powered by Next.js 15! 🚀
+Your Nexlife International website is now powered by Next.js 15! 🚀
 
 The original React + Vite version is still in the `src/` folder (untouched), so you can always refer back to it.
 

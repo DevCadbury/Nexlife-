@@ -91,7 +91,7 @@ export function ProductCarousel({ products }: ProductCarouselProps) {
                     <div className="w-full h-full flex items-center justify-center bg-[#F0F2F5]">
                       <img
                         src="/images/nexlife-logo.png"
-                        alt="NexLife International"
+                        alt="Nexlife International"
                         style={{ height: "40px", width: "auto", opacity: 0.22, filter: "grayscale(1)" }}
                       />
                     </div>

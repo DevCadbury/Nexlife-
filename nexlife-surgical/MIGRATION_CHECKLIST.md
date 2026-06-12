@@ -35,7 +35,7 @@
 ## ✅ Assets
 
 - [x] Logo images copied to `public/images/`
-- [x] NexLife logo: `public/images/nexlife-logo.png`
+- [x] Nexlife logo: `public/images/nexlife-logo.png`
 - [x] Alternative logo: `public/images/logo.png`
 
 ## 📋 To-Do: Setup Instructions

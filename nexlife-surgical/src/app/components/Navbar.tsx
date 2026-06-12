@@ -84,7 +84,7 @@ export function Navbar() {
             </div>
             <div className="flex flex-col leading-tight">
               <span className="text-[#0D2240] tracking-tight" style={{ fontSize: "15px", fontWeight: 700, letterSpacing: "-0.02em" }}>
-                NexLife International
+                Nexlife International
               </span>
               <span className="text-[10px] text-slate-500 tracking-widest uppercase" style={{ letterSpacing: "0.1em" }}>
                 Medical &amp; Surgical
@@ -197,7 +197,7 @@ export function Navbar() {
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0]">
           <span className="text-[#0D2240]" style={{ fontWeight: 700, fontSize: "15px" }}>
-            NexLife International
+            Nexlife International
           </span>
           <button
             onClick={() => setDrawerOpen(false)}

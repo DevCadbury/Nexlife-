@@ -1,6 +1,6 @@
-# Vercel Deployment Guide for NexLife International
+# Vercel Deployment Guide for Nexlife International
 
-This guide will help you deploy the NexLife International website to Vercel.
+This guide will help you deploy the Nexlife International website to Vercel.
 
 ## Prerequisites
 

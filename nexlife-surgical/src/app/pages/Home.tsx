@@ -422,13 +422,13 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <p className="text-xs text-[#0A8A78] mb-2" style={{ fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}>
-              Why NexLife
+              Why Nexlife
             </p>
             <h2 className="text-[#0D2240]" style={{ fontSize: "clamp(1.5rem, 3vw, 2.25rem)", fontWeight: 800, letterSpacing: "-0.03em" }}>
               The Standard for Medical Excellence
             </h2>
             <p className="text-slate-500 mt-3 max-w-xl mx-auto leading-relaxed" style={{ fontSize: "0.95rem" }}>
-              Since 2004, NexLife International has been the procurement partner of choice for hospitals, distributors, and healthcare systems worldwide.
+              Since 2004, Nexlife International has been the procurement partner of choice for hospitals, distributors, and healthcare systems worldwide.
             </p>
           </div>
 
@@ -500,7 +500,7 @@ export default function Home() {
               onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.08)")}
               onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
             >
-              About NexLife
+              About Nexlife
             </Link>
           </div>
         </div>

@@ -10,13 +10,13 @@ import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://nexlifeinternational.in";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.nexlifeinternational.in";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "NexLife International — Medical & Surgical Supplies",
-    template: "%s | NexLife International",
+    default: "Nexlife International — Medical & Surgical Supplies",
+    template: "%s | Nexlife International",
   },
   description:
     "FDA-registered, ISO 13485 certified medical disposables and surgical instruments — supplied to hospitals and distributors across 40+ countries.",
@@ -31,11 +31,11 @@ export const metadata: Metadata = {
     "ISO 13485",
     "FDA registered",
     "medical exporter India",
-    "NexLife International",
+    "Nexlife International",
   ],
-  authors: [{ name: "NexLife International" }],
-  creator: "NexLife International",
-  publisher: "NexLife International",
+  authors: [{ name: "Nexlife International" }],
+  creator: "Nexlife International",
+  publisher: "Nexlife International",
   alternates: {
     canonical: "/",
   },
@@ -43,8 +43,8 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: SITE_URL,
-    siteName: "NexLife International",
-    title: "NexLife International — Medical & Surgical Supplies",
+    siteName: "Nexlife International",
+    title: "Nexlife International — Medical & Surgical Supplies",
     description:
       "FDA-registered, ISO 13485 certified medical disposables and surgical instruments delivered worldwide.",
     images: [
@@ -52,13 +52,13 @@ export const metadata: Metadata = {
         url: "/images/nexlife-logo.png",
         width: 1200,
         height: 630,
-        alt: "NexLife International",
+        alt: "Nexlife International",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "NexLife International — Medical & Surgical Supplies",
+    title: "Nexlife International — Medical & Surgical Supplies",
     description:
       "FDA-registered, ISO 13485 certified medical disposables and surgical instruments delivered worldwide.",
     images: ["/images/nexlife-logo.png"],
@@ -84,7 +84,7 @@ export const metadata: Metadata = {
 const organizationJsonLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  name: "NexLife International",
+  name: "Nexlife International",
   url: SITE_URL,
   logo: `${SITE_URL}/images/nexlife-logo.png`,
   description:

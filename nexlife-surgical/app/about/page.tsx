@@ -104,7 +104,7 @@ export default function About() {
               <div className="rounded-xl overflow-hidden" style={{ aspectRatio: "4/3" }}>
                 <img
                   src="https://images.unsplash.com/photo-1768498993096-6db9950eeb1b?w=900&q=80&fm=webp"
-                  alt="NexLife supply facility"
+                  alt="Nexlife supply facility"
                   className="w-full h-full object-cover"
                   width={900}
                   height={675}
@@ -218,7 +218,7 @@ export default function About() {
                 Built on a Foundation of Certification
               </h2>
               <p className="text-slate-600 leading-relaxed mb-8" style={{ fontSize: "0.95rem" }}>
-                Our compliance framework meets the strictest international standards, giving procurement teams confidence that every NexLife product is fully validated and audit-ready.
+                Our compliance framework meets the strictest international standards, giving procurement teams confidence that every Nexlife product is fully validated and audit-ready.
               </p>
               <Link
                 href="/contact"

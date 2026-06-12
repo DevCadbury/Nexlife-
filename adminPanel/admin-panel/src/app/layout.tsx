@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NexLife CRM",
-  description: "NexLife International Customer Relationship Management System",
+  title: "Nexlife CRM",
+  description: "Nexlife International Customer Relationship Management System",
   icons: {
     icon: [
       { url: "/nexlife_logo.png" },

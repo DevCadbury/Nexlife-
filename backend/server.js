@@ -726,7 +726,7 @@ app.post("/api/newsletter", async (req, res) => {
   const src = String(source || "").toLowerCase() === "surgical" ? "surgical" : "general";
   const siteUrl =
     src === "surgical"
-      ? "https://nexlifeinternational.in"
+      ? "https://www.nexlifeinternational.in"
       : "https://www.nexlifeinternational.com";
 
   try {
@@ -813,7 +813,7 @@ app.get("/api/newsletter/unsubscribe", async (req, res) => {
     <div style="padding:32px 28px;text-align:center;">
       <h1 style="font-size:20px;color:#0D2240;margin:0 0 10px;">${title}</h1>
       <p style="color:#475569;font-size:15px;line-height:1.6;margin:0 0 22px;">${message}</p>
-      <a href="https://nexlifeinternational.in" style="display:inline-block;background:#0A8A78;color:#fff;padding:11px 26px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">Back to Website</a>
+      <a href="https://www.nexlifeinternational.in" style="display:inline-block;background:#0A8A78;color:#fff;padding:11px 26px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">Back to Website</a>
     </div>
   </div>
 </body></html>`;

@@ -1,4 +1,4 @@
-# 🎉 NexLife International - Next.js Conversion Complete
+# 🎉 Nexlife International - Next.js Conversion Complete
 
 ## Overview
 
@@ -430,7 +430,7 @@ npm run dev -- -p 3001
 
 ## 🎊 Conclusion
 
-Your NexLife International website is now powered by Next.js 15! 
+Your Nexlife International website is now powered by Next.js 15! 
 
 ### What's Preserved:
 ✅ 100% identical UI/UX  

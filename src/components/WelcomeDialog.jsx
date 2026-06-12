@@ -103,7 +103,7 @@ export default function WelcomeDialog() {
             </p>
 
             <a
-              href="https://nexlifeinternational.in/"
+              href="https://www.nexlifeinternational.in/"
               target="_blank"
               rel="noopener noreferrer"
               style={{ display: "flex", alignItems: "center", gap: "12px", padding: "13px 15px", borderRadius: "11px", border: "1.5px solid #E5E7EB", background: "#F9FAFB", textDecoration: "none" }}

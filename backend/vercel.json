@@ -37,8 +37,8 @@
     "IMAP_SECURE": "true",
     "IMAP_USER": "info@nexlifeinternational.com",
     "IMAP_PASS": "Sid_.@Nexlife3A60",
-    "FRONTEND_URL": "https://nexlifeinternational.in",
-    "SURGICAL_URL": "https://nexlifeinternational.in",
+    "FRONTEND_URL": "https://www.nexlifeinternational.in",
+    "SURGICAL_URL": "https://www.nexlifeinternational.in",
     "CRM_URL": "https://nexlife-admin.vercel.app"
   }
 }

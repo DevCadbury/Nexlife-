@@ -23,7 +23,7 @@ export const products: Product[] = [
     price: "$48.00",
     priceUnit: "per box of 50 pairs",
     shortDescription: "Powder-free sterile latex surgical gloves with anatomic fit and high tactile sensitivity.",
-    description: "NexLife Sterile Surgical Gloves are manufactured to the highest medical standards, providing exceptional barrier protection and tactile sensitivity for surgical procedures. Each glove undergoes 100% electrical testing and water-leak testing. Individually folded and double-packaged for easy, aseptic donning.",
+    description: "Nexlife Sterile Surgical Gloves are manufactured to the highest medical standards, providing exceptional barrier protection and tactile sensitivity for surgical procedures. Each glove undergoes 100% electrical testing and water-leak testing. Individually folded and double-packaged for easy, aseptic donning.",
     images: [
       "https://images.unsplash.com/photo-1584820927498-cfe5211fd8bf?w=800&q=80&fm=webp",
       "https://images.unsplash.com/photo-1599412227383-b7d4751c8765?w=800&q=80&fm=webp",
@@ -78,7 +78,7 @@ export const products: Product[] = [
     price: "$12.50",
     priceUnit: "per box of 50",
     shortDescription: "ASTM Level 2 fluid-resistant surgical masks with ear-loop or tie-on options.",
-    description: "NexLife 3-Ply Surgical Masks provide reliable bacterial filtration (BFE ≥98%) and fluid resistance for surgical environments. The three-layer construction — melt-blown polypropylene filter flanked by non-woven layers — delivers comfort during extended wear without compromising protection.",
+    description: "Nexlife 3-Ply Surgical Masks provide reliable bacterial filtration (BFE ≥98%) and fluid resistance for surgical environments. The three-layer construction — melt-blown polypropylene filter flanked by non-woven layers — delivers comfort during extended wear without compromising protection.",
     images: [
       "https://images.unsplash.com/photo-1628235176517-71013205a2de?w=800&q=80&fm=webp",
       "https://images.unsplash.com/photo-1504813184591-01572f98c85f?w=800&q=80&fm=webp",
@@ -104,7 +104,7 @@ export const products: Product[] = [
     price: "$38.00",
     priceUnit: "per box of 20",
     shortDescription: "NIOSH-approved N95 respirators with adjustable nose wire and foam nose cushion.",
-    description: "Engineered for maximum respiratory protection, NexLife N95 Respirators filter ≥95% of non-oil-based airborne particles, including virus-carrying aerosols. The cup-shape design provides ample breathing room while the integrated exhalation valve reduces heat and moisture build-up during prolonged use.",
+    description: "Engineered for maximum respiratory protection, Nexlife N95 Respirators filter ≥95% of non-oil-based airborne particles, including virus-carrying aerosols. The cup-shape design provides ample breathing room while the integrated exhalation valve reduces heat and moisture build-up during prolonged use.",
     images: [
       "https://images.unsplash.com/photo-1628235176517-71013205a2de?w=800&q=80&fm=webp",
     ],
@@ -130,7 +130,7 @@ export const products: Product[] = [
     price: "$18.00",
     priceUnit: "per box of 100",
     shortDescription: "Luer-lock sterile disposable syringes with smooth plunger action and clear barrel.",
-    description: "NexLife Disposable Syringes feature crystal-clear barrels for precise volume reading, smooth silicone-lubricated plunger action, and a secure luer-lock tip. Individually blister-packed to maintain sterility. Available in volumes from 1ml to 60ml to suit all clinical applications.",
+    description: "Nexlife Disposable Syringes feature crystal-clear barrels for precise volume reading, smooth silicone-lubricated plunger action, and a secure luer-lock tip. Individually blister-packed to maintain sterility. Available in volumes from 1ml to 60ml to suit all clinical applications.",
     images: [
       "https://images.unsplash.com/photo-1766297247072-93fd815afef3?w=800&q=80&fm=webp",
       "https://images.unsplash.com/photo-1768498993096-6db9950eeb1b?w=800&q=80&fm=webp",
@@ -156,7 +156,7 @@ export const products: Product[] = [
     price: "$95.00",
     priceUnit: "per unit",
     shortDescription: "Autoclavable German-grade stainless steel Mayo scissors for general surgery.",
-    description: "Precision-crafted from 17-4 German stainless steel, NexLife Mayo Scissors deliver sharp, precise cuts across a wide range of tissues. Autoclavable up to 134°C. The ring-handle design reduces operator fatigue during extended procedures. Available in straight and curved blade configurations.",
+    description: "Precision-crafted from 17-4 German stainless steel, Nexlife Mayo Scissors deliver sharp, precise cuts across a wide range of tissues. Autoclavable up to 134°C. The ring-handle design reduces operator fatigue during extended procedures. Available in straight and curved blade configurations.",
     images: [
       "https://images.unsplash.com/photo-1685997179880-6449203a053e?w=800&q=80&fm=webp",
       "https://images.unsplash.com/photo-1514416309827-bfb0cf433a2d?w=800&q=80&fm=webp",
@@ -183,7 +183,7 @@ export const products: Product[] = [
     price: "$32.00",
     priceUnit: "per box of 100",
     shortDescription: "Non-adherent sterile wound dressings that minimize trauma at dressing change.",
-    description: "NexLife Non-Adherent Wound Dressings are designed for use on superficial wounds, burns, and skin grafts. The low-adherent facing allows for easy removal with minimal pain and no disruption to the healing tissue. Absorbent core wicks exudate away from the wound bed.",
+    description: "Nexlife Non-Adherent Wound Dressings are designed for use on superficial wounds, burns, and skin grafts. The low-adherent facing allows for easy removal with minimal pain and no disruption to the healing tissue. Absorbent core wicks exudate away from the wound bed.",
     images: [
       "https://images.unsplash.com/photo-1768498993096-6db9950eeb1b?w=800&q=80&fm=webp",
     ],
@@ -206,7 +206,7 @@ export const products: Product[] = [
     price: "$55.00",
     priceUnit: "per box of 10",
     shortDescription: "AAMI Level 2 fluid-resistant isolation gowns with knit cuffs and tie-back closure.",
-    description: "Manufactured from SMS non-woven fabric, NexLife Isolation Gowns provide dependable barrier protection against low-to-moderate fluid hazards. The reinforced critical zones (chest and forearms) meet AAMI Level 2 standards. Knit cuffs and adjustable tie-back closure ensure a secure, comfortable fit.",
+    description: "Manufactured from SMS non-woven fabric, Nexlife Isolation Gowns provide dependable barrier protection against low-to-moderate fluid hazards. The reinforced critical zones (chest and forearms) meet AAMI Level 2 standards. Knit cuffs and adjustable tie-back closure ensure a secure, comfortable fit.",
     images: [
       "https://images.unsplash.com/photo-1551601651-2a8555f1a136?w=800&q=80&fm=webp",
       "https://images.unsplash.com/photo-1768498993096-6db9950eeb1b?w=800&q=80&fm=webp",

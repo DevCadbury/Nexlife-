@@ -1,4 +1,4 @@
-# NexLife International - Next.js Conversion
+# Nexlife International - Next.js Conversion
 
 This project has been successfully converted from React + Vite to Next.js 15 with the App Router, maintaining the exact same UI/UX.
 
@@ -70,7 +70,7 @@ nexlife-sur/
 │       └── products.ts          # Products data
 ├── public/
 │   └── images/                  # Static images
-│       ├── nexlife-logo.png     # NexLife logo
+│       ├── nexlife-logo.png     # Nexlife logo
 │       └── logo.png             # Alternative logo
 ├── next.config.js               # Next.js configuration
 ├── package.nextjs.json          # Next.js dependencies

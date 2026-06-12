@@ -245,7 +245,7 @@ export default function ProductPage() {
             {/* Main image */}
             <div
               className="relative group rounded-lg overflow-hidden border border-[#E2E8F0] bg-white mb-3"
-              style={{ aspectRatio: "4/3", cursor: mainImageUrl ? "zoom-in" : "default" }}
+              style={{ aspectRatio: "4/3", cursor: mainImageUrl ? "zoom-in" : "default", touchAction: zoom.active ? "none" : "pan-y" }}
               onMouseMove={(e) => {
                 if (!mainImageUrl) return;
                 const rect = e.currentTarget.getBoundingClientRect();
@@ -254,6 +254,23 @@ export default function ProductPage() {
                 setZoom({ active: true, x, y });
               }}
               onMouseLeave={() => setZoom((z) => ({ ...z, active: false }))}
+              onTouchStart={(e) => {
+                if (!mainImageUrl) return;
+                const t = e.touches[0];
+                const rect = e.currentTarget.getBoundingClientRect();
+                const x = ((t.clientX - rect.left) / rect.width) * 100;
+                const y = ((t.clientY - rect.top) / rect.height) * 100;
+                setZoom({ active: true, x, y });
+              }}
+              onTouchMove={(e) => {
+                if (!mainImageUrl) return;
+                const t = e.touches[0];
+                const rect = e.currentTarget.getBoundingClientRect();
+                const x = Math.min(100, Math.max(0, ((t.clientX - rect.left) / rect.width) * 100));
+                const y = Math.min(100, Math.max(0, ((t.clientY - rect.top) / rect.height) * 100));
+                setZoom({ active: true, x, y });
+              }}
+              onTouchEnd={() => setZoom((z) => ({ ...z, active: false }))}
             >
               {mainImageUrl ? (
                 <img
