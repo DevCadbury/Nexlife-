@@ -470,11 +470,11 @@ export default function ProductPage() {
             >
               Technical Specifications
             </h2>
-            <div className="rounded-lg border border-[#E2E8F0] overflow-hidden lg:max-w-3xl">
+            <div className="rounded-lg border border-[#E2E8F0] overflow-hidden w-full">
               {visibleFields.map((field, i) => (
                 <div
                   key={`${field.key}-${i}`}
-                  className="grid grid-cols-1 sm:grid-cols-[minmax(140px,220px)_1fr]"
+                  className="grid grid-cols-1 sm:grid-cols-[minmax(160px,260px)_1fr]"
                   style={{
                     borderBottom: i < visibleFields.length - 1 ? "1px solid #E2E8F0" : "none",
                   }}
