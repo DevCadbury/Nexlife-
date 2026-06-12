@@ -95,6 +95,38 @@ function makeImageUid(): string {
   return `img-${++imageUidCounter}`;
 }
 
+// Auto-growing textarea — lets long field values stay fully visible by expanding
+// vertically with the content instead of clipping inside a one-line input.
+function AutoGrowTextarea({
+  value,
+  onChange,
+  placeholder,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+}) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (el) {
+      el.style.height = "auto";
+      el.style.height = `${el.scrollHeight}px`;
+    }
+  }, [value]);
+  return (
+    <textarea
+      ref={ref}
+      className="crm-input"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      rows={1}
+      style={{ flex: 1, resize: "none", overflow: "hidden", minHeight: "38px", lineHeight: 1.5 }}
+    />
+  );
+}
+
 // Small circular control button shown over each image thumbnail in the manager.
 function imgCtrlBtnStyle(disabled: boolean): React.CSSProperties {
   return {
@@ -825,7 +857,7 @@ function ProductModal({
                     key={f._uid}
                     style={{
                       display: "flex",
-                      alignItems: "center",
+                      alignItems: "flex-start",
                       gap: "6px",
                       opacity: f.hidden ? 0.65 : 1,
                     }}
@@ -838,12 +870,10 @@ function ProductModal({
                       placeholder="Key"
                       style={{ flex: 1 }}
                     />
-                    <input
-                      className="crm-input"
+                    <AutoGrowTextarea
                       value={f.value}
-                      onChange={(e) => updateField(f._uid, "value", e.target.value)}
-                      placeholder="Value"
-                      style={{ flex: 1 }}
+                      onChange={(v) => updateField(f._uid, "value", v)}
+                      placeholder="Value (supports long text)"
                     />
                     <button
                       type="button"

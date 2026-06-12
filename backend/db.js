@@ -212,6 +212,8 @@ async function ensureIndexes(db) {
       { key: { isStarred: 1, visible: 1, sequence: 1 } },
       { key: { isFeatured: 1, visible: 1, sequence: 1 } },
       { key: { siteContext: 1, category: 1, visible: 1, sequence: 1 } },
+      { key: { createdAt: -1 } },
+      { key: { siteContext: 1, visible: 1, createdAt: -1 } },
     ]);
   // Unified categories collection indexes
   await db

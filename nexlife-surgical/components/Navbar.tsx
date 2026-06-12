@@ -8,6 +8,8 @@ import { Menu, X, ChevronDown, Phone, Mail, ShoppingCart, Star, TrendingUp, Cloc
 import { useCart } from "@/lib/context/CartContext";
 import { useCategories } from "@/lib/hooks/useCategories";
 import { useFeaturedProducts } from "@/lib/hooks/useFeaturedProducts";
+import { useStarredProducts } from "@/lib/hooks/useStarredProducts";
+import { useRecentProducts } from "@/lib/hooks/useRecentProducts";
 import type { Category } from "@/lib/types/product";
 
 // The frontend is always the surgical site — no site-switching needed here.
@@ -35,8 +37,14 @@ export function Navbar() {
 
   const { data: categoriesData } = useCategories(SITE);
   const { data: featuredData } = useFeaturedProducts(SITE);
+  const { data: starredData } = useStarredProducts(SITE);
+  const { data: recentData } = useRecentProducts(SITE, 4);
   const apiCategories: Category[] = categoriesData?.items ?? [];
-  const apiPopularProducts = featuredData?.items?.slice(0, 3) ?? [];
+  // "Popular" column = starred products (fall back to featured if none are starred)
+  const apiPopularProducts =
+    (starredData?.items?.length ? starredData.items : featuredData?.items ?? []).slice(0, 3);
+  // "Recent" column = most recently added products
+  const apiRecentProducts = (recentData?.items ?? []).slice(0, 3);
 
   useEffect(() => {
     setMounted(true);
@@ -236,8 +244,8 @@ export function Navbar() {
                               </h3>
                             </div>
                             <div className="space-y-2">
-                              {apiPopularProducts.length > 0 ? (
-                                apiPopularProducts.slice(1, 4).map((product) => {
+                              {apiRecentProducts.length > 0 ? (
+                                apiRecentProducts.map((product) => {
                                   const pName = product.name.replace(/^[a-f0-9]{24}/i, "").trim() || product.name;
                                   const pCat = /^[a-f0-9]{24}$/i.test(product.category) ? "" : product.category;
                                   return (

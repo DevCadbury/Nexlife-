@@ -213,6 +213,40 @@ router.get('/starred', async (req, res) => {
   }
 });
 
+// ─── GET /api/v2/products/recent  (public) ────────────────────────────────────
+router.get('/recent', async (req, res) => {
+  try {
+    const { site } = req.query;
+    const limit = Math.min(20, Math.max(1, parseInt(req.query.limit, 10) || 8));
+
+    const siteFilter = buildSiteFilter(site);
+    if (!siteFilter) {
+      return res.status(400).json({ error: 'Invalid site parameter.' });
+    }
+
+    const { products, categories } = await getCollections();
+    const hiddenCategories = await getHiddenCategoryNames(categories);
+
+    const filter = { visible: true, ...siteFilter };
+    // Newest first; _id is a good createdAt fallback for legacy docs without createdAt
+    const rawItems = await products
+      .find(filter)
+      .sort({ createdAt: -1, _id: -1 })
+      .limit(limit + 10)
+      .toArray();
+
+    const items = rawItems
+      .filter((p) => !hiddenCategories.has(p.category))
+      .map(stripPublicFields)
+      .slice(0, limit);
+
+    return res.json({ total: items.length, items });
+  } catch (err) {
+    console.error('[products] GET /recent', err);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
 // ─── GET /api/v2/products/admin/all  (admin) ──────────────────────────────────
 router.get(
   '/admin/all',

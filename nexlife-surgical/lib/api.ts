@@ -58,6 +58,13 @@ export async function getStarredProducts(site?: string): Promise<ProductsRespons
   return apiFetch<ProductsResponse>(`/api/v2/products/starred${qs}`);
 }
 
+export async function getRecentProducts(site?: string, limit = 8): Promise<ProductsResponse> {
+  const query = new URLSearchParams();
+  if (site) query.set('site', site);
+  query.set('limit', String(limit));
+  return apiFetch<ProductsResponse>(`/api/v2/products/recent?${query.toString()}`);
+}
+
 export async function getCategories(site?: string): Promise<CategoriesResponse> {
   const qs = site ? `?site=${site}` : '';
   return apiFetch<CategoriesResponse>(`/api/v2/categories${qs}`);

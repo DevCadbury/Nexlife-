@@ -224,9 +224,16 @@ export default function Products() {
                 {[1, 2, 3, 4, 5, 6].map((i) => (
                   <div
                     key={i}
-                    className="rounded-lg border border-[#E2E8F0] bg-[#F7F8FA] animate-pulse"
-                    style={{ height: "280px" }}
-                  />
+                    className="rounded-lg border border-[#E2E8F0] overflow-hidden bg-white"
+                  >
+                    <div className="bg-slate-200 animate-pulse" style={{ height: "200px" }} />
+                    <div className="p-4 space-y-3">
+                      <div className="h-3 w-20 bg-slate-200 rounded animate-pulse" />
+                      <div className="h-4 w-3/4 bg-slate-200 rounded animate-pulse" />
+                      <div className="h-4 w-1/2 bg-slate-200 rounded animate-pulse" />
+                      <div className="h-9 w-full bg-slate-100 rounded animate-pulse mt-2" />
+                    </div>
+                  </div>
                 ))}
               </div>
             ) : productsError ? (

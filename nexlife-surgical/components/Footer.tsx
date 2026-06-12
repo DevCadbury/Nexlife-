@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Phone, Mail, MapPin, Linkedin, Twitter, Facebook, ArrowRight, Send } from "lucide-react";
 import { useState } from "react";
+import { useCategories } from "@/lib/hooks/useCategories";
 
 const quickLinks = [
   { label: "Home", href: "/" },
@@ -12,7 +13,8 @@ const quickLinks = [
   { label: "Quality Certifications", href: "/about#certifications" },
 ];
 
-const productCategories = [
+// Fallback categories shown only if the CRM has none configured yet.
+const fallbackCategories = [
   { label: "Surgical Instruments", href: "/products?category=surgical-instruments" },
   { label: "Disposable Gloves", href: "/products?category=disposable-gloves" },
   { label: "Face Masks & Respirators", href: "/products?category=face-masks-respirators" },
@@ -40,6 +42,13 @@ function SocialIcon({ Icon, label, href }: { Icon: any; label: string; href: str
 
 export function Footer() {
   const [email, setEmail] = useState("");
+  const { data: categoriesData } = useCategories("surgical");
+
+  // Build the Products column from live CRM categories (visible, non-ObjectId names).
+  const dynamicCategories = (categoriesData?.items ?? [])
+    .filter((c) => c.visible && !/^[a-f0-9]{24}$/i.test(c.name))
+    .map((c) => ({ label: c.name, href: `/products?category=${encodeURIComponent(c.name)}` }));
+  const productCategories = dynamicCategories.length ? dynamicCategories : fallbackCategories;
 
   const handleNewsletterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
