@@ -260,11 +260,11 @@ export default function Products() {
                     className="group relative flex flex-col bg-white rounded-lg border border-[#E2E8F0] overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-[#0A8A78]/20 active:scale-[0.98] touch-manipulation"
                     style={{ boxShadow: "0 1px 4px rgba(13,34,64,0.06)" }}
                   >
-                    <div className="relative overflow-hidden bg-[#F7F8FA]" style={{ height: "200px" }}>
+                    <div className="relative overflow-hidden bg-white" style={{ height: "200px" }}>
                       <img
                         src={product.images[0]?.secure_url ?? ""}
                         alt={product.name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        className="w-full h-full object-contain p-3 transition-transform duration-500 group-hover:scale-105"
                         width={400}
                         height={300}
                         loading="lazy"
@@ -306,11 +306,11 @@ export default function Products() {
                     className="group relative flex flex-col sm:flex-row bg-white rounded-lg border border-[#E2E8F0] overflow-hidden transition-all duration-300 hover:shadow-xl hover:border-[#0A8A78]/20 active:scale-[0.99] touch-manipulation"
                     style={{ boxShadow: "0 1px 4px rgba(13,34,64,0.06)" }}
                   >
-                    <div className="relative overflow-hidden bg-[#F7F8FA] sm:w-64 flex-shrink-0" style={{ height: "200px" }}>
+                    <div className="relative overflow-hidden bg-white sm:w-64 flex-shrink-0" style={{ height: "200px" }}>
                       <img
                         src={product.images[0]?.secure_url ?? ""}
                         alt={product.name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        className="w-full h-full object-contain p-3 transition-transform duration-500 group-hover:scale-105"
                         width={400}
                         height={300}
                         loading="lazy"

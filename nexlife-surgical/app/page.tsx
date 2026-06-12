@@ -6,7 +6,6 @@ import Image from "next/image";
 import {
   ArrowRight,
   Globe,
-  ChevronLeft,
   ChevronRight,
   BadgeCheck,
   Users,
@@ -197,7 +196,6 @@ export default function Home() {
   };
 
   const nextSlide = () => goToSlide((currentSlide + 1) % heroSlides.length);
-  const prevSlide = () => goToSlide((currentSlide - 1 + heroSlides.length) % heroSlides.length);
 
   useEffect(() => {
     intervalRef.current = setInterval(nextSlide, 6000);
@@ -208,9 +206,6 @@ export default function Home() {
     if (intervalRef.current) clearInterval(intervalRef.current);
     intervalRef.current = setInterval(nextSlide, 6000);
   };
-
-  const handlePrev = () => { prevSlide(); resetInterval(); };
-  const handleNext = () => { nextSlide(); resetInterval(); };
 
   return (
     <div>
@@ -328,23 +323,6 @@ export default function Home() {
             />
           ))}
         </div>
-
-        <button
-          onClick={handlePrev}
-          className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white transition-all duration-150 hover:scale-105 active:scale-95 touch-manipulation"
-          style={{ backgroundColor: "rgba(13,34,64,0.55)", border: "1px solid rgba(255,255,255,0.2)" }}
-          aria-label="Previous slide"
-        >
-          <ChevronLeft size={20} />
-        </button>
-        <button
-          onClick={handleNext}
-          className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white transition-all duration-150 hover:scale-105 active:scale-95 touch-manipulation"
-          style={{ backgroundColor: "rgba(13,34,64,0.55)", border: "1px solid rgba(255,255,255,0.2)" }}
-          aria-label="Next slide"
-        >
-          <ChevronRight size={20} />
-        </button>
       </section>
 
       <SectionDivider className="bg-white" />

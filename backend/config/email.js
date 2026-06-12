@@ -361,6 +361,68 @@ This email was sent from the Nexlife International website newsletter signup.
     `,
   }),
 
+  // Confirmation email sent to the subscriber after they sign up
+  subscriptionConfirmation: (data) => {
+    const navy = "#0D2240";
+    const accent = "#0A8A78";
+    const siteUrl = data.siteUrl || "https://nexlifeinternational.in";
+    const unsubscribeUrl = data.unsubscribeUrl || "#";
+    return {
+      subject: "You're subscribed — Nexlife International",
+      html: `
+      <div style="font-family:'Segoe UI', Arial, sans-serif; max-width:600px; margin:0 auto; background:#ffffff;">
+        <div style="background:${navy}; padding:28px;">
+          <div style="font-size:20px; font-weight:800; letter-spacing:-0.02em; color:#ffffff;">NEXLIFE INTERNATIONAL</div>
+          <div style="font-size:12px; letter-spacing:0.06em; text-transform:uppercase; color:${accent}; font-weight:700; margin-top:4px;">Surgical &amp; Medical Supplies</div>
+        </div>
+        <div style="height:4px; background:${accent};"></div>
+        <div style="padding:32px 28px;">
+          <h1 style="margin:0 0 8px; font-size:22px; color:${navy}; font-weight:800; letter-spacing:-0.02em;">You're all set! 🎉</h1>
+          <p style="color:#475569; font-size:15px; line-height:1.65; margin:0 0 18px;">
+            Thanks for subscribing to <strong>Nexlife International</strong>. You'll now receive product updates,
+            industry insights, and exclusive offers straight to your inbox.
+          </p>
+          <div style="background:#F0FBF9; border:1px solid #BFE9E1; border-radius:10px; padding:16px 18px; margin-bottom:22px;">
+            <p style="margin:0; font-size:13.5px; color:#0A6B5E; line-height:1.6;">
+              <strong>What to expect:</strong> occasional emails with new products, certifications, and special pricing — no spam, ever.
+            </p>
+          </div>
+          <div style="text-align:center; margin:24px 0;">
+            <a href="${siteUrl}/products" style="display:inline-block; background:${accent}; color:#ffffff; padding:12px 28px; text-decoration:none; border-radius:8px; font-weight:700; font-size:14px;">
+              Browse Our Products
+            </a>
+          </div>
+          <p style="font-size:13px; color:#64748B; line-height:1.6; margin:0;">
+            Subscribed by mistake or changed your mind? You can
+            <a href="${unsubscribeUrl}" style="color:${accent}; font-weight:600;">unsubscribe here</a> at any time.
+          </p>
+        </div>
+        <div style="background:${navy}; padding:22px 28px; color:#94A3B8; font-size:12.5px; line-height:1.9;">
+          <div style="color:#ffffff; font-weight:700; margin-bottom:6px;">Nexlife International</div>
+          📧 <a href="mailto:Info@nexlifeinternational.com" style="color:${accent}; text-decoration:none;">Info@nexlifeinternational.com</a><br/>
+          📞 <a href="tel:+919664843790" style="color:#94A3B8; text-decoration:none;">+91 96648 43790</a> &nbsp;·&nbsp; <a href="tel:+918401546910" style="color:#94A3B8; text-decoration:none;">+91 84015 46910</a><br/>
+          📍 S-223, Angel Business Center – 2, Mota Varachha, Surat - 394101 (Gujarat, India)
+          <div style="margin-top:14px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.12); color:#64748B; font-size:11.5px;">
+            You received this because you subscribed at ${siteUrl.replace('https://','')}.
+            <a href="${unsubscribeUrl}" style="color:#94A3B8;">Unsubscribe</a>
+          </div>
+        </div>
+      </div>`,
+      text: `You're subscribed to Nexlife International!
+
+Thanks for subscribing. You'll receive product updates, industry insights, and exclusive offers.
+
+Browse our products: ${siteUrl}/products
+
+Unsubscribe any time: ${unsubscribeUrl}
+
+Nexlife International
+Email: Info@nexlifeinternational.com
+Phone: +91 96648 43790 | +91 84015 46910
+Address: S-223, Angel Business Center – 2, Mota Varachha, Surat - 394101 (Gujarat, India)`,
+    };
+  },
+
   // Alias: inquiry template (uses contact template structure)
   inquiry: (data) => emailTemplates.contact(data),
 

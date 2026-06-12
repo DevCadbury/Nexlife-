@@ -712,7 +712,7 @@ app.post("/api/contact", async (req, res) => {
 
 // Newsletter subscription endpoint
 app.post("/api/newsletter", async (req, res) => {
-  const { email } = req.body || {};
+  const { email, source } = req.body || {};
 
   if (!email) {
     return res.status(400).json({ error: "Email is required" });
@@ -722,24 +722,129 @@ app.post("/api/newsletter", async (req, res) => {
     return res.status(400).json({ error: "Invalid email format" });
   }
 
-  try {
-    const toAddress = process.env.CONTACT_TO || process.env.SMTP_USER;
-    const result = await sendEmail(toAddress, "newsletter", { email });
+  const cleanEmail = String(email).trim().toLowerCase();
+  const src = String(source || "").toLowerCase() === "surgical" ? "surgical" : "general";
+  const siteUrl =
+    src === "surgical"
+      ? "https://nexlifeinternational.in"
+      : "https://www.nexlifeinternational.com";
 
-    if (result.success) {
-      res.json({
-        success: true,
-        message: "Newsletter subscription successful",
-      });
-    } else {
-      res.status(500).json({
-        error: "Failed to process subscription",
-        details: result.error,
-      });
+  try {
+    // ── Persist / re-activate the subscriber ──────────────────────────────
+    let unsubscribeToken = "";
+    try {
+      const { subscribers } = await getCollections();
+      const existing = await subscribers.findOne({ email: cleanEmail });
+
+      if (existing && existing.unsubscribed !== true && existing.newsletter === true) {
+        // Already actively subscribed — short-circuit with a friendly message
+        return res.json({
+          success: true,
+          already: true,
+          message: "You're already subscribed. Thanks for staying with us!",
+        });
+      }
+
+      unsubscribeToken =
+        existing?.unsubscribeToken ||
+        `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 12)}`;
+
+      await subscribers.updateOne(
+        { email: cleanEmail },
+        {
+          $setOnInsert: { email: cleanEmail, createdAt: new Date() },
+          $set: {
+            newsletter: true,
+            unsubscribed: false,
+            source: src,
+            unsubscribeToken,
+            subscribedAt: new Date(),
+            lastSeenAt: new Date(),
+          },
+        },
+        { upsert: true }
+      );
+    } catch (persistErr) {
+      console.error("[newsletter] Failed to persist subscriber:", persistErr);
+      // Continue — still attempt to email
     }
+
+    const baseUrl = process.env.PUBLIC_API_URL || `https://${req.get("host")}`;
+    const unsubscribeUrl = `${baseUrl}/api/newsletter/unsubscribe?email=${encodeURIComponent(
+      cleanEmail
+    )}&token=${encodeURIComponent(unsubscribeToken)}`;
+
+    // Send the professional confirmation email to the subscriber
+    const confirmResult = await sendEmail(cleanEmail, "subscriptionConfirmation", {
+      email: cleanEmail,
+      siteUrl,
+      unsubscribeUrl,
+    });
+
+    // Notify admin (best-effort, don't block on failure)
+    const toAddress = process.env.CONTACT_TO || process.env.SMTP_USER;
+    sendEmail(toAddress, "newsletter", { email: cleanEmail }).catch((e) =>
+      console.warn("[newsletter] admin notify failed:", e?.message)
+    );
+
+    return res.json({
+      success: true,
+      message: "Subscribed! Check your inbox for a confirmation email.",
+      confirmationSent: confirmResult?.success || false,
+    });
   } catch (err) {
     console.error("Newsletter subscription error:", err);
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Unsubscribe from the newsletter (clicked from an email link) — returns an HTML page
+app.get("/api/newsletter/unsubscribe", async (req, res) => {
+  const email = String(req.query.email || "").trim().toLowerCase();
+  const token = String(req.query.token || "");
+
+  const page = (title, message, ok) => `<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>${title}</title></head>
+<body style="margin:0;font-family:'Segoe UI',Arial,sans-serif;background:#F7F8FA;">
+  <div style="max-width:480px;margin:60px auto;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 8px 32px rgba(13,34,64,0.10);">
+    <div style="background:#0D2240;padding:24px 28px;color:#fff;font-weight:800;font-size:18px;">NEXLIFE INTERNATIONAL</div>
+    <div style="height:4px;background:${ok ? "#0A8A78" : "#B54A4A"};"></div>
+    <div style="padding:32px 28px;text-align:center;">
+      <h1 style="font-size:20px;color:#0D2240;margin:0 0 10px;">${title}</h1>
+      <p style="color:#475569;font-size:15px;line-height:1.6;margin:0 0 22px;">${message}</p>
+      <a href="https://nexlifeinternational.in" style="display:inline-block;background:#0A8A78;color:#fff;padding:11px 26px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">Back to Website</a>
+    </div>
+  </div>
+</body></html>`;
+
+  if (!email || !validateEmail(email)) {
+    return res.status(400).send(page("Invalid request", "This unsubscribe link is missing or malformed.", false));
+  }
+
+  try {
+    const { subscribers } = await getCollections();
+    const sub = await subscribers.findOne({ email });
+    if (!sub) {
+      return res.status(404).send(page("Not found", "We couldn't find a subscription for this email address.", false));
+    }
+    if (sub.unsubscribeToken && token && sub.unsubscribeToken !== token) {
+      return res.status(403).send(page("Invalid link", "This unsubscribe link is no longer valid.", false));
+    }
+    await subscribers.updateOne(
+      { email },
+      { $set: { newsletter: false, unsubscribed: true, unsubscribedAt: new Date() } }
+    );
+    return res.send(
+      page(
+        "You've been unsubscribed",
+        "You will no longer receive newsletter emails from Nexlife International. You can re-subscribe any time from our website.",
+        true
+      )
+    );
+  } catch (err) {
+    console.error("[newsletter] unsubscribe error:", err);
+    return res.status(500).send(page("Something went wrong", "Please try again later or email us at Info@nexlifeinternational.com.", false));
   }
 });
 

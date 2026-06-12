@@ -32,6 +32,8 @@ export default function ProductPage() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [qty, setQty] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
+  // Amazon-style hover zoom on the main product image
+  const [zoom, setZoom] = useState({ active: false, x: 50, y: 50 });
 
   const { addToCart } = useCart();
 
@@ -242,16 +244,29 @@ export default function ProductPage() {
           <div>
             {/* Main image */}
             <div
-              className="relative group rounded-lg overflow-hidden border border-[#E2E8F0] bg-[#F7F8FA] mb-3"
-              style={{ aspectRatio: "4/3" }}
+              className="relative group rounded-lg overflow-hidden border border-[#E2E8F0] bg-white mb-3"
+              style={{ aspectRatio: "4/3", cursor: mainImageUrl ? "zoom-in" : "default" }}
+              onMouseMove={(e) => {
+                if (!mainImageUrl) return;
+                const rect = e.currentTarget.getBoundingClientRect();
+                const x = ((e.clientX - rect.left) / rect.width) * 100;
+                const y = ((e.clientY - rect.top) / rect.height) * 100;
+                setZoom({ active: true, x, y });
+              }}
+              onMouseLeave={() => setZoom((z) => ({ ...z, active: false }))}
             >
               {mainImageUrl ? (
                 <img
                   src={mainImageUrl}
                   alt={product.name}
-                  className="w-full h-full object-cover transition-opacity duration-300"
+                  className="w-full h-full object-contain"
                   width={800}
                   height={600}
+                  style={{
+                    transformOrigin: `${zoom.x}% ${zoom.y}%`,
+                    transform: zoom.active ? "scale(2.2)" : "scale(1)",
+                    transition: zoom.active ? "transform 0.08s ease-out" : "transform 0.25s ease-out",
+                  }}
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-slate-300">
@@ -304,7 +319,7 @@ export default function ProductPage() {
                     <img
                       src={img.secure_url}
                       alt={`View ${i + 1}`}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain bg-white p-1"
                       width={144}
                       height={144}
                       loading="lazy"
@@ -518,14 +533,14 @@ export default function ProductPage() {
                   style={{ boxShadow: "0 1px 4px rgba(13,34,64,0.04)" }}
                 >
                   <div
-                    className="flex-shrink-0 rounded overflow-hidden bg-[#F7F8FA]"
+                    className="flex-shrink-0 rounded overflow-hidden bg-white"
                     style={{ width: "72px", height: "72px" }}
                   >
                     {p.images[0]?.secure_url ? (
                       <img
                         src={p.images[0].secure_url}
                         alt={relName}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-contain p-1"
                         width={144}
                         height={144}
                         loading="lazy"

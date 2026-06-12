@@ -42,6 +42,8 @@ function SocialIcon({ Icon, label, href }: { Icon: any; label: string; href: str
 
 export function Footer() {
   const [email, setEmail] = useState("");
+  const [subState, setSubState] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [subMsg, setSubMsg] = useState("");
   const { data: categoriesData } = useCategories("surgical");
 
   // Build the Products column from live CRM categories (visible, non-ObjectId names).
@@ -50,10 +52,27 @@ export function Footer() {
     .map((c) => ({ label: c.name, href: `/products?category=${encodeURIComponent(c.name)}` }));
   const productCategories = dynamicCategories.length ? dynamicCategories : fallbackCategories;
 
-  const handleNewsletterSubmit = (e: React.FormEvent) => {
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert(`Thank you for subscribing with: ${email}`);
-    setEmail("");
+    if (subState === "loading") return;
+    setSubState("loading");
+    setSubMsg("");
+    try {
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "";
+      const res = await fetch(`${backendUrl}/api/newsletter`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, source: "surgical" }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.error || "Subscription failed. Please try again.");
+      setSubState("success");
+      setSubMsg(data?.message || "Subscribed! Check your inbox for a confirmation email.");
+      setEmail("");
+    } catch (err: unknown) {
+      setSubState("error");
+      setSubMsg(err instanceof Error ? err.message : "Subscription failed. Please try again.");
+    }
   };
 
   return (
@@ -80,24 +99,36 @@ export function Footer() {
                 Subscribe to receive product updates, industry news, and exclusive offers directly to your inbox.
               </p>
             </div>
-            <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-3">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email address"
-                required
-                className="flex-1 text-sm text-[#0D2240] rounded-lg px-4 py-3.5 outline-none placeholder-slate-400 border-2 border-transparent focus:border-white/30 transition-all"
-                style={{ backgroundColor: "white" }}
-              />
-              <button
-                type="submit"
-                className="px-6 py-3.5 rounded-lg text-sm text-white flex items-center justify-center gap-2 transition-all hover:shadow-2xl active:scale-95 whitespace-nowrap hover:bg-[#0D2240]/90"
-                style={{ backgroundColor: "#0D2240", fontWeight: 600 }}
-              >
-                <Send size={16} />
-                Subscribe Now
-              </button>
+            <form onSubmit={handleNewsletterSubmit} className="flex flex-col gap-3">
+              <div className="flex flex-col sm:flex-row gap-3">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email address"
+                  required
+                  disabled={subState === "loading"}
+                  className="flex-1 text-sm text-[#0D2240] rounded-lg px-4 py-3.5 outline-none placeholder-slate-400 border-2 border-transparent focus:border-white/30 transition-all disabled:opacity-70"
+                  style={{ backgroundColor: "white" }}
+                />
+                <button
+                  type="submit"
+                  disabled={subState === "loading"}
+                  className="px-6 py-3.5 rounded-lg text-sm text-white flex items-center justify-center gap-2 transition-all hover:shadow-2xl active:scale-95 whitespace-nowrap hover:bg-[#0D2240]/90 disabled:opacity-70"
+                  style={{ backgroundColor: "#0D2240", fontWeight: 600 }}
+                >
+                  <Send size={16} />
+                  {subState === "loading" ? "Subscribing…" : "Subscribe Now"}
+                </button>
+              </div>
+              {subMsg && (
+                <p
+                  className="text-sm"
+                  style={{ color: subState === "error" ? "#FECACA" : "#ffffff", fontWeight: 500 }}
+                >
+                  {subState === "success" ? "✓ " : ""}{subMsg}
+                </p>
+              )}
             </form>
           </div>
         </div>
