@@ -470,21 +470,24 @@ export default function ProductPage() {
             >
               Technical Specifications
             </h2>
-            <div
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px rounded-lg border border-[#E2E8F0] overflow-hidden"
-              style={{ background: "#E2E8F0" }}
-            >
+            <div className="rounded-lg border border-[#E2E8F0] overflow-hidden lg:max-w-3xl">
               {visibleFields.map((field, i) => (
-                <div key={`${field.key}-${i}`} className="bg-white px-4 py-3">
+                <div
+                  key={`${field.key}-${i}`}
+                  className="grid grid-cols-1 sm:grid-cols-[minmax(140px,220px)_1fr]"
+                  style={{
+                    borderBottom: i < visibleFields.length - 1 ? "1px solid #E2E8F0" : "none",
+                  }}
+                >
                   <div
-                    className="text-[11px] uppercase tracking-wide text-slate-500 mb-1"
-                    style={{ fontWeight: 700, letterSpacing: "0.04em" }}
+                    className="px-5 py-3 text-[#0D2240] text-sm"
+                    style={{ background: "#F7F8FA", fontWeight: 700 }}
                   >
                     {field.key}
                   </div>
                   <div
-                    className="text-sm text-[#0D2240]"
-                    style={{ fontWeight: 500, wordBreak: "break-word", whiteSpace: "pre-wrap" }}
+                    className="px-5 py-3 text-slate-700 text-sm"
+                    style={{ fontWeight: 500, whiteSpace: "pre-wrap", wordBreak: "break-word" }}
                   >
                     {field.value}
                   </div>
