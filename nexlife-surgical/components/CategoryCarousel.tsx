@@ -116,29 +116,7 @@ export function CategoryCarousel({
           decoding="async"
         />
 
-        {/* Dot indicators (only when multiple images) */}
-        {safeImages.length > 1 && (
-          <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 z-10">
-            {safeImages.map((_, i) => (
-              <button
-                key={i}
-                aria-label={`Image ${i + 1}`}
-                onClick={(e) => { e.preventDefault(); setIdx(i); }}
-                style={{
-                  width: i === idx ? "16px" : "6px",
-                  height: "6px",
-                  borderRadius: "3px",
-                  backgroundColor: i === idx ? "rgba(10,138,120,0.9)" : "rgba(255,255,255,0.55)",
-                  border: "none",
-                  padding: 0,
-                  cursor: "pointer",
-                  transition: "width 300ms, background-color 300ms",
-                  flexShrink: 0,
-                }}
-              />
-            ))}
-          </div>
-        )}
+        {/* Dot indicators removed — clean look */}
       </div>
 
       {/* Label */}
