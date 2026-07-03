@@ -4,7 +4,7 @@ import { getCategories } from '@/lib/api';
 import type { CategoriesResponse } from '@/lib/types/product';
 
 const cache = new Map<string, { data: CategoriesResponse; ts: number }>();
-const STALE_MS = 60_000;
+const STALE_MS = 300_000;
 
 export function useCategories(site?: string) {
   const key = JSON.stringify({ site });

@@ -4,7 +4,7 @@ import { getStarredProducts } from '@/lib/api';
 import type { ProductsResponse } from '@/lib/types/product';
 
 const cache = new Map<string, { data: ProductsResponse; ts: number }>();
-const STALE_MS = 60_000;
+const STALE_MS = 300_000;
 
 export function useStarredProducts(site?: string) {
   const key = JSON.stringify({ site });

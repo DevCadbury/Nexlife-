@@ -14,8 +14,8 @@ export async function uploadImage(fileBuffer, mimetype) {
         folder: 'nexlife-products',
         resource_type: 'image',
         transformation: [
-          { width: 800, height: 800, crop: 'limit' },
-          { quality: 'auto' },
+          { width: 1200, height: 1200, crop: 'limit' },
+          { quality: 'auto:good' },
           { fetch_format: 'auto' },
         ],
       },
