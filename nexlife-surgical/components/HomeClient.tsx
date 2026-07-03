@@ -22,7 +22,7 @@ const heroSlides = [
     headline: "Instruments Built\nfor the OR",
     sub: "German-grade stainless steel surgical instruments with lifetime quality guarantee and global service support.",
     cta: "View Instruments",
-    ctaHref: "/products?category=surgical-instruments",
+    ctaHref: "/products",
     ctaSecondary: "Learn More",
     ctaSecondaryHref: "/about",
   },

@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ArrowRight, ChevronRight } from "lucide-react";
 import { SectionDivider } from "@/components/SectionDivider";
 import { HomeClient } from "@/components/HomeClient";
+import { CategoriesGrid } from "@/components/CategoriesGrid";
 import {
   serverGetCategories,
   serverGetFeaturedProducts,
@@ -131,6 +132,32 @@ export default async function Home() {
     .filter((c) => c.visible && !/^[a-f0-9]{24}$/i.test(c.name))
     .slice(0, 6);
 
+  // Build per-category image list (up to 6 images per category) and product count
+  const categoriesWithImages = visibleCategories.map((cat) => {
+    const catProducts = apiAllProducts.filter(
+      (p) => resolveCategory(p.category) === cat.name
+    );
+    // Collect all images across the category (all images of each product), deduped
+    const images: string[] = [];
+    const seen = new Set<string>();
+    for (const p of catProducts) {
+      for (const img of p.images ?? []) {
+        if (img.secure_url && !seen.has(img.secure_url)) {
+          seen.add(img.secure_url);
+          images.push(img.secure_url);
+          if (images.length >= 8) break;
+        }
+      }
+      if (images.length >= 8) break;
+    }
+    return {
+      _id: cat._id,
+      name: cat.name,
+      images,
+      productCount: catProducts.length,
+    };
+  });
+
   return (
     <div>
       {/* ── Hero + carousel (client interactive) ── */}
@@ -176,57 +203,8 @@ export default async function Home() {
             </Link>
           </div>
 
-          {visibleCategories.length === 0 ? (
-            <div className="rounded-xl border border-[#E2E8F0] bg-white p-10 text-center">
-              <p className="text-sm text-slate-400">No categories available at this time.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {visibleCategories.map((cat) => {
-                const categoryProducts = apiAllProducts
-                  .filter((p) => resolveCategory(p.category) === cat.name)
-                  .slice(0, 6);
-                const carouselImages = categoryProducts
-                  .map((p) => p.images[0]?.secure_url)
-                  .filter(Boolean) as string[];
-                const firstImage = carouselImages[0] ?? "/our-product-bg.png";
-                const productCount = apiAllProducts.filter((p) => resolveCategory(p.category) === cat.name).length;
+          <CategoriesGrid categories={categoriesWithImages} />
 
-                return (
-                  <Link
-                    key={cat._id}
-                    href={`/products?category=${encodeURIComponent(cat.name)}`}
-                    className="group relative overflow-hidden rounded-xl bg-white border border-[#E2E8F0] transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 hover:border-[#0A8A78]/20"
-                    style={{ boxShadow: "0 2px 8px rgba(13,34,64,0.08)" }}
-                  >
-                    <div className="absolute top-3 left-3 z-10">
-                      <div
-                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-full transition-all duration-300 group-hover:scale-105"
-                        style={{ backgroundColor: "rgba(13,34,64,0.85)", boxShadow: "0 2px 8px rgba(13,34,64,0.3)" }}
-                      >
-                        <span className="text-xs text-white/90 font-semibold">{productCount} Products</span>
-                      </div>
-                    </div>
-                    <div className="relative overflow-hidden bg-white" style={{ height: "280px" }}>
-                      <Image
-                        src={firstImage}
-                        alt={cat.name}
-                        fill
-                        className="object-contain p-4 transition-transform duration-500 group-hover:scale-105"
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        priority={false}
-                      />
-                    </div>
-                    <div className="px-5 py-4 bg-white group-hover:bg-[#F7F8FA] transition-colors duration-300">
-                      <h3 className="text-[#0D2240] group-hover:text-[#0A8A78] transition-colors" style={{ fontSize: "1.1rem", fontWeight: 700, letterSpacing: "-0.01em" }}>
-                        {cat.name}
-                      </h3>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          )}
         </div>
       </section>
 

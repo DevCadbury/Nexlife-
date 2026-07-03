@@ -4,7 +4,7 @@ import { getProducts } from '@/lib/api';
 import type { ProductsResponse } from '@/lib/types/product';
 
 const cache = new Map<string, { data: ProductsResponse; ts: number }>();
-const STALE_MS = 60_000;
+const STALE_MS = 300_000; // 5 minutes — returning visitors get instant results
 
 export function useProducts(params?: { site?: string; category?: string }) {
   const key = JSON.stringify(params ?? {});
@@ -25,6 +25,7 @@ export function useProducts(params?: { site?: string; category?: string }) {
     abortRef.current = new AbortController();
     setIsLoading(true);
     setError(null);
+    setData(null); // clear stale data so old results don't flash during new fetch
 
     getProducts(params)
       .then((res) => {

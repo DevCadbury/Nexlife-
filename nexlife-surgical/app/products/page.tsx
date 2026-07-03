@@ -20,11 +20,10 @@ export default function Products() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   const activeCategory = searchParams.get("category") ?? "all";
-  const searchParamCategory = activeCategory !== "all" ? activeCategory : undefined;
 
+  // Fetch ALL products once — filter client-side so switching categories is instant
   const { data: productsData, error: productsError, isLoading: productsLoading } = useProducts({
     site: SITE,
-    category: searchParamCategory,
   });
   const { data: categoriesData } = useCategories(SITE);
 
@@ -49,12 +48,27 @@ export default function Products() {
   };
 
   const filtered = useMemo(() => {
-    if (!search) return allProducts;
-    const q = search.toLowerCase();
-    return allProducts.filter(
-      (p) => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q)
-    );
-  }, [allProducts, search]);
+    let list = allProducts;
+
+    // Apply active category filter
+    if (activeCategory !== "all") {
+      list = list.filter((p) => {
+        const cat = resolveCategoryName(p.category);
+        return cat.toLowerCase() === activeCategory.toLowerCase();
+      });
+    }
+
+    // Apply search filter
+    if (search) {
+      const q = search.toLowerCase();
+      list = list.filter(
+        (p) => p.name.toLowerCase().includes(q) || resolveCategoryName(p.category).toLowerCase().includes(q)
+      );
+    }
+
+    return list;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allProducts, activeCategory, search]);
 
   // Use router.push so useSearchParams triggers a re-render and hook re-fetches
   const setCategory = useCallback((name: string) => {
